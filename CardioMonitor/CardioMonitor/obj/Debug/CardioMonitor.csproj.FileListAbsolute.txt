@@ -1,0 +1,13 @@
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\bin\Debug\CardioMonitor.exe.config
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\bin\Debug\CardioMonitor.exe
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\bin\Debug\CardioMonitor.pdb
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\obj\Debug\CardioMonitor.csprojResolveAssemblyReference.cache
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\obj\Debug\MainWindow.baml
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\obj\Debug\MainWindow.g.cs
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\obj\Debug\App.g.cs
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\obj\Debug\CardioMonitor_MarkupCompile.cache
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\obj\Debug\CardioMonitor.g.resources
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\obj\Debug\CardioMonitor.Properties.Resources.resources
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\obj\Debug\CardioMonitor.csproj.GenerateResource.Cache
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\obj\Debug\CardioMonitor.exe
+c:\users\алексей\documents\visual studio 2012\Projects\CardioMonitor\CardioMonitor\obj\Debug\CardioMonitor.pdb
