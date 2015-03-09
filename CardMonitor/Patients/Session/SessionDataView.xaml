@@ -1,0 +1,67 @@
+﻿<UserControl x:Class="CardioMonitor.Patients.Session.SessionDataView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="500">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0, 10, 0, 10"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+            <TextBlock Text="Фамилия имя отчество"
+                   FontSize="16"
+                   FontWeight="Bold">
+            </TextBlock>
+            <TextBlock Text="Дата сеанса:"
+                       Margin="25,0"
+                       FontSize="16"
+                       FontWeight="Bold"/>
+            <TextBlock Text="25.02.2015"
+                       FontSize="16"
+                       FontWeight="Bold"/>
+        </StackPanel>
+        <DataGrid Grid.Row="1"
+                  BorderBrush="{DynamicResource AccentColorBrush}"
+                  BorderThickness="2"
+                  Style="{DynamicResource AzureDataGrid}"
+                  RenderOptions.ClearTypeHint="Enabled"
+                  TextOptions.TextFormattingMode="Display"
+                  AutoGenerateColumns="False" 
+                  GridLinesVisibility="All"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserResizeRows="False"
+                  CanUserReorderColumns="False"
+                  SelectionUnit="FullRow"
+                  IsReadOnly="True"
+                  ColumnWidth="*">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Угол наклона кровати"/>
+                <DataGridTextColumn Header="ЧСС"/>
+                <DataGridTextColumn Header="ЧД"/>
+                <DataGridTextColumn Header="SPO2"/>
+                <DataGridTextColumn Header="Систолическое АД"/>
+                <DataGridTextColumn Header="Диастолическое АД"/>
+                <DataGridTextColumn Header="Среднее АД"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button x:Name="SaveB"
+                Grid.Row="2"
+                Content="Сохранить в файл"
+                FontSize="12"
+                Width="250"
+                Margin="10"></Button>
+        <TextBlock Grid.Row="3"
+                   FontSize="14"
+                   Text="Тут будут графики"
+                   Margin="10"
+                   TextAlignment="Center"></TextBlock>
+    </Grid>
+</UserControl>
