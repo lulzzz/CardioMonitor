@@ -11,9 +11,10 @@
                       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                       xmlns:main="clr-namespace:CardioMonitor"
+                      xmlns:treatmentData="clr-namespace:CardioMonitor.Patients.TreatmentData"
                       Title="Cardio monitor" 
                       Height="350" 
-                      Width="525"
+                      Width="925"
                       WindowStartupLocation="CenterScreen"
                       GlowBrush="{DynamicResource AccentColorBrush}"
                       WindowState="Maximized" 
@@ -24,6 +25,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro.Resources;component/Icons.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.buttons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+            <BooleanToVisibilityConverter x:Key="btv" />
         </ResourceDictionary>
     </controls:MetroWindow.Resources>
     
@@ -48,13 +50,16 @@
     </controls:MetroWindow.RightWindowCommands>
 
     <controls:MetroWindow.Flyouts>
-
         <controls:FlyoutsControl>
             <controls:Flyout x:Name="SettingFlyout"
-                         Header="Настройки"
-                         Position="Right"
-                         IsModal="True">
-                <settings:SettingsView/>
+                             DataContext="{Binding SettingsViewModel}"
+                             Header="Настройки"
+                             Position="Right"
+                             IsModal="True" 
+                             CloseCommand="{Binding CloseCommand}"
+                             AllowFocusElement="False">
+                <settings:SettingsView x:Name="SettingsView"
+                                       x:FieldModifier="private"/>
             </controls:Flyout>
         </controls:FlyoutsControl>
     </controls:MetroWindow.Flyouts>
@@ -140,13 +145,15 @@
             <controls:MetroTabItem Header="Результаты обследования"
                                    Visibility="Collapsed">
                 <Grid >
-                    <treatments:TreatmentDataView Margin="10,0"/>
+                    <treatmentData:TreatmentDataView Margin="10,0"
+                                                     DataContext="{Binding TreatmentDataViewModel}"/>
                 </Grid>
             </controls:MetroTabItem>
             <controls:MetroTabItem Header="Результаты сеанса"
                                    Visibility="Collapsed">
                 <Grid >
-                    <treamentSession:SessionDataView Margin="10,0"/>
+                    <treamentSession:SessionDataView Margin="10,0"
+                                                     DataContext="{Binding SessionDataViewModel}"/>
                 </Grid>
             </controls:MetroTabItem>
             <controls:MetroTabItem Header="Паицент"

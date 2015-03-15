@@ -13,7 +13,7 @@ namespace CardioMonitor.Patients.Treatments
     public class TreatmentsViewModel : Notifier, IViewModel
     {
         private ObservableCollection<Treatment> _treatments;
-        private PatinetFullName _patientName;
+        private PatientFullName _patientName;
         private Treatment _selectedTreatment;
 
         private ICommand _startNewCommand;
@@ -34,7 +34,7 @@ namespace CardioMonitor.Patients.Treatments
             }
         }
 
-        public PatinetFullName PatientName
+        public PatientFullName PatientName
         {
             get { return _patientName; }
             set

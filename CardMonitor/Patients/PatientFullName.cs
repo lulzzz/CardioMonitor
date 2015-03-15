@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CardioMonitor.Patients
 {
-    public class PatinetFullName
+    public class PatientFullName
     {
         public string LastName { get; set; }
 

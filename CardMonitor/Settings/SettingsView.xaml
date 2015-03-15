@@ -8,7 +8,7 @@
              xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance settings:SettingsViewModel}"
-             d:DesignHeight="300" d:DesignWidth="400">
+             d:DesignHeight="300" d:DesignWidth="600">
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -50,7 +50,9 @@
                             <RowDefinition/>
                             <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <TextBlock Text="Theme:" VerticalAlignment="Center" Margin="0,0,16,4" />
+                        <TextBlock Text="Theme:"
+                                   VerticalAlignment="Center" 
+                                   Margin="0,0,16,4" />
                         <ComboBox Grid.Row="0" 
                                   Grid.Column="1" 
                                   ItemsSource="{Binding AppThemes, Mode=OneWay}"
@@ -104,21 +106,47 @@
                 <Expander Header="База данных">
 
                 </Expander>
+                <Expander Header="Результаты сеанса">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Каталог для хранения:"
+                                   VerticalAlignment="Center" 
+                                   Margin="0,0,16,4" />
+                        <TextBox x:Name="FilesDirecotryPathTB"
+                                 Grid.Column="1"
+                                 Text="{Binding FilesDirectoryPath,
+                                                ValidatesOnDataErrors=True,
+                                                UpdateSourceTrigger=PropertyChanged,
+                                                NotifyOnSourceUpdated=True,
+                                                NotifyOnValidationError=True}"
+                                 VerticalAlignment="Center" 
+                                 Margin="0,0,5,0" />
+                        <Button Content="..."
+                                Grid.Column="2"
+                                Command="{Binding ChooseFolderCommand}"/>
+                    </Grid>
+                </Expander>
             </StackPanel>
             <StackPanel Grid.Row="2"
                                     Orientation="Horizontal"
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
                 <Button x:Name="SaveSettingsB"
-                                    Content="Save"
-                                    MinHeight="30"
-                                    MinWidth="150"
-                                    Margin="40,10"/>
+                        Content="Сохранить"
+                        MinHeight="30"
+                        MinWidth="150"
+                        Margin="40,10"
+                        Command="{Binding SaveCommand}"/>
                 <Button x:Name="CancelSettingsB"
-                                    Content="Cancel"
-                                    MinHeight="30"
-                                    MinWidth="150"
-                                    Margin="40,10"/>
+                        Content="Отмена"
+                        Command="{Binding CancelCommand}"
+                        MinHeight="30"
+                        MinWidth="150"
+                        Margin="40,10"/>
             </StackPanel>
         </Grid>
     </ScrollViewer>

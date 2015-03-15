@@ -165,7 +165,7 @@ namespace CardioMonitor.Patients.Session
                     AverageArterialPressure = 100,
                     DiastolicArterialPressure = 80,
                     HeartRate = 70,
-                    InlcinationAngle = 0,
+                    InclinationAngle = 0,
                     RepsirationRate = 40,
                     Spo2 = 40,
                     SystolicArterialPressure = 120
@@ -175,7 +175,7 @@ namespace CardioMonitor.Patients.Session
                     AverageArterialPressure = 100,
                     DiastolicArterialPressure = 80,
                     HeartRate = 70,
-                    InlcinationAngle = 10.5,
+                    InclinationAngle = 10.5,
                     RepsirationRate = 40,
                     Spo2 = 40,
                     SystolicArterialPressure = 120
@@ -185,7 +185,7 @@ namespace CardioMonitor.Patients.Session
                     AverageArterialPressure = 100,
                     DiastolicArterialPressure = 80,
                     HeartRate = 70,
-                    InlcinationAngle = 21,
+                    InclinationAngle = 21,
                     RepsirationRate = 40,
                     Spo2 = 40,
                     SystolicArterialPressure = 120
@@ -195,7 +195,7 @@ namespace CardioMonitor.Patients.Session
                     AverageArterialPressure = 100,
                     DiastolicArterialPressure = 80,
                     HeartRate = 70,
-                    InlcinationAngle = 30,
+                    InclinationAngle = 30,
                     RepsirationRate = 40,
                     Spo2 = 40,
                     SystolicArterialPressure = 120
@@ -205,7 +205,7 @@ namespace CardioMonitor.Patients.Session
                     AverageArterialPressure = 100,
                     DiastolicArterialPressure = 80,
                     HeartRate = 70,
-                    InlcinationAngle = 21,
+                    InclinationAngle = 21,
                     RepsirationRate = 40,
                     Spo2 = 40,
                     SystolicArterialPressure = 120
@@ -215,7 +215,7 @@ namespace CardioMonitor.Patients.Session
                     AverageArterialPressure = 100,
                     DiastolicArterialPressure = 80,
                     HeartRate = 70,
-                    InlcinationAngle = 10.5,
+                    InclinationAngle = 10.5,
                     RepsirationRate = 40,
                     Spo2 = 40,
                     SystolicArterialPressure = 120
@@ -225,7 +225,7 @@ namespace CardioMonitor.Patients.Session
                     AverageArterialPressure = 100,
                     DiastolicArterialPressure = 80,
                     HeartRate = 70,
-                    InlcinationAngle = 0,
+                    InclinationAngle = 0,
                     RepsirationRate = 40,
                     Spo2 = 40,
                     SystolicArterialPressure = 120

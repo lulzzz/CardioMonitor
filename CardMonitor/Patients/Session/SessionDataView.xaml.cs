@@ -20,6 +20,12 @@ namespace CardioMonitor.Patients.Session
     /// </summary>
     public partial class SessionDataView : UserControl
     {
+        public SessionDataViewModel ViewModel
+        {
+            get { return DataContext as SessionDataViewModel; }
+            set { DataContext = value; }
+        }
+
         public SessionDataView()
         {
             InitializeComponent();

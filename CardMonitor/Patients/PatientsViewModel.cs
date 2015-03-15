@@ -22,6 +22,8 @@ namespace CardioMonitor.Patients
         private ICommand _editPateintCommand;
         private ICommand _openPatientCommand;
         private ICommand _patientSearchCommand;
+        private ICommand _opentSesionsCommand;
+        private ICommand _showTreatmentResultsCommand;
 
         public int SelectedPatientIndex
         {
@@ -132,8 +134,39 @@ namespace CardioMonitor.Patients
             }
         }
 
+        public ICommand OpenSessionsCommand
+        {
+            get
+            {
+                return _opentSesionsCommand ??
+                       (_opentSesionsCommand =
+                           new SimpleCommand
+                           {
+                               CanExecuteDelegate = x => null != SelectedPatient,
+                               ExecuteDelegate = x => OpenSessions()
+                           });
+            }
+        }
+
+        public ICommand ShowResultsCommand
+        {
+            get
+            {
+                return _showTreatmentResultsCommand ??
+                       (_showTreatmentResultsCommand =
+                           new SimpleCommand
+                           {
+                               CanExecuteDelegate = x => null != SelectedPatient,
+                               ExecuteDelegate = x => ShowResults()
+                           });
+            }
+        }
+
+        //temporary not used
         public EventHandler OpenPatienEvent { get; set; }
         public EventHandler AddEditPatient { get; set; }
+        public EventHandler OpenSessionsHandler { get; set; }
+        public EventHandler ShowTreatmentResults { get; set; }
 
         public PatientsViewModel()
         {
@@ -209,6 +242,24 @@ namespace CardioMonitor.Patients
                 return false;
             }
             return !String.IsNullOrWhiteSpace(searchQuery);
+        }
+
+        private void OpenSessions()
+        {
+            var handler = OpenSessionsHandler;
+            if (null != handler)
+            {
+                handler(this, null);
+            }
+        }
+
+        private void ShowResults()
+        {
+            var handler = ShowTreatmentResults;
+            if (null != handler)
+            {
+                handler(this, null);
+            }
         }
     }
 }

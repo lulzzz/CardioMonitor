@@ -11,6 +11,11 @@ namespace CardioMonitor.Patients.Session
         public int Id { get; set; }
 
         /// <summary>
+        /// Специальное поле для корректной сортировки этих параметров
+        /// </summary>
+        public int Iteraton { get; set; }
+
+        /// <summary>
         /// Идентификатор сеанса лечения
         /// </summary>
         public int SessionId { get; set; }
@@ -18,7 +23,7 @@ namespace CardioMonitor.Patients.Session
         /// <summary>
         /// Угол наклона кровати
         /// </summary>
-        public double InlcinationAngle { get; set; }
+        public double InclinationAngle { get; set; }
 
         /// <summary>
         /// Частота сердечных сокращений (ЧСС)

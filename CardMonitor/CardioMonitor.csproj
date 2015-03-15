@@ -46,6 +46,10 @@
     <Reference Include="MahApps.Metro.SimpleChildWindow">
       <HintPath>..\packages\MahApps.Metro.SimpleChildWindow.1.1.0.0\lib\net45\MahApps.Metro.SimpleChildWindow.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Libs\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -76,6 +80,8 @@
     </Compile>
     <Compile Include="Core\AccessMode.cs" />
     <Compile Include="Core\CardioEventArgs.cs" />
+    <Compile Include="Core\DictionaryExtension.cs" />
+    <Compile Include="Core\FileManager.cs" />
     <Compile Include="Core\IViewModel.cs" />
     <Compile Include="Core\MessageHelper.cs" />
     <Compile Include="Core\Notifier.cs" />
@@ -93,13 +99,14 @@
       <DependentUpon>PatientView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Patients\PatientsViewModel.cs" />
-    <Compile Include="Patients\PatinetFullName.cs" />
+    <Compile Include="Patients\PatientFullName.cs" />
     <Compile Include="Patients\Sessions\SessionsView.xaml.cs">
       <DependentUpon>SessionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Patients\Sessions\SessionsViewModel.cs" />
     <Compile Include="Patients\Session\PatientParams.cs" />
     <Compile Include="Patients\Session\Session.cs" />
+    <Compile Include="Patients\Session\SessionDataViewModel.cs" />
     <Compile Include="Patients\Session\SessionInfo.cs" />
     <Compile Include="Patients\Session\SessionView.xaml.cs">
       <DependentUpon>SessionView.xaml</DependentUpon>
@@ -110,14 +117,19 @@
     </Compile>
     <Compile Include="Patients\Session\SessionStatus.cs" />
     <Compile Include="Patients\Session\SessionViewModel.cs" />
+    <Compile Include="Patients\TreatmentData\Statistic.cs" />
+    <Compile Include="Patients\TreatmentData\TreatmentDataViewModel.cs" />
+    <Compile Include="Patients\TreatmentData\TreatmentFullStatistic.cs" />
+    <Compile Include="Patients\TreatmentData\TreatmentParamStatistic.cs" />
+    <Compile Include="Patients\TreatmentData\TreatmentStatisticBuilder.cs" />
     <Compile Include="Patients\Treatments\TreatmentsView.xaml.cs">
       <DependentUpon>TreatmentsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Patients\Treatments\Treatment.cs" />
-    <Compile Include="Patients\Treatments\TreatmentDataView.xaml.cs">
+    <Compile Include="Patients\TreatmentData\TreatmentDataView.xaml.cs">
       <DependentUpon>TreatmentDataView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Patients\Treatments\TreatmentParametrGridView.xaml.cs">
+    <Compile Include="Patients\TreatmentData\TreatmentParametrGridView.xaml.cs">
       <DependentUpon>TreatmentParametrGridView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Patients\Treatments\TreatmentsViewModel.cs" />
@@ -160,11 +172,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Patients\Treatments\TreatmentDataView.xaml">
+    <Page Include="Patients\TreatmentData\TreatmentDataView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Patients\Treatments\TreatmentParametrGridView.xaml">
+    <Page Include="Patients\TreatmentData\TreatmentParametrGridView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

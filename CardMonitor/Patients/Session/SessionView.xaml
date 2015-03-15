@@ -85,7 +85,7 @@
                   ColumnWidth="*">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Угол наклона кровати"
-                                    Binding="{Binding InlcinationAngle}"/>
+                                    Binding="{Binding InclinationAngle}"/>
                 <DataGridTextColumn Header="ЧСС"
                                     Binding="{Binding HeartRate}"/>
                 <DataGridTextColumn Header="ЧД"
@@ -190,7 +190,7 @@
                 <Border Grid.Column="1"
                         BorderBrush="{DynamicResource AccentColorBrush}"
                         BorderThickness="2">
-                    <TextBlock Text="{Binding CurrentTime, StringFormat='{}{0:mm мин ss сек}'}"
+                    <TextBlock Text="{Binding CurrentTime, StringFormat='{}{0:m мин ss сек}'}"
                            Margin="15"
                            VerticalAlignment="Center"
                            FontSize="28"/>

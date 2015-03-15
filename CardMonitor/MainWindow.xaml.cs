@@ -35,6 +35,7 @@ namespace CardioMonitor
             MessageHelper.Instance.Window = this;
             DataContext = _viewModel;
             InitializeComponent();
+            SettingsView.ViewModel = _viewModel.SettingsViewModel;
             try
             {
                 var accent = ThemeManager.GetAccent(Settings.Settings.Instance.SelectedAcentColorName);
@@ -57,7 +58,10 @@ namespace CardioMonitor
                 {
                     return;
                 }
-                flyout.IsOpen = !flyout.IsOpen;
+                if (!flyout.IsOpen)
+                {
+                  flyout.IsOpen =  true;
+                }
             }
             catch (Exception ex)
             {

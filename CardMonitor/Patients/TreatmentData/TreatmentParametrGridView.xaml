@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CardioMonitor.Patients.Treatments.TreatmentParametrGridView"
+﻿<UserControl x:Class="CardioMonitor.Patients.TreatmentData.TreatmentParametrGridView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -15,7 +15,7 @@
                 BorderBrush="{DynamicResource AccentColorBrush}"
                 BorderThickness="2">
             <TextBlock FontSize="15"
-                       Text="Параметр"
+                       Text="{Binding Name}"
                        TextAlignment="Center"
                        VerticalAlignment="Center"/>
         </Border>
@@ -28,6 +28,7 @@
                        VerticalAlignment="Center"/>
         </Border>
         <DataGrid Grid.Row="2"
+                  ItemsSource="{Binding Statistics}"
                   BorderBrush="{DynamicResource AccentColorBrush}"
                   BorderThickness="2"
                   Style="{DynamicResource AzureDataGrid}"
@@ -43,8 +44,10 @@
                   IsReadOnly="True"
                   ColumnWidth="*">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Укол наклона кровати"/>
-                <DataGridTextColumn Header="1"/>
+                <DataGridTextColumn Header="Укол наклона кровати"
+                                    Binding="{Binding InclinationAngle}"/>
+                <DataGridTextColumn Header="1"
+                                    Binding="{Binding Value[0]}"/>
                 <DataGridTextColumn Header="2"/>
                 <DataGridTextColumn Header="3"/>
                 <DataGridTextColumn Header="4"/>

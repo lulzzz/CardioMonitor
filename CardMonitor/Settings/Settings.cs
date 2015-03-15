@@ -21,6 +21,7 @@ namespace CardioMonitor.Settings
 
         public string SeletedAppThemeName { get; set; }
         public string SelectedAcentColorName { get; set; }
+        public string FilesDirectoryPath { get; set; }
         
         public static Settings Instance
         {

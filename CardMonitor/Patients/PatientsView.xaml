@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="700">
+             d:DesignHeight="300" d:DesignWidth="900">
     <UserControl.Resources>
         <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.TextBox.xaml" />
     </UserControl.Resources>
@@ -94,12 +94,35 @@
                     FontSize="11"/>
             <Button x:Name="OpenPatinetB"
                     x:FieldModifier="private"
+                    Visibility="Collapsed"
                     Content="Открыть курсы"
                     Width="150"
                     Margin="10"
                     FontSize="11"
                     Command="{Binding OpenPatientCommand}"
                     CommandParameter="{Binding ElementName=PatientsDG, Path=SelectedItem}"/>
+            <Button x:Name="OpenSessionsB"
+                    x:FieldModifier="private"
+                    Content="Открыть сеансы"
+                    Width="150"
+                    Margin="10"
+                    FontSize="11"
+                    Command="{Binding OpenSessionsCommand}"/>
+            <Button x:Name="OpenTreatmentResultsB"
+                    x:FieldModifier="private"
+                    Visibility="Collapsed"
+                    Content="Открыть результаты"
+                    Width="150"
+                    Margin="10"
+                    FontSize="11"
+                    Command="{Binding ShowResultsCommand}"/>
+            <Button x:Name="OpenFileResultsB"
+                    x:FieldModifier="private"
+                    Content="Открыть файл"
+                    Width="150"
+                    Margin="10"
+                    FontSize="11"
+                    Command="{Binding OpenFileCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>

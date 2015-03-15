@@ -14,7 +14,7 @@ namespace CardioMonitor.Patients.Sessions
 {
     public class SessionsViewModel : Notifier, IViewModel
     {
-        private PatinetFullName _patientName;
+        private PatientFullName _patientName;
         private DateTime _treatmentStartDate;
         private SessionInfo _selectedSessionInfo;
         private ObservableCollection<SessionInfo> _sessionInfos;
@@ -23,7 +23,7 @@ namespace CardioMonitor.Patients.Sessions
         private ICommand _deleteSessionCommand;
         private ICommand _showResultsCommand;
 
-        public PatinetFullName PatientName
+        public PatientFullName PatientName
         {
             get { return _patientName; }
             set
