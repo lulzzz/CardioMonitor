@@ -220,6 +220,7 @@
     <None Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Core\Repository\Scrypts\db_v_1.sql" />
     <Content Include="Resources\Entypo-license.txt" />
     <Content Include="Resources\WindowsIcons-license.txt" />
     <Content Include="usbHeart.ico">
