@@ -31,7 +31,7 @@ namespace CardioMonitor.Patients.Sessions
                 if (value != _patientName)
                 {
                     _patientName = value;
-                    RisePropertyChanged("PatientName");
+                    RisePropertyChanged("Patient");
                 }
             }
         }
@@ -120,7 +120,7 @@ namespace CardioMonitor.Patients.Sessions
             {
                 new SessionInfo {DateTime = new DateTime()},
                 new SessionInfo {DateTime = new DateTime()},
-                new SessionInfo {DateTime = new DateTime()}
+                new SessionInfo {DateTime = new DateTime(), Status = SessionStatus.Terminated}
             };
         }
 

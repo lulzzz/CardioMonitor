@@ -39,7 +39,8 @@
                                     Margin="5,5,5,5"
                                     Orientation="Vertical"
                                     Width="450">
-                <Expander Header="Внешний вид">
+                <Expander Header="Внешний вид"
+                          Visibility="Collapsed">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>

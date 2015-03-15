@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.Core;
 using CardioMonitor.Patients;
@@ -28,6 +29,7 @@ namespace CardioMonitor
     {
         private ICommand _moveBackwardComand;
         private int _mainTCSelectedIndex;
+        private int _mainTCPreviosSelectedIndex;
         private PatientsViewModel _patientsViewModel;
         private PatientViewModel _patientViewModel;
         private TreatmentsViewModel _treatmentsViewModel;
@@ -58,6 +60,7 @@ namespace CardioMonitor
             {
                 if (value != _mainTCSelectedIndex)
                 {
+                    _mainTCPreviosSelectedIndex = _mainTCSelectedIndex;
                     _mainTCSelectedIndex = value;
                     RisePropertyChanged("MainTCSelectedIndex");
                 }
@@ -176,7 +179,8 @@ namespace CardioMonitor
                 OpenPatienEvent = OpetPatientTreatmentsHanlder,
                 AddEditPatient = AddEditPatientHanlder,
                 OpenSessionsHandler = StartOrContinueTreatmentSession,
-                ShowTreatmentResults = ShowTreatmentResults
+                ShowTreatmentResults = ShowTreatmentResults,
+                OpenSessionHandler = LoadSession
             };
             PatientViewModel = new PatientViewModel();
             TreatmentsViewModel = new TreatmentsViewModel
@@ -221,7 +225,7 @@ namespace CardioMonitor
                     MainTCSelectedIndex = (int)ViewIndex.SessionsView;
                     break;
                 case ViewIndex.SessionDataView:
-                    MainTCSelectedIndex = (int)ViewIndex.SessionsView;
+                    MainTCSelectedIndex = (_mainTCPreviosSelectedIndex == (int)ViewIndex.PatientsView) ? (int)ViewIndex.PatientsView : (int)ViewIndex.SessionsView;
                     break;
                 case ViewIndex.TreatmentDataView:
                     //MainTCSelectedIndex = (int)ViewIndex.TreatmentsView;
@@ -483,6 +487,31 @@ namespace CardioMonitor
             });
             SessionDataViewModel.Session = Session;
             MainTCSelectedIndex = (int) ViewIndex.SessionDataView;
+        }
+
+        private void LoadSession(object sender, EventArgs args)
+        {
+            var loadDialog = new OpenFileDialog {CheckFileExists = true, Filter = "Сеанс|*.cmsf"};
+            var result = loadDialog.ShowDialog();
+            if (result == DialogResult.OK)
+            {
+                try
+                {
+                    var container = FileManager.LoadFromFile(loadDialog.FileName);
+                    SessionDataViewModel.Session = new SessionModel {Session = container.Session};
+                    SessionDataViewModel.Patient = container.Patient;
+                    /*{
+                        LastName = container.Patient.LastName,
+                        FirstName =  container.Patient.FirstName,
+                        PatronymicName = container.Patient.PatronymicName
+                    };*/
+                    MainTCSelectedIndex = (int) ViewIndex.SessionDataView;
+                }
+                catch (Exception ex)
+                {
+                    MessageHelper.Instance.ShowMessageAsync("Не удалось открыть файл");
+                }
+            }
         }
     }
 

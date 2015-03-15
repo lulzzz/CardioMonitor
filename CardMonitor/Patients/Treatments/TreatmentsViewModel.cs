@@ -42,7 +42,7 @@ namespace CardioMonitor.Patients.Treatments
                 if (value != _patientName)
                 {
                     _patientName = value;
-                    RisePropertyChanged("PatientName");
+                    RisePropertyChanged("Patient");
                 }
             }
         }

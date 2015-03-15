@@ -7,7 +7,12 @@
              mc:Ignorable="d" 
         d:DesignHeight="300" d:DesignWidth="800">
     <UserControl.Resources>
-        <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.TextBox.xaml" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.TextBox.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.datagrid.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -23,10 +28,12 @@
                        FontWeight="Bold">
             </TextBlock>
             <TextBlock Text="Дата начала курса:"
+                       Visibility="Collapsed"
                        Margin="25,0"
                        FontSize="16"
                        FontWeight="Bold"/>
             <TextBlock Text="{Binding TreatmentStartDate, StringFormat='{}{0:dd.MM.yyyy}'}"
+                       Visibility="Collapsed"
                        FontSize="16"
                        FontWeight="Bold"/>
         </StackPanel>
@@ -53,8 +60,18 @@
                 <DataGridTextColumn Header="Дата сеанса"
                                     Binding="{Binding DateTime, StringFormat='{}{0:dd.MM.yyyy}'}"/>
                 <DataGridTextColumn Header="Время сеанса"
-                                    Binding="{Binding DateTime, StringFormat='{}{0:dd.MM.yyyy}'}"/>
+                                    Binding="{Binding DateTime, StringFormat='{}{0:h:mm}'}"/>
             </DataGrid.Columns>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow"
+                       BasedOn="{StaticResource MetroDataGridRow}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Status}" Value="Terminated">
+                            <Setter Property="Background" Value="Red"></Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
         </DataGrid>
         <StackPanel Grid.Row="2"
                     Orientation="Horizontal"
@@ -86,4 +103,5 @@
     </Grid>
 </UserControl>
 
+    
     

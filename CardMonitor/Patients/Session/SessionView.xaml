@@ -112,11 +112,11 @@
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <Button x:Name="StartSessionB"
+            <ToggleButton x:Name="StartSessionB"
                     Command="{Binding StartCommand}"
                     Grid.Row="0"
                     Grid.Column="0"
-                    Content="Старт"
+                    Content="{Binding StartButtonText}"
                     Width="250"
                     FontSize="12"
                     Margin="10"/>

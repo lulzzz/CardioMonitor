@@ -8,6 +8,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -29,6 +30,34 @@
                        FontWeight="Bold"/>
         </StackPanel>
         <DataGrid Grid.Row="1"
+                  Margin="0,10,0,10"
+                  ItemsSource="{Binding Patients}"
+                  BorderBrush="{DynamicResource AccentColorBrush}"
+                  BorderThickness="2"
+                  RenderOptions.ClearTypeHint="Enabled"
+                  TextOptions.TextFormattingMode="Display"
+                  AutoGenerateColumns="False" 
+                  GridLinesVisibility="All"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserResizeRows="False"
+                  CanUserReorderColumns="False"
+                  SelectionUnit="FullRow"
+                  CanUserSortColumns="False"
+                  IsReadOnly="True"
+                  ColumnWidth="*">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Фамилия"
+                                    Binding="{Binding LastName}"/>
+                <DataGridTextColumn Header="Имя"
+                                    Binding="{Binding FirstName}"/>
+                <DataGridTextColumn Header="Отчество"
+                                    Binding="{Binding PatronymicName}"/>
+                <DataGridTextColumn Header="Ид"
+                                    Binding="{Binding Id}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <DataGrid Grid.Row="2"
                   BorderBrush="{DynamicResource AccentColorBrush}"
                   DataContext="{Binding Session}"
                   ItemsSource="{Binding PatientParams}"
@@ -66,12 +95,12 @@
         <Button x:Name="SaveB"
                 Command="{Binding SaveCommand}"
                 Visibility="Collapsed"
-                Grid.Row="2"
+                Grid.Row="3"
                 Content="Сохранить в файл"
                 FontSize="12"
                 Width="250"
                 Margin="10"></Button>
-        <TextBlock Grid.Row="3"
+        <TextBlock Grid.Row="4"
                    FontSize="14"
                    Text="Тут будут графики"
                    Margin="10"

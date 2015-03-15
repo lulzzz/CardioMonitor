@@ -22,7 +22,23 @@ namespace CardioMonitor.Settings
         public string SeletedAppThemeName { get; set; }
         public string SelectedAcentColorName { get; set; }
         public string FilesDirectoryPath { get; set; }
-        
+
+        private Settings()
+        {
+            try
+            {
+                FilesDirectoryPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                    "CardioMonitor", "Patients");
+                if (!Directory.Exists(FilesDirectoryPath))
+                {
+                    Directory.CreateDirectory(FilesDirectoryPath);
+                }
+            }
+            catch
+            {
+            }
+        }
+
         public static Settings Instance
         {
             get

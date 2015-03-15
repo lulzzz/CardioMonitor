@@ -24,6 +24,7 @@ namespace CardioMonitor.Patients
         private ICommand _patientSearchCommand;
         private ICommand _opentSesionsCommand;
         private ICommand _showTreatmentResultsCommand;
+        private ICommand _openSessionCommand;
 
         public int SelectedPatientIndex
         {
@@ -83,7 +84,7 @@ namespace CardioMonitor.Patients
             get
             {
                 return _editPateintCommand ??
-                       (_addNewPatientCommand =
+                       (_editPateintCommand =
                            new SimpleCommand
                            {
                                CanExecuteDelegate = x => null != SelectedPatient,
@@ -162,11 +163,24 @@ namespace CardioMonitor.Patients
             }
         }
 
+        public ICommand OpenSessionCommand
+        {
+            get
+            {
+                return _openSessionCommand ?? (_openSessionCommand = new SimpleCommand
+                {
+                    CanExecuteDelegate = x => true,
+                    ExecuteDelegate = x => OpenSession()
+                });
+            }
+        }
+
         //temporary not used
         public EventHandler OpenPatienEvent { get; set; }
         public EventHandler AddEditPatient { get; set; }
         public EventHandler OpenSessionsHandler { get; set; }
         public EventHandler ShowTreatmentResults { get; set; }
+        public EventHandler OpenSessionHandler { get; set; }
 
         public PatientsViewModel()
         {
@@ -256,6 +270,15 @@ namespace CardioMonitor.Patients
         private void ShowResults()
         {
             var handler = ShowTreatmentResults;
+            if (null != handler)
+            {
+                handler(this, null);
+            }
+        }
+
+        private void OpenSession()
+        {
+            var handler = OpenSessionHandler;
             if (null != handler)
             {
                 handler(this, null);

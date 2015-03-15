@@ -24,7 +24,7 @@
                  TextChanged="SearTB_TextChanged">
             <TextBox.Style>
                 <Style TargetType="{x:Type TextBox}"
-                               BasedOn="{StaticResource SearchMetroTextBox}">
+                       BasedOn="{StaticResource SearchMetroTextBox}">
                     <Style.Triggers>
                         <Trigger Property="controls:TextBoxHelper.HasText"
                                          Value="True">
@@ -122,7 +122,7 @@
                     Width="150"
                     Margin="10"
                     FontSize="11"
-                    Command="{Binding OpenFileCommand}"/>
+                    Command="{Binding OpenSessionCommand}"/>
         </StackPanel>
     </Grid>
 </UserControl>

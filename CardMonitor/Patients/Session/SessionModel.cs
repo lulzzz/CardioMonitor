@@ -85,14 +85,25 @@ namespace CardioMonitor.Patients.Session
 
         public Session Session
         {
-            get { return new Session
+            get
             {
-                Id = Id,
-                TreatmentId =  TreatmentId,
-                DateTime =  DateTime,
-                Status =  Status,
-                PatientParams = PatientParams
-            }; }
+                return new Session
+                {
+                    Id = Id,
+                    TreatmentId = TreatmentId,
+                    DateTime = DateTime,
+                    Status = Status,
+                    PatientParams = PatientParams
+                };
+            }
+            set
+            {
+                Id = value.Id;
+                TreatmentId = value.TreatmentId;
+                DateTime = value.DateTime;
+                Status = value.Status;
+                PatientParams = value.PatientParams;
+            }
         }
 
         public SessionModel()
@@ -101,6 +112,7 @@ namespace CardioMonitor.Patients.Session
             Status = SessionStatus.Unknown;
             PatientParams = new ObservableCollection<PatientParams>();
         }
+
 
     }
 }

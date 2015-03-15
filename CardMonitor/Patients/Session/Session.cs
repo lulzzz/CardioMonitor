@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace CardioMonitor.Patients.Session
 {
+    [Serializable]
     public class Session
     {
         public int Id { get; set; }

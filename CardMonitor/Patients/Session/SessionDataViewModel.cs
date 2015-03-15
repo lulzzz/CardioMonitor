@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace CardioMonitor.Patients.Session
     public class SessionDataViewModel : Notifier, IViewModel
     {
         private PatientFullName _patientName;
+        private Patient _patient;
         private SessionModel _session;
         private ICommand _saveCommand;
 
@@ -26,6 +28,25 @@ namespace CardioMonitor.Patients.Session
                     RisePropertyChanged("PatientName");
                 }
             }
+        }
+
+        public Patient Patient
+        {
+            get { return _patient; }
+            set
+            {
+                if (value != _patient)
+                {
+                    _patient = value;
+                    RisePropertyChanged("Patient");
+                    RisePropertyChanged("Patients");
+                }
+            }
+        }
+
+        public ObservableCollection<Patient> Patients
+        {
+            get { return new ObservableCollection<Patient>() { Patient }; }
         }
 
         public SessionModel Session
@@ -68,6 +89,7 @@ namespace CardioMonitor.Patients.Session
         {
             PatientName = null;
             Session = null;
+            Patient = null;
         }
     }
 }

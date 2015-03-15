@@ -106,6 +106,7 @@
     <Compile Include="Patients\Sessions\SessionsViewModel.cs" />
     <Compile Include="Patients\Session\PatientParams.cs" />
     <Compile Include="Patients\Session\Session.cs" />
+    <Compile Include="Patients\Session\SessionContainer.cs" />
     <Compile Include="Patients\Session\SessionDataViewModel.cs" />
     <Compile Include="Patients\Session\SessionInfo.cs" />
     <Compile Include="Patients\Session\SessionView.xaml.cs">

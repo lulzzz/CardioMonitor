@@ -14,8 +14,9 @@ namespace CardioMonitor.Settings
 {
     public class SettingsViewModel : Notifier, IDataErrorInfo
     {
+        /*
         private AppApperanceData _selectedAccentColor;
-        private AppApperanceData _selectedAppTheme;
+        private AppApperanceData _selectedAppTheme;*/
         private string _filesDirectoryPath;
         private ICommand _chooseFolderCommand;
         private ICommand _closeCommand;
@@ -24,6 +25,7 @@ namespace CardioMonitor.Settings
         private bool _isValid;
         private bool _isSettingsChanged;
 
+        /*
         public List<AppApperanceData> AccentColors { get; set; }
         public List<AppApperanceData> AppThemes { get; set; }
 
@@ -61,7 +63,7 @@ namespace CardioMonitor.Settings
                     _isSettingsChanged = true;
                 }
             }
-        }
+        }*/
 
         public string FilesDirectoryPath
         {
@@ -126,23 +128,24 @@ namespace CardioMonitor.Settings
 
         public SettingsViewModel()
         {
+            /*
             AccentColors = ThemeManager.Accents
                                             .Select(a => new AppApperanceData { Name = a.Name, ColorBrush = a.Resources["AccentColorBrush"] as Brush })
                                             .ToList();
 
             AppThemes = ThemeManager.AppThemes
                                            .Select(a => new AppApperanceData { Name = a.Name, BorderColorBrush = a.Resources["BlackColorBrush"] as Brush, ColorBrush = a.Resources["WhiteColorBrush"] as Brush })
-                                           .ToList();
+                                           .ToList();*/
             InitializeSettings();
             _isSettingsChanged = false;
         }
 
         private void InitializeSettings()
         {
-            SelectedAppTheme =
+            /*SelectedAppTheme =
                AppThemes.FirstOrDefault(x => x.Name == Settings.Instance.SeletedAppThemeName);
             SelectedAccentColor =
-                AccentColors.FirstOrDefault(x => x.Name == Settings.Instance.SelectedAcentColorName);
+                AccentColors.FirstOrDefault(x => x.Name == Settings.Instance.SelectedAcentColorName);*/
             FilesDirectoryPath = Settings.Instance.FilesDirectoryPath;
             _isValid = true;
             _isSettingsChanged = false;
@@ -188,8 +191,8 @@ namespace CardioMonitor.Settings
         private async void SaveSettings()
         {
             await MessageHelper.Instance.ShowMessageAsync("Настройки сохранены");
-            Settings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
-            Settings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;
+           /* Settings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
+            Settings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
             Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
             Settings.SaveToFile();
             _isSettingsChanged = false;

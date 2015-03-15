@@ -12,6 +12,8 @@ namespace CardioMonitor.Patients.Session
     public class SessionViewModel : Notifier, IViewModel
     {
         private const double Tolerance = 0.001;
+        private readonly string StartText;
+        private readonly string PauseText; 
 
         private Patient _patient;
         private SessionModel _session;
@@ -19,6 +21,7 @@ namespace CardioMonitor.Patients.Session
         private DateTime _currentTime;
         private DateTime _remainingTime;
         private int _repeatCount;
+        private string _startButtonText;
 
         private ICommand _startCommand;
         private ICommand _reverseCommand;
@@ -51,6 +54,7 @@ namespace CardioMonitor.Patients.Session
                 if (value != _session)
                 {
                     _session = value;
+                    
                     RisePropertyChanged("Session");
                 }
             }
@@ -60,7 +64,7 @@ namespace CardioMonitor.Patients.Session
         {
             get { return _currentAngle; }
             set
-            {;
+            {
                 if (Math.Abs(value - _currentAngle) > Tolerance)
                 {
                     _currentAngle = value;
@@ -104,6 +108,19 @@ namespace CardioMonitor.Patients.Session
                 {
                     _repeatCount = value;
                     RisePropertyChanged("RepeatCount");
+                }
+            }
+        }
+
+        public string StartButtonText
+        {
+            get { return _startButtonText; }
+            set
+            {
+                if (value != _startButtonText)
+                {
+                    _startButtonText = value;
+                    RisePropertyChanged("StartButtonText");
                 }
             }
         }
@@ -152,84 +169,94 @@ namespace CardioMonitor.Patients.Session
         public SessionViewModel()
         {
             Session = new SessionModel();
+            StartText = "Старт";
+            PauseText = "Пауза";
+            StartButtonText = StartText;
         }
 
         private async void StartSession()
         {
-            await MessageHelper.Instance.ShowMessageAsync("Start");
-            if (SessionStatus.InProgress != _session.Status)
+            switch (_session.Status)
             {
-                _session.Status = SessionStatus.InProgress;
-                Session.PatientParams.Add(new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 0,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                });
-                Session.PatientParams.Add(new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 10.5,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                });
-                Session.PatientParams.Add(new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 21,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                });
-                Session.PatientParams.Add(new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 30,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                });
-                Session.PatientParams.Add(new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 21,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                });
-                Session.PatientParams.Add(new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 10.5,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                });
-                Session.PatientParams.Add(new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 0,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                });
+                case SessionStatus.InProgress:
+                    StartButtonText = StartText;
+                    break;
+                default:
+                    _session.Status = SessionStatus.InProgress;
+                    StartButtonText = PauseText;
+                    Session.DateTime = DateTime.Now;
+                    Session.PatientParams.Add(new PatientParams
+                    {
+                        AverageArterialPressure = 100,
+                        DiastolicArterialPressure = 80,
+                        HeartRate = 70,
+                        InclinationAngle = 0,
+                        RepsirationRate = 40,
+                        Spo2 = 40,
+                        SystolicArterialPressure = 120
+                    });
+                    Session.PatientParams.Add(new PatientParams
+                    {
+                        AverageArterialPressure = 100,
+                        DiastolicArterialPressure = 80,
+                        HeartRate = 70,
+                        InclinationAngle = 10.5,
+                        RepsirationRate = 40,
+                        Spo2 = 40,
+                        SystolicArterialPressure = 120
+                    });
+                    Session.PatientParams.Add(new PatientParams
+                    {
+                        AverageArterialPressure = 100,
+                        DiastolicArterialPressure = 80,
+                        HeartRate = 70,
+                        InclinationAngle = 21,
+                        RepsirationRate = 40,
+                        Spo2 = 40,
+                        SystolicArterialPressure = 120
+                    });
+                    Session.PatientParams.Add(new PatientParams
+                    {
+                        AverageArterialPressure = 100,
+                        DiastolicArterialPressure = 80,
+                        HeartRate = 70,
+                        InclinationAngle = 30,
+                        RepsirationRate = 40,
+                        Spo2 = 40,
+                        SystolicArterialPressure = 120
+                    });
+                    Session.PatientParams.Add(new PatientParams
+                    {
+                        AverageArterialPressure = 100,
+                        DiastolicArterialPressure = 80,
+                        HeartRate = 70,
+                        InclinationAngle = 21,
+                        RepsirationRate = 40,
+                        Spo2 = 40,
+                        SystolicArterialPressure = 120
+                    });
+                    Session.PatientParams.Add(new PatientParams
+                    {
+                        AverageArterialPressure = 100,
+                        DiastolicArterialPressure = 80,
+                        HeartRate = 70,
+                        InclinationAngle = 10.5,
+                        RepsirationRate = 40,
+                        Spo2 = 40,
+                        SystolicArterialPressure = 120
+                    });
+                    Session.PatientParams.Add(new PatientParams
+                    {
+                        AverageArterialPressure = 100,
+                        DiastolicArterialPressure = 80,
+                        HeartRate = 70,
+                        InclinationAngle = 0,
+                        RepsirationRate = 40,
+                        Spo2 = 40,
+                        SystolicArterialPressure = 120
+                    });
+                    SessionCompleted();
+                    break;
             }
         }
 
@@ -242,6 +269,20 @@ namespace CardioMonitor.Patients.Session
         {
             await MessageHelper.Instance.ShowMessageAsync("Stoped");
             _session.Status = SessionStatus.InProgress;
+        }
+
+        private void SessionCompleted()
+        {
+            Session.Status = SessionStatus.Completed;
+
+            try
+            {
+                FileManager.SaveToFile(Patient, Session.Session);
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.Instance.ShowMessageAsync("Не удалось сохранить результаты сеанса.");
+            }
         }
 
         public void Clear()
