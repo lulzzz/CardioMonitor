@@ -12,9 +12,9 @@ DEBUG;TRACE
 D:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\App.xaml
 111242157174
 3-496187283
-51-313759142
-201492616094
+55-1146990460
+251378921737
 MainWindow.xaml;Patients\PatientsView.xaml;Patients\PatientView.xaml;Patients\Sessions\SessionsView.xaml;Patients\Session\SessionView.xaml;Patients\Session\SessionDataView.xaml;Patients\Treatments\TreatmentsView.xaml;Patients\TreatmentData\TreatmentDataView.xaml;Patients\TreatmentData\TreatmentParametrGridView.xaml;Resources\Icons.xaml;Settings\SettingsView.xaml;
 
-False
+True
 

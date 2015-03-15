@@ -18,7 +18,7 @@
                       WindowStartupLocation="CenterScreen"
                       GlowBrush="{DynamicResource AccentColorBrush}"
                       WindowState="Maximized" 
-                      mc:Ignorable="d" Icon="usbHeart.ico" >
+                      mc:Ignorable="d" Icon="usbHeart.ico" Loaded="MetroWindow_Loaded" >
     <controls:MetroWindow.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

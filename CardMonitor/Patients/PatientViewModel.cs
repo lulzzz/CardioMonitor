@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.Core;
+using CardioMonitor.Core.Repository;
 
 namespace CardioMonitor.Patients
 {
@@ -124,8 +125,33 @@ namespace CardioMonitor.Patients
 
         private void Save()
         {
-            MessageHelper.Instance.ShowMessageAsync("Saved!");
-            IsSaved = true;
+            try
+            {
+                switch (AccessMode)
+                {
+                    case AccessMode.Create:
+                        Repository.Instance.AddPatient(Patient);
+                        MessageHelper.Instance.ShowMessageAsync("Новый пациент добавлен!");
+                        break;
+                    case AccessMode.Edit:
+                        Repository.Instance.UpdatePatient(Patient);
+                        MessageHelper.Instance.ShowMessageAsync("Изменения сохранены!");
+                        break;
+                }
+                IsSaved = true;
+            }
+            catch (Exception ex)
+            {
+                switch (AccessMode)
+                {
+                    case AccessMode.Create:
+                        MessageHelper.Instance.ShowMessageAsync("Не удалось добавить нового пациента!");
+                        break;
+                    case AccessMode.Edit:
+                        MessageHelper.Instance.ShowMessageAsync("Не удалось сохранить изменения!");
+                        break;
+                }
+            }
         }
 
         public void Clear()

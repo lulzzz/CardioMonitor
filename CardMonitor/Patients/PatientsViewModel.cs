@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.Core;
+using CardioMonitor.Core.Repository;
 using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.Patients
@@ -214,12 +215,21 @@ namespace CardioMonitor.Patients
                 style: MessageDialogStyle.AffirmativeAndNegative);
             if (MessageDialogResult.Affirmative == result)
             {
-                var patient = sender as Patient;
-                if (null != patient)
+                var isDeleted = false;
+                if (null != SelectedPatient)
                 {
-                    Patients.Remove(patient);
+                    try
+                    {
+                        Repository.Instance.DeletePatient(SelectedPatient.Id);
+                        isDeleted = true;
+                        Patients.Remove(SelectedPatient);
+                        SelectedPatient = null;
+                    }
+                    catch
+                    {
+                    }
                 }
-                else
+                if (!isDeleted)
                 {
                     await MessageHelper.Instance.ShowMessageAsync("Не удалось удалить пациента");
                 }

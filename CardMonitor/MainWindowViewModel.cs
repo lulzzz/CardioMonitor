@@ -2,6 +2,7 @@
 using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.Core;
+using CardioMonitor.Core.Repository;
 using CardioMonitor.Patients;
 using CardioMonitor.Patients.Session;
 using CardioMonitor.Patients.Sessions;
@@ -199,6 +200,19 @@ namespace CardioMonitor
             SettingsViewModel = new SettingsViewModel();
         }
 
+        public void UpdatePatiens()
+        {
+            try
+            {
+                PatientsViewModel.Patients = Repository.Instance.GetPatients();
+            }
+            catch (Exception ex)
+            {
+                MessageHelper.Instance.ShowMessageAsync(ex.Message);
+            }
+
+        }
+
         private async void MoveBackwardView(object sender)
         {
             int index;
@@ -229,6 +243,7 @@ namespace CardioMonitor
                     break;
                 case ViewIndex.TreatmentDataView:
                     //MainTCSelectedIndex = (int)ViewIndex.TreatmentsView;
+                    UpdatePatiens();
                     MainTCSelectedIndex = (int)ViewIndex.PatientsView;
                     break;
                 case ViewIndex.PatientView:
@@ -238,9 +253,11 @@ namespace CardioMonitor
                         if (MessageDialogResult.Negative == result) { return;}
                     }
                     _patientViewModel.Clear();
+                    UpdatePatiens();
                     MainTCSelectedIndex = (int) ViewIndex.PatientsView;
                     break;
                 default:
+                    UpdatePatiens();
                     MainTCSelectedIndex = (int) ViewIndex.PatientsView;
                     break;
             }
@@ -264,14 +281,22 @@ namespace CardioMonitor
 
         public void AddEditPatientHanlder(object sender, EventArgs args)
         {
-            var patientEventArgs = args as PatientEventArgs;
-            if (null == patientEventArgs)
+            try
             {
-                return;
+                var patientEventArgs = args as PatientEventArgs;
+                if (null == patientEventArgs)
+                {
+                    return;
+                }
+                _patientViewModel.Patient = patientEventArgs.Patient;
+                _patientViewModel.AccessMode = patientEventArgs.Mode;
+                MainTCSelectedIndex = (int)ViewIndex.PatientView;
             }
-            _patientViewModel.Patient = patientEventArgs.Patient;
-            _patientViewModel.AccessMode = patientEventArgs.Mode;
-            MainTCSelectedIndex = (int) ViewIndex.PatientView;
+            catch (Exception)
+            {
+                
+                throw;
+            }
         }
 
         public void StartOrContinueTreatmentSession(object sender, EventArgs args)

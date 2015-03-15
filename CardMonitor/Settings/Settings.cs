@@ -22,6 +22,7 @@ namespace CardioMonitor.Settings
         public string SeletedAppThemeName { get; set; }
         public string SelectedAcentColorName { get; set; }
         public string FilesDirectoryPath { get; set; }
+        public DataBaseSettings DataBase { get; set; }
 
         private Settings()
         {
@@ -33,6 +34,7 @@ namespace CardioMonitor.Settings
                 {
                     Directory.CreateDirectory(FilesDirectoryPath);
                 }
+                DataBase = new DataBaseSettings();
             }
             catch
             {
@@ -68,6 +70,16 @@ namespace CardioMonitor.Settings
                     _instance  = (Settings)bf.Deserialize(loadingStream);
                     loadingStream.Close();
                 }
+                _instance.DataBase.DataBase = "cardio_monitor_db";
+                _instance.DataBase.Source = "localhost";
+                _instance.DataBase.User = "root";
+
+                /*var pwd_code = "gfhjkm";
+                string pwd = "";
+                for (int i = 0; i < pwd_code.Length; i++)
+                    pwd += (char)(pwd_code[i] + 7);*/
+
+                _instance.DataBase.Password = "gfhjkm";
             }
             catch (Exception ex)
             {

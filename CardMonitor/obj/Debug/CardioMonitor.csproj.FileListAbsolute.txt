@@ -43,3 +43,6 @@ D:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\obj\Debug\CardM
 D:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\obj\Debug\CardMonitor.exe
 D:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\obj\Debug\CardMonitor.pdb
 D:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\obj\Debug\CardioMonitor.csprojResolveAssemblyReference.cache
+D:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\bin\Debug\MySql.Data.Entity.EF5.dll
+D:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\bin\Debug\MySql.Data.Entity.EF6.dll
+D:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\bin\Debug\MySql.Fabric.Plugin.dll

@@ -30,9 +30,9 @@ namespace CardioMonitor
 
         public MainWindow()
         {
-            _viewModel = new MainWindowViewModel();
             //inititalize messageHelper
             MessageHelper.Instance.Window = this;
+            _viewModel = new MainWindowViewModel();
             DataContext = _viewModel;
             InitializeComponent();
             SettingsView.ViewModel = _viewModel.SettingsViewModel;
@@ -68,6 +68,11 @@ namespace CardioMonitor
                 this.ShowMessageAsync("Error", ex.Message);
             }
 
+        }
+
+        private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            _viewModel.UpdatePatiens();
         }
 
     }
