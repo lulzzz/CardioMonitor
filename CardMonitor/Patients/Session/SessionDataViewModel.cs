@@ -37,7 +37,13 @@ namespace CardioMonitor.Patients.Session
             {
                 if (value != _patient)
                 {
-                    _patient = value;
+                    _patient = value; 
+                    PatientName = new PatientFullName
+                    {
+                        LastName = _patient.LastName,
+                        FirstName = _patient.FirstName,
+                        PatronymicName = _patient.PatronymicName,
+                    };
                     RisePropertyChanged("Patient");
                     RisePropertyChanged("Patients");
                 }
@@ -46,7 +52,7 @@ namespace CardioMonitor.Patients.Session
 
         public ObservableCollection<Patient> Patients
         {
-            get { return new ObservableCollection<Patient>() { Patient }; }
+            get { return new ObservableCollection<Patient> { Patient }; }
         }
 
         public SessionModel Session

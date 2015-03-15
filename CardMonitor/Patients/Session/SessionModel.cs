@@ -39,7 +39,7 @@ namespace CardioMonitor.Patients.Session
                 if (value != _treatmentId)
                 {
                     _treatmentId = value;
-                    RisePropertyChanged("TreatmentId");
+                    RisePropertyChanged("Treatment");
                 }
             }
         }

@@ -12,7 +12,7 @@ using MySql.Data.MySqlClient;
 namespace CardioMonitor.Core.Repository
 {
 
-    public class DataBaseController
+    internal class DataBaseController
     {
         private static MySqlConnection _myConnect;
         private bool _isOpen = false;
@@ -61,7 +61,7 @@ namespace CardioMonitor.Core.Repository
             }
         }
 
-        public int ExecuteDB(string query)
+        public int ExecuteQuery(string query)
         {
             try
             {

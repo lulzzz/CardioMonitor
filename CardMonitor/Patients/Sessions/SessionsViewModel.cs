@@ -6,8 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.Core;
+using CardioMonitor.Core.Repository;
 using CardioMonitor.Patients.Session;
 using CardioMonitor.Patients;
+using CardioMonitor.Patients.Treatments;
 using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.Patients.Sessions
@@ -75,6 +77,8 @@ namespace CardioMonitor.Patients.Sessions
             }
         }
 
+        public Treatment Treatment { get; set; }
+
         public ICommand StartSessionCommand
         {
             get
@@ -93,7 +97,7 @@ namespace CardioMonitor.Patients.Sessions
                 return _deleteSessionCommand ?? (_deleteSessionCommand = new SimpleCommand
                 {
                     CanExecuteDelegate = x => null != SelectedSessionInfo,
-                    ExecuteDelegate = x => DeleteSession(x)
+                    ExecuteDelegate = x => DeleteSession()
                 });
             }
         }
@@ -105,7 +109,7 @@ namespace CardioMonitor.Patients.Sessions
                 return _showResultsCommand ?? (_showResultsCommand = new SimpleCommand
                 {
                     CanExecuteDelegate = x => null != SelectedSessionInfo,
-                    ExecuteDelegate = x => ShowResults(x)
+                    ExecuteDelegate = x => ShowResults()
                 });
             }
         }
@@ -133,25 +137,35 @@ namespace CardioMonitor.Patients.Sessions
             }
         }
 
-        private async void DeleteSession(object sender)
+        private async void DeleteSession()
         {
             var result = await MessageHelper.Instance.ShowMessageAsync("Вы уверены, что хотите удалить сессию?",
                 style: MessageDialogStyle.AffirmativeAndNegative);
+            var isDeletingSuccessfull = false;
             if (MessageDialogResult.Affirmative == result)
             {
-                var sessionInfo = sender as SessionInfo;
+                var sessionInfo = SelectedSessionInfo;
                 if (null != sessionInfo)
                 {
-                    SessionInfos.Remove(sessionInfo);
+                    try
+                    {
+                        Repository.Instance.DeleteSession(sessionInfo.Id);
+                        SessionInfos.Remove(sessionInfo);
+                        isDeletingSuccessfull = true;
+                    }
+                    catch (Exception)
+                    {
+                        isDeletingSuccessfull = false;
+                    }
                 }
-                else
+                if (!isDeletingSuccessfull)
                 {
                     await MessageHelper.Instance.ShowMessageAsync("Не удалось удалить сессию");
                 }
             }
         }
 
-        private void ShowResults(object sender)
+        private void ShowResults()
         {
             var handler = ShowResultsEvent;
             if (null != handler)

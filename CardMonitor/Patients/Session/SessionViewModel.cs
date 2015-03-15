@@ -6,14 +6,16 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.Core;
+using CardioMonitor.Core.Repository;
+using CardioMonitor.Patients.Treatments;
 
 namespace CardioMonitor.Patients.Session
 {
     public class SessionViewModel : Notifier, IViewModel
     {
         private const double Tolerance = 0.001;
-        private readonly string StartText;
-        private readonly string PauseText; 
+        private readonly string _startText;
+        private readonly string _pauseText; 
 
         private Patient _patient;
         private SessionModel _session;
@@ -43,7 +45,7 @@ namespace CardioMonitor.Patients.Session
 
         public ObservableCollection<Patient> Patients
         {
-            get { return new ObservableCollection<Patient>() {Patient} ;}
+            get { return new ObservableCollection<Patient> {Patient} ;}
         }
 
         public SessionModel Session
@@ -166,12 +168,14 @@ namespace CardioMonitor.Patients.Session
             }
         }
 
+        public Treatment Treatment { get; set; }
+
         public SessionViewModel()
         {
             Session = new SessionModel();
-            StartText = "Старт";
-            PauseText = "Пауза";
-            StartButtonText = StartText;
+            _startText = "Старт";
+            _pauseText = "Пауза";
+            StartButtonText = _startText;
         }
 
         private async void StartSession()
@@ -179,11 +183,12 @@ namespace CardioMonitor.Patients.Session
             switch (_session.Status)
             {
                 case SessionStatus.InProgress:
-                    StartButtonText = StartText;
+                    StartButtonText = _startText;
                     break;
                 default:
                     _session.Status = SessionStatus.InProgress;
-                    StartButtonText = PauseText;
+                    _session.TreatmentId = Treatment.Id;
+                    StartButtonText = _pauseText;
                     Session.DateTime = DateTime.Now;
                     Session.PatientParams.Add(new PatientParams
                     {
@@ -274,10 +279,10 @@ namespace CardioMonitor.Patients.Session
         private void SessionCompleted()
         {
             Session.Status = SessionStatus.Completed;
-
             try
             {
                 FileManager.SaveToFile(Patient, Session.Session);
+                Repository.Instance.AddSession(Session.Session);
             }
             catch (Exception ex)
             {

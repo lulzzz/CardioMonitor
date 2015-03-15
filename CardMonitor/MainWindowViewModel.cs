@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.Core;
@@ -210,7 +211,6 @@ namespace CardioMonitor
             {
                 MessageHelper.Instance.ShowMessageAsync(ex.Message);
             }
-
         }
 
         private async void MoveBackwardView(object sender)
@@ -222,10 +222,12 @@ namespace CardioMonitor
             {
                 case ViewIndex.TreatmentsView:
                     _treatmentsViewModel.Clear();
+                    UpdatePatiens();
                     MainTCSelectedIndex = (int)ViewIndex.PatientsView;
                     break;
                 case ViewIndex.SessionsView:
                     _sessionsViewModel.Clear();
+                    UpdatePatiens();
                     MainTCSelectedIndex = (int)ViewIndex.PatientsView;
                     //MainTCSelectedIndex = (int)ViewIndex.TreatmentsView;
                     break;
@@ -236,10 +238,20 @@ namespace CardioMonitor
                         if (MessageDialogResult.Negative == result) { return; }
                     }
                     _sessionViewModel.Clear();
+                    UpdateSessionInfosSave();
                     MainTCSelectedIndex = (int)ViewIndex.SessionsView;
                     break;
                 case ViewIndex.SessionDataView:
-                    MainTCSelectedIndex = (_mainTCPreviosSelectedIndex == (int)ViewIndex.PatientsView) ? (int)ViewIndex.PatientsView : (int)ViewIndex.SessionsView;
+                    if (_mainTCPreviosSelectedIndex == (int) ViewIndex.PatientsView)
+                    {
+                        MainTCSelectedIndex = (int) ViewIndex.PatientsView;
+                        UpdatePatiens();
+                    }
+                    else
+                    {
+                        MainTCSelectedIndex = (int)ViewIndex.SessionsView;
+                        UpdateSessionInfosSave();
+                    }
                     break;
                 case ViewIndex.TreatmentDataView:
                     //MainTCSelectedIndex = (int)ViewIndex.TreatmentsView;
@@ -267,7 +279,6 @@ namespace CardioMonitor
         {
             var cardioEventArgs = eventArgs as CardioEventArgs;
             if (null == cardioEventArgs) { return;}
-            //var patientId = cardioEventArgs.Id;
             var patient = PatientsViewModel.SelectedPatient;
             TreatmentsViewModel.PatientName = new PatientFullName
             {
@@ -299,120 +310,77 @@ namespace CardioMonitor
             }
         }
 
-        public void StartOrContinueTreatmentSession(object sender, EventArgs args)
+        public async void StartOrContinueTreatmentSession(object sender, EventArgs args)
         {
             //TODO Old realisation
-            /*var treatmentArgs = args as TreatmentEventArgs;
-            if (null != treatmentArgs)
-            {
-                switch (treatmentArgs.Action)
-                {
-                    case TreatmentAction.StartNew:
-
-                        //here we crete new session
-                        break;
-                    case TreatmentAction.Continue:
-
-                        //here we get existance session
-                        break;
-                    default:
-                        return;
-                }
-                //pass params to SessionsView
-
-            }*/
-
+            var isSuccessfull = false;
             var patient = PatientsViewModel.SelectedPatient;
-            SessionsViewModel.PatientName = new PatientFullName
+            try
             {
-                FirstName = patient.FirstName,
-                LastName = patient.LastName,
-                PatronymicName = patient.PatronymicName
-            };
 
-            MainTCSelectedIndex = (int)ViewIndex.SessionsView;
+                var treamtnets = Repository.Instance.GetTreatments(patient.Id);
+                var treatment = treamtnets.FirstOrDefault();
+                if (null == treatment)
+                {
+                    Repository.Instance.AddTreatment(new Treatment { StartDate = DateTime.Now, PatientId = patient.Id });
+                    treatment = Repository.Instance.GetTreatments(patient.Id).FirstOrDefault();
+                    if (null == treatment)
+                    {
+                        await MessageHelper.Instance.ShowMessageAsync("Не удалось получить список ");
+                        return;
+                    }
+                }
+                SessionsViewModel.PatientName = new PatientFullName
+                {
+                    FirstName = patient.FirstName,
+                    LastName = patient.LastName,
+                    PatronymicName = patient.PatronymicName
+                };
+                SessionsViewModel.Treatment = treatment;
+                SessionViewModel.Treatment = treatment;
+                UpdateSessionInfos();
+                MainTCSelectedIndex = (int)ViewIndex.SessionsView;
+                isSuccessfull = true;
+            }
+            catch (Exception ex)
+            {
+                isSuccessfull = false;
+            }
+            if (!isSuccessfull)
+            {
+                await MessageHelper.Instance.ShowMessageAsync("Не удалось получить список сеансов.");
+            }
         }
 
+        private void UpdateSessionInfos()
+        {
+            var sessions = Repository.Instance.GetSessionInfos(SessionsViewModel.Treatment.Id);
+            SessionsViewModel.SessionInfos = sessions;
+        }
+
+        private void UpdateSessionInfosSave()
+        {
+            try
+            {
+                UpdateSessionInfos();
+            }
+            catch (Exception)
+            {
+                MessageHelper.Instance.ShowMessageAsync("Не удалось получить список сеансов.");
+            }
+        }
+
+        //temporary not  used
         public void ShowTreatmentResults(object sender, EventArgs args)
         {
             //var treatmentId = _treatmentsViewModel.SelectedTreatment.Id;
             //getting result
-            var Session = new SessionModel();
-            Session.DateTime = new DateTime();
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 0,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 10.5,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 21,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 30,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 21,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 10.5,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 0,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
+            var session = new SessionModel {DateTime = new DateTime()};
+            
             var statisticBuilder = new TreatmentStatisticBuilder();
             TreatmentDataViewModel.Statistic = statisticBuilder.Build(new Session[]
             {
-                Session.Session, Session.Session, Session.Session, Session.Session, Session.Session, Session.Session, Session.Session,Session.Session ,Session.Session ,Session.Session
+                session.Session, session.Session, session.Session, session.Session, session.Session, session.Session, session.Session,session.Session ,session.Session ,session.Session
             });
             TreatmentDataViewModel.PatientName = new PatientFullName
             {
@@ -420,98 +388,37 @@ namespace CardioMonitor
                 FirstName = PatientsViewModel.SelectedPatient.FirstName,
                 PatronymicName = PatientsViewModel.SelectedPatient.PatronymicName,
             };
-            TreatmentDataViewModel.StartDate = Session.DateTime;
+            TreatmentDataViewModel.StartDate = session.DateTime;
             MainTCSelectedIndex = (int) ViewIndex.TreatmentDataView;
         }
 
         private void StartSession(object sender, EventArgs args)
         {
             SessionViewModel.Patient = PatientsViewModel.SelectedPatient;
+            
             MainTCSelectedIndex = (int) ViewIndex.SessionView;
         }
 
-        private void ShowSessionResults(object sender, EventArgs args)
+        private async void ShowSessionResults(object sender, EventArgs args)
         {
-            SessionDataViewModel.PatientName = new PatientFullName
+            var isShowingSuccessfull = false;
+            try
             {
-                LastName = PatientsViewModel.SelectedPatient.LastName,
-                FirstName = PatientsViewModel.SelectedPatient.FirstName,
-                PatronymicName = PatientsViewModel.SelectedPatient.PatronymicName,
-            };
-            var Session = new SessionModel();
-            Session.DateTime = new DateTime();
-            Session.PatientParams.Add(new PatientParams
+
+                var session = Repository.Instance.GetSession(SessionsViewModel.SelectedSessionInfo.Id);
+                SessionDataViewModel.Session = new SessionModel {Session = session};
+                SessionDataViewModel.Patient = PatientsViewModel.SelectedPatient;
+                MainTCSelectedIndex = (int)ViewIndex.SessionDataView;
+                isShowingSuccessfull = true;
+            }
+            catch (Exception)
             {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 0,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
+                isShowingSuccessfull = false;
+            }
+            if (!isShowingSuccessfull)
             {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 10.5,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 21,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 30,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 21,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 10.5,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            Session.PatientParams.Add(new PatientParams
-            {
-                AverageArterialPressure = 100,
-                DiastolicArterialPressure = 80,
-                HeartRate = 70,
-                InclinationAngle = 0,
-                RepsirationRate = 40,
-                Spo2 = 40,
-                SystolicArterialPressure = 120
-            });
-            SessionDataViewModel.Session = Session;
-            MainTCSelectedIndex = (int) ViewIndex.SessionDataView;
+                await MessageHelper.Instance.ShowMessageAsync("Не удалость получить данные за сеанс.");
+            }
         }
 
         private void LoadSession(object sender, EventArgs args)

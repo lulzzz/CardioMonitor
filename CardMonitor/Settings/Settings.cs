@@ -73,12 +73,7 @@ namespace CardioMonitor.Settings
                 _instance.DataBase.DataBase = "cardio_monitor_db";
                 _instance.DataBase.Source = "localhost";
                 _instance.DataBase.User = "root";
-
-                /*var pwd_code = "gfhjkm";
-                string pwd = "";
-                for (int i = 0; i < pwd_code.Length; i++)
-                    pwd += (char)(pwd_code[i] + 7);*/
-
+                
                 _instance.DataBase.Password = "gfhjkm";
             }
             catch (Exception ex)
