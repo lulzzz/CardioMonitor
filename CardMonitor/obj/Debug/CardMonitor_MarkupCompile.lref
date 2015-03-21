@@ -1,8 +1,8 @@
 ﻿
 
-FD:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\MainWindow.xaml;;
-FD:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\Patients\Sessions\SessionsView.xaml;;
-FD:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\Patients\Session\SessionView.xaml;;
-FD:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\Patients\TreatmentData\TreatmentDataView.xaml;;
-FD:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\Settings\SettingsView.xaml;;
+FD:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\View\MainWindow.xaml;;
+FD:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\View\SessionsView.xaml;;
+FD:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\View\SessionView.xaml;;
+FD:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\View\TreatmentDataView.xaml;;
+FD:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\View\SettingsView.xaml;;
 

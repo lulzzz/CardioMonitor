@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using CardioMonitor.Patients;
-using CardioMonitor.Patients.Session;
+using CardioMonitor.Core.Models.Patients;
+using CardioMonitor.Core.Models.Session;
 
 namespace CardioMonitor.Core
 {
@@ -20,11 +20,17 @@ namespace CardioMonitor.Core
             {
                 Directory.CreateDirectory(dirPath);
             }
-            var dateSring = String.Format("{0}_{1}_{2}_{3}_{4}_{5}", session.DateTime.Day, session.DateTime.Month,
-                session.DateTime.Year,
-                session.DateTime.Hour, session.DateTime.Minute, session.DateTime.Second);
-            var fileName = String.Format("{0}_{1}_{2}_{3}_{4}.cmsf", patient.LastName, patient.FirstName,
-                patient.PatronymicName, patient.Id, dateSring);
+            var dateSring = String.Format("{0}_{1}_{2}_{3}_{4}_{5}", session.DateTime.Day,
+                                                                     session.DateTime.Month,
+                                                                     session.DateTime.Year,
+                                                                     session.DateTime.Hour,
+                                                                     session.DateTime.Minute, 
+                                                                     session.DateTime.Second);
+            var fileName = String.Format("{0}_{1}_{2}_{3}_{4}.cmsf", patient.LastName, 
+                                                                     patient.FirstName,
+                                                                     patient.PatronymicName, 
+                                                                     patient.Id, 
+                                                                     dateSring);
 
             var container = new SessionContainer
             {

@@ -8,9 +8,9 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("core/repository/scrypts/db_v_1.sql")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("core/repository/database/scrypts/db_v_1.sql")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("resources/entypo-license.txt")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("resources/windowsicons-license.txt")]
-[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("usbheart.ico")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("resources/usbheart.ico")]
 
 

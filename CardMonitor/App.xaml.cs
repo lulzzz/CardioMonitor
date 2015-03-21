@@ -17,11 +17,7 @@ namespace CardioMonitor
     {
         public App()
         {
-            //need to fix this problem
-            //seems this bug_ apper after adding MessageHelper
-           // ShutdownMode = ShutdownMode.OnMainWindowClose;
             Settings.Settings.LoadFromFile();
-
         }
     }
 }

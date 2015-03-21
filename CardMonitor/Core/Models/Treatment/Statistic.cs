@@ -1,0 +1,18 @@
+﻿using System.Collections.Generic;
+
+namespace CardioMonitor.Core.Models.Treatment
+{
+    public class Statistic
+    {
+        public int Iteration { get; set; }
+
+        public double InclinationAngle { get; set; }
+
+        public List<int> Values { get; set; }
+
+        public Statistic()
+        {
+            Values =  new List<int>();
+        }
+    }
+}
