@@ -4,9 +4,9 @@ using System.Runtime.Serialization.Formatters.Binary;
 using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Models.Session;
 
-namespace CardioMonitor.Core
+namespace CardioMonitor.Core.Repository.Files
 {
-    public static class FileManager
+    public static class FileRepository
     {
         public static void SaveToFile(Patient patient, Session session)
         {

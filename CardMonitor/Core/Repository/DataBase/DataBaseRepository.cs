@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Models.Session;
 using CardioMonitor.Core.Models.Treatment;
@@ -264,7 +265,7 @@ namespace CardioMonitor.Core.Repository.DataBase
                         String.Format(
                             "INSERT INTO {0}.params ({1}) VALUES ('{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}')",
                             Settings.Settings.Instance.DataBase.DataBase,
-                            columns, param.Iteraton, sessionId, param.InclinationAngle, param.HeartRate,
+                            columns, param.Iteraton, sessionId, param.InclinationAngle.ToString(CultureInfo.GetCultureInfoByIetfLanguageTag("en")), param.HeartRate,
                             param.RepsirationRate, param.Spo2, param.SystolicArterialPressure,
                             param.DiastolicArterialPressure, param.AverageArterialPressure);
                     control.ExecuteQuery(query);

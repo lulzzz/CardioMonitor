@@ -11,6 +11,7 @@ using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Models.Session;
 using CardioMonitor.Core.Models.Treatment;
 using CardioMonitor.Core.Repository.DataBase;
+using CardioMonitor.Core.Repository.Files;
 using CardioMonitor.Core.Repository.Monitor;
 using CardioMonitor.ViewModel.Base;
 using MahApps.Metro.Controls.Dialogs;
@@ -366,7 +367,7 @@ namespace CardioMonitor.ViewModel.Sessions
         {
             try
             {
-                FileManager.SaveToFile(Patient, Session.Session);
+                FileRepository.SaveToFile(Patient, Session.Session);
                 DataBaseRepository.Instance.AddSession(Session.Session);
                 await MessageHelper.Instance.ShowMessageAsync("Сенас завершен.");
             }

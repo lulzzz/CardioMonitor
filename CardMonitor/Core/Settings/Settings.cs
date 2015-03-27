@@ -1,22 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using CardioMonitor.Core;
+using CardioMonitor.Settings;
 
-namespace CardioMonitor.Settings
+namespace CardioMonitor.Core.Settings
 {
     [Serializable]
     public class Settings
     {
         private const string SettingsName = "Settings.bin";
+        public readonly string AppName = "Cardio Monitor";
         
         private static volatile Settings _instance;
-        private static readonly object _syncObject = new object();
+        private static readonly object SyncObject = new object();
 
 
         public string SeletedAppThemeName { get; set; }
@@ -49,7 +45,7 @@ namespace CardioMonitor.Settings
                 {
                     return _instance;
                 }
-                lock (_syncObject)
+                lock (SyncObject)
                 {
                     if (null == _instance)
                     {

@@ -102,7 +102,7 @@
     <Compile Include="Core\ThreadAssistant.cs" />
     <Compile Include="ViewModel\Communication\AccessMode.cs" />
     <Compile Include="ViewModel\Communication\CardioEventArgs.cs" />
-    <Compile Include="Core\FileManager.cs" />
+    <Compile Include="Core\Repository\Files\FileRepository.cs" />
     <Compile Include="ViewModel\Base\IViewModel.cs" />
     <Compile Include="ViewModel\MessageHelper.cs" />
     <Compile Include="ViewModel\Base\Notifier.cs" />

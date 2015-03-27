@@ -8,6 +8,7 @@ using CardioMonitor.Core.Models.Session;
 using CardioMonitor.Core.Models.Treatment;
 using CardioMonitor.Core.Repository;
 using CardioMonitor.Core.Repository.DataBase;
+using CardioMonitor.Core.Repository.Files;
 using CardioMonitor.ViewModel.Communication;
 using CardioMonitor.ViewModel.Patients;
 using CardioMonitor.ViewModel.Sessions;
@@ -430,7 +431,7 @@ namespace CardioMonitor.ViewModel{
             {
                 try
                 {
-                    var container = FileManager.LoadFromFile(loadDialog.FileName);
+                    var container = FileRepository.LoadFromFile(loadDialog.FileName);
                     SessionDataViewModel.Session = new SessionModel {Session = container.Session};
                     SessionDataViewModel.Patient = container.Patient;
                     MainTCSelectedIndex = (int) ViewIndex.SessionDataView;
