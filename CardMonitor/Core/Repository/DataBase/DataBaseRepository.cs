@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Threading.Tasks;
 using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Models.Session;
 using CardioMonitor.Core.Models.Treatment;
 using CardioMonitor.Logs;
 using CardioMonitor.Resources;
+using MySql.Data.MySqlClient;
 
 namespace CardioMonitor.Core.Repository.DataBase
 {
@@ -16,6 +18,9 @@ namespace CardioMonitor.Core.Repository.DataBase
     {
         private static DataBaseRepository _instance;
         private static readonly object SyncObject = new object();
+
+        private const int HostError = 1042;
+        private const int AccessDeniedError = 0;
 
         /// <summary>
         /// Репозиторий для доступа к базе данных
@@ -42,15 +47,15 @@ namespace CardioMonitor.Core.Repository.DataBase
         /// <returns>Список пациентов</returns>
         public ObservableCollection<Patient> GetPatients()
         {
-            var queryMain = "";
+            var query = "";
             try
             {
                 var control = new DataBaseController();
                 var output = new ObservableCollection<Patient>();
 
-                queryMain = String.Format("SELECT id, FirstName, PatronymicName, LastName FROM {0}.patients",
+                query = String.Format("SELECT id, FirstName, PatronymicName, LastName FROM {0}.patients",
                     Settings.Settings.Instance.DataBase.DataBase);
-                var reader = control.ConnectDB(queryMain);
+                var reader = control.ConnectDB(query);
                 var sreader = new SafeReader(reader);
 
                 while (reader.Read())
@@ -67,10 +72,29 @@ namespace CardioMonitor.Core.Repository.DataBase
                 control.DisConnectDB(reader);
                 return output;
             }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_Patients_GetExcepttion;
+                        break;
+                }
+                throw new Exception(message);
+            }
             catch (Exception ex)
             {
                 Logger.Instance.LogError("DataBaseRepository", ex);
-                Logger.Instance.LogQueryError(queryMain);
+                Logger.Instance.LogQueryError(query);
                 throw new Exception(Localisation.DataBaseRepository_Patients_GetExcepttion);
             }
         }
@@ -96,6 +120,25 @@ namespace CardioMonitor.Core.Repository.DataBase
                         patient.LastName, patient.FirstName, patient.PatronymicName);
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
+            }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_Patient_AddExcepttion;
+                        break;
+                }
+                throw new Exception(message);
             }
             catch (Exception ex)
             {
@@ -128,6 +171,25 @@ namespace CardioMonitor.Core.Repository.DataBase
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
             }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_Patient_UpdateExcepttion;
+                        break;
+                }
+                throw new Exception(message);
+            }
             catch (Exception ex)
             {
                 Logger.Instance.LogError("DataBaseRepository", ex);
@@ -152,6 +214,25 @@ namespace CardioMonitor.Core.Repository.DataBase
 
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
+            }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_Patient_DeleteExcepttion;
+                        break;
+                }
+                throw new Exception(message);
             }
             catch (Exception ex)
             {
@@ -193,6 +274,25 @@ namespace CardioMonitor.Core.Repository.DataBase
                 control.DisConnectDB(reader);
                 return output;
             }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_Treatments_GetException;
+                        break;
+                }
+                throw new Exception(message);
+            }
             catch (Exception ex)
             {
                 Logger.Instance.LogError("DataBaseRepository", ex);
@@ -223,6 +323,25 @@ namespace CardioMonitor.Core.Repository.DataBase
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
             }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_Treatment_AddException;
+                        break;
+                }
+                throw new Exception(message);
+            }
             catch (Exception ex)
             {
                 Logger.Instance.LogError("DataBaseRepository", ex);
@@ -247,6 +366,25 @@ namespace CardioMonitor.Core.Repository.DataBase
 
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
+            }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_Treatment_DeleteException;
+                        break;
+                }
+                throw new Exception(message);
             }
             catch (Exception ex)
             {
@@ -286,6 +424,25 @@ namespace CardioMonitor.Core.Repository.DataBase
                 control.DisConnectDB(reader);
                 return output;
             }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_SessionInfo_GetException;
+                        break;
+                }
+                throw new Exception(message);
+            }
             catch (Exception ex)
             {
                 Logger.Instance.LogError("DataBaseRepository", ex);
@@ -309,6 +466,25 @@ namespace CardioMonitor.Core.Repository.DataBase
                         sessionId);
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
+            }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_Session_DeleteException;
+                        break;
+                }
+                throw new Exception(message);
             }
             catch (Exception ex)
             {
@@ -366,6 +542,25 @@ namespace CardioMonitor.Core.Repository.DataBase
                             param.DiastolicArterialPressure, param.AverageArterialPressure);
                     control.ExecuteQuery(query);
                 }
+            }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_Session_AddException;
+                        break;
+                }
+                throw new Exception(message);
             }
             catch (Exception ex)
             {
@@ -426,12 +621,83 @@ namespace CardioMonitor.Core.Repository.DataBase
                 }
                 return session;
             }
+            catch (MySqlException ex)
+            {
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                string message;
+                switch (ex.Number)
+                {
+                    case HostError:
+                        message = Localisation.DataBaseRepository_HostAccessException;
+                        break;
+                    case AccessDeniedError:
+                        message = Localisation.DataBaseRepository_AccessDenied;
+                        break;
+                    default:
+                        message = Localisation.DataBaseRepository_Session_GetException;
+                        break;
+                }
+                throw new Exception(message);
+            }
             catch (Exception ex)
             {
                 Logger.Instance.LogError("DataBaseRepository", ex);
                 Logger.Instance.LogQueryError(query);
                 throw new Exception(Localisation.DataBaseRepository_Session_GetException);
             }
+        }
+
+        /// <summary>
+        /// Возвращает статус соединения
+        /// </summary>
+        /// <returns></returns>
+        public bool GetConnectionStatus()
+        {
+            var control = new DataBaseController();
+            return control.GetConnectionStatus();
+        }
+
+        /// <summary>
+        /// Проверяте соединение к базе
+        /// </summary>
+        /// <remarks>
+        /// Может выбросить эксепшн с информацией о проблеме
+        /// </remarks>
+        public async Task CheckConnection(string dataBase, string source, string user, string password)
+        {
+            await Task.Run(async () =>
+            {
+                try
+                {
+                    var control = new DataBaseController(dataBase, source, user, password);
+                    control.CheckConnection();
+                }
+                catch (MySqlException ex)
+                {
+                    Logger.Instance.LogError("DataBaseRepository", ex);
+                    string message;
+                    switch (ex.Number)
+                    {
+                        case HostError:
+                            message = Localisation.DataBaseRepository_HostAccessException;
+                            break;
+                        case AccessDeniedError:
+                            message = Localisation.DataBaseRepository_AccessDenied;
+                            break;
+                        default:
+                            message = Localisation.DataBaseRepository_UnknownException;
+                            break;
+                    }
+                    throw new Exception(message);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Instance.LogError("DataBaseRepository", ex);
+                    throw new Exception(Localisation.DataBaseRepository_UnknownException);
+                }
+            });
+
         }
     }
 }

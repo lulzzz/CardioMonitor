@@ -26,6 +26,18 @@ namespace CardioMonitor.Core.Repository.DataBase
         }
 
         /// <summary>
+        /// Контроллер для непосредственного взаимодействия с базой данных
+        /// </summary>
+        public DataBaseController(string dataBase, string source, string user, string password)
+        {
+            var initComand = "Database=" + dataBase + ";Data Source=" +
+                             source + ";User Id=" + user + ";Password=gfhjkm" + ";Allow Zero Datetime=True;Convert Zero Datetime=True;charset=utf8";
+            _myConnect = new MySqlConnection(initComand);
+            _isOpen = false;
+
+        }
+
+        /// <summary>
         /// Открывает соединение к базе данных, выполняя переданный запрос, возвращает MySqlDataReader для чтения результатов
         /// </summary>
         /// <param name="query">SQL запрос</param>
@@ -74,7 +86,7 @@ namespace CardioMonitor.Core.Repository.DataBase
         /// Проверяет соединение с базой данных
         /// </summary>
         /// <returns>Результат проверки</returns>
-        public bool IsConnected()
+        public bool GetConnectionStatus()
         {
             try
             {
@@ -88,5 +100,15 @@ namespace CardioMonitor.Core.Repository.DataBase
                 return false;
             }
         }
+
+        /// <summary>
+        /// Проверяет соединение с базой данных
+        /// </summary>
+        public void CheckConnection()
+        {
+            _myConnect.Open();
+            _myConnect.Close();
+        }
     }
+
 }

@@ -1,4 +1,5 @@
-﻿using CardioMonitor.ViewModel;
+﻿using System.Windows.Controls;
+using CardioMonitor.ViewModel;
 using UserControl = System.Windows.Controls.UserControl;
 
 namespace CardioMonitor.View
@@ -18,6 +19,5 @@ namespace CardioMonitor.View
         {
             InitializeComponent();
         }
-
     }
 }

@@ -16,5 +16,5 @@ d:\Projects\Applications\CardioMonitor\CardioMonitor\CardMonitor\App.xaml
 25514830482
 View\MainWindow.xaml;View\PatientsView.xaml;View\PatientView.xaml;View\SessionsView.xaml;View\SessionView.xaml;View\SessionDataView.xaml;View\TreatmentsView.xaml;View\TreatmentDataView.xaml;View\TreatmentParametrGridView.xaml;Resources\Icons.xaml;View\SettingsView.xaml;
 
-False
+True
 

@@ -195,6 +195,15 @@
   <data name="SettingsViewModel_ChooseFolder" xml:space="preserve">
     <value>Выберите каталог для хранения результатов сеансов</value>
   </data>
+  <data name="DataBaseRepository_AccessDenied" xml:space="preserve">
+    <value>Отказано в доступе к базе данных. Проверьте название базы данных, логин и пароль.</value>
+  </data>
+  <data name="DataBaseRepository_HostAccessException" xml:space="preserve">
+    <value>Невозможно подключиться к указанному серверу. Проверьте название сервера и порт.</value>
+  </data>
+  <data name="DataBaseRepository_UnknownException" xml:space="preserve">
+    <value>Неизвестная ошибка при подключении к базе данных</value>
+  </data>
   <data name="FileRepository_SeansFileFilter" xml:space="preserve">
     <value>"Сеанс|*.cmsf"</value>
   </data>

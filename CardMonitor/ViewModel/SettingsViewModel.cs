@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.Core;
+using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Resources;
 
 namespace CardioMonitor.ViewModel
@@ -17,6 +18,10 @@ namespace CardioMonitor.ViewModel
         private ICommand _cancelCommand;
         private bool _isValid;
         private bool _isSettingsChanged;
+        private string _dbServerName;
+        private string _dbName;
+        private string _dbLogin;
+        private string _dbPassword;
 
         #region Apperance settings
         /*
@@ -76,6 +81,7 @@ namespace CardioMonitor.ViewModel
             }
         }
 
+
         public ICommand ChooseFolderCommand
         {
             get
@@ -123,6 +129,63 @@ namespace CardioMonitor.ViewModel
             }
         }
 
+
+        public string DBServerName
+        {
+            get { return _dbServerName; }
+            set
+            {
+                if (value != _dbServerName)
+                {
+                    _dbServerName = value;
+                    RisePropertyChanged("DBServerName");
+                    _isSettingsChanged = true;
+                }
+            }
+        }
+
+        public string DBName
+        {
+            get { return _dbName; }
+            set
+            {
+                if (value != _dbName)
+                {
+                    _dbName = value;
+                    RisePropertyChanged("DBName");
+                    _isSettingsChanged = true;
+                }
+            }
+        }
+
+        public string DBLogin
+        {
+            get { return _dbLogin; }
+            set
+            {
+                if (value != _dbLogin)
+                {
+                    _dbLogin = value;
+                    RisePropertyChanged("DBLogin");
+                    _isSettingsChanged = true;
+                }
+            }
+        }
+
+        public string DBPassword
+        {
+            get { return _dbPassword; }
+            set
+            {
+                if (value != _dbPassword)
+                {
+                    _dbPassword = value;
+                    RisePropertyChanged("DBPassword");
+                    _isSettingsChanged = true;
+                }
+            }
+        }
+
         public SettingsViewModel()
         {
             /*
@@ -144,6 +207,10 @@ namespace CardioMonitor.ViewModel
             SelectedAccentColor =
                 AccentColors.FirstOrDefault(x => x.Name == Settings.Instance.SelectedAcentColorName);*/
             FilesDirectoryPath = Core.Settings.Settings.Instance.FilesDirectoryPath;
+            DBLogin = Core.Settings.Settings.Instance.DataBase.User;
+            DBName = Core.Settings.Settings.Instance.DataBase.DataBase;
+            DBPassword = Core.Settings.Settings.Instance.DataBase.Password;
+            DBServerName = Core.Settings.Settings.Instance.DataBase.Source;
             _isValid = true;
             _isSettingsChanged = false;
         }
@@ -158,6 +225,18 @@ namespace CardioMonitor.ViewModel
                 {
                     _isValid = false;
                     return Localisation.SettingsViewModel_DirectoryDoesNotExist;
+                }
+                if (columnName == "DBServerName" || columnName == "DBName" || columnName == "DBLogin" || columnName == "DBPassword")
+                {
+                    /*try
+                    {
+                        DataBaseRepository.Instance.CheckConnection(DBName,DBServerName, DBLogin, DBPassword);
+                    }
+                    catch (Exception ex)
+                    {
+                        _isValid = false;
+                        return ex.Message;
+                    }*/
                 }
                 _isValid = true;
                 return null;
@@ -187,12 +266,35 @@ namespace CardioMonitor.ViewModel
 
         private async void SaveSettings()
         {
-            await MessageHelper.Instance.ShowMessageAsync(Localisation.SettingsViewModel_Saved);
-           /* Settings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
-            Settings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
-            Core.Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
-            Core.Settings.Settings.SaveToFile();
-            _isSettingsChanged = false;
+            var message = String.Empty;
+            try
+            {
+                await DataBaseRepository.Instance.CheckConnection(DBName, DBServerName, DBLogin, DBPassword);
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+            if (!String.IsNullOrEmpty(message))
+            {
+                await MessageHelper.Instance.ShowMessageAsync(message);
+            }
+            else
+            {
+                /* Settings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
+                Settings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
+                Core.Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
+
+                Core.Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
+                Core.Settings.Settings.Instance.DataBase.User = DBLogin;
+                Core.Settings.Settings.Instance.DataBase.DataBase = DBName;
+                Core.Settings.Settings.Instance.DataBase.Password = DBPassword;
+                Core.Settings.Settings.Instance.DataBase.Source = DBServerName;
+                Core.Settings.Settings.SaveToFile();
+                _isSettingsChanged = false;
+                await MessageHelper.Instance.ShowMessageAsync(Localisation.SettingsViewModel_Saved);
+                
+            }
         }
 
         private void CloseSettings()

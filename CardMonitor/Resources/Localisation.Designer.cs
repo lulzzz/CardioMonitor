@@ -70,6 +70,24 @@ namespace CardioMonitor.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Отказано в доступе к базе данных. Проверьте название базы данных, логин и пароль..
+        /// </summary>
+        internal static string DataBaseRepository_AccessDenied {
+            get {
+                return ResourceManager.GetString("DataBaseRepository_AccessDenied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Невозможно подключиться к указанному серверу. Проверьте название сервера и порт..
+        /// </summary>
+        internal static string DataBaseRepository_HostAccessException {
+            get {
+                return ResourceManager.GetString("DataBaseRepository_HostAccessException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Не удалось добавить пациента .
         /// </summary>
         internal static string DataBaseRepository_Patient_AddExcepttion {
@@ -165,6 +183,15 @@ namespace CardioMonitor.Resources {
         internal static string DataBaseRepository_Treatments_GetException {
             get {
                 return ResourceManager.GetString("DataBaseRepository_Treatments_GetException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Неизвестная ошибка при подключении к базе данных.
+        /// </summary>
+        internal static string DataBaseRepository_UnknownException {
+            get {
+                return ResourceManager.GetString("DataBaseRepository_UnknownException", resourceCulture);
             }
         }
         
