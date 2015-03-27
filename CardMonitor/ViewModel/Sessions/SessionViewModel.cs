@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading;
-using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
-using System.Windows.Threading;
 using CardioMonitor.Core;
 using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Models.Session;
@@ -13,27 +9,60 @@ using CardioMonitor.Core.Models.Treatment;
 using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Core.Repository.Files;
 using CardioMonitor.Core.Repository.Monitor;
+using CardioMonitor.Logs;
+using CardioMonitor.Resources;
 using CardioMonitor.ViewModel.Base;
-using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.ViewModel.Sessions
 {
+    /// <summary>
+    /// ViewModel для сеанса
+    /// </summary>
     public class SessionViewModel : Notifier, IViewModel
     {
+        #region Поля
+
         private const double Tolerance = 0.1e-12;
+
+        /// <summary>
+        /// Скорость подъема кровати
+        /// </summary>
+        /// <remarks>
+        /// Эмуляция работы железа
+        /// </remarks>
         private const double UpAnglePerSecond = 0.6;
+
+        /// <summary>
+        /// Скорость спуска кровати
+        /// </summary>
+        /// <remarks>
+        /// Эмуляция работы железа
+        /// </remarks>
         private const double DownAnglePerSecond = 0.3;
+
+        /// <summary>
+        /// Длительность одного периода в цикле
+        /// </summary>
+        /// <remarks>
+        /// Эмуляция работы железа
+        /// </remarks>
         private const int PeriodDuration = 5;
+
+        /// <summary>
+        /// Количество периодов в одном цикле
+        /// </summary>
+        /// <remarks>
+        /// Эмуляция работы железа
+        /// </remarks>
         private const int PeriodsCount = 6;
-        private readonly string _startText;
-        private readonly string _pauseText;
+
         private readonly TimeSpan _oneSecond;
         private readonly TimeSpan _halfSessionTime;
 
         private Patient _patient;
         private SessionModel _session;
         private double _currentAngle;
-        private TimeSpan _currentTime;
+        private TimeSpan _elapsedTime;
         private TimeSpan _remainingTime;
         private int _repeatCount;
         private string _startButtonText;
@@ -49,6 +78,13 @@ namespace CardioMonitor.ViewModel.Sessions
 
         private CardioTimer _mainTimer;
 
+        #endregion
+
+        #region Свойства
+
+        /// <summary>
+        /// Пациент
+        /// </summary>
         public Patient Patient
         {
             get { return _patient; }
@@ -63,6 +99,12 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Список пациентов
+        /// </summary>
+        /// <remarks>
+        /// Лайфхак для отображения пациента в таблице
+        /// </remarks>
         public ObservableCollection<Patient> Patients
         {
             get { return (null != Patient) 
@@ -70,6 +112,9 @@ namespace CardioMonitor.ViewModel.Sessions
                             : new ObservableCollection<Patient>();}
         }
 
+        /// <summary>
+        /// Сеанс
+        /// </summary>
         public SessionModel Session
         {
             get { return _session; }
@@ -80,13 +125,16 @@ namespace CardioMonitor.ViewModel.Sessions
                     _session = value;
                     RisePropertyChanged("Session");
                     RisePropertyChanged("Status");
-                    CurrentTime = new TimeSpan();
+                    ElapsedTime = new TimeSpan();
                     RemainingTime = new TimeSpan();
-                    StartButtonText = _startText;
+                    StartButtonText = Localisation.SessionViewModel_StartButton_Text;
                 }
             }
         }
 
+        /// <summary>
+        /// Текущий угол наклона кровати
+        /// </summary>
         public double CurrentAngle
         {
             get { return _currentAngle; }
@@ -101,19 +149,25 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
-        public TimeSpan CurrentTime
+        /// <summary>
+        /// Прошедшее время
+        /// </summary>
+        public TimeSpan ElapsedTime
         {
-            get { return _currentTime; }
+            get { return _elapsedTime; }
             set
             {
-                if (value != _currentTime)
+                if (value != _elapsedTime)
                 {
-                    _currentTime = value;
-                    RisePropertyChanged("CurrentTime");
+                    _elapsedTime = value;
+                    RisePropertyChanged("ElapsedTime");
                 }
             }
         }
 
+        /// <summary>
+        /// Оставшееся время
+        /// </summary>
         public TimeSpan RemainingTime
         {
             get { return _remainingTime; }
@@ -127,6 +181,9 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Количество повторений сеанса
+        /// </summary>
         public int RepeatCount
         {
             get { return _repeatCount; }
@@ -140,6 +197,9 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Текст кнопки старт
+        /// </summary>
         public string StartButtonText
         {
             get { return _startButtonText; }
@@ -153,6 +213,9 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Статус сеанса
+        /// </summary>
         public SessionStatus Status
         {
             get { return _session.Status; }
@@ -167,6 +230,9 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Команда старта/пауза сеанса
+        /// </summary>
         public ICommand StartCommand
         {
             get
@@ -179,18 +245,24 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
         
+        /// <summary>
+        /// Команда реверса
+        /// </summary>
         public ICommand ReverseCommand
         {
             get
             {
                 return _reverseCommand ?? (_reverseCommand = new SimpleCommand
                 {
-                    CanExecuteDelegate = x => SessionStatus.InProgress == Status && (!_isReversing && !_isNeedReversing) && CurrentTime < _halfSessionTime,
+                    CanExecuteDelegate = x => SessionStatus.InProgress == Status && (!_isReversing && !_isNeedReversing) && ElapsedTime < _halfSessionTime,
                     ExecuteDelegate = x => Reverse()
                 });
             }
         }
 
+        /// <summary>
+        /// Команда экстренной остановки
+        /// </summary>
         public ICommand EmergencyStopCommand
         {
             get
@@ -203,8 +275,17 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Курс лечения
+        /// </summary>
         public Treatment Treatment { get; set; }
 
+        #region Эмуляция работы железа
+
+        /// <summary>
+        /// Прошедшие секунды одного периода
+        /// </summary>
+        /// <remarks>5 секунд на один период</remarks>
         private int PeriodSeconds
         {
             get { return _periodSesonds; }
@@ -222,6 +303,10 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Номер периода
+        /// </summary>
+        /// <remarks>1 из 6</remarks>
         private int PeriodNumber
         {
             get { return _periodNumber; }
@@ -236,7 +321,7 @@ namespace CardioMonitor.ViewModel.Sessions
                         _isNeedReversing = false;
                         _isReversing = true;
                         _mainTimer.Stop();
-                        RemainingTime = CurrentTime;
+                        RemainingTime = ElapsedTime;
                         _mainTimer = new CardioTimer(TimerTick, RemainingTime, new TimeSpan(0, 0, 0, 1));
                         _mainTimer.Start();
                     }
@@ -248,12 +333,20 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        #endregion
+
+        /// <summary>
+        /// Помощник потоков для выполнения фунциий в потоке GUI
+        /// </summary>
         public ThreadAssistant ThreadAssistant { get; set; }
 
+        #endregion
+
+        /// <summary>
+        /// ViewModel для сеанса
+        /// </summary>
         public SessionViewModel()
         {
-            _startText = "Старт";
-            _pauseText = "Пауза";
             Session = new SessionModel();
             _oneSecond = new TimeSpan(0,0,0,1);
             _isNeedReversing = false;
@@ -261,6 +354,9 @@ namespace CardioMonitor.ViewModel.Sessions
             _halfSessionTime = new TimeSpan(0,0,10,0);
         }
 
+        /// <summary>
+        /// Обрабатывает нажатие на кнопку старт/пауза
+        /// </summary>
         private void StartSessionButtonClick()
         {
             switch (Session.Status)
@@ -277,13 +373,16 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Запускает сеанс
+        /// </summary>
         private void SessionStart()
         {
-            StartButtonText = _pauseText;
+            StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
             Session.Status = SessionStatus.InProgress;
             Session.TreatmentId = Treatment.Id;
             Session.DateTime = DateTime.Now;
-            CurrentTime = new TimeSpan(0,0,0,0);
+            ElapsedTime = new TimeSpan(0,0,0,0);
             RemainingTime = new TimeSpan(0, 0, 20, 0);
             CurrentAngle = 0;
             PeriodSeconds = 0;
@@ -293,17 +392,23 @@ namespace CardioMonitor.ViewModel.Sessions
             _isNeedReversing = false;
             _isReversing = false;
 
+            //TODO можно протестить все за 30 секунд, раскомментровать следующу строку, закомментровать следующую за ней
            // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 0, 30), new TimeSpan(0,0,0,0,25));
             _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 20, 0), new TimeSpan(0, 0, 0, 1));
             _mainTimer.Start();
             UpdateData();
         }
 
+        /// <summary>
+        /// Обработка тика таймера
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void TimerTick(object sender, EventArgs e)
         {
-            CurrentTime += _oneSecond;
+            ElapsedTime += _oneSecond;
             RemainingTime -= _oneSecond;
-            if (CurrentTime == RemainingTime)
+            if (ElapsedTime == RemainingTime)
             {
                 _isUpping = false;
             }
@@ -316,6 +421,12 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Обновляет угол наклона
+        /// </summary>
+        /// <remarks>
+        /// Эмуляция работы железа
+        /// </remarks>
         private void UpdateAngle()
         {
             if (1 == PeriodNumber)
@@ -328,6 +439,9 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Обновляет данные
+        /// </summary>
         private void UpdateData()
         {
             if ((Math.Abs(CurrentAngle) < Tolerance) || (Math.Abs(CurrentAngle - 10.5) < Tolerance) 
@@ -343,45 +457,73 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        /// <summary>
+        /// Приостанавливает сеанс
+        /// </summary>
         private void SuspendSesion()
         {
             _mainTimer.Suspend();
-            StartButtonText = _startText;
+            StartButtonText = Localisation.SessionViewModel_StartButton_Text;
             Session.Status = SessionStatus.Suspended;
         }
 
+        /// <summary>
+        /// Продолжает сеанс после приостановки
+        /// </summary>
         private void ResumeSession()
         {
             _mainTimer.Resume();
-            StartButtonText = _pauseText;
+            StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
             Session.Status = SessionStatus.InProgress;
         }
 
+        /// <summary>
+        /// Завершает сенас
+        /// </summary>
         private void SessionComplete()
         {
             Session.Status = SessionStatus.Completed;
             SaveSession();
         }
 
+        /// <summary>
+        /// Сохраняет результаты сеанса в базу и файл
+        /// </summary>
         private async void SaveSession()
         {
+            var exceptionMessage = String.Empty;
             try
             {
                 FileRepository.SaveToFile(Patient, Session.Session);
                 DataBaseRepository.Instance.AddSession(Session.Session);
-                await MessageHelper.Instance.ShowMessageAsync("Сенас завершен.");
+                await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionViewModel_SessionCompeted);
+            }
+            catch (ArgumentNullException ex)
+            {
+                Logger.Instance.LogError("SessionViewModel", ex);
+                exceptionMessage = Localisation.SessionViewModel_SaveSession_ArgumentNullException;
             }
             catch (Exception ex)
             {
-                MessageHelper.Instance.ShowMessageAsync("Не удалось сохранить результаты сеанса.");
+                exceptionMessage = ex.Message;
+            }
+            if (!String.IsNullOrEmpty(exceptionMessage))
+            {
+                await MessageHelper.Instance.ShowMessageAsync(exceptionMessage);
             }
         }
 
-        private async void Reverse()
+        /// <summary>
+        /// Реверс
+        /// </summary>
+        private void Reverse()
         {
             _isNeedReversing = true;
         }
 
+        /// <summary>
+        /// Прерывает сеанс
+        /// </summary>
         private void EmergencyStop()
         {
             _mainTimer.Stop();
@@ -389,9 +531,16 @@ namespace CardioMonitor.ViewModel.Sessions
             SaveSession();
         }
 
+        /// <summary>
+        /// Очищает содержимое ViewModel, обнуляя все данные
+        /// </summary>
         public void Clear()
         {
             Patient = null;
+            CurrentAngle = 0;
+            RemainingTime = TimeSpan.Zero;
+            ElapsedTime = TimeSpan.Zero;
+            Status = SessionStatus.Unknown;
             Session = new SessionModel();
         }
     }

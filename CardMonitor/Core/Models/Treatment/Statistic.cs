@@ -2,6 +2,7 @@
 
 namespace CardioMonitor.Core.Models.Treatment
 {
+    //todo Временно не используется
     public class Statistic
     {
         public int Iteration { get; set; }

@@ -7,7 +7,7 @@ namespace CardioMonitor.ViewModel
     public sealed class MessageHelper
     {
         private static volatile MessageHelper _instance;
-        private static readonly object _syncObject = new object();
+        private static readonly object SyncObject = new object();
         private MetroWindow _window;
 
         private MessageHelper()
@@ -18,15 +18,14 @@ namespace CardioMonitor.ViewModel
         {
             get
             {
-                if (null != _instance) { return _instance;}
-                lock (_syncObject)
+                if (null != _instance)
                 {
-                    if (null == _instance)
-                    {
-                        _instance = new MessageHelper();
-                    }
+                    return _instance;
                 }
-                return _instance;
+                lock (SyncObject)
+                {
+                    return _instance ?? (_instance = new MessageHelper());
+                }
             }
         }
 
@@ -35,7 +34,7 @@ namespace CardioMonitor.ViewModel
             private get { return _window; }
             set
             {
-                lock (_syncObject)
+                lock (SyncObject)
                 {
                     if (_window != value || null != value)
                     {

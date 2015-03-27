@@ -1,7 +1,6 @@
-﻿using CardioMonitor.Patients.TreatmentData;
-
-namespace CardioMonitor.Core.Models.Treatment
+﻿namespace CardioMonitor.Core.Models.Treatment
 {
+    //todo Временно не используется
     public class TreatmentFullStatistic
     {
         /// <summary>

@@ -2,15 +2,30 @@
 
 namespace CardioMonitor.Core.Models.Patients
 {
+    /// <summary>
+    /// Полное имя пациента
+    /// </summary>
     [Serializable]
     public class PatientFullName
     {
+        /// <summary>
+        /// Фамилия
+        /// </summary>
         public string LastName { get; set; }
 
+        /// <summary>
+        /// Имя
+        /// </summary>
         public string FirstName { get; set; }
 
+        /// <summary>
+        /// Отчество
+        /// </summary>
         public string PatronymicName { get; set; }
 
+        /// <summary>
+        /// Полное имя пациента
+        /// </summary>
         public string Name
         {
             get
@@ -19,6 +34,10 @@ namespace CardioMonitor.Core.Models.Patients
             }
         }
 
+        /// <summary>
+        /// Возвращает полное имя пациента
+        /// </summary>
+        /// <returns>Полное имя пациента</returns>
         public override string ToString()
         {
             return Name;

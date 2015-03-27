@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
+﻿using System.Windows.Media;
 
-namespace CardioMonitor.Settings
+namespace CardioMonitor.Core.Settings
 {
+    /// <summary>
+    /// Настройки внешнего вида
+    /// </summary>
+    /// <remarks>Временно не используются</remarks>
     public class AppApperanceData
     {
         public string Name { get; set; }

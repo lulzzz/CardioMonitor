@@ -3,6 +3,8 @@ using System.Windows.Input;
 using CardioMonitor.Core;
 using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Repository.DataBase;
+using CardioMonitor.Logs;
+using CardioMonitor.Resources;
 using CardioMonitor.ViewModel.Base;
 using CardioMonitor.ViewModel.Communication;
 
@@ -100,9 +102,11 @@ namespace CardioMonitor.ViewModel.Patients
 
         public string Title
         {
-            get 
+            get
             {
-                return (AccessMode.Create == AccessMode)? "Добавление пациента":"Редактирование данных пациента";
+                return (AccessMode.Create == AccessMode)
+                    ? Localisation.PatientViewModel_Patient_Added
+                    : Localisation.PatientViewModel_Patient_Updated;
             }
             set
             {
@@ -121,34 +125,36 @@ namespace CardioMonitor.ViewModel.Patients
             }); }
         }
 
-        private void Save()
+        private async void Save()
         {
+            var message = String.Empty;
             try
             {
                 switch (AccessMode)
                 {
                     case AccessMode.Create:
                         DataBaseRepository.Instance.AddPatient(Patient);
-                        MessageHelper.Instance.ShowMessageAsync("Новый пациент добавлен!");
+                        message = Localisation.PatientViewModel_Patient_Added;
                         break;
                     case AccessMode.Edit:
                         DataBaseRepository.Instance.UpdatePatient(Patient);
-                        MessageHelper.Instance.ShowMessageAsync("Изменения сохранены!");
+                        message = Localisation.PatientViewModel_Patient_Updated;
                         break;
                 }
                 IsSaved = true;
             }
+            catch (ArgumentNullException ex)
+            {
+                Logger.Instance.LogError("PatientViewModel",ex);
+                message = Localisation.ArgumentNullExceptionMessage;
+            }
             catch (Exception ex)
             {
-                switch (AccessMode)
-                {
-                    case AccessMode.Create:
-                        MessageHelper.Instance.ShowMessageAsync("Не удалось добавить нового пациента!");
-                        break;
-                    case AccessMode.Edit:
-                        MessageHelper.Instance.ShowMessageAsync("Не удалось сохранить изменения!");
-                        break;
-                }
+                message = ex.Message;
+            }
+            if (!String.IsNullOrEmpty(message))
+            {
+                await MessageHelper.Instance.ShowMessageAsync(message);
             }
         }
 

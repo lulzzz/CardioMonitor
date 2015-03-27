@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using CardioMonitor.Core.Models.Session;
 
 namespace CardioMonitor.Core.Repository.Monitor
 {
+    /// <summary>
+    /// Репозиторй для получения данных с монитора
+    /// </summary>
     public class MonitorRepository
     {
         private static MonitorRepository _instance;
@@ -17,6 +15,10 @@ namespace CardioMonitor.Core.Repository.Monitor
 
         private int _index;
 
+        /// <summary>
+        /// Индекс для эмуляции доступа к данным
+        /// </summary>
+        /// <remarks>Чтобы можно было бесконечно считывать, не выходя за границы</remarks>
         private int Index
         {
             get
@@ -30,8 +32,12 @@ namespace CardioMonitor.Core.Repository.Monitor
             
         }
 
+        /// <summary>
+        /// Репозиторй для получения данных с монитора
+        /// </summary>
         private MonitorRepository()
         {
+            //заполняем псведоданнымиы
             _patientParams = new List<PatientParams>
             {
                 new PatientParams
@@ -107,6 +113,9 @@ namespace CardioMonitor.Core.Repository.Monitor
             };
         }
 
+        /// <summary>
+        /// Репозиторй для получения данных с монитора
+        /// </summary>
         public static MonitorRepository Instance
         {
             get
@@ -117,15 +126,16 @@ namespace CardioMonitor.Core.Repository.Monitor
                 }
                 lock (SyncObject)
                 {
-                    if (null == _instance)
-                    {
-                        _instance = new MonitorRepository();
-                    }
+                    return _instance ?? (_instance = new MonitorRepository());
                 }
-                return _instance;
             }
         }
 
+        /// <summary>
+        /// Возвращает показатели пациента
+        /// </summary>
+        /// <returns>Показатели пациента</returns>
+        /// <remarks>Эмулирует работу с монитором. Сюда следует поместить логику считывания данных с монитора</remarks>
         public PatientParams GetPatientParams()
         {
             return _patientParams[Index];

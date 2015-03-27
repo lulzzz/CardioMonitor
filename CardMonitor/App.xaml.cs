@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
-using CardioMonitor.Settings;
-using MahApps.Metro;
+﻿using System.Windows;
 
 namespace CardioMonitor
 {
@@ -17,7 +9,7 @@ namespace CardioMonitor
     {
         public App()
         {
-            Settings.Settings.LoadFromFile();
+            Core.Settings.Settings.LoadFromFile();
         }
     }
 }

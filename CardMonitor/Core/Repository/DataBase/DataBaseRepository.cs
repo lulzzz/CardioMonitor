@@ -4,15 +4,22 @@ using System.Globalization;
 using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Models.Session;
 using CardioMonitor.Core.Models.Treatment;
-using CardioMonitor.Patients;
+using CardioMonitor.Logs;
+using CardioMonitor.Resources;
 
 namespace CardioMonitor.Core.Repository.DataBase
 {
+    /// <summary>
+    /// Репозиторий для доступа к базе данных
+    /// </summary>
     public class DataBaseRepository
     {
         private static DataBaseRepository _instance;
         private static readonly object SyncObject = new object();
 
+        /// <summary>
+        /// Репозиторий для доступа к базе данных
+        /// </summary>
         public static DataBaseRepository Instance
         {
             get
@@ -23,23 +30,25 @@ namespace CardioMonitor.Core.Repository.DataBase
                 }
                 lock (SyncObject)
                 {
-                    if (null == _instance)
-                    {
-                        _instance = new DataBaseRepository();
-                    }
+
+                    return _instance ?? (_instance = new DataBaseRepository());
                 }
-                return _instance;
             }
         }
 
+        /// <summary>
+        /// Возвращает список пациентов
+        /// </summary>
+        /// <returns>Список пациентов</returns>
         public ObservableCollection<Patient> GetPatients()
         {
+            var queryMain = "";
             try
             {
                 var control = new DataBaseController();
                 var output = new ObservableCollection<Patient>();
 
-                var queryMain = String.Format("SELECT id, FirstName, PatronymicName, LastName FROM {0}.patients",
+                queryMain = String.Format("SELECT id, FirstName, PatronymicName, LastName FROM {0}.patients",
                     Settings.Settings.Instance.DataBase.DataBase);
                 var reader = control.ConnectDB(queryMain);
                 var sreader = new SafeReader(reader);
@@ -58,17 +67,29 @@ namespace CardioMonitor.Core.Repository.DataBase
                 control.DisConnectDB(reader);
                 return output;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(queryMain);
+                throw new Exception(Localisation.DataBaseRepository_Patients_GetExcepttion);
             }
         }
 
+        /// <summary>
+        /// Добавляет пациента в базу
+        /// </summary>
+        /// <param name="patient">Пациент</param>
         public void AddPatient(Patient patient)
         {
+            if (patient == null)
+            {
+                throw new ArgumentNullException("patient");
+            }
+
+            var query = "";
             try
             {
-                var query =
+                query =
                     String.Format(
                         "INSERT INTO {0}.patients (LastName,FirstName,PatronymicName) VALUES ('{1}','{2}','{3}')",
                         Settings.Settings.Instance.DataBase.DataBase,
@@ -76,17 +97,29 @@ namespace CardioMonitor.Core.Repository.DataBase
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                throw new Exception(Localisation.DataBaseRepository_Patient_AddExcepttion);
             }
         }
 
+        /// <summary>
+        /// Обновляет информацию о пациента
+        /// </summary>
+        /// <param name="patient">Пациент, информацию о котором необходимо обновить</param>
         public void UpdatePatient(Patient patient)
         {
+            if (patient == null)
+            {
+                throw new ArgumentNullException("patient");
+            }
+
+            var query = "";
             try
             {
-                var query =
+                query =
                     String.Format(
                         "UPDATE {0}.patients SET LastName='{1}', FirstName='{2}', PatronymicName='{3}' WHERE id='{4}'",
                         Settings.Settings.Instance.DataBase.DataBase,
@@ -95,17 +128,24 @@ namespace CardioMonitor.Core.Repository.DataBase
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                throw new Exception(Localisation.DataBaseRepository_Patient_UpdateExcepttion);
             }
         }
 
+        /// <summary>
+        /// Удаляет выбранного пациента
+        /// </summary>
+        /// <param name="patientId">Ид пациента</param>
         public void DeletePatient(int patientId)
         {
+            var query = "";
             try
             {
-                var query =
+                query =
                     String.Format(
                         "DELETE FROM {0}.patients WHERE id='{1}'", Settings.Settings.Instance.DataBase.DataBase,
                         patientId);
@@ -113,21 +153,29 @@ namespace CardioMonitor.Core.Repository.DataBase
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                throw new Exception(Localisation.DataBaseRepository_Patient_DeleteExcepttion);
             }
         }
 
+        /// <summary>
+        /// Возвращает курсы лечения для выбранногоп пациента
+        /// </summary>
+        /// <param name="patientId">ИД пациента</param>
+        /// <returns>Курсы лечения</returns>
         public ObservableCollection<Treatment> GetTreatments(int patientId)
         {
+            var query = "";
             try
             {
                 var control = new DataBaseController();
                 var output = new ObservableCollection<Treatment>();
-                var queryMain = String.Format("SELECT * FROM {0}.treatments WHERE PatientId='{1}'",
+                query = String.Format("SELECT * FROM {0}.treatments WHERE PatientId='{1}'",
                     Settings.Settings.Instance.DataBase.DataBase, patientId);
-                var reader = control.ConnectDB(queryMain);
+                var reader = control.ConnectDB(query);
                 var sreader = new SafeReader(reader);
 
                 while (reader.Read())
@@ -145,17 +193,29 @@ namespace CardioMonitor.Core.Repository.DataBase
                 control.DisConnectDB(reader);
                 return output;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                throw new Exception(Localisation.DataBaseRepository_Treatments_GetException);
             }
         }
 
+        /// <summary>
+        /// Добавялет новый курс лечения в базу
+        /// </summary>
+        /// <param name="treatment">Курс лечения</param>
         public void AddTreatment(Treatment treatment)
         {
+            if (treatment == null)
+            {
+                throw new ArgumentNullException("treatment");
+            }
+
+            var query = "";
             try
             {
-                var query =
+                query =
                     String.Format(
                         "INSERT INTO {0}.treatments (PatientId,StartDate) VALUES ('{1}','{2}')",
                         Settings.Settings.Instance.DataBase.DataBase,
@@ -163,17 +223,24 @@ namespace CardioMonitor.Core.Repository.DataBase
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                throw new Exception(Localisation.DataBaseRepository_Treatment_AddException);
             }
         }
 
+        /// <summary>
+        /// Удаляет курс лечения
+        /// </summary>
+        /// <param name="treatmentId">Ид курса лечения</param>
         public void DeleteTreatment(int treatmentId)
         {
+            var query = "";
             try
             {
-                var query =
+                query =
                     String.Format(
                         "DELETE FROM {0}.treatments WHERE id='{1}'", Settings.Settings.Instance.DataBase.DataBase,
                         treatmentId);
@@ -181,21 +248,29 @@ namespace CardioMonitor.Core.Repository.DataBase
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                throw new Exception(Localisation.DataBaseRepository_Treatment_DeleteException);
             }
         }
 
+        /// <summary>
+        /// Возвращает информацию о сенасах для указанного курса лечения
+        /// </summary>
+        /// <param name="treatmentId">Курс леченяи</param>
+        /// <returns>Информация о сеансах</returns>
         public ObservableCollection<SessionInfo> GetSessionInfos(int treatmentId)
         {
+            var query = "";
             try
             {
                 var control = new DataBaseController();
                 var output = new ObservableCollection<SessionInfo>();
-                var queryMain = String.Format("SELECT id, DateTime, Status FROM {0}.sessions WHERE TreatmentID='{1}'",
+                query = String.Format("SELECT id, DateTime, Status FROM {0}.sessions WHERE TreatmentID='{1}'",
                     Settings.Settings.Instance.DataBase.DataBase, treatmentId);
-                var reader = control.ConnectDB(queryMain);
+                var reader = control.ConnectDB(query);
                 var sreader = new SafeReader(reader);
 
                 while (reader.Read())
@@ -211,34 +286,53 @@ namespace CardioMonitor.Core.Repository.DataBase
                 control.DisConnectDB(reader);
                 return output;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                throw new Exception(Localisation.DataBaseRepository_SessionInfo_GetException);
             }
         }
 
+        /// <summary>
+        /// Удаляет сеанс
+        /// </summary>
+        /// <param name="sessionId">Ид сеанса</param>
         public void DeleteSession(int sessionId)
         {
+            var query = "";
             try
             {
-                var query =
+                query =
                     String.Format(
                         "DELETE FROM {0}.sessions WHERE id='{1}'", Settings.Settings.Instance.DataBase.DataBase,
                         sessionId);
                 var control = new DataBaseController();
                 control.ExecuteQuery(query);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                throw new Exception(Localisation.DataBaseRepository_Session_DeleteException);
             }
         }
 
+        /// <summary>
+        /// Добавляет новый сеанс в базу
+        /// </summary>
+        /// <param name="session">Сеасн</param>
         public void AddSession(Session session)
         {
+            if (session == null)
+            {
+                throw new ArgumentNullException("session");
+            }
+
+            var query = "";
             try
             {
-                var query =
+                query =
                     String.Format("INSERT INTO {0}.sessions (TreatmentId, DateTime, Status) VALUES ('{1}','{2}','{3}')",
                         Settings.Settings.Instance.DataBase.DataBase, session.TreatmentId,
                         session.DateTime.ToString("yyyy-MM-dd HH:mm:ss"), (int) session.Status);
@@ -265,24 +359,34 @@ namespace CardioMonitor.Core.Repository.DataBase
                         String.Format(
                             "INSERT INTO {0}.params ({1}) VALUES ('{2}','{3}','{4}','{5}','{6}','{7}','{8}','{9}','{10}')",
                             Settings.Settings.Instance.DataBase.DataBase,
-                            columns, param.Iteraton, sessionId, param.InclinationAngle.ToString(CultureInfo.GetCultureInfoByIetfLanguageTag("en")), param.HeartRate,
+                            columns, param.Iteraton, sessionId,
+                            param.InclinationAngle.ToString(CultureInfo.GetCultureInfoByIetfLanguageTag("en")),
+                            param.HeartRate,
                             param.RepsirationRate, param.Spo2, param.SystolicArterialPressure,
                             param.DiastolicArterialPressure, param.AverageArterialPressure);
                     control.ExecuteQuery(query);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                throw new Exception(Localisation.DataBaseRepository_Session_AddException);
             }
         }
 
+        /// <summary>
+        /// Возвращает информацию об указанном сеанса
+        /// </summary>
+        /// <param name="sessionId">Ид сеанса</param>
+        /// <returns>Сеанс</returns>
         public Session GetSession(int sessionId)
         {
+            var query = "";
             try
             {
-                var query = String.Format("SELECT * FROM {0}.sessions WHERE id='{1}'", Settings.Settings.Instance.DataBase.DataBase, sessionId);
+                query = String.Format("SELECT * FROM {0}.sessions WHERE id='{1}'",
+                    Settings.Settings.Instance.DataBase.DataBase, sessionId);
                 var control = new DataBaseController();
 
                 var reader = control.ConnectDB(query);
@@ -298,7 +402,8 @@ namespace CardioMonitor.Core.Repository.DataBase
                 }
                 control.DisConnectDB(reader);
 
-                query = String.Format("SELECT * FROM {0}.params WHERE SessionId='{1}'", Settings.Settings.Instance.DataBase.DataBase, sessionId);
+                query = String.Format("SELECT * FROM {0}.params WHERE SessionId='{1}'",
+                    Settings.Settings.Instance.DataBase.DataBase, sessionId);
                 reader = control.ConnectDB(query);
                 sreader = new SafeReader(reader);
 
@@ -321,11 +426,12 @@ namespace CardioMonitor.Core.Repository.DataBase
                 }
                 return session;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Logger.Instance.LogError("DataBaseRepository", ex);
+                Logger.Instance.LogQueryError(query);
+                throw new Exception(Localisation.DataBaseRepository_Session_GetException);
             }
         }
-
     }
 }

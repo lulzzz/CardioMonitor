@@ -2,9 +2,15 @@
 
 namespace CardioMonitor.Core.Models.Session
 {
+    /// <summary>
+    /// Показатели пациента
+    /// </summary>
     [Serializable]
     public class PatientParams
     {
+        /// <summary>
+        /// Идентификатор
+        /// </summary>
         public int Id { get; set; }
 
         /// <summary>

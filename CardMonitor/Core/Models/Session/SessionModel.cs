@@ -3,6 +3,9 @@ using System.Collections.ObjectModel;
 
 namespace CardioMonitor.Core.Models.Session
 {
+    /// <summary>
+    /// Модель сеансаов для SessionView
+    /// </summary>
     public class SessionModel: Notifier
     {
         private int _id;
@@ -11,6 +14,9 @@ namespace CardioMonitor.Core.Models.Session
         private SessionStatus _status;
         private ObservableCollection<PatientParams> _patientParams;
 
+        /// <summary>
+        /// Идентифкатор
+        /// </summary>
         public int Id 
         {
             get { return _id; }
@@ -24,6 +30,9 @@ namespace CardioMonitor.Core.Models.Session
             } 
         }
 
+        /// <summary>
+        /// Идентифкатор курса лечения
+        /// </summary>
         public int TreatmentId 
         {
             get { return _treatmentId; }
@@ -37,6 +46,9 @@ namespace CardioMonitor.Core.Models.Session
             }
         }
 
+        /// <summary>
+        /// Дата и время сеанса
+        /// </summary>
         public DateTime DateTime
         {
             get { return _dateTime; }
@@ -50,6 +62,9 @@ namespace CardioMonitor.Core.Models.Session
             }
         }
 
+        /// <summary>
+        /// Статус сеанса
+        /// </summary>
         public SessionStatus Status
         {
             get { return _status; }
@@ -63,6 +78,9 @@ namespace CardioMonitor.Core.Models.Session
             }
         }
 
+        /// <summary>
+        /// Показатели пациента
+        /// </summary>
         public ObservableCollection<PatientParams> PatientParams
         {
             get { return _patientParams; }
@@ -76,6 +94,9 @@ namespace CardioMonitor.Core.Models.Session
             }
         }
 
+        /// <summary>
+        /// Сеанс
+        /// </summary>
         public Session Session
         {
             get
@@ -99,13 +120,14 @@ namespace CardioMonitor.Core.Models.Session
             }
         }
 
+        /// <summary>
+        /// Модель сеансаов для SessionView
+        /// </summary>
         public SessionModel()
         {
             DateTime = new DateTime();
             Status = SessionStatus.Unknown;
             PatientParams = new ObservableCollection<PatientParams>();
         }
-
-
     }
 }

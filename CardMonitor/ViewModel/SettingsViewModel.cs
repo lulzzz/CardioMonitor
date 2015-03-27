@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.Core;
+using CardioMonitor.Resources;
 
 namespace CardioMonitor.ViewModel
 {
@@ -142,7 +143,7 @@ namespace CardioMonitor.ViewModel
                AppThemes.FirstOrDefault(x => x.Name == Settings.Instance.SeletedAppThemeName);
             SelectedAccentColor =
                 AccentColors.FirstOrDefault(x => x.Name == Settings.Instance.SelectedAcentColorName);*/
-            FilesDirectoryPath = Settings.Settings.Instance.FilesDirectoryPath;
+            FilesDirectoryPath = Core.Settings.Settings.Instance.FilesDirectoryPath;
             _isValid = true;
             _isSettingsChanged = false;
         }
@@ -156,7 +157,7 @@ namespace CardioMonitor.ViewModel
                 if (columnName == "FilesDirectoryPath" && !Directory.Exists(FilesDirectoryPath))
                 {
                     _isValid = false;
-                    return "Указанной директории не существует.";
+                    return Localisation.SettingsViewModel_DirectoryDoesNotExist;
                 }
                 _isValid = true;
                 return null;
@@ -178,7 +179,7 @@ namespace CardioMonitor.ViewModel
             var folderBrowserDialog = new FolderBrowserDialog
             {
                 SelectedPath = FilesDirectoryPath,
-                Description = "Выберите каталог для хранения результатов сеансов"
+                Description = Localisation.SettingsViewModel_ChooseFolder
             };
             folderBrowserDialog.ShowDialog();
             FilesDirectoryPath = folderBrowserDialog.SelectedPath;
@@ -186,11 +187,11 @@ namespace CardioMonitor.ViewModel
 
         private async void SaveSettings()
         {
-            await MessageHelper.Instance.ShowMessageAsync("Настройки сохранены");
+            await MessageHelper.Instance.ShowMessageAsync(Localisation.SettingsViewModel_Saved);
            /* Settings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
             Settings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
-            Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
-            Settings.Settings.SaveToFile();
+            Core.Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
+            Core.Settings.Settings.SaveToFile();
             _isSettingsChanged = false;
         }
 
@@ -204,7 +205,7 @@ namespace CardioMonitor.ViewModel
 
         private void CancelSettings()
         {
-            Settings.Settings.LoadFromFile();
+            Core.Settings.Settings.LoadFromFile();
             InitializeSettings();
         }
     }

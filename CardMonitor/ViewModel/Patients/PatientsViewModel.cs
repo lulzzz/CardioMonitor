@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CardioMonitor.Core;
 using CardioMonitor.Core.Repository.DataBase;
+using CardioMonitor.Resources;
 using CardioMonitor.ViewModel.Communication;
 using MahApps.Metro.Controls.Dialogs;
 
@@ -85,7 +86,7 @@ namespace CardioMonitor.ViewModel.Patients
                            new SimpleCommand
                            {
                                CanExecuteDelegate = x => null != SelectedPatient,
-                               ExecuteDelegate = x => EditPatient(x)
+                               ExecuteDelegate = x => EditPatient()
                            });
             }
         }
@@ -99,7 +100,7 @@ namespace CardioMonitor.ViewModel.Patients
                            new SimpleCommand
                            {
                                CanExecuteDelegate = x => null != SelectedPatient,
-                               ExecuteDelegate = x=> DeletePatient(x)
+                               ExecuteDelegate = x=> DeletePatient()
                            });
             }
         }
@@ -193,7 +194,7 @@ namespace CardioMonitor.ViewModel.Patients
             }
         }
 
-        private async void EditPatient(object sender)
+        private void EditPatient()
         {
             var handler = AddEditPatient;
             if (null != handler)
@@ -202,30 +203,29 @@ namespace CardioMonitor.ViewModel.Patients
             }
         }
 
-        private async void DeletePatient(object sender)
+        private async void DeletePatient()
         {
-            var result = await MessageHelper.Instance.ShowMessageAsync("Вы уверены, что хотите удалить пациента?",
+            var result = await MessageHelper.Instance.ShowMessageAsync(Localisation.PatientsViewModel_DeletePatientQuestion,
                 style: MessageDialogStyle.AffirmativeAndNegative);
             if (MessageDialogResult.Affirmative == result)
             {
-                var isDeleted = false;
+                var exceptionMassage = String.Empty;
                 if (null != SelectedPatient)
                 {
                     try
                     {
                         DataBaseRepository.Instance.DeletePatient(SelectedPatient.Id);
-                        isDeleted = true;
                         Patients.Remove(SelectedPatient);
                         SelectedPatient = null;
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        isDeleted = false;
+                        exceptionMassage = ex.Message;
                     }
                 }
-                if (!isDeleted)
+                if (!String.IsNullOrEmpty(exceptionMassage))
                 {
-                    await MessageHelper.Instance.ShowMessageAsync("Не удалось удалить пациента");
+                    await MessageHelper.Instance.ShowMessageAsync(exceptionMassage);
                 }
             }
         }

@@ -24,16 +24,16 @@ namespace CardioMonitor.View
             DataContext = _viewModel;
             InitializeComponent();
             SettingsView.ViewModel = _viewModel.SettingsViewModel;
-            try
+            /*try
             {
-                var accent = ThemeManager.GetAccent(Settings.Settings.Instance.SelectedAcentColorName);
-                var appTheme = ThemeManager.GetAppTheme(Settings.Settings.Instance.SeletedAppThemeName);
+                var accent = ThemeManager.GetAccent(Core.Settings.Settings.Instance.SelectedAcentColorName);
+                var appTheme = ThemeManager.GetAppTheme(Core.Settings.Settings.Instance.SeletedAppThemeName);
                 ThemeManager.ChangeAppStyle(Application.Current, accent, appTheme);
             }
             catch
             {
 
-            }
+            }*/
         }
 
         private void SettingsB_OnClick(object sender, RoutedEventArgs e)

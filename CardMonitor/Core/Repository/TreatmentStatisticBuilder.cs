@@ -4,6 +4,7 @@ using CardioMonitor.Patients.TreatmentData;
 
 namespace CardioMonitor.Core.Repository
 {
+    //todo Временно не используется
     public class TreatmentStatisticBuilder
     {
         public TreatmentFullStatistic Build(Core.Models.Session.Session[] sessions)

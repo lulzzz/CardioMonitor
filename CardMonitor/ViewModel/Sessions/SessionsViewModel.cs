@@ -6,6 +6,7 @@ using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Models.Session;
 using CardioMonitor.Core.Models.Treatment;
 using CardioMonitor.Core.Repository.DataBase;
+using CardioMonitor.Resources;
 using CardioMonitor.ViewModel.Base;
 using MahApps.Metro.Controls.Dialogs;
 
@@ -127,28 +128,27 @@ namespace CardioMonitor.ViewModel.Sessions
 
         private async void DeleteSession()
         {
-            var result = await MessageHelper.Instance.ShowMessageAsync("Вы уверены, что хотите удалить сессию?",
+            var result = await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionsViewModel_DeleteSessionQuestion,
                 style: MessageDialogStyle.AffirmativeAndNegative);
-            var isDeletingSuccessfull = false;
             if (MessageDialogResult.Affirmative == result)
             {
                 var sessionInfo = SelectedSessionInfo;
+                var exceptionMessage = String.Empty;
                 if (null != sessionInfo)
                 {
                     try
                     {
                         DataBaseRepository.Instance.DeleteSession(sessionInfo.Id);
                         SessionInfos.Remove(sessionInfo);
-                        isDeletingSuccessfull = true;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        isDeletingSuccessfull = false;
+                        exceptionMessage = ex.Message;
                     }
                 }
-                if (!isDeletingSuccessfull)
+                if (!String.IsNullOrEmpty(exceptionMessage))
                 {
-                    await MessageHelper.Instance.ShowMessageAsync("Не удалось удалить сессию");
+                    await MessageHelper.Instance.ShowMessageAsync(exceptionMessage);
                 }
             }
         }

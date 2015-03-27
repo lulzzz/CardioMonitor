@@ -190,7 +190,7 @@
                 <Border Grid.Column="1"
                         BorderBrush="{DynamicResource AccentColorBrush}"
                         BorderThickness="2">
-                    <TextBlock Text="{Binding CurrentTime, StringFormat='{}{0:mm\\:ss}'}"
+                    <TextBlock Text="{Binding ElapsedTime, StringFormat='{}{0:mm\\:ss}'}"
                            Margin="15"
                            VerticalAlignment="Center"
                            FontSize="28"/>

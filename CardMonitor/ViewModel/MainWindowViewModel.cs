@@ -9,6 +9,8 @@ using CardioMonitor.Core.Models.Treatment;
 using CardioMonitor.Core.Repository;
 using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Core.Repository.Files;
+using CardioMonitor.Logs;
+using CardioMonitor.Resources;
 using CardioMonitor.ViewModel.Communication;
 using CardioMonitor.ViewModel.Patients;
 using CardioMonitor.ViewModel.Sessions;
@@ -17,7 +19,7 @@ using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.ViewModel{
 
-    public enum ViewIndex
+    internal enum ViewIndex
     {
         NotSelected = -1,
         PatientsView = 0,
@@ -42,6 +44,8 @@ namespace CardioMonitor.ViewModel{
         private SessionDataViewModel _sessionDataViewModel;
         private TreatmentDataViewModel _treatmentDataViewModel;
         private SettingsViewModel _settingsViewModel;
+
+        #region Свойства
 
         public ICommand MoveBackwardCommand
         {
@@ -175,6 +179,8 @@ namespace CardioMonitor.ViewModel{
             }
         }
 
+#endregion
+
         public MainWindowViewModel()
         {
             PatientsViewModel = new PatientsViewModel
@@ -204,13 +210,19 @@ namespace CardioMonitor.ViewModel{
 
         public void UpdatePatiens()
         {
+            var message = String.Empty;
             try
             {
                 PatientsViewModel.Patients = DataBaseRepository.Instance.GetPatients();
             }
             catch (Exception ex)
             {
-                MessageHelper.Instance.ShowMessageAsync(ex.Message);
+                message = ex.Message;
+            }
+            if (!String.IsNullOrEmpty(message))
+            {
+
+                MessageHelper.Instance.ShowMessageAsync(message);
             }
         }
 
@@ -235,7 +247,7 @@ namespace CardioMonitor.ViewModel{
                 case ViewIndex.SessionView:
                     if (SessionStatus.InProgress == SessionViewModel.Status)
                     {
-                        var result = await MessageHelper.Instance.ShowMessageAsync("Все несохраненые изменения будут потеряны. Продолжить?", style: MessageDialogStyle.AffirmativeAndNegative);
+                        var result = await MessageHelper.Instance.ShowMessageAsync(Localisation.LostChangesConfirmation, style: MessageDialogStyle.AffirmativeAndNegative);
                         if (MessageDialogResult.Negative == result) { return; }
                     }
                     SessionViewModel.Clear();
@@ -262,7 +274,7 @@ namespace CardioMonitor.ViewModel{
                 case ViewIndex.PatientView:
                     if (!PatientViewModel.IsSaved)
                     {
-                        var result = await MessageHelper.Instance.ShowMessageAsync("Все несохраненые изменения будут потеряны. Продолжить?", 
+                        var result = await MessageHelper.Instance.ShowMessageAsync(Localisation.LostChangesConfirmation, 
                                                                                     style: MessageDialogStyle.AffirmativeAndNegative);
                         if (MessageDialogResult.Negative == result) { return;}
                     }
@@ -277,7 +289,7 @@ namespace CardioMonitor.ViewModel{
             }
         }
 
-        public async void OpetPatientTreatmentsHanlder(object sender, EventArgs eventArgs)
+        public void OpetPatientTreatmentsHanlder(object sender, EventArgs eventArgs)
         {
             var cardioEventArgs = eventArgs as CardioEventArgs;
             if (null == cardioEventArgs) { return;}
@@ -305,17 +317,16 @@ namespace CardioMonitor.ViewModel{
                 PatientViewModel.AccessMode = patientEventArgs.Mode;
                 MainTCSelectedIndex = (int)ViewIndex.PatientView;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                
-                throw;
+                Logger.Instance.LogError("MainWindowViewModel",ex);
             }
         }
 
         public async void StartOrContinueTreatmentSession(object sender, EventArgs args)
         {
             //TODO Old realisation
-            var isSuccessfull = false;
+            var message = String.Empty;
             var patient = PatientsViewModel.SelectedPatient;
             try
             {
@@ -328,7 +339,7 @@ namespace CardioMonitor.ViewModel{
                     treatment = DataBaseRepository.Instance.GetTreatments(patient.Id).FirstOrDefault();
                     if (null == treatment)
                     {
-                        await MessageHelper.Instance.ShowMessageAsync("Не удалось получить список ");
+                        await MessageHelper.Instance.ShowMessageAsync(Localisation.MainWindowViewModel_CantLoadList);
                         return;
                     }
                 }
@@ -342,15 +353,14 @@ namespace CardioMonitor.ViewModel{
                 SessionViewModel.Treatment = treatment;
                 UpdateSessionInfos();
                 MainTCSelectedIndex = (int)ViewIndex.SessionsView;
-                isSuccessfull = true;
             }
             catch (Exception ex)
             {
-                isSuccessfull = false;
+                message = ex.Message;
             }
-            if (!isSuccessfull)
+            if (!String.IsNullOrEmpty(message))
             {
-                await MessageHelper.Instance.ShowMessageAsync("Не удалось получить список сеансов.");
+                await MessageHelper.Instance.ShowMessageAsync(message);
             }
         }
 
@@ -360,15 +370,20 @@ namespace CardioMonitor.ViewModel{
             SessionsViewModel.SessionInfos = sessions;
         }
 
-        private void UpdateSessionInfosSave()
+        private async void UpdateSessionInfosSave()
         {
+            var message = String.Empty;
             try
             {
                 UpdateSessionInfos();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageHelper.Instance.ShowMessageAsync("Не удалось получить список сеансов.");
+                message = ex.Message;
+            }
+            if (!String.IsNullOrEmpty(message))
+            {
+                await MessageHelper.Instance.ShowMessageAsync(message);
             }
         }
 
@@ -380,7 +395,7 @@ namespace CardioMonitor.ViewModel{
             var session = new SessionModel {DateTime = new DateTime()};
             
             var statisticBuilder = new TreatmentStatisticBuilder();
-            TreatmentDataViewModel.Statistic = statisticBuilder.Build(new Session[]
+            TreatmentDataViewModel.Statistic = statisticBuilder.Build(new[]
             {
                 session.Session, session.Session, session.Session, session.Session, session.Session, session.Session, session.Session,session.Session ,session.Session ,session.Session
             });
@@ -403,7 +418,7 @@ namespace CardioMonitor.ViewModel{
 
         private async void ShowSessionResults(object sender, EventArgs args)
         {
-            var isShowingSuccessfull = false;
+            var message = String.Empty;
             try
             {
 
@@ -411,24 +426,24 @@ namespace CardioMonitor.ViewModel{
                 SessionDataViewModel.Session = new SessionModel {Session = session};
                 SessionDataViewModel.Patient = PatientsViewModel.SelectedPatient;
                 MainTCSelectedIndex = (int)ViewIndex.SessionDataView;
-                isShowingSuccessfull = true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                isShowingSuccessfull = false;
+                message = ex.Message;
             }
-            if (!isShowingSuccessfull)
+            if (!String.IsNullOrEmpty(message))
             {
-                await MessageHelper.Instance.ShowMessageAsync("Не удалость получить данные за сеанс.");
+                await MessageHelper.Instance.ShowMessageAsync(message);
             }
         }
 
-        private void LoadSession(object sender, EventArgs args)
+        private async void LoadSession(object sender, EventArgs args)
         {
-            var loadDialog = new OpenFileDialog {CheckFileExists = true, Filter = "Сеанс|*.cmsf"};
+            var loadDialog = new OpenFileDialog {CheckFileExists = true, Filter = Localisation.FileRepository_SeansFileFilter};
             var result = loadDialog.ShowDialog();
             if (result == DialogResult.OK)
             {
+                var message = String.Empty;
                 try
                 {
                     var container = FileRepository.LoadFromFile(loadDialog.FileName);
@@ -436,9 +451,17 @@ namespace CardioMonitor.ViewModel{
                     SessionDataViewModel.Patient = container.Patient;
                     MainTCSelectedIndex = (int) ViewIndex.SessionDataView;
                 }
+                catch (ArgumentNullException)
+                {
+                    message = Localisation.ArgumentNullExceptionMessage;
+                }
                 catch (Exception ex)
                 {
-                    MessageHelper.Instance.ShowMessageAsync("Не удалось открыть файл");
+                    message = ex.Message;
+                }
+                if (!String.IsNullOrEmpty(message))
+                {
+                    await MessageHelper.Instance.ShowMessageAsync(message);
                 }
             }
         }

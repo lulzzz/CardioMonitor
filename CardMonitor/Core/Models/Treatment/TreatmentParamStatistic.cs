@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace CardioMonitor.Core.Models.Treatment
 {
+    //todo Временно не используется
     public class TreatmentParamStatistic
     {
         private const double Tolerance = 0.00001;
