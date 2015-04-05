@@ -191,7 +191,10 @@ namespace CardioMonitor.ViewModel{
                 ShowTreatmentResults = ShowTreatmentResults,
                 OpenSessionHandler = LoadSession
             };
-            PatientViewModel = new PatientViewModel();
+            PatientViewModel = new PatientViewModel
+            {
+                MoveBackwardEvent = MoveBackwardPatient
+            };
             TreatmentsViewModel = new TreatmentsViewModel
             {
                 OpenSessionsEvent = StartOrContinueTreatmentSession,
@@ -224,6 +227,11 @@ namespace CardioMonitor.ViewModel{
 
                 MessageHelper.Instance.ShowMessageAsync(message);
             }
+        }
+
+        private void MoveBackwardPatient(object sender, EventArgs args)
+        {
+            MoveBackwardView((int)ViewIndex.PatientView);
         }
 
         private async void MoveBackwardView(object sender)

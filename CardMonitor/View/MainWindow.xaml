@@ -153,7 +153,7 @@
                                                      DataContext="{Binding SessionDataViewModel}"/>
                 </Grid>
             </controls:MetroTabItem>
-            <controls:MetroTabItem Header="Паицент"
+            <controls:MetroTabItem Header="Пациент"
                                    Visibility="Collapsed">
                 <Grid >
                     <view:PatientView Margin="10,0"

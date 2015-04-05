@@ -19,7 +19,7 @@ namespace CardioMonitor.ViewModel.Patients
         private int _id;
         private ICommand _saveCommand;
 
-        public EventHandler MoveFowardEvent { get; set; }
+        public EventHandler MoveBackwardEvent { get; set; }
 
         public AccessMode AccessMode
         {
@@ -105,8 +105,8 @@ namespace CardioMonitor.ViewModel.Patients
             get
             {
                 return (AccessMode.Create == AccessMode)
-                    ? Localisation.PatientViewModel_Patient_Added
-                    : Localisation.PatientViewModel_Patient_Updated;
+                    ? Localisation.PatientViewModel_Title_Add
+                    : Localisation.PatientViewModel_Title_Edit;
             }
             set
             {
@@ -142,6 +142,11 @@ namespace CardioMonitor.ViewModel.Patients
                         break;
                 }
                 IsSaved = true;
+                var hanlder = MoveBackwardEvent;
+                if (hanlder != null)
+                {
+                    hanlder(null, null);
+                }
             }
             catch (ArgumentNullException ex)
             {
