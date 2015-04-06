@@ -205,7 +205,7 @@
     <value>Неизвестная ошибка при подключении к базе данных</value>
   </data>
   <data name="FileRepository_SeansFileFilter" xml:space="preserve">
-    <value>"Сеанс|*.cmsf"</value>
+    <value>Сеанс|*.cmsf</value>
   </data>
   <data name="LostChangesConfirmation" xml:space="preserve">
     <value>Все несохраненые изменения будут потеряны. Продолжить?</value>

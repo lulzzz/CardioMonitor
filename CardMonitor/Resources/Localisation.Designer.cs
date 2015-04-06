@@ -214,7 +214,7 @@ namespace CardioMonitor.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;Сеанс|*.cmsf&quot;.
+        ///   Looks up a localized string similar to Сеанс|*.cmsf.
         /// </summary>
         internal static string FileRepository_SeansFileFilter {
             get {
