@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using CardioMonitor.Core.Models.Session;
+using CardioMonitor.MonitorConnection;
 
 namespace CardioMonitor.Core.Repository.Monitor
 {
@@ -10,7 +11,7 @@ namespace CardioMonitor.Core.Repository.Monitor
     {
         private static MonitorRepository _instance;
         private static readonly object SyncObject = new object();
-        
+
         private readonly List<PatientParams> _patientParams;
 
         private int _index;
@@ -29,7 +30,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                 }
                 return _index++;
             }
-            
+
         }
 
         /// <summary>
@@ -37,6 +38,7 @@ namespace CardioMonitor.Core.Repository.Monitor
         /// </summary>
         private MonitorRepository()
         {
+            MonitorConnection.MonitorConnection.StartConnection();
             //заполняем псведоданнымиы
             _patientParams = new List<PatientParams>
             {
@@ -138,7 +140,11 @@ namespace CardioMonitor.Core.Repository.Monitor
         /// <remarks>Эмулирует работу с монитором. Сюда следует поместить логику считывания данных с монитора</remarks>
         public PatientParams GetPatientParams()
         {
-            return _patientParams[Index];
+
+            //var _patientParametrs =  MonitorConnection.StartTCPConnection(MonitorConnection.Listener);
+            var _patientParametrs = MonitorConnection.MonitorConnection.StartTCPConnection(MonitorConnection.MonitorConnection.Listener);
+            return _patientParametrs;
+            //return _patientParams[Index];
         }
     }
 }
