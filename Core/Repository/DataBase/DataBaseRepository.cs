@@ -147,6 +147,7 @@ namespace CardioMonitor.Core.Repository.DataBase
                 throw new Exception(Localisation.DataBaseRepository_Patient_AddExcepttion);
             }
         }
+        ///просто чтобы прошел комиит 
 
         /// <summary>
         /// Обновляет информацию о пациента
