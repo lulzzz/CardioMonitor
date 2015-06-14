@@ -130,12 +130,7 @@ namespace CardioMonitor.ViewModel.Patients
         }
 
         public bool IsSaved { get; set; }
-
-        public PatientViewModel()
-        {
-            //_birthDate = DateTime.Now;
-        }
-
+        
         public ICommand SaveCommand
         {
             get { return _saveCommand ?? ( _saveCommand = new SimpleCommand
