@@ -8,24 +8,24 @@ namespace CardioMonitor.Core
     /// </summary>
     public class ThreadAssistant
     {
-        private readonly MetroWindow _metriWindow;
+        private readonly MetroWindow _metroWindow;
 
         /// <summary>
         /// Помощник для работы с потоками
         /// </summary>
         public ThreadAssistant(MetroWindow metriWindow)
         {
-            _metriWindow = metriWindow;
+            _metroWindow = metriWindow;
         }
 
         /// <summary>
         /// Выполняет переданный метод в потоке UI пользователя
         /// </summary>
         /// <param name="method">Метод</param>
-        public void StartInUIThread(Action method)
+        public void StartInUiThread(Action method)
         {
             //TODO Можно заменить реализацию, вызывать application.currentWindow
-            _metriWindow.Dispatcher.BeginInvoke(method);
+            _metroWindow.Dispatcher.BeginInvoke(method);
         }
 
     }

@@ -417,7 +417,7 @@ namespace CardioMonitor.ViewModel.Sessions
             UpdateData();
             if (TimeSpan.Zero == RemainingTime)
             {
-                ThreadAssistant.StartInUIThread(SessionComplete);
+                ThreadAssistant.StartInUiThread(SessionComplete);
             }
         }
 
@@ -452,7 +452,7 @@ namespace CardioMonitor.ViewModel.Sessions
                 {
                     param = MonitorRepository.Instance.GetPatientParams();
                     param.InclinationAngle = Math.Abs(CurrentAngle) < Tolerance ? 0 : CurrentAngle;
-                    ThreadAssistant.StartInUIThread(() => Session.PatientParams.Add(param));
+                    ThreadAssistant.StartInUiThread(() => Session.PatientParams.Add(param));
                 }
             }
         }

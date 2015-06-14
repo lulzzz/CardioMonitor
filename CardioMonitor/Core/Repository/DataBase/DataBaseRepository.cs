@@ -683,7 +683,7 @@ namespace CardioMonitor.Core.Repository.DataBase
         /// </remarks>
         public async Task CheckConnectionAsync(string dataBase, string source, string user, string password)
         {
-            await Task.Run(() =>
+            await Task.Factory.StartNew(() =>
             {
                 try
                 {
