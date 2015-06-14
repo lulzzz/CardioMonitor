@@ -38,7 +38,9 @@ namespace CardioMonitor.Core.Repository.Monitor
         /// </summary>
         private MonitorRepository()
         {
+#if Debug_Monitor || RELEASE
             MonitorConnection.MonitorConnection.StartConnection();
+#endif
             //заполняем псведоданнымиы
             _patientParams = new List<PatientParams>
             {
@@ -141,10 +143,13 @@ namespace CardioMonitor.Core.Repository.Monitor
         public PatientParams GetPatientParams()
         {
 
+#if Debug_Monitor || RELEASE
             //var _patientParametrs =  MonitorConnection.StartTCPConnection(MonitorConnection.Listener);
-            var _patientParametrs = MonitorConnection.MonitorConnection.StartTCPConnection(MonitorConnection.MonitorConnection.Listener);
-            return _patientParametrs;
-            //return _patientParams[Index];
-        }
+            var patientParametrs = MonitorConnection.MonitorConnection.StartTCPConnection(MonitorConnection.MonitorConnection.Listener);
+            return patientParametrs;
+#else
+            return _patientParams[Index];
+#endif
+            }
     }
 }

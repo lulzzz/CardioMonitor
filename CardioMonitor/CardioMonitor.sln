@@ -1,16 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor", "CardioMonitor.csproj", "{DF144E7C-7975-4FE3-B925-3C2842E407D4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug_Monitor|Any CPU = Debug_Monitor|Any CPU
+		Debug_No_Monitor|Any CPU = Debug_No_Monitor|Any CPU
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DF144E7C-7975-4FE3-B925-3C2842E407D4}.Debug_Monitor|Any CPU.ActiveCfg = Debug_Monitor|Any CPU
+		{DF144E7C-7975-4FE3-B925-3C2842E407D4}.Debug_Monitor|Any CPU.Build.0 = Debug_Monitor|Any CPU
+		{DF144E7C-7975-4FE3-B925-3C2842E407D4}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug_No_Monitor|Any CPU
+		{DF144E7C-7975-4FE3-B925-3C2842E407D4}.Debug_No_Monitor|Any CPU.Build.0 = Debug_No_Monitor|Any CPU
 		{DF144E7C-7975-4FE3-B925-3C2842E407D4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DF144E7C-7975-4FE3-B925-3C2842E407D4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF144E7C-7975-4FE3-B925-3C2842E407D4}.Release|Any CPU.ActiveCfg = Release|Any CPU
