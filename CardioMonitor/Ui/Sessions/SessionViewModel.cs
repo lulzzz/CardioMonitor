@@ -273,8 +273,8 @@ namespace CardioMonitor.ViewModel.Sessions
             {
                 return _emergencyStopCommand ?? (_emergencyStopCommand = new SimpleCommand
                 {
-                    CanExecuteDelegate = x => SessionStatus.InProgress == Status || SessionStatus.Suspended == Status,
-                    ExecuteDelegate = x => EmergencyStop()
+                    CanExecuteDelegate = o => SessionStatus.InProgress == Status || SessionStatus.Suspended == Status,
+                    ExecuteDelegate = o => EmergencyStop()
                 });
             }
         }
