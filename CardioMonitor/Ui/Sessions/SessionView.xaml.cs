@@ -1,7 +1,13 @@
-﻿using System.Windows.Controls;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Data;
 using CardioMonitor.Core;
 using CardioMonitor.ViewModel;
 using CardioMonitor.ViewModel.Sessions;
+using OxyPlot;
+using Binding = System.Windows.Forms.Binding;
+using UserControl = System.Windows.Controls.UserControl;
 
 namespace CardioMonitor.View
 {
@@ -10,14 +16,24 @@ namespace CardioMonitor.View
     /// </summary>
     public partial class PatientTreatmentSession : UserControl
     {
-        private SessionViewModel _viewModel;
+
+        public SessionViewModel ViewModel
+        {
+            get { return DataContext as SessionViewModel; }
+            set
+            {
+                DataContext = value;
+            }
+        }
 
         public PatientTreatmentSession()
         {
-            _viewModel = new SessionViewModel ();
-            DataContext = _viewModel;
-
             InitializeComponent();
+        }
+
+        private void OnDataPointsChanged(object sender, EventArgs args)
+        {
+            EcgView.Update();
         }
     }
 }

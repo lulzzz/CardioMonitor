@@ -4,10 +4,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace CardioMonitor.Core
 {
-    public class Notifier : INotifyPropertyChanged
+    public class Notifier : DependencyObject, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

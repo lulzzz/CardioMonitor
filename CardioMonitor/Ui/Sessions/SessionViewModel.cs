@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
+using System.Windows.Documents;
 using System.Windows.Input;
 using CardioMonitor.Core;
 using CardioMonitor.Core.Models.Patients;
@@ -11,7 +13,9 @@ using CardioMonitor.Core.Repository.Files;
 using CardioMonitor.Core.Repository.Monitor;
 using CardioMonitor.Logs;
 using CardioMonitor.Resources;
+using CardioMonitor.Ui.EcgController;
 using CardioMonitor.ViewModel.Base;
+using OxyPlot;
 
 namespace CardioMonitor.ViewModel.Sessions
 {
@@ -280,6 +284,20 @@ namespace CardioMonitor.ViewModel.Sessions
         /// </summary>
         public Treatment Treatment { get; set; }
 
+        public EventHandler UpdateEcg;
+
+        private bool _needUpdate;
+
+        public bool NeedUpdate
+        {
+            get { return _needUpdate; }
+            set
+            {
+                _needUpdate = value;
+                RisePropertyChanged("NeedUpdate");
+            }
+        }
+
         #region Эмуляция работы железа
 
         /// <summary>
@@ -340,6 +358,18 @@ namespace CardioMonitor.ViewModel.Sessions
         /// </summary>
         public ThreadAssistant ThreadAssistant { get; set; }
 
+        private ObservableCollection<DataPoint> _points;
+
+        public ObservableCollection<DataPoint> Points
+        {
+            get { return _points; }
+            set
+            {
+                _points = value;
+                RisePropertyChanged("Points");
+            }
+        }
+
         #endregion
 
         /// <summary>
@@ -397,8 +427,19 @@ namespace CardioMonitor.ViewModel.Sessions
            // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 20, 0), new TimeSpan(0, 0, 0, 1));
             _mainTimer.Start();
             UpdateData();
+            Points = new ObservableCollection<DataPoint>
+            {
+                new DataPoint(x++,y++),
+                new DataPoint(x++,y++),
+                new DataPoint(x++,y++),
+                new DataPoint(x++,y++),
+                new DataPoint(x++,y++),
+                new DataPoint(x++,y++),
+            };
         }
 
+        private int x = 0;
+        private int y = 0;
         /// <summary>
         /// Обработка тика таймера
         /// </summary>
@@ -419,6 +460,10 @@ namespace CardioMonitor.ViewModel.Sessions
             {
                 ThreadAssistant.StartInUiThread(SessionComplete);
             }
+            ThreadAssistant.StartInUiThread(() =>
+                Points.Add(new DataPoint(x++, Math.Pow(-1, y)*y++)));
+
+            NeedUpdate = true;
         }
 
         /// <summary>

@@ -6,6 +6,7 @@
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:core="clr-namespace:CardioMonitor.Core"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+             xmlns:ecg="clr-namespace:CardioMonitor.Ui.EcgController"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="800">
     <Grid>
@@ -67,7 +68,9 @@
                        Grid.Column="3"
                        FontSize="14"/>
         </Grid>
-        <DataGrid Grid.Row="2"
+        <TabControl Grid.Row="2">
+            <TabItem Header="Параметры">
+                <DataGrid Grid.Row="2"
                   BorderBrush="{DynamicResource AccentColorBrush}"
                   DataContext="{Binding Session}"
                   ItemsSource="{Binding PatientParams}"
@@ -85,23 +88,31 @@
                   IsReadOnly="True"
                   CanUserSortColumns="False"
                   ColumnWidth="*">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Угол наклона кровати"
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Угол наклона кровати"
                                     Binding="{Binding InclinationAngle}"/>
-                <DataGridTextColumn Header="ЧСС"
+                        <DataGridTextColumn Header="ЧСС"
                                     Binding="{Binding HeartRate}"/>
-                <DataGridTextColumn Header="ЧД"
+                        <DataGridTextColumn Header="ЧД"
                                     Binding="{Binding RepsirationRate}"/>
-                <DataGridTextColumn Header="SPO2"
+                        <DataGridTextColumn Header="SPO2"
                                     Binding="{Binding Spo2}"/>
-                <DataGridTextColumn Header="Систолическое АД"
+                        <DataGridTextColumn Header="Систолическое АД"
                                     Binding="{Binding SystolicArterialPressure}"/>
-                <DataGridTextColumn Header="Диастолическое АД"
+                        <DataGridTextColumn Header="Диастолическое АД"
                                     Binding="{Binding DiastolicArterialPressure}"/>
-                <DataGridTextColumn Header="Среднее АД"
+                        <DataGridTextColumn Header="Среднее АД"
                                     Binding="{Binding AverageArterialPressure}"/>
-            </DataGrid.Columns>
-        </DataGrid>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="ЭКГ">
+                <ecg:EcgControllerView x:Name="EcgView"
+                    Points="{Binding DataPoints}"
+                    NeedUpdate="{Binding NeedUpdate}"/>
+            </TabItem>
+        </TabControl>
+        
         <Grid Grid.Row="3"
               Margin="0,10,0,0">
             <Grid.ColumnDefinitions>

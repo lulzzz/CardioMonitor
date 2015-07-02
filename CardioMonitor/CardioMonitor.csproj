@@ -30,7 +30,6 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -40,7 +39,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -52,7 +50,6 @@
     <ApplicationIcon>Resources\usbHeart.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug_No_Monitor|AnyCPU'">
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug_No_Monitor\</OutputPath>
     <DefineConstants>TRACE;DEBUG;Debug_No_Monitor</DefineConstants>
@@ -63,7 +60,6 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug_Monitor|AnyCPU'">
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\Debug_Monitor\</OutputPath>
     <DefineConstants>TRACE;DEBUG;Debug_Monitor</DefineConstants>
@@ -122,9 +118,6 @@
     <Reference Include="OxyPlot.Extensions">
       <HintPath>Libs\OxyPlot.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="OxyPlot.WindowsForms">
-      <HintPath>Libs\OxyPlot.WindowsForms.dll</HintPath>
-    </Reference>
     <Reference Include="OxyPlot.Wpf">
       <HintPath>Libs\OxyPlot.Wpf.dll</HintPath>
     </Reference>
@@ -174,6 +167,9 @@
     <Compile Include="Ui\Communication\CardioEventArgs.cs" />
     <Compile Include="Core\Repository\Files\FileRepository.cs" />
     <Compile Include="Ui\Base\IViewModel.cs" />
+    <Compile Include="Ui\EcgController\EcgControllerView.xaml.cs">
+      <DependentUpon>EcgControllerView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\Base\Notifier.cs" />
     <Compile Include="Ui\Communication\PatientEventArgs.cs" />
@@ -236,6 +232,10 @@
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\SettingsViewModel.cs" />
+    <Page Include="Ui\EcgController\EcgControllerView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Ui\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
