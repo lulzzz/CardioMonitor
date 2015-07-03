@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using CardioMonitor.Core.Models.Session;
-using CardioMonitor.MonitorConnection;
 
 namespace CardioMonitor.Core.Repository.Monitor
 {
@@ -9,8 +8,30 @@ namespace CardioMonitor.Core.Repository.Monitor
     /// </summary>
     public class MonitorRepository
     {
+        #region Singletone
+
         private static MonitorRepository _instance;
         private static readonly object SyncObject = new object();
+
+        /// <summary>
+        /// Репозиторй для получения данных с монитора
+        /// </summary>
+        public static MonitorRepository Instance
+        {
+            get
+            {
+                if (null != _instance)
+                {
+                    return _instance;
+                }
+                lock (SyncObject)
+                {
+                    return _instance ?? (_instance = new MonitorRepository());
+                }
+            }
+        }
+
+        #endregion
 
         private readonly List<PatientParams> _patientParams;
 
@@ -39,7 +60,7 @@ namespace CardioMonitor.Core.Repository.Monitor
         private MonitorRepository()
         {
 #if Debug_Monitor || RELEASE
-            MonitorConnection.MonitorConnection.StartConnection();
+            MonitorDataReader.StartConnection();
 #endif
             //заполняем псведоданнымиы
             _patientParams = new List<PatientParams>
@@ -116,25 +137,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                 }
             };
         }
-
-        /// <summary>
-        /// Репозиторй для получения данных с монитора
-        /// </summary>
-        public static MonitorRepository Instance
-        {
-            get
-            {
-                if (null != _instance)
-                {
-                    return _instance;
-                }
-                lock (SyncObject)
-                {
-                    return _instance ?? (_instance = new MonitorRepository());
-                }
-            }
-        }
-
+        
         /// <summary>
         /// Возвращает показатели пациента
         /// </summary>
@@ -144,12 +147,11 @@ namespace CardioMonitor.Core.Repository.Monitor
         {
 
 #if Debug_Monitor || RELEASE
-            //var _patientParametrs =  MonitorConnection.StartTCPConnection(MonitorConnection.Listener);
-            var patientParametrs = MonitorConnection.MonitorConnection.StartTCPConnection(MonitorConnection.MonitorConnection.Listener);
+            var patientParametrs = MonitorDataReader.GetPatientParams(MonitorDataReader.Listener);
             return patientParametrs;
 #else
             return _patientParams[Index];
 #endif
-            }
+        }
     }
 }

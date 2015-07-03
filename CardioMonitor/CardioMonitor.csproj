@@ -88,6 +88,9 @@
     <Reference Include="MahApps.Metro.SimpleChildWindow">
       <HintPath>Libs\MahApps.Metro.SimpleChildWindow.dll</HintPath>
     </Reference>
+    <Reference Include="MyHIDUSBLibrary">
+      <HintPath>Libs\MyHIDUSBLibrary.dll</HintPath>
+    </Reference>
     <Reference Include="MySql.Data, Version=6.9.5.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Libs\MySql.Data.dll</HintPath>
@@ -152,10 +155,17 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Core\CardioTimer.cs" />
+    <Compile Include="Core\Threading\CardioTimer.cs" />
+    <Compile Include="Core\Models\Connection\Bed\BedType.cs" />
+    <Compile Include="Core\Models\Connection\BedConnectionStatus.cs" />
+    <Compile Include="Core\Models\Connection\BedMovingStatus.cs" />
+    <Compile Include="Core\Models\Connection\UsbHIDConnection.cs" />
+    <Compile Include="Core\Repository\Controller\Connection.cs" />
     <Compile Include="Core\Repository\Controller\ControllerConnection.cs" />
-    <Compile Include="Core\Repository\Monitor\MonitorConnection.cs" />
-    <Compile Include="Core\ThreadAssistant.cs" />
+    <Compile Include="Core\Repository\Monitor\AsyncMonitorConnection.cs" />
+    <Compile Include="Core\Repository\Monitor\AutoPumping.cs" />
+    <Compile Include="Core\Repository\Monitor\MonitorDataReader.cs" />
+    <Compile Include="Core\Threading\ThreadAssistant.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

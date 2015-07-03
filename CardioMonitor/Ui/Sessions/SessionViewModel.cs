@@ -11,6 +11,7 @@ using CardioMonitor.Core.Models.Treatment;
 using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Core.Repository.Files;
 using CardioMonitor.Core.Repository.Monitor;
+using CardioMonitor.Core.Threading;
 using CardioMonitor.Logs;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.EcgController;

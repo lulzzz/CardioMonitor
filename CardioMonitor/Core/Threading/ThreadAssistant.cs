@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Windows;
 using MahApps.Metro.Controls;
 
-namespace CardioMonitor.Core
+namespace CardioMonitor.Core.Threading
 {
     /// <summary>
     /// Помощник для работы с потоками

@@ -36,7 +36,6 @@ namespace CardioMonitor.Core.Models.Session
         /// <summary>
         /// Частотат дыхания (ЧД)
         /// </summary>
-        /// <remarks>Я правильно расшифровал?</remarks>
         public int RepsirationRate { get; set; }
 
         /// <summary>

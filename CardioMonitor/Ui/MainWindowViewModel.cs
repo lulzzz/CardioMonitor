@@ -11,6 +11,7 @@ using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Core.Repository.Files;
 using CardioMonitor.Logs;
 using CardioMonitor.Resources;
+using CardioMonitor.Ui.Patients;
 using CardioMonitor.ViewModel.Communication;
 using CardioMonitor.ViewModel.Patients;
 using CardioMonitor.ViewModel.Sessions;

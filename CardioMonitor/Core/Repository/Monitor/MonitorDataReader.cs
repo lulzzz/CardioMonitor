@@ -1,45 +1,41 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿//using CardioMonitor.Patients.Session;
+using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
-//using CardioMonitor.Patients.Session;
-using System.Windows;
-using System.Windows.Forms;
 using CardioMonitor.Core.Models.Session;
 
-namespace CardioMonitor.MonitorConnection
+namespace CardioMonitor.Core.Repository.Monitor
 {
-    public class MonitorConnection
+    public class MonitorDataReader
     {
         public static Socket Listener;
         public static void StartConnection()
         {
-            IPAddress ipAddr = new IPAddress(new byte[] { 192, 168, 0, 147 });
+            /*IPAddress ipAddr = new IPAddress(new byte[] { 192, 168, 0, 147 });
             IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 4000);
             Socket sListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             sListener.Bind(ipEndPoint);
             sListener.Listen(10);
-            Listener = sListener;
+            Listener = sListener;*/
 
             //handler = sListener.Accept();
         }
-        public static PatientParams StartTCPConnection(Socket Listner)
+
+        //TODO зачем каждый раз создавать соединение?
+        public static PatientParams GetPatientParams(Socket listner)
         {
             //StartConnection();
-            int outputData = 0;
-            PatientParams patientParams = new PatientParams();
-            bool StopFlag = false;
+            var outputData = 0;
+            var patientParams = new PatientParams();
+            var stopFlag = false;
 
             try
             {
-                /*IPAddress ipAddr = new IPAddress(new byte[] { 192, 168, 0, 147 });
-                IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 4000);
-                Socket sListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                var ipAddr = new IPAddress(new byte[] { 192, 168, 0, 147 });
+                var ipEndPoint = new IPEndPoint(ipAddr, 4000);
+                var sListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 sListener.Bind(ipEndPoint);
-                sListener.Listen(10)*/
+                sListener.Listen(10);
 
                 //Listener = sListener; 
                 //Listner.
@@ -49,12 +45,12 @@ namespace CardioMonitor.MonitorConnection
                  //handler1.Shutdown(SocketShutdown.Both);           //Выдает старые данные
                  handler1.Close();      */
                 //Фейковый запрос к слушателю
-                Socket handler = Listner.Accept();
+                var handler = sListener.Accept();
 
                 // List<byte[]> bufer = new List<byte[]>();
 
                 // Начинаем слушать соединения
-                while (!StopFlag)
+                while (!stopFlag)
                 {
                     // MessageBox.Show("Ожидаем соединение через порт", "ipEndPoint.ToString()");
 
@@ -64,18 +60,18 @@ namespace CardioMonitor.MonitorConnection
 
                     // Мы дождались клиента, пытающегося с нами соединиться
 
-                    byte[] bytes = new byte[4096];
-                    byte[] bytebuf = new byte[1024];
-                    int bytesRec;
-                    int iterator = 0;
-                    int i = 0;
+                    var bytes = new byte[4096];
+                    var bytebuf = new byte[1024];
+                    var iterator = 0;
+                    var i = 0;
                     while (i < 4000)
                     {
-                        bytesRec = handler.Receive(bytebuf);
+                        int bytesRec = handler.Receive(bytebuf);
                         Array.ConstrainedCopy(bytebuf, 0, bytes, i, bytesRec);
                         i += bytesRec;
                     }
-
+                    var sendMessage = new byte[] { 0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22 };      //автонакачко
+                    handler.Send(sendMessage);
                     //  bytesRec = handler.Receive(bytes);
 
                     // MessageBox.Show(Convert.ToString(bytesRec));
@@ -252,14 +248,14 @@ namespace CardioMonitor.MonitorConnection
                                 {
                                     stopSearchingFlag = true;
                                     iterator = 0;
-                                    StopFlag = true;
+                                    stopFlag = true;
                                 }
                             }
                             if (iterator > (bytes.Length - 24))
                             {
                                 iterator = 0;
                                 stopSearchingFlag = true;
-                                StopFlag = true;
+                                stopFlag = true;
                                 break;
                             }
                             iterator++;
