@@ -37,28 +37,15 @@ namespace CardioMonitor.Core.Repository.Monitor
                 sListener.Bind(ipEndPoint);
                 sListener.Listen(10);
 
-                //Listener = sListener; 
-                //Listner.
-                /* Socket handler1 = Listener.Accept();              //КАСТЫЛЬ!
-                 byte[] bytesx = new byte[1024];                   //По невыясненной причине
-                 int bytesRec1451 = handler1.Receive(bytesx);      //Первый запрос после ожидания
-                 //handler1.Shutdown(SocketShutdown.Both);           //Выдает старые данные
-                 handler1.Close();      */
-                //Фейковый запрос к слушателю
+
                 var handler = sListener.Accept();
 
-                // List<byte[]> bufer = new List<byte[]>();
+
 
                 // Начинаем слушать соединения
                 while (!stopFlag)
                 {
-                    // MessageBox.Show("Ожидаем соединение через порт", "ipEndPoint.ToString()");
 
-                    // Программа приостанавливается, ожидая входящее соединение
-                    //Socket handler = sListener.Accept();
-                    // string data = null;
-
-                    // Мы дождались клиента, пытающегося с нами соединиться
 
                     var bytes = new byte[4096];
                     var bytebuf = new byte[1024];
@@ -72,17 +59,10 @@ namespace CardioMonitor.Core.Repository.Monitor
                     }
                     var sendMessage = new byte[] { 0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22 };      //автонакачко
                     handler.Send(sendMessage);
-                    //  bytesRec = handler.Receive(bytes);
 
-                    // MessageBox.Show(Convert.ToString(bytesRec));
-                    //i++;
-                    //  while ((bytesRec = handler.Receive(bytes)) > 0)
-                    // if (bytesRec > 1000)
                     {
                         bool stopSearchingFlag = false;
-                        //bool stopSearchingFlag = false;
-                        //int bytesRec = handler.Receive(bytes);
-                        //bufer.Add(bytes);
+
                         while (!stopSearchingFlag)
                         {
                             if ((bytes[iterator] >= 0xE0) && (bytes[iterator] <= 0xEF))
@@ -105,12 +85,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                                     if ((result >= 15) && (result <= 250))
                                     {
                                         patientParams.HeartRate = result;
-                                        // outputData = result;
-                                        // MessageBox.Show(Convert.ToString(i));
-                                        //stopSearchingFlag = true;
-                                        //iterator = 0;
-                                        //StopFlag = true;
-                                        //return outputData;
+
                                     }
                                 }
                                 if ((bytes[iterator + 2] >= 0xA0) && (bytes[iterator + 2] <= 0xAF) && (bytes[iterator + 4] <= 0x0F))          //поиск ЧД
@@ -131,11 +106,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                                     if ((result >= 0) && (result <= 180))
                                     {
                                         patientParams.RepsirationRate = result;
-                                        // MessageBox.Show(Convert.ToString(i));
-                                        //stopSearchingFlag = true;
-                                        //iterator = 0;
-                                        //StopFlag = true;
-                                        //return outputData;
+
                                     }
                                 }
                                 if ((bytes[iterator + 2] >= 0xD0) && (bytes[iterator + 2] <= 0xDF) && (bytes[iterator + 4] <= 0x0F))          //поиск SPO2
@@ -156,11 +127,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                                     if ((result > 0) && (result <= 100))
                                     {
                                         patientParams.Spo2 = result;
-                                        // MessageBox.Show(Convert.ToString(i));
-                                        //stopSearchingFlag = true;
-                                        //iterator = 0;
-                                        //StopFlag = true;
-                                        //return outputData;
+
                                     }
                                 }
                                 if ((bytes[iterator + 2] >= 0x10) && (bytes[iterator + 2] <= 0x1F) && (bytes[iterator + 4] >= 0x10) && (bytes[iterator + 4] <= 0x1F)) //поиск АД среднее - на самом деле систолическое
@@ -181,12 +148,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                                     if ((result > 0) && (result < 300))
                                     {
                                         patientParams.SystolicArterialPressure = result;
-                                        // outputData = result;
-                                        // MessageBox.Show(Convert.ToString(i));
-                                        //stopSearchingFlag = true;
-                                        //iterator = 0;
-                                        //StopFlag = true;
-                                        //return outputData;
+
                                     }
                                 }
                                 if ((bytes[iterator + 4] >= 0x10) && (bytes[iterator + 4] <= 0x1F) && (bytes[iterator + 2] >= 0x20) && (bytes[iterator + 2] <= 0x2F)) //поиск АД диастол
@@ -207,12 +169,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                                     if ((result >= 0) && (result <= 300))
                                     {
                                         patientParams.DiastolicArterialPressure = result;
-                                        // outputData = result;
-                                        // MessageBox.Show(Convert.ToString(i));
-                                        //stopSearchingFlag = true;
-                                        //iterator = 0;
-                                        //StopFlag = true;
-                                        //return outputData;
+
                                     }
                                 }
                                 if ((bytes[iterator + 4] >= 0x10) && (bytes[iterator + 4] <= 0x1F) && (bytes[iterator + 2] >= 0x30) && (bytes[iterator + 2] <= 0x3F)) //поиск АД сист
@@ -233,12 +190,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                                     if ((result > 0) && (result <= 300))
                                     {
                                         patientParams.AverageArterialPressure = result;
-                                        // outputData = result;
-                                        // MessageBox.Show(Convert.ToString(i));
-                                        //stopSearchingFlag = true;
-                                        //iterator = 0;
-                                        //StopFlag = true;
-                                        //return outputData;
+
                                     }
                                 } // если все значения не нулевые (заполнились) - остановить поиск
                                 if ((patientParams.AverageArterialPressure != 0) &&

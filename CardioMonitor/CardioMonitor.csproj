@@ -155,12 +155,12 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Core\Repository\Controller\BedUSBConnection.cs" />
     <Compile Include="Core\Threading\CardioTimer.cs" />
     <Compile Include="Core\Models\Connection\Bed\BedType.cs" />
     <Compile Include="Core\Models\Connection\BedConnectionStatus.cs" />
     <Compile Include="Core\Models\Connection\BedMovingStatus.cs" />
     <Compile Include="Core\Models\Connection\UsbHIDConnection.cs" />
-    <Compile Include="Core\Repository\Controller\Connection.cs" />
     <Compile Include="Core\Repository\Controller\ControllerConnection.cs" />
     <Compile Include="Core\Repository\Monitor\AsyncMonitorConnection.cs" />
     <Compile Include="Core\Repository\Monitor\AutoPumping.cs" />

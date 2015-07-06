@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -8,6 +9,7 @@ using CardioMonitor.Core;
 using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Models.Session;
 using CardioMonitor.Core.Models.Treatment;
+using CardioMonitor.Core.Repository.Controller;
 using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Core.Repository.Files;
 using CardioMonitor.Core.Repository.Monitor;
@@ -360,7 +362,6 @@ namespace CardioMonitor.ViewModel.Sessions
         public ThreadAssistant ThreadAssistant { get; set; }
 
         private ObservableCollection<DataPoint> _points;
-
         public ObservableCollection<DataPoint> Points
         {
             get { return _points; }
@@ -368,6 +369,21 @@ namespace CardioMonitor.ViewModel.Sessions
             {
                 _points = value;
                 RisePropertyChanged("Points");
+            }
+        }
+
+        private string _executionStatus;
+
+        public string ExecutionStatus
+        {
+            get { return _executionStatus; }
+            set
+            {
+                if (value != _executionStatus)
+                {
+                    _executionStatus = value;
+                    RisePropertyChanged("ExecutionStatus");
+                }
             }
         }
 
@@ -407,7 +423,7 @@ namespace CardioMonitor.ViewModel.Sessions
         /// <summary>
         /// Запускает сеанс
         /// </summary>
-        private void SessionStart()
+        private async void SessionStart()
         {
             StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
             Session.Status = SessionStatus.InProgress;
@@ -419,24 +435,41 @@ namespace CardioMonitor.ViewModel.Sessions
             PeriodSeconds = 0;
             PeriodNumber = 1;
 
-            _isUpping = true;
-            _isNeedReversing = false;
-            _isReversing = false;
+            ExecutionStatus = "Старт...";
 
-            //TODO можно протестить все за 30 секунд, раскомментровать следующу строку, закомментровать следующую за ней
-            _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 0, 30), new TimeSpan(0,0,0,0,25));
-           // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 20, 0), new TimeSpan(0, 0, 0, 1));
-            _mainTimer.Start();
-            UpdateData();
-            Points = new ObservableCollection<DataPoint>
+            var progressController = await MessageHelper.Instance.ShowProgressDialogAsync("Подождите, идет накачка кровати");
+
+            var pumpingResult = await AutoPumping.Instance.Pump();
+
+            await progressController.CloseAsync();
+
+            // Если накачка прошла успешно
+            if (pumpingResult)
             {
-                new DataPoint(x++,y++),
-                new DataPoint(x++,y++),
-                new DataPoint(x++,y++),
-                new DataPoint(x++,y++),
-                new DataPoint(x++,y++),
-                new DataPoint(x++,y++),
-            };
+
+                _isUpping = true;
+                _isNeedReversing = false;
+                _isReversing = false;
+
+                //TODO можно протестить все за 30 секунд, раскомментровать следующу строку, закомментровать следующую за ней
+                _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 0, 30), new TimeSpan(0, 0, 0, 0, 25));
+                // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 20, 0), new TimeSpan(0, 0, 0, 1));
+                _mainTimer.Start();
+                UpdateData();
+                Points = new ObservableCollection<DataPoint>
+                {
+                    new DataPoint(x++, y++),
+                    new DataPoint(x++, y++),
+                    new DataPoint(x++, y++),
+                    new DataPoint(x++, y++),
+                    new DataPoint(x++, y++),
+                    new DataPoint(x++, y++),
+                };
+            }
+            else
+            {
+                await MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку кровати. Сеанс будет прерван.");
+            }
         }
 
         private int x = 0;
@@ -456,15 +489,41 @@ namespace CardioMonitor.ViewModel.Sessions
             }
             PeriodSeconds++;
             UpdateAngle();
+            
+            //Накачка кровати при необходимости
+            if (AutoPumping.Instance.CheckNeedPumping(CurrentAngle, _isUpping))
+            {
+                 Pump();
+            }
+
             UpdateData();
             if (TimeSpan.Zero == RemainingTime)
             {
                 ThreadAssistant.StartInUiThread(SessionComplete);
             }
-            ThreadAssistant.StartInUiThread(() =>
-                Points.Add(new DataPoint(x++, Math.Pow(-1, y)*y++)));
+            //Для ЭКГ графика
+            //ThreadAssistant.StartInUiThread(() =>
+            //    Points.Add(new DataPoint(x++, Math.Pow(-1, y)*y++)));
 
-            NeedUpdate = true;
+            //NeedUpdate = true;
+        }
+
+        private void Pump()
+        {
+            Task.Factory.StartNew(() =>
+            {
+                //ExecutionStatus = "Выполняется накачка кровати...";
+                var pumpingResult = AutoPumping.Instance.Pump();
+                ExecutionStatus = String.Empty;
+
+                if (!pumpingResult.Result)
+                {
+                    // Нужно решить, что делать, если не удалось провести накачку
+                    // Пока так
+                    EmergencyStop();
+                    MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку кровати. Сеанс будет экстренно прерван.");
+                }
+            });
         }
 
         /// <summary>
@@ -473,8 +532,9 @@ namespace CardioMonitor.ViewModel.Sessions
         /// <remarks>
         /// Эмуляция работы железа
         /// </remarks>
-        private void UpdateAngle()
+        private async void UpdateAngle()
         {
+#if Debug_No_Monitor
             if (1 == PeriodNumber)
             {
                 CurrentAngle += _isUpping ? UpAnglePerSecond : (-1)*UpAnglePerSecond;
@@ -483,6 +543,9 @@ namespace CardioMonitor.ViewModel.Sessions
             {
                 CurrentAngle -= _isUpping ? DownAnglePerSecond : (-1) * DownAnglePerSecond;
             }
+#else
+            CurrentAngle = await BedUSBConnection.GetAngleXAsync(); 
+#endif
         }
 
         /// <summary>

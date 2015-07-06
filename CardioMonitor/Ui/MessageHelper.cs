@@ -49,5 +49,11 @@ namespace CardioMonitor.ViewModel
             title = title ?? Window.Title;
             return Window.ShowMessageAsync(title, message, style, settings);
         }
+
+        public Task<ProgressDialogController> ShowProgressDialogAsync(string message, string title = null)
+        {
+            title = title ?? Window.Title;
+            return Window.ShowProgressAsync(title, message);
+        }
     }
 }

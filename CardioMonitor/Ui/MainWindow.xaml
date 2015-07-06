@@ -163,12 +163,15 @@
             </controls:MetroTabItem>
 
         </controls:MetroAnimatedTabControl>
-        <StatusBar Grid.Row="3">
+        <StatusBar Grid.Row="3"
+                   Visibility="Collapsed">
             <TextBlock Text="Подключение к монитору"/>
             <Separator/>
             <TextBlock Text="Подключение к кровати"/>
             <Separator/>
             <TextBlock Text="Подключение к базе данных"/>
+            <Separator/>
+            <TextBlock Text=""/>
             
         </StatusBar>
     </Grid>
