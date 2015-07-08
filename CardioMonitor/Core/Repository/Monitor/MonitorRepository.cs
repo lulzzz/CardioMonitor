@@ -145,11 +145,11 @@ namespace CardioMonitor.Core.Repository.Monitor
         /// </summary>
         /// <returns>Показатели пациента</returns>
         /// <remarks>Эмулирует работу с монитором. Сюда следует поместить логику считывания данных с монитора</remarks>
-        public PatientParams GetPatientParams()
+        public Task<PatientParams> GetPatientParams()
         {
 
 #if Debug_Monitor || RELEASE
-            var patientParametrs = MonitorDataReader.GetPatientParams(MonitorDataReader.Listener);
+            var patientParametrs = MonitorDataReader.GetPatientParams();
             return patientParametrs;
 #else
             /*var patientParametrs = MonitorDataReader.GetPatientParams();

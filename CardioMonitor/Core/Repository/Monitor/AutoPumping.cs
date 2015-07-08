@@ -14,30 +14,7 @@ namespace CardioMonitor.Core.Repository.Monitor
     /// </summary>
     public class AutoPumping
     {
-        #region Singletone
-
-        private static AutoPumping _instance;
-        private static readonly object SyncObject = new object();
-
-        public static AutoPumping Instance
-        {
-            get
-            {
-                if (null != _instance)
-                {
-                    return _instance;
-                }
-                lock (SyncObject)
-                {
-
-                    return _instance ?? (_instance = new AutoPumping());
-                }
-            }
-        }
-
-        #endregion
-
-        private double _previuosPumpingAngle = 0;
+        private double _previuosPumpingAngle;
         
         /// <summary> 
         /// Угол,используемый для задания диапазона значений текущего угла, для которых
@@ -59,19 +36,7 @@ namespace CardioMonitor.Core.Repository.Monitor
         /// <returns></returns>
         public Task<bool> Pump()
         {
-            return Task.Factory.StartNew(() =>
-            {
-                // В конце накачки метод должен возвращать true, если произойдет исключение или не удасться накачать,
-                // то нужно вернуть false
-
-                //Имитация накачки
-               // Thread.Sleep(new TimeSpan(0, 0, 0, 10));
-                if (AutoPumpingRequest.StartAutoPumpingRequest())
-                { return true; }
-                else
-                { return false; }
-               // return true;
-            });
+            return Task.Factory.StartNew(() => AutoPumpingRequest.StartAutoPumpingRequest());
         }
 
         /// <summary>
