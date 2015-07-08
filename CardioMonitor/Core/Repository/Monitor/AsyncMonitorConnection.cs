@@ -85,6 +85,7 @@ namespace CardioMonitor.Core.Repository.Monitor
         private static void ReceiveCallback(IAsyncResult result)
         {
             ConnectionInfo connection = (ConnectionInfo)result.AsyncState;
+
             try
             {
                 int bytesRead = connection.Socket.EndReceive(result);
@@ -94,9 +95,10 @@ namespace CardioMonitor.Core.Repository.Monitor
                     {
 
                         /* if (showText)
-                         {
+                         {*/
                              string text = Encoding.UTF8.GetString(connection.Buffer, 0, bytesRead);
-                             //Console.Write(text);
+                             MessageBox.Show(text);
+                             /*Console.Write(text);
                          }*/
                     }
                     lock (connections)

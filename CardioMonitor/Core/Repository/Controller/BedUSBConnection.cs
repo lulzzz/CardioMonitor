@@ -227,9 +227,7 @@ namespace CardioMonitor.Core.Repository.Controller
                         resultX = Math.Round(resultX, 2);
                     }
                     device.close();
-                    return resultX;
-
-                    //device.close();  //если определять устройство один раз, то закрывать его до конца сеанса нельзя
+                    return resultX;                   
                 }
                 return 0;
             });
@@ -356,31 +354,41 @@ namespace CardioMonitor.Core.Repository.Controller
             }
         }
 
-        public void CommandCase(string commandName)
+        public static void StartCommand(string commandName)
         {
-            HIDDevice device = GetDevice();
-            byte[] message = null;
-            switch (commandName)
+            try
             {
-                case "Start":
-                    message = new byte[] {0x29, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff};
+                HIDDevice device = GetDevice();
+                byte[] message = null;
+                if (device != null)
+                {
+                    switch (commandName)
+                    {
+                        case "Start":
+                            message = new byte[] { 0x29, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-                    break;
-                case "Pause":
-                    message = new byte[] {0x2a, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff};
+                            break;
+                        case "Pause":
+                            message = new byte[] { 0x2a, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-                    break;
-                case "Reverse":
-                    message = new byte[] {0x2c, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff};
+                            break;
+                        case "Reverse":
+                            message = new byte[] { 0x2c, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-                    break;
-                case "EmergencyStop":
-                    message = new byte[] {0x2b, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff};
+                            break;
+                        case "EmergencyStop":
+                            message = new byte[] { 0x2b, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff };
 
-                    break;
+                            break;
+                    }
+                    device.write(message);
+                    device.close();
+                }
             }
-            device.write(message);
-            device.close();
+            catch (Exception ex)
+            {
+                //error message
+            }
         }
     }
 }

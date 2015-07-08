@@ -112,6 +112,22 @@ namespace CardioMonitor.Logs
                 Console.WriteLine("Can't save log to file. \n\t{0}\n\t{1}", ex.Message, ex.StackTrace);
             }
         }
+
+        public async void Log(string message)
+        {
+            try
+            {
+                var fileName = _logsFolder + @"\Message_" + DateTime.Today.Date.ToShortDateString() + ".log";
+                var textFile = new StreamWriter(fileName, true);
+                var logMessage = String.Format("{0} \nInfo: \n{1}\n------------\n", DateTime.Now.ToShortTimeString(), message);
+                await textFile.WriteAsync(logMessage);
+                textFile.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Can't save log to file. \n\t{0}\n\t{1}", ex.Message, ex.StackTrace);
+            }
+        }
     }
 }
 // ReSharper restore UnassignedField.Compiler

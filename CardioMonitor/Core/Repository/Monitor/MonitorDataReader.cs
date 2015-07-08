@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using CardioMonitor.Core.Models.Session;
+using System.Threading.Tasks;
 
 namespace CardioMonitor.Core.Repository.Monitor
 {
@@ -11,18 +12,20 @@ namespace CardioMonitor.Core.Repository.Monitor
         public static Socket Listener;
         public static void StartConnection()
         {
-            /*IPAddress ipAddr = new IPAddress(new byte[] { 192, 168, 0, 147 });
-            IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 4000);
-            Socket sListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            sListener.Bind(ipEndPoint);
-            sListener.Listen(10);
-            Listener = sListener;*/
-
-            //handler = sListener.Accept();
+            
         }
-
+        /* public Task<PatientParams> GetMonitorParams()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                
+                var patientParametrs = MonitorDataReader.GetPatientParams();
+                return patientParametrs;
+            });
+         }
+        */
         //TODO зачем каждый раз создавать соединение?
-        public static PatientParams GetPatientParams(Socket listner)
+        public static PatientParams GetPatientParams()
         {
             //StartConnection();
             var outputData = 0;
@@ -57,8 +60,8 @@ namespace CardioMonitor.Core.Repository.Monitor
                         Array.ConstrainedCopy(bytebuf, 0, bytes, i, bytesRec);
                         i += bytesRec;
                     }
-                    var sendMessage = new byte[] { 0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22 };      //автонакачко
-                    handler.Send(sendMessage);
+                   /* var sendMessage = new byte[] { 0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22 };      //автонакачко
+                    handler.Send(sendMessage);*/
 
                     {
                         bool stopSearchingFlag = false;

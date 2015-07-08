@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using CardioMonitor.Core.Models.Session;
+using System.Threading.Tasks;
+using CardioMonitor.Core.Repository.Monitor;
 
 namespace CardioMonitor.Core.Repository.Monitor
 {
@@ -60,7 +62,7 @@ namespace CardioMonitor.Core.Repository.Monitor
         private MonitorRepository()
         {
 #if Debug_Monitor || RELEASE
-            MonitorDataReader.StartConnection();
+           // MonitorDataReader.StartConnection();
 #endif
             //заполняем псведоданнымиы
             _patientParams = new List<PatientParams>
@@ -150,8 +152,22 @@ namespace CardioMonitor.Core.Repository.Monitor
             var patientParametrs = MonitorDataReader.GetPatientParams(MonitorDataReader.Listener);
             return patientParametrs;
 #else
-            return _patientParams[Index];
+            /*var patientParametrs = MonitorDataReader.GetPatientParams();
+            return patientParametrs;*/
+            var patientParametrs = MonitorDataReader.GetPatientParams();
+            return patientParametrs;
+            //return _patientParams[Index];
 #endif
         }
+        
+        /*public Task<PatientParams> GetMonitorParams()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+                
+               /* var patientParametrs = MonitorDataReader.GetPatientParams();
+                return patientParametrs;
+            });
+        }*/
     }
 }

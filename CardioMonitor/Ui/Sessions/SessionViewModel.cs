@@ -452,8 +452,8 @@ namespace CardioMonitor.ViewModel.Sessions
                 _isReversing = false;
 
                 //TODO можно протестить все за 30 секунд, раскомментровать следующу строку, закомментровать следующую за ней
-                _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 0, 30), new TimeSpan(0, 0, 0, 0, 25));
-                // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 20, 0), new TimeSpan(0, 0, 0, 1));
+                //_mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 2, 0), new TimeSpan(0, 0, 0, 0, 100));
+                 _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 20, 0), new TimeSpan(0, 0, 0, 1));
                 _mainTimer.Start();
                 UpdateData();
                 Points = new ObservableCollection<DataPoint>
@@ -468,8 +468,9 @@ namespace CardioMonitor.ViewModel.Sessions
             }
             else
             {
-                await MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку кровати. Сеанс будет прерван.");
+                await MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку давления.");
             }
+           BedUSBConnection.StartCommand("Start");
         }
 
         private int x = 0;
@@ -520,8 +521,8 @@ namespace CardioMonitor.ViewModel.Sessions
                 {
                     // Нужно решить, что делать, если не удалось провести накачку
                     // Пока так
-                    EmergencyStop();
-                    MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку кровати. Сеанс будет экстренно прерван.");
+                   // EmergencyStop();
+                   // MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку кровати. Сеанс будет экстренно прерван.");
                 }
             });
         }
@@ -544,7 +545,15 @@ namespace CardioMonitor.ViewModel.Sessions
                 CurrentAngle -= _isUpping ? DownAnglePerSecond : (-1) * DownAnglePerSecond;
             }
 #else
-            CurrentAngle = await BedUSBConnection.GetAngleXAsync(); 
+           CurrentAngle = await BedUSBConnection.GetAngleXAsync();
+          /*  if (1 == PeriodNumber)
+            {
+                CurrentAngle += _isUpping ? UpAnglePerSecond : (-1) * UpAnglePerSecond;
+            }
+            if (2 == PeriodNumber)
+            {
+                CurrentAngle -= _isUpping ? DownAnglePerSecond : (-1) * DownAnglePerSecond;
+            }*/
 #endif
         }
 
@@ -574,6 +583,7 @@ namespace CardioMonitor.ViewModel.Sessions
             _mainTimer.Suspend();
             StartButtonText = Localisation.SessionViewModel_StartButton_Text;
             Session.Status = SessionStatus.Suspended;
+            BedUSBConnection.StartCommand("Pause");
         }
 
         /// <summary>
@@ -584,6 +594,7 @@ namespace CardioMonitor.ViewModel.Sessions
             _mainTimer.Resume();
             StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
             Session.Status = SessionStatus.InProgress;
+            BedUSBConnection.StartCommand("Start");
         }
 
         /// <summary>
@@ -628,6 +639,7 @@ namespace CardioMonitor.ViewModel.Sessions
         private void Reverse()
         {
             _isNeedReversing = true;
+            BedUSBConnection.StartCommand("Reverse");
         }
 
         /// <summary>
@@ -638,6 +650,7 @@ namespace CardioMonitor.ViewModel.Sessions
             _mainTimer.Stop();
             Session.Status = SessionStatus.Terminated;
             SaveSession();
+            BedUSBConnection.StartCommand("EmergencyStop");
         }
 
         /// <summary>
