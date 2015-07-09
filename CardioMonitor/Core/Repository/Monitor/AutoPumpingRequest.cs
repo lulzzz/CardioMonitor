@@ -45,8 +45,12 @@ namespace CardioMonitor.Core.Repository.Monitor
 
                // handler.Shutdown(SocketShutdown.Both);
                 handler.Close();
+<<<<<<< HEAD
                 sListener.Close();
                 Thread.Sleep(new TimeSpan(0, 0, 0, 5 ));
+=======
+                Thread.Sleep(new TimeSpan(0, 0, 1, 0));
+>>>>>>> 698389f1d9f11cb5aeb847a0385384affd498f2a
             
                 return true;
             }

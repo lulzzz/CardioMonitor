@@ -84,6 +84,7 @@ namespace CardioMonitor.ViewModel.Sessions
         private ICommand _emergencyStopCommand;
 
         private CardioTimer _mainTimer;
+        private AutoPumping _autoPumping;
 
         #endregion
 
@@ -399,6 +400,7 @@ namespace CardioMonitor.ViewModel.Sessions
             _isNeedReversing = false;
             _isReversing = false;
             _halfSessionTime = new TimeSpan(0,0,10,0);
+            _autoPumping = new AutoPumping();
         }
 
         /// <summary>
@@ -439,7 +441,7 @@ namespace CardioMonitor.ViewModel.Sessions
 
             var progressController = await MessageHelper.Instance.ShowProgressDialogAsync("Подождите, идет накачка кровати");
 
-            var pumpingResult = await AutoPumping.Instance.Pump();
+            var pumpingResult = await _autoPumping.Pump();
 
             await progressController.CloseAsync();
 
@@ -492,7 +494,7 @@ namespace CardioMonitor.ViewModel.Sessions
             UpdateAngle();
             
             //Накачка кровати при необходимости
-            if (AutoPumping.Instance.CheckNeedPumping(CurrentAngle, _isUpping))
+            if (_autoPumping.CheckNeedPumping(CurrentAngle, _isUpping))
             {
                  Pump();
             }
@@ -514,7 +516,7 @@ namespace CardioMonitor.ViewModel.Sessions
             Task.Factory.StartNew(() =>
             {
                 //ExecutionStatus = "Выполняется накачка кровати...";
-                var pumpingResult = AutoPumping.Instance.Pump();
+                var pumpingResult = _autoPumping.Pump();
                 ExecutionStatus = String.Empty;
 
                 if (!pumpingResult.Result)
@@ -560,7 +562,7 @@ namespace CardioMonitor.ViewModel.Sessions
         /// <summary>
         /// Обновляет данные
         /// </summary>
-        private void UpdateData()
+        private async void UpdateData()
         {
             if ((Math.Abs(CurrentAngle) < Tolerance) || (Math.Abs(CurrentAngle - 10.5) < Tolerance) 
                 || (Math.Abs(CurrentAngle - 21) < Tolerance) || (Math.Abs(CurrentAngle - 30) < Tolerance))
@@ -568,7 +570,7 @@ namespace CardioMonitor.ViewModel.Sessions
                 var param = Session.PatientParams.LastOrDefault();
                 if (null == param || Math.Abs(CurrentAngle - param.InclinationAngle) > Tolerance)
                 {
-                    param = MonitorRepository.Instance.GetPatientParams();
+                    param = await MonitorRepository.Instance.GetPatientParams();
                     param.InclinationAngle = Math.Abs(CurrentAngle) < Tolerance ? 0 : CurrentAngle;
                     ThreadAssistant.StartInUiThread(() => Session.PatientParams.Add(param));
                 }
@@ -665,6 +667,7 @@ namespace CardioMonitor.ViewModel.Sessions
             Status = SessionStatus.Unknown;
             Session = new SessionModel();
             if (_mainTimer != null) {_mainTimer.Stop();}
+            _autoPumping = new AutoPumping();
         }
     }
 }

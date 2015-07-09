@@ -145,7 +145,7 @@ namespace CardioMonitor.Core.Repository.Monitor
         /// </summary>
         /// <returns>Показатели пациента</returns>
         /// <remarks>Эмулирует работу с монитором. Сюда следует поместить логику считывания данных с монитора</remarks>
-        public PatientParams GetPatientParams()
+        public Task<PatientParams> GetPatientParams()
         {
 
 #if Debug_Monitor || RELEASE
