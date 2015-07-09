@@ -62,8 +62,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                             Array.ConstrainedCopy(bytebuf, 0, bytes, i, bytesRec);
                             i += bytesRec;
                         }
-                        /* var sendMessage = new byte[] { 0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22 };      //автонакачко
-                         handler.Send(sendMessage);*/
+                        
 
                         {
                             bool stopSearchingFlag = false;
