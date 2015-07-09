@@ -571,6 +571,16 @@ namespace CardioMonitor.ViewModel.Sessions
                 if (null == param || Math.Abs(CurrentAngle - param.InclinationAngle) > Tolerance)
                 {
                     param = await MonitorRepository.Instance.GetPatientParams();
+                    
+                    try
+                    {
+                        throw new Exception();
+                    }
+                    catch (Exception ex)
+                    {
+                         Logger.Instance.LogError("", ex);
+                        
+                    }
                     param.InclinationAngle = Math.Abs(CurrentAngle) < Tolerance ? 0 : CurrentAngle;
                     ThreadAssistant.StartInUiThread(() => Session.PatientParams.Add(param));
                 }
