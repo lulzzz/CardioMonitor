@@ -24,7 +24,7 @@ namespace CardioMonitor.Core.Repository.Monitor
         {
             //StartConnection();
             int outputData = 0;
-            PatientParams patientParams = new PatientParams();
+           // PatientParams patientParams = new PatientParams();
             bool StopFlag = false;
 
             try
@@ -33,7 +33,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                 IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 4000);
                 Socket sListener = new Socket(ipAddr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 sListener.Bind(ipEndPoint);
-                sListener.Listen(10);
+                sListener.Listen(1);
 
                 
                 Socket handler = sListener.Accept();
@@ -43,9 +43,10 @@ namespace CardioMonitor.Core.Repository.Monitor
                     byte[] sendMessage = new byte[25] { 0x70, 0x10, 0x50, 0x50, 0xaa, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xa5 };   //до 170 мм
                     handler.Send(sendMessage);
 
-                handler.Shutdown(SocketShutdown.Both);
+               // handler.Shutdown(SocketShutdown.Both);
                 handler.Close();
-                Thread.Sleep(new TimeSpan(0, 0, 1 ));
+                sListener.Close();
+                Thread.Sleep(new TimeSpan(0, 0, 0, 5 ));
             
                 return true;
             }

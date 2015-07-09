@@ -149,7 +149,7 @@ namespace CardioMonitor.Core.Repository.Monitor
         {
 
 #if Debug_Monitor || RELEASE
-            var patientParametrs = MonitorDataReader.GetPatientParams(MonitorDataReader.Listener);
+            var patientParametrs = MonitorDataReader.GetPatientParams();
             return patientParametrs;
 #else
             /*var patientParametrs = MonitorDataReader.GetPatientParams();
