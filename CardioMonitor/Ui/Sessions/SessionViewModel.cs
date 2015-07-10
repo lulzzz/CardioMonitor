@@ -9,6 +9,7 @@ using CardioMonitor.Core;
 using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Models.Session;
 using CardioMonitor.Core.Models.Treatment;
+using CardioMonitor.Core.Models.Connection;
 using CardioMonitor.Core.Repository.Controller;
 using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Core.Repository.Files;
@@ -19,6 +20,7 @@ using CardioMonitor.Resources;
 using CardioMonitor.Ui.EcgController;
 using CardioMonitor.ViewModel.Base;
 using OxyPlot;
+using CardioMonitor.Core.Repository.Controller;
 
 namespace CardioMonitor.ViewModel.Sessions
 {
@@ -78,7 +80,8 @@ namespace CardioMonitor.ViewModel.Sessions
         private bool _isUpping;
         private bool _isNeedReversing;
         private bool _isReversing;
-
+        private BedConnectionStatus _status = BedConnectionStatus.Unknow;
+        private bool _isConnecting;
         private ICommand _startCommand;
         private ICommand _reverseCommand;
         private ICommand _emergencyStopCommand;
@@ -237,6 +240,20 @@ namespace CardioMonitor.ViewModel.Sessions
                 }
             }
         }
+        /// <summary>
+        /// Статус кровати
+        /// </summary>
+        public BedConnectionStatus BedStatus
+        {
+            get { return _status; }
+            set
+            {
+                if (value != _status)
+                {
+                    _status = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Команда старта/пауза сеанса
@@ -301,6 +318,14 @@ namespace CardioMonitor.ViewModel.Sessions
                 RisePropertyChanged("NeedUpdate");
             }
         }
+        public bool IsConnecting
+        {
+            get { return _isConnecting; }
+            set
+            {
+                _isConnecting = value;
+            }
+        } 
 
         #region Эмуляция работы железа
 
@@ -427,38 +452,41 @@ namespace CardioMonitor.ViewModel.Sessions
         /// </summary>
         private async void SessionStart()
         {
-            StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
-            Session.Status = SessionStatus.InProgress;
-            Session.TreatmentId = Treatment.Id;
-            Session.DateTime = DateTime.Now;
-            ElapsedTime = new TimeSpan(0,0,0,0);
-            RemainingTime = new TimeSpan(0, 0, 20, 0);
-            CurrentAngle = 0;
-            PeriodSeconds = 0;
-            PeriodNumber = 1;
-
-            ExecutionStatus = "Старт...";
-
-            var progressController = await MessageHelper.Instance.ShowProgressDialogAsync("Подождите, идет накачка кровати");
-
-            var pumpingResult = await _autoPumping.Pump();
-
-            await progressController.CloseAsync();
-
-            // Если накачка прошла успешно
-            if (pumpingResult)
+            BedStatus = BedUSBConnection.GetConnectionStatus();
+            if (BedStatus == BedConnectionStatus.Ready)
             {
+                StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
+                Session.Status = SessionStatus.InProgress;
+                Session.TreatmentId = Treatment.Id;
+                Session.DateTime = DateTime.Now;
+                ElapsedTime = new TimeSpan(0, 0, 0, 0);
+                RemainingTime = new TimeSpan(0, 0, 20, 0);
+                CurrentAngle = 0;
+                PeriodSeconds = 0;
+                PeriodNumber = 1;
 
-                _isUpping = true;
-                _isNeedReversing = false;
-                _isReversing = false;
+                ExecutionStatus = "Старт...";
 
-                //TODO можно протестить все за 30 секунд, раскомментровать следующу строку, закомментровать следующую за ней
-                //_mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 2, 0), new TimeSpan(0, 0, 0, 0, 100));
-                 _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 20, 0), new TimeSpan(0, 0, 0, 1));
-                _mainTimer.Start();
-                UpdateData();
-                Points = new ObservableCollection<DataPoint>
+                var progressController = await MessageHelper.Instance.ShowProgressDialogAsync("Подождите, идет накачка давления");
+
+                var pumpingResult = await _autoPumping.Pump();
+
+                await progressController.CloseAsync();
+
+                // Если накачка прошла успешно
+                if (pumpingResult)
+                {
+
+                    _isUpping = true;
+                    _isNeedReversing = false;
+                    _isReversing = false;
+
+                    //TODO можно протестить все за 30 секунд, раскомментровать следующу строку, закомментровать следующую за ней
+                    //_mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 2, 0), new TimeSpan(0, 0, 0, 0, 100));
+                    _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 20, 0), new TimeSpan(0, 0, 0, 1));
+                    _mainTimer.Start();
+                    UpdateData();
+                    Points = new ObservableCollection<DataPoint>
                 {
                     new DataPoint(x++, y++),
                     new DataPoint(x++, y++),
@@ -467,12 +495,32 @@ namespace CardioMonitor.ViewModel.Sessions
                     new DataPoint(x++, y++),
                     new DataPoint(x++, y++),
                 };
+                }
+                else
+                {
+                    await MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку давления.");
+                }
+                BedUSBConnection.StartCommand("Start");
             }
             else
             {
-                await MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку давления.");
+                if (BedStatus == BedConnectionStatus.Calibrating)
+                {
+                   await MessageHelper.Instance.ShowMessageAsync("Кровать находится в состоянии калибровки. Дождитесь ее окончания и повторите попытку");
+                }
+                if (BedStatus == BedConnectionStatus.Loop)
+                {
+                    await MessageHelper.Instance.ShowMessageAsync("Цикл уже запущен. Дождитесь его окончания или экстренно завершите");
+                }
+                if (BedStatus == BedConnectionStatus.NotReady)
+                {
+                   await  MessageHelper.Instance.ShowMessageAsync("Кровать не готова. Дождитесь окончания подготовки и повторите попытку");
+                }
+                if (BedStatus == BedConnectionStatus.UnConnected)
+                {
+                    await MessageHelper.Instance.ShowMessageAsync("Кровать не подключена. Проверьте соединение");
+                }
             }
-           BedUSBConnection.StartCommand("Start");
         }
 
         private int x = 0;
@@ -493,7 +541,7 @@ namespace CardioMonitor.ViewModel.Sessions
             PeriodSeconds++;
             UpdateAngle();
             
-            //Накачка кровати при необходимости
+            //Накачка давления при необходимости
             if (_autoPumping.CheckNeedPumping(CurrentAngle, _isUpping))
             {
                  Pump();
@@ -524,7 +572,7 @@ namespace CardioMonitor.ViewModel.Sessions
                     // Нужно решить, что делать, если не удалось провести накачку
                     // Пока так
                    // EmergencyStop();
-                   // MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку кровати. Сеанс будет экстренно прерван.");
+                   // MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку");
                 }
             });
         }
@@ -548,14 +596,7 @@ namespace CardioMonitor.ViewModel.Sessions
             }
 #else
            CurrentAngle = await BedUSBConnection.GetAngleXAsync();
-          /*  if (1 == PeriodNumber)
-            {
-                CurrentAngle += _isUpping ? UpAnglePerSecond : (-1) * UpAnglePerSecond;
-            }
-            if (2 == PeriodNumber)
-            {
-                CurrentAngle -= _isUpping ? DownAnglePerSecond : (-1) * DownAnglePerSecond;
-            }*/
+          
 #endif
         }
 
@@ -590,12 +631,19 @@ namespace CardioMonitor.ViewModel.Sessions
         /// <summary>
         /// Приостанавливает сеанс
         /// </summary>
-        private void SuspendSesion()
+        private async void SuspendSesion()
         {
-            _mainTimer.Suspend();
-            StartButtonText = Localisation.SessionViewModel_StartButton_Text;
-            Session.Status = SessionStatus.Suspended;
-            BedUSBConnection.StartCommand("Pause");
+            if (IsConnecting = BedUSBConnection.IsConnecting())
+            {
+                _mainTimer.Suspend();
+                StartButtonText = Localisation.SessionViewModel_StartButton_Text;
+                Session.Status = SessionStatus.Suspended;
+                BedUSBConnection.StartCommand("Pause");
+            }
+            else
+            {
+                await MessageHelper.Instance.ShowMessageAsync("Нет соединения с кроватью");
+            }
         }
 
         /// <summary>

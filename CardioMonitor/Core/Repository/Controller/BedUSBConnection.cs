@@ -7,7 +7,7 @@ namespace CardioMonitor.Core.Repository.Controller
 {
     public class BedUSBConnection
     {
-        public BedConnectionStatus Status;
+        
         public BedMovingStatus MovingStatus;
         public bool _isConnection;
         public int flag_start = -1;
@@ -17,48 +17,57 @@ namespace CardioMonitor.Core.Repository.Controller
         /// <summary>
         /// Запрос текущего состояния готовности устройства (Неподключено, калибруется, готово, в работе(идет цикл), не готово(после аварийной остановки))
         /// </summary>
-        public void GetConnectionStatus()
+        public static BedConnectionStatus GetConnectionStatus()
         {
-            HIDDevice.interfaceDetails[] devices = HIDDevice.getConnectedDevices();
-            string devicePath = null;
-            foreach (var listofDevice in devices)
-            {
-                if (listofDevice.product == "belmed_v1")
+            BedConnectionStatus status = BedConnectionStatus.Unknow;
+            try
+            {  
+                HIDDevice.interfaceDetails[] devices = HIDDevice.getConnectedDevices();
+                string devicePath = null;
+                foreach (var listofDevice in devices)
                 {
-                    devicePath = listofDevice.devicePath;
-                    break;
+                    if (listofDevice.product == "belmed_v1")
+                    {
+                        devicePath = listofDevice.devicePath;
+                        break;
+                    }
                 }
-            }
-            if (devicePath == null)
-            {
-                Status = BedConnectionStatus.UnConnected;
-            }
-            else
-            {
-                HIDDevice device = new HIDDevice(devicePath, false);
-                var message = new byte[] {0x6e, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff};
-                device.write(message);
-                byte[] readData = device.read();
-                if (readData != null)
+                if (devicePath == null)
                 {
-                    if (readData[3] == 0)
-                    {
-                        Status = BedConnectionStatus.Calibrating;
-                    }
-                    if (readData[3] == 1)
-                    {
-                        Status = BedConnectionStatus.Ready;
-                    }
-                    if (readData[3] == 2)
-                    {
-                        Status = BedConnectionStatus.Loop;
-                    }
-                    if (readData[3] == 3)
-                    {
-                        Status = BedConnectionStatus.NotReady;
-                    } //если почему то придет другое значение - поле останется пустым! (add Unknow?)
+                    status = BedConnectionStatus.UnConnected;
                 }
-                device.close();
+                else
+                {
+                    HIDDevice device = new HIDDevice(devicePath, false);
+                    var message = new byte[] { 0x6e, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff };
+                    device.write(message);
+                    byte[] readData = device.read();
+                    if (readData != null)
+                    {
+                        if (readData[3] == 0)
+                        {
+                            status = BedConnectionStatus.Calibrating;
+                        }
+                        if (readData[3] == 1)
+                        {
+                            status = BedConnectionStatus.Ready;
+                        }
+                        if (readData[3] == 2)
+                        {
+                            status = BedConnectionStatus.Loop;
+                        }
+                        if (readData[3] == 3)
+                        {
+                            status = BedConnectionStatus.NotReady;
+                        } //если почему то придет другое значение - поле останется пустым! (add Unknow?)
+                    }
+                    device.close();
+                }
+                return status;
+            }
+            catch (Exception ex)
+            {
+                return BedConnectionStatus.Unknow;
             }
         }
 
@@ -332,7 +341,7 @@ namespace CardioMonitor.Core.Repository.Controller
         /// подключено ли устройство
         /// </summary>
         /// <returns></returns>
-        public bool IsConnecting()
+        public static bool IsConnecting()
         {
             HIDDevice.interfaceDetails[] devices = HIDDevice.getConnectedDevices();
             string devicePath = null;

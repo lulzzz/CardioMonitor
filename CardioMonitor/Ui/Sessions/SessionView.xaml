@@ -209,13 +209,13 @@
                            FontSize="28"/>
                 </Border>
             </Grid>
-            <Border Grid.Row="3"
+            <!--<Border Grid.Row="3"
                     Grid.Column="0"
                     BorderBrush="{DynamicResource AccentColorBrush}"
                     BorderThickness="2"
                     Width="250"
                     Margin="10">
-                <Grid >
+                 <Grid >
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                         <RowDefinition/>
@@ -236,7 +236,7 @@
                                             Margin="5"/>
 
                 </Grid>
-            </Border>
+            </Border>-->
             
             
             <Grid Grid.Row="3"

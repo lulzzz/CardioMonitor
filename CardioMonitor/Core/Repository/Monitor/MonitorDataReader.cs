@@ -9,21 +9,7 @@ namespace CardioMonitor.Core.Repository.Monitor
 {
     public class MonitorDataReader
     {
-        public static Socket Listener;
-        public static void StartConnection()
-        {
-            
-        }
-        /* public Task<PatientParams> GetMonitorParams()
-        {
-            return Task.Factory.StartNew(() =>
-            {
-                
-                var patientParametrs = MonitorDataReader.GetPatientParams();
-                return patientParametrs;
-            });
-         }
-        */
+       
         //TODO зачем каждый раз создавать соединение?
         public static Task<PatientParams> GetPatientParams()
         {
