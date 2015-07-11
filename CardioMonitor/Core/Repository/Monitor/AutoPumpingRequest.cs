@@ -39,7 +39,7 @@ namespace CardioMonitor.Core.Repository.Monitor
 
                 sListener.Close();
                // Thread.Sleep(new TimeSpan(0, 0, 0, 5 ));
-                Thread.Sleep(new TimeSpan(0, 0, 1, 0));
+               // Thread.Sleep(new TimeSpan(0, 0, 0, 50));
                 return true;
             
                

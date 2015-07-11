@@ -171,6 +171,54 @@ namespace CardioMonitor.Core.Repository.Controller
                 device.close();
             }
         }
+        public static int GetStartFlag()
+        {
+            HIDDevice device = GetDevice();
+            if (device != null)
+            {
+                var message = new byte[] { 0x6e, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff };
+                device.write(message);
+                byte[] readData = device.read();
+                if (readData != null)
+                {
+                    if (readData[5] == 0)
+                    {
+                        return 0;
+                    }
+                    if (readData[5] == 1)
+                    {
+                        return 1;
+                    }
+                    
+                }
+                device.close();
+            }
+            return -1;
+        }
+        public static int GetReverseFlag()
+        {
+            HIDDevice device = GetDevice();
+            if (device != null)
+            {
+                var message = new byte[] { 0x6e, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff };
+                device.write(message);
+                byte[] readData = device.read();
+                if (readData != null)
+                {
+                    if (readData[7] == 0)
+                    {
+                        return 0;
+                    }
+                    if (readData[7] == 1)
+                    {
+                        return 1;
+                    }
+
+                }
+                device.close();
+            }
+            return -1;
+        }
 
         /// <summary>
         /// Угол по оси Х
