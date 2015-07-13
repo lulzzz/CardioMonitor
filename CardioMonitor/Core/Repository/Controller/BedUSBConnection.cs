@@ -19,7 +19,7 @@ namespace CardioMonitor.Core.Repository.Controller
         /// </summary>
         public static BedConnectionStatus GetConnectionStatus()
         {
-            BedConnectionStatus status = BedConnectionStatus.Unknow;
+            BedConnectionStatus status = BedConnectionStatus.Unknown;
             try
             {  
                 HIDDevice.interfaceDetails[] devices = HIDDevice.getConnectedDevices();
@@ -59,7 +59,7 @@ namespace CardioMonitor.Core.Repository.Controller
                         if (readData[3] == 3)
                         {
                             status = BedConnectionStatus.NotReady;
-                        } //если почему то придет другое значение - поле останется пустым! (add Unknow?)
+                        } //если почему то придет другое значение - поле останется пустым! (add Unknown?)
                     }
                     device.close();
                 }
@@ -67,7 +67,7 @@ namespace CardioMonitor.Core.Repository.Controller
             }
             catch (Exception ex)
             {
-                return BedConnectionStatus.Unknow;
+                return BedConnectionStatus.Unknown;
             }
         }
 

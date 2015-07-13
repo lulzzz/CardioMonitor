@@ -7,6 +7,10 @@
     public enum BedConnectionStatus
     {
         /// <summary>
+        /// Состояние неизвестно
+        /// </summary>
+        Unknown,
+        /// <summary>
         /// Соединение не установлено или разорвано 
         /// </summary>
         UnConnected,
@@ -25,10 +29,6 @@
         /// <summary>
         ///  Устройство не готово (ожидание завершения возвращения)
         /// </summary>
-        NotReady,
-        /// <summary>
-        /// Состояние неизвестно
-        /// </summary>
-        Unknow
+        NotReady
     }
 }

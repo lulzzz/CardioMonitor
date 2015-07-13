@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Data;
 using CardioMonitor.Core;
+using CardioMonitor.Ui.Sessions;
 using CardioMonitor.ViewModel;
 using CardioMonitor.ViewModel.Sessions;
 using OxyPlot;
