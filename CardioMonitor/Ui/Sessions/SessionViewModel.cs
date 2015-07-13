@@ -29,7 +29,7 @@ namespace CardioMonitor.Ui.Sessions
     /// </summary>
     public class SessionViewModel : Notifier, IViewModel
     {
-        #region
+        #region Константы
 
         /// <summary>
         /// Таймаут запроса параметром пациента
@@ -675,11 +675,9 @@ namespace CardioMonitor.Ui.Sessions
         /// </summary>
         private async void UpdateData(double currentAngle)
         {
-            if (((Math.Abs(currentAngle) < Tolerance) || (Math.Abs(currentAngle - 10.5) < Tolerance)
-                 || (Math.Abs(currentAngle - 21) < Tolerance) || (Math.Abs(currentAngle - 30) < Tolerance)) 
-                /*&& !Monitor.IsEntered(_updatePatientParamsLockObject)*/)
+            if (!Monitor.IsEntered(_updatePatientParamsLockObject))
             {
-                bool acquiredLock = false;
+                var acquiredLock = false;
 
                 try
                 {
@@ -703,7 +701,6 @@ namespace CardioMonitor.Ui.Sessions
                                 };
                             }
                             //TODO по-хорошему, надо предусмотреть обработку и других исключений 
-
                             param.InclinationAngle = Math.Abs(currentAngle) < Tolerance ? 0 : currentAngle;
                             ThreadAssistant.StartInUiThread(() => Session.PatientParams.Add(param));
                         }
