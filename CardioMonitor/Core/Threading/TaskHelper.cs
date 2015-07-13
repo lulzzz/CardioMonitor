@@ -25,7 +25,14 @@ namespace CardioMonitor.Core.Threading
 
             if (firstToFinish == delayTask)
             {
-                await task.ContinueWith(LogException);
+                // Если задачу ответить в течение указанного времени, значит она не зависла и можно
+                // обработать исключения, если они возникли, иначе бросаем исключение
+                var waitingTimeout = new TimeSpan(0, 0, 1);
+                if (task.Wait(waitingTimeout))
+                {
+                    await task.ContinueWith(LogException);
+                }
+                //TODO нужно придумать, как убивать задачу
                 throw new TimeoutException();
             }
 

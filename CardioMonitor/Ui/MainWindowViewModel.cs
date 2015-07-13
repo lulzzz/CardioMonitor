@@ -208,7 +208,9 @@ namespace CardioMonitor.ViewModel{
                 ShowResultsEvent = ShowSessionResults
             };
             SessionViewModel = new SessionViewModel();
+            //SessionViewModel.StartStatusTimer();
             SessionDataViewModel = new SessionDataViewModel();
+            
             TreatmentDataViewModel = new TreatmentDataViewModel();
             SettingsViewModel = new SettingsViewModel();
         }
