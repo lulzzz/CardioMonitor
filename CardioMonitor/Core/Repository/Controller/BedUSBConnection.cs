@@ -361,26 +361,33 @@ namespace CardioMonitor.Core.Repository.Controller
         /// </summary>
         public static HIDDevice GetDevice()
         {
-            HIDDevice.interfaceDetails[] devices = HIDDevice.getConnectedDevices();
-            string devicePath = null;
-            HIDDevice device;
-            foreach (var listofDevice in devices)
+            try
             {
-                if (listofDevice.product == "belmed_v1") //итоговое название всех прошивок - другое
+                HIDDevice.interfaceDetails[] devices = HIDDevice.getConnectedDevices();
+                string devicePath = null;
+                HIDDevice device;
+                foreach (var listofDevice in devices)
                 {
-                    devicePath = listofDevice.devicePath;
-                    break;
+                    if (listofDevice.product == "belmed_v1") //итоговое название всех прошивок - другое
+                    {
+                        devicePath = listofDevice.devicePath;
+                        break;
+                    }
                 }
+                if (devicePath != null)
+                {
+                    device = new HIDDevice(devicePath, false);
+                }
+                else
+                {
+                    device = null;
+                }
+                return device;
             }
-            if (devicePath != null)
+            catch (Exception)
             {
-                device = new HIDDevice(devicePath, false);
+                return null;
             }
-            else
-            {
-                device = null;
-            }
-            return device;
 
 
         }

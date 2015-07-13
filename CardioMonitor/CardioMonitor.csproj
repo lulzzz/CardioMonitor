@@ -166,6 +166,7 @@
     <Compile Include="Core\Repository\Monitor\AsyncMonitorConnection.cs" />
     <Compile Include="Core\Repository\Monitor\AutoPumping.cs" />
     <Compile Include="Core\Repository\Monitor\MonitorDataReader.cs" />
+    <Compile Include="Core\Threading\TaskHelper.cs" />
     <Compile Include="Core\Threading\ThreadAssistant.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
