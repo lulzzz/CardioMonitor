@@ -32,7 +32,7 @@ namespace CardioMonitor.Ui.Sessions
     {
         #region Константы
 
-        private readonly List<double> _angleCheckPoints; 
+        private readonly IReadOnlyList<double> _checkPointsAngles; 
 
         /// <summary>
         /// Таймаут запроса параметром пациента
@@ -47,6 +47,14 @@ namespace CardioMonitor.Ui.Sessions
         /// Точность для сравнение double величин
         /// </summary>
         private const double Tolerance = 0.1e-12;
+
+        // <summary>
+        /// Специальная велична, необходимая для корректной работы определения разрешения
+        /// </summary>
+        /// <remarks>
+        /// Без нее все плохо, слишком часто вызывается метод
+        /// </remarks>
+        private const double ResolutionToleranceAgnle = 6;
 
         /// <summary>
         /// Скорость подъема кровати
@@ -112,8 +120,10 @@ namespace CardioMonitor.Ui.Sessions
         private readonly object _updatePatientParamsLockObject;
         private readonly object _updateAngleLockObject;
 
-        private readonly object _checkNeedUpdataDataLockObject;
-        private readonly Dictionary<double, AngleCheckPoint> _passedAngleCheckPoints; 
+        private readonly object _passedCheckPointsAnglesLockObject;
+        private readonly List<double> _passedCheckPointsAngles;
+
+        private double _previuosCheckPointAngle;
 
         #endregion
 
@@ -451,10 +461,10 @@ namespace CardioMonitor.Ui.Sessions
             _updatePatientParamTimeout = new TimeSpan(0,0,5);
             _pumpingTimeout = new TimeSpan(0, 0, 5);
             _angleUpdateTimeout = new TimeSpan(0, 0, 1);
-            _passedAngleCheckPoints = new Dictionary<double, AngleCheckPoint>();
-            _checkNeedUpdataDataLockObject = new object();
+            _passedCheckPointsAngles = new List<double>();
+            _passedCheckPointsAnglesLockObject = new object();
             // Контрольные точки
-            _angleCheckPoints = new List<double> {0, 10.5, 21, 30};
+            _checkPointsAngles = new List<double> {0, 10.5, 21, 30};
         }
 
         /// <summary>
@@ -493,6 +503,7 @@ namespace CardioMonitor.Ui.Sessions
                 CurrentAngle = 0;
                 PeriodSeconds = 0;
                 PeriodNumber = 1;
+                _previuosCheckPointAngle = -10;
 
                 ExecutionStatus = "Старт...";
                 var isPumpingFailed = false;
@@ -541,7 +552,13 @@ namespace CardioMonitor.Ui.Sessions
                // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 2, 0), new TimeSpan(0, 0, 0, 0, 100));
                 _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 18, 0), new TimeSpan(0, 0, 0, 1));
                 _mainTimer.Start();
-                UpdateData(CurrentAngle);
+
+                var currentAngle = CurrentAngle;
+                if (IsNeedUpdateData(currentAngle))
+                {
+                    UpdateData(currentAngle);
+                }
+
                 Points = new ObservableCollection<DataPoint>
                 {
                     new DataPoint(_x++, _y++),
@@ -601,7 +618,8 @@ namespace CardioMonitor.Ui.Sessions
                 Pump();
             }
 
-            if (IsNeedUpdataData(currentAngle, _isUpping))
+            //По идеи уже здесь должно гарантироваться, что только один поток запустит обновление
+            if (IsNeedUpdateData(currentAngle))
             {
                 UpdateData(currentAngle);
             }
@@ -689,97 +707,50 @@ namespace CardioMonitor.Ui.Sessions
         /// <param name="currentAngle">Текущий угол</param>
         /// <param name="isUpping">Флаг подъема</param>
         /// <returns>Разрешение обновления</returns>
-        private bool IsNeedUpdataData(double currentAngle, bool isUpping)
+        private bool IsNeedUpdateData(double currentAngle)
         {
-            lock (_checkNeedUpdataDataLockObject)
+            lock (_passedCheckPointsAnglesLockObject)
             {
-                foreach (var angleCheckPoint in _angleCheckPoints)
-                {
-                    if (IsNeedUpdateDataIntoCheckPoint(currentAngle, angleCheckPoint, isUpping))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
+                if (_checkPointsAngles == null) { return false; }
 
-        /// <summary>
-        /// Проверяет, является ли текущий угол контрольной точки и необходимо для этого угла обновление данных
-        /// </summary>
-        /// <param name="currentAngle">Текущий угол</param>
-        /// <param name="checkPointAngle">Контрольная точка</param>
-        /// <param name="isUpping">Флаг подъема</param>
-        /// <returns>Разрешение обновления</returns>
-        private bool IsNeedUpdateDataIntoCheckPoint(double currentAngle, double checkPointAngle, bool isUpping)
-        {
-            if (Math.Abs(currentAngle - checkPointAngle) < Tolerance)
-            {
-                if (!_passedAngleCheckPoints.ContainsKey(checkPointAngle) && isUpping)
+                foreach (var checkPointAngle in _checkPointsAngles)
                 {
-                    _passedAngleCheckPoints.Add(checkPointAngle, new AngleCheckPoint { IsUppingPassed = true });
-                    return true;
-                }
-                if (_passedAngleCheckPoints.ContainsKey(checkPointAngle) && !isUpping)
-                {
-                    if (_passedAngleCheckPoints[checkPointAngle].IsUppingPassed && !_passedAngleCheckPoints[checkPointAngle].IsDowningPassed)
+                    if (Math.Abs(currentAngle - checkPointAngle) < Tolerance)
                     {
-                        _passedAngleCheckPoints[checkPointAngle].IsDowningPassed = true;
+                        if (Math.Abs(_previuosCheckPointAngle - checkPointAngle) < ResolutionToleranceAgnle) { return false; }
+
+                        _previuosCheckPointAngle = checkPointAngle;
                         return true;
                     }
                 }
                 return false;
             }
-            return false;
         }
-
+        
         /// <summary>
         /// Обновляет данные
         /// </summary>
         private async void UpdateData(double currentAngle)
         {
-            if (!Monitor.IsEntered(_updatePatientParamsLockObject))
+            var param = new PatientParams();
+            try
             {
-                var acquiredLock = false;
-
-                try
-                {
-                    Monitor.TryEnter(_updatePatientParamsLockObject, ref acquiredLock);
-                    if (!Monitor.IsEntered(_updatePatientParamsLockObject)) {return;}
-                    if (acquiredLock)
-                    {
-                        var param = Session.PatientParams.LastOrDefault();
-                        if (null == param || Math.Abs(currentAngle - param.InclinationAngle) > Tolerance)
-                        {
-                            try
-                            {
-                                var gettingParamsTask = MonitorRepository.Instance.GetPatientParams();
-                                param = await TaskHelper.StartWithTimeout(gettingParamsTask, _updatePatientParamTimeout);
-                            }
-                            catch (TimeoutException)
-                            {
-                                param = new PatientParams 
-                                {
-                                    RepsirationRate = -1,
-                                    HeartRate = -1
-                                };
-                            }
-                            //TODO по-хорошему, надо предусмотреть обработку и других исключений 
-                            param.InclinationAngle = Math.Abs(currentAngle) < Tolerance ? 0 : currentAngle;
-                            ThreadAssistant.StartInUiThread(() => Session.PatientParams.Add(param));
-                        }
-                    }
-                }
-                finally
-                {
-                    if (acquiredLock && Monitor.IsEntered(_updatePatientParamsLockObject))
-                    {
-                        Monitor.Exit(_updatePatientParamsLockObject);
-                    }
-                }
-
+                var gettingParamsTask = MonitorRepository.Instance.GetPatientParams();
+                param = await TaskHelper.StartWithTimeout(gettingParamsTask, _updatePatientParamTimeout);
             }
+            catch (TimeoutException)
+            {
+                param = new PatientParams
+                {
+                    RepsirationRate = -1,
+                    HeartRate = -1
+                };
+            }
+            //TODO по-хорошему, надо предусмотреть обработку и других исключений 
+            param.InclinationAngle = Math.Abs(currentAngle) < Tolerance ? 0 : currentAngle;
+            ThreadAssistant.StartInUiThread(() => Session.PatientParams.Add(param));
         }
+        
         
         /// <summary>
         /// Приостанавливает сеанс
@@ -921,7 +892,7 @@ namespace CardioMonitor.Ui.Sessions
                 Session.TreatmentId = Treatment.Id;
                 Session.DateTime = DateTime.Now;
                 ElapsedTime = new TimeSpan(0, 0, 0, 0);
-                RemainingTime = new TimeSpan(0, 0, 18, 15);
+                RemainingTime = new TimeSpan(0, 0, 18, 0);
                 CurrentAngle = 0;
                 PeriodSeconds = 0;
                 PeriodNumber = 1;
@@ -958,12 +929,21 @@ namespace CardioMonitor.Ui.Sessions
             //}
 
             //если кровать запущена и прешел флаг паузы - пауза
-
+            if ((BedConnectionStatus == BedConnectionStatus.Loop) && (BedUSBConnection.GetStartFlag() == 0) && (Session.Status == SessionStatus.InProgress))
+            {
+                Session.Status = SessionStatus.Suspended;
+            }
             //если запущен цикл, кровать была на паузе и была выведена из нее - продолжить работу
-
+            if ((BedConnectionStatus == BedConnectionStatus.Loop) && (BedUSBConnection.GetStartFlag() == 1) && (Session.Status == SessionStatus.Suspended))
+            {
+                Session.Status = SessionStatus.InProgress;
+            }
             //если кровать запущена и пришел флаг реверса - реверс
 
-
+            if ((BedConnectionStatus == BedConnectionStatus.Loop) && (BedUSBConnection.GetReverseFlag() == 1) && (Session.Status == SessionStatus.InProgress))
+            {
+                Session.Status = SessionStatus.InProgress;
+            }
 
 
             //если кровать запущена и пришел флаг экстренной остановки - завершить сеанс
