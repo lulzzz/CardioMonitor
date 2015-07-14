@@ -481,7 +481,7 @@ namespace CardioMonitor.Ui.Sessions
                 Session.TreatmentId = Treatment.Id;
                 Session.DateTime = DateTime.Now;
                 ElapsedTime = new TimeSpan(0, 0, 0, 0);
-                RemainingTime = new TimeSpan(0, 0, 18, 14);
+                RemainingTime = new TimeSpan(0, 0, 18, 0);
                 CurrentAngle = 0;
                 PeriodSeconds = 0;
                 PeriodNumber = 1;
@@ -531,7 +531,7 @@ namespace CardioMonitor.Ui.Sessions
 
                 //TODO можно протестить все за 30 секунд, раскомментровать следующу строку, закомментровать следующую за ней
                // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 2, 0), new TimeSpan(0, 0, 0, 0, 100));
-                _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 18, 14), new TimeSpan(0, 0, 0, 1));
+                _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 18, 0), new TimeSpan(0, 0, 0, 1));
                 _mainTimer.Start();
                 UpdateData(CurrentAngle);
                 Points = new ObservableCollection<DataPoint>
