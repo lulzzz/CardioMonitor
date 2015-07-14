@@ -156,6 +156,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Core\Repository\Controller\BedUSBConnection.cs" />
+    <Compile Include="Core\Repository\Monitor\AngleCheckPoint.cs" />
     <Compile Include="Core\Repository\Monitor\AutoPumpingRequest.cs" />
     <Compile Include="Core\Threading\CardioTimer.cs" />
     <Compile Include="Core\Models\Connection\Bed\BedType.cs" />
