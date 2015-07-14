@@ -148,16 +148,16 @@ namespace CardioMonitor.Core.Repository.Monitor
         public Task<PatientParams> GetPatientParams()
         {
 
-#if Debug_Monitor || RELEASE
+        #if Debug_Monitor || RELEASE
             var patientParametrs = MonitorDataReader.GetPatientParams();
             return patientParametrs;
-#else
+        #else
             /*var patientParametrs = MonitorDataReader.GetPatientParams();
             return patientParametrs;*/
             var patientParametrs = MonitorDataReader.GetPatientParams();
             return patientParametrs;
             //return _patientParams[Index];
-#endif
+        #endif
         }
         
         /*public Task<PatientParams> GetMonitorParams()

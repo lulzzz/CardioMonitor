@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
@@ -31,17 +32,17 @@ namespace CardioMonitor.Ui.Sessions
     {
         #region Константы
 
+        private readonly List<double> _angleCheckPoints; 
+
         /// <summary>
         /// Таймаут запроса параметром пациента
         /// </summary>
         private readonly TimeSpan _updatePatientParamTimeout;
 
         private readonly TimeSpan _pumpingTimeout;
-
+        
         private readonly TimeSpan _angleUpdateTimeout;
-
-        private const double AngleComparationTolerance = 3;
-
+        
         /// <summary>
         /// Точность для сравнение double величин
         /// </summary>
@@ -110,6 +111,9 @@ namespace CardioMonitor.Ui.Sessions
 
         private readonly object _updatePatientParamsLockObject;
         private readonly object _updateAngleLockObject;
+
+        private readonly object _checkNeedUpdataDataLockObject;
+        private readonly Dictionary<double, AngleCheckPoint> _passedAngleCheckPoints; 
 
         #endregion
 
@@ -447,6 +451,10 @@ namespace CardioMonitor.Ui.Sessions
             _updatePatientParamTimeout = new TimeSpan(0,0,5);
             _pumpingTimeout = new TimeSpan(0, 0, 5);
             _angleUpdateTimeout = new TimeSpan(0, 0, 1);
+            _passedAngleCheckPoints = new Dictionary<double, AngleCheckPoint>();
+            _checkNeedUpdataDataLockObject = new object();
+            // Контрольные точки
+            _angleCheckPoints = new List<double> {0, 10.5, 21, 30};
         }
 
         /// <summary>
@@ -545,7 +553,7 @@ namespace CardioMonitor.Ui.Sessions
                 };
                 BedUSBConnection.StartCommand("Start");
             }
-              else
+            else
             {
                 if (BedConnectionStatus == BedConnectionStatus.Calibrating)
                 {
@@ -568,6 +576,7 @@ namespace CardioMonitor.Ui.Sessions
 
         private int _x;
         private int _y;
+
         /// <summary>
         /// Обработка тика таймера
         /// </summary>
@@ -589,10 +598,14 @@ namespace CardioMonitor.Ui.Sessions
             //Накачка давления при необходимости
             if (_autoPumping.CheckNeedPumping(currentAngle, _isUpping))
             {
-                 Pump();
+                Pump();
             }
 
-            UpdateData(currentAngle);
+            if (IsNeedUpdataData(currentAngle, _isUpping))
+            {
+                UpdateData(currentAngle);
+            }
+            
             if (TimeSpan.Zero == RemainingTime)
             {
                 ThreadAssistant.StartInUiThread(SessionComplete);
@@ -671,6 +684,56 @@ namespace CardioMonitor.Ui.Sessions
         }
 
         /// <summary>
+        /// Проверяет, есть ли необходимость запросить данные в данном угле
+        /// </summary>
+        /// <param name="currentAngle">Текущий угол</param>
+        /// <param name="isUpping">Флаг подъема</param>
+        /// <returns>Разрешение обновления</returns>
+        private bool IsNeedUpdataData(double currentAngle, bool isUpping)
+        {
+            lock (_checkNeedUpdataDataLockObject)
+            {
+                foreach (var angleCheckPoint in _angleCheckPoints)
+                {
+                    if (IsNeedUpdateDataIntoCheckPoint(currentAngle, angleCheckPoint, isUpping))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Проверяет, является ли текущий угол контрольной точки и необходимо для этого угла обновление данных
+        /// </summary>
+        /// <param name="currentAngle">Текущий угол</param>
+        /// <param name="checkPointAngle">Контрольная точка</param>
+        /// <param name="isUpping">Флаг подъема</param>
+        /// <returns>Разрешение обновления</returns>
+        private bool IsNeedUpdateDataIntoCheckPoint(double currentAngle, double checkPointAngle, bool isUpping)
+        {
+            if (Math.Abs(currentAngle - checkPointAngle) < Tolerance)
+            {
+                if (!_passedAngleCheckPoints.ContainsKey(checkPointAngle) && isUpping)
+                {
+                    _passedAngleCheckPoints.Add(checkPointAngle, new AngleCheckPoint { IsUppingPassed = true });
+                    return true;
+                }
+                if (_passedAngleCheckPoints.ContainsKey(checkPointAngle) && !isUpping)
+                {
+                    if (_passedAngleCheckPoints[checkPointAngle].IsUppingPassed && !_passedAngleCheckPoints[checkPointAngle].IsDowningPassed)
+                    {
+                        _passedAngleCheckPoints[checkPointAngle].IsDowningPassed = true;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Обновляет данные
         /// </summary>
         private async void UpdateData(double currentAngle)
@@ -682,6 +745,7 @@ namespace CardioMonitor.Ui.Sessions
                 try
                 {
                     Monitor.TryEnter(_updatePatientParamsLockObject, ref acquiredLock);
+                    if (!Monitor.IsEntered(_updatePatientParamsLockObject)) {return;}
                     if (acquiredLock)
                     {
                         var param = Session.PatientParams.LastOrDefault();
@@ -716,7 +780,7 @@ namespace CardioMonitor.Ui.Sessions
 
             }
         }
-
+        
         /// <summary>
         /// Приостанавливает сеанс
         /// </summary>
