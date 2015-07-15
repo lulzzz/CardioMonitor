@@ -16,7 +16,6 @@ namespace CardioMonitor.Core.Repository.Monitor
             return Task.Factory.StartNew(() =>
             {
                 //StartConnection();
-                var outputData = 0;
                 var patientParams = new PatientParams();
                 var stopFlag = false;
 

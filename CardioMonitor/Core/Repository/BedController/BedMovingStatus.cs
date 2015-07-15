@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.Core.Models.Connection
+﻿namespace CardioMonitor.Core.Repository.BedController
 {
     /// <summary>
     /// Текущий статус кровати
@@ -32,7 +32,7 @@
         /// <summary>
         /// Нет соединения
         /// </summary>
-        UnConnected
+        Disconnected
     }
 
 }

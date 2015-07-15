@@ -1,10 +1,9 @@
-﻿namespace CardioMonitor.Core.Models.Connection
+﻿namespace CardioMonitor.Core.Repository.BedController
 {
-
     /// <summary>
-    /// Состояние соединения с кроватью
+    /// Статус кровати
     /// </summary>
-    public enum BedConnectionStatus
+    public enum BedStatus
     {
         /// <summary>
         /// Состояние неизвестно
@@ -13,7 +12,7 @@
         /// <summary>
         /// Соединение не установлено или разорвано 
         /// </summary>
-        UnConnected,
+        Disconnected,
         /// <summary>
         /// Идет калибровка 
         /// </summary>
