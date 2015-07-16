@@ -393,7 +393,7 @@ namespace CardioMonitor.Ui.Sessions
                         _isNeedReversing = false;
                         _isReversing = true;
                         _mainTimer.Stop();
-                        RemainingTime = ElapsedTime;
+                        RemainingTime = ElapsedTime - new TimeSpan(0, 1, 0);
                         _mainTimer = new CardioTimer(TimerTick, RemainingTime, new TimeSpan(0, 0, 0, 1));
                         _mainTimer.Start();
                     }
@@ -827,7 +827,10 @@ namespace CardioMonitor.Ui.Sessions
             if (_bedUsbController.IsConnected())
             {
                 _isNeedReversing = true;
+                _autoPumping = new AutoPumping();
+                _previuosCheckPointAngle = -10;
                 _bedUsbController.ExecuteCommand(BedControlCommand.Reverse);
+                await MessageHelper.Instance.ShowMessageAsync("Запущен реверс");
             }
             else
             {
@@ -876,7 +879,7 @@ namespace CardioMonitor.Ui.Sessions
             _checkStatusTimer.Start();
         }
 
-        private void StatusTimerTick(object sender, EventArgs e)
+        private async void StatusTimerTick(object sender, EventArgs e)
         {
            // ElapsedTime += _oneSecond;
             //RemainingTime -= _oneSecond;
@@ -943,6 +946,9 @@ namespace CardioMonitor.Ui.Sessions
             if ((BedStatus == BedStatus.Loop) && (_bedUsbController.ReverseFlag == ReverseFlag.Reversed) && (Session.Status == SessionStatus.InProgress))
             {
                 _isNeedReversing = true;
+                _previuosCheckPointAngle = -10;
+                _autoPumping = new AutoPumping();
+                await MessageHelper.Instance.ShowMessageAsync("Запущен реверс");
             }
 
 
@@ -951,10 +957,10 @@ namespace CardioMonitor.Ui.Sessions
             {
                 Session.Status = SessionStatus.Terminated;
                 _mainTimer.Stop();
-                ThreadAssistant.StartInUiThread(() => { SaveSession(); });
+                ThreadAssistant.StartInUiThread(SaveSession);
                 _startBedFlag = false;
             }
-
+            CommandManager.InvalidateRequerySuggested();
 
             //если кровать запущена и пришел флаг экстренной остановки - завершить сеанс
         }
