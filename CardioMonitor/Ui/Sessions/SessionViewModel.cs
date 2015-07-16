@@ -393,7 +393,9 @@ namespace CardioMonitor.Ui.Sessions
                         _isNeedReversing = false;
                         _isReversing = true;
                         _mainTimer.Stop();
-                        RemainingTime = ElapsedTime - new TimeSpan(0, 1, 0);
+                        RemainingTime = (ElapsedTime.Minutes > 1) 
+                                        ? ElapsedTime - new TimeSpan(0, 1, 0) 
+                                        : ElapsedTime;
                         _mainTimer = new CardioTimer(TimerTick, RemainingTime, new TimeSpan(0, 0, 0, 1));
                         _mainTimer.Start();
                     }
