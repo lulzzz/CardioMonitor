@@ -112,6 +112,7 @@ namespace CardioMonitor.Ui.Sessions
         private ICommand _startCommand;
         private ICommand _reverseCommand;
         private ICommand _emergencyStopCommand;
+        private bool _stratBedFlag = false;
 
         private CardioTimer _mainTimer;
         private CardioTimer _checkStatusTimer;
@@ -190,7 +191,8 @@ namespace CardioMonitor.Ui.Sessions
                 if (Math.Abs(value - _currentAngle) > Tolerance)
                 {
 
-                    _currentAngle = value > 0 ? value : 0;
+                   // _currentAngle = value > 0 ? value : 0;
+                    _currentAngle = value;
                     RisePropertyChanged("CurrentAngle");
                 }
             }
@@ -518,7 +520,7 @@ namespace CardioMonitor.Ui.Sessions
                     var pumpingResult = await TaskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
                     
                     // просто ожидаем 30 скеунд
-                    await Task.Delay(new TimeSpan(0,0,30));
+                    await Task.Delay(new TimeSpan(0,0,50));
 
                     await progressController.CloseAsync();
 
@@ -552,6 +554,7 @@ namespace CardioMonitor.Ui.Sessions
                // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 2, 0), new TimeSpan(0, 0, 0, 0, 100));
                 _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 18, 0), new TimeSpan(0, 0, 0, 1));
                 _mainTimer.Start();
+                _stratBedFlag = true;
 
                 var currentAngle = CurrentAngle;
                 if (IsNeedUpdateData(currentAngle))
@@ -851,6 +854,7 @@ namespace CardioMonitor.Ui.Sessions
                 _mainTimer.Stop();
                 Session.Status = SessionStatus.Terminated;
                 SaveSession();
+                _stratBedFlag = false;
                 BedUSBConnection.StartCommand("EmergencyStop");
             }
             else
@@ -872,11 +876,12 @@ namespace CardioMonitor.Ui.Sessions
             Session = new SessionModel();
             if (_mainTimer != null) {_mainTimer.Stop();}
             if (_checkStatusTimer != null) { _checkStatusTimer.Stop(); }
+            _stratBedFlag = false;
             _autoPumping = new AutoPumping();
         }
         public void StartStatusTimer()
         {
-            _checkStatusTimer = new CardioTimer(StatusTimerTick, new TimeSpan(10, 0, 0, 0), new TimeSpan(0, 0, 0, 0, 500));
+            _checkStatusTimer = new CardioTimer(StatusTimerTick, new TimeSpan(10, 0, 0, 0), new TimeSpan(0, 0, 0, 0,815));
             _checkStatusTimer.Start();
         }
         private void StatusTimerTick(object sender, EventArgs e)
@@ -885,7 +890,7 @@ namespace CardioMonitor.Ui.Sessions
             //RemainingTime -= _oneSecond;
             //если цикл не запущен, а с кровати пришел флаг старт и начала цикла, то запуск
             BedConnectionStatus = BedUSBConnection.GetConnectionStatus();
-            if ((BedConnectionStatus == BedConnectionStatus.Loop)&&(BedUSBConnection.GetStartFlag() == 1)&&(Session.Status == SessionStatus.Unknown))
+            if ((BedConnectionStatus == BedConnectionStatus.Loop)&&(BedUSBConnection.GetStartFlag() == 1)&&(Session.Status == SessionStatus.Unknown)&&(!_stratBedFlag))
             {
                 StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
                 Session.Status = SessionStatus.InProgress;
@@ -896,13 +901,29 @@ namespace CardioMonitor.Ui.Sessions
                 CurrentAngle = 0;
                 PeriodSeconds = 0;
                 PeriodNumber = 1;
-                ExecutionStatus = "Старт..."; 
+                _previuosCheckPointAngle = -10;
+
+                ExecutionStatus = "Старт...";
+                
+
+                
+
                 _isUpping = true;
                 _isNeedReversing = false;
                 _isReversing = false;
+
+                //TODO можно протестить все за 30 секунд, раскомментровать следующу строку, закомментровать следующую за ней
+                // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 2, 0), new TimeSpan(0, 0, 0, 0, 100));
                 _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 18, 0), new TimeSpan(0, 0, 0, 1));
                 _mainTimer.Start();
-                UpdateData(CurrentAngle);
+
+                var currentAngle = CurrentAngle;
+                if (IsNeedUpdateData(currentAngle))
+                {
+                    UpdateData(currentAngle);
+                }
+
+               
             }
 
 
@@ -932,21 +953,32 @@ namespace CardioMonitor.Ui.Sessions
             if ((BedConnectionStatus == BedConnectionStatus.Loop) && (BedUSBConnection.GetStartFlag() == 0) && (Session.Status == SessionStatus.InProgress))
             {
                 Session.Status = SessionStatus.Suspended;
+                _mainTimer.Suspend();
+                StartButtonText = Localisation.SessionViewModel_StartButton_Text;
             }
             //если запущен цикл, кровать была на паузе и была выведена из нее - продолжить работу
             if ((BedConnectionStatus == BedConnectionStatus.Loop) && (BedUSBConnection.GetStartFlag() == 1) && (Session.Status == SessionStatus.Suspended))
             {
                 Session.Status = SessionStatus.InProgress;
+                StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
+                _mainTimer.Resume();
             }
             //если кровать запущена и пришел флаг реверса - реверс
 
             if ((BedConnectionStatus == BedConnectionStatus.Loop) && (BedUSBConnection.GetReverseFlag() == 1) && (Session.Status == SessionStatus.InProgress))
             {
-                Session.Status = SessionStatus.InProgress;
+                _isNeedReversing = true;
             }
 
 
             //если кровать запущена и пришел флаг экстренной остановки - завершить сеанс
+            if ((BedConnectionStatus == BedConnectionStatus.NotReady) && ((Session.Status == SessionStatus.InProgress) || (Session.Status ==SessionStatus.Suspended)))
+            {
+                Session.Status = SessionStatus.Terminated;
+                _mainTimer.Stop();
+                ThreadAssistant.StartInUiThread(() => { SaveSession(); });
+                _stratBedFlag = false;
+            }
         }
     }
 }

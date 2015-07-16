@@ -286,7 +286,7 @@ namespace CardioMonitor.Core.Repository.Controller
                     device.close();
                     return resultX;                   
                 }
-                return 0;
+                return -1;
             });
         }
 
