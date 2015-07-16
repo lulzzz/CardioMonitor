@@ -424,7 +424,7 @@ namespace CardioMonitor.ViewModel{
         private void StartSession(object sender, EventArgs args)
         {
             SessionViewModel.Patient = PatientsViewModel.SelectedPatient;
-            
+            SessionViewModel.StartStatusTimer();
             MainTCSelectedIndex = (int) ViewIndex.SessionView;
         }
 

@@ -32,11 +32,11 @@ namespace CardioMonitor.Core.Repository.BedController
         {
             try
             {
-                var device = GetBedUsbDevice();
-                if (device == null) { return BedStatus.Disconnected;}
-
                 lock (_lockObject)
                 {
+                    var device = GetBedUsbDevice();
+                    if (device == null) { return BedStatus.Disconnected; }
+
                     var message = new byte[] {0x6e, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff};
                     device.write(message);
 
@@ -76,11 +76,11 @@ namespace CardioMonitor.Core.Repository.BedController
         /// </summary>
         public BedMovingStatus GetBedMovingStatus()
         {
-            var device = GetBedUsbDevice();
-            if (device == null) { return BedMovingStatus.Disconnected; }
-
             lock (_lockObject)
             {
+                var device = GetBedUsbDevice();
+                if (device == null) { return BedMovingStatus.Disconnected; }
+
                 var bedMovingStatus = BedMovingStatus.Disconnected;
 
                 var message = new byte[] {0x6e, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff};
@@ -123,11 +123,11 @@ namespace CardioMonitor.Core.Repository.BedController
         /// </summary>
         public void UpdateFlags()
         {
-            var device = GetBedUsbDevice();
-            if (device == null) { return; }
-
-            lock (_lockObject)
+           lock (_lockObject)
             {
+                var device = GetBedUsbDevice();
+                if (device == null) { return; }
+
                 var message = new byte[] { 0x6e, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff };
                 device.write(message);
                 var readData = device.read();
@@ -160,10 +160,11 @@ namespace CardioMonitor.Core.Repository.BedController
         /// <returns></returns>
         public StartFlag GetStartFlag()
         {
-            var device = GetBedUsbDevice();
-            if (device == null) { return StartFlag.Default; }
             lock (_lockObject)
             {
+                var device = GetBedUsbDevice();
+                if (device == null) { return StartFlag.Default; }
+
                 var message = new byte[] { 0x6e, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff };
                 device.write(message);
                 var readData = device.read();
@@ -190,11 +191,11 @@ namespace CardioMonitor.Core.Repository.BedController
         /// <returns></returns>
         public ReverseFlag GetReverseFlag()
         {
-            var device = GetBedUsbDevice();
-            if (device == null) { return ReverseFlag.Default;}
-
             lock (_lockObject)
             {
+                var device = GetBedUsbDevice();
+                if (device == null) { return ReverseFlag.Default; }
+
                 var message = new byte[] { 0x6e, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff };
                 device.write(message);
 
@@ -223,15 +224,15 @@ namespace CardioMonitor.Core.Repository.BedController
         public Task<double> GetAngleXAsync()
         {
             return Task.Factory.StartNew(() =>
-            {
-                var device = GetBedUsbDevice();
-                if (device == null)
-                {
-                    return 0;
-                }
-
+            {              
                 lock (_lockObject)
                 {
+                    var device = GetBedUsbDevice();
+                    if (device == null)
+                    {
+                        return -1;
+                    }
+
                     var message = new byte[] {0x50, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff};
                     device.write(message);
                     var readData = device.read();
@@ -288,11 +289,11 @@ namespace CardioMonitor.Core.Repository.BedController
         /// </summary>
         public double GetAngleY()
         {
-            var device = GetBedUsbDevice();
-            if (device == null) { return 0;}
-
             lock (_lockObject)
             {
+                var device = GetBedUsbDevice();
+                if (device == null) { return 0; }
+
                 var message = new byte[] {0x51, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff};
                 device.write(message);
                 byte[] readData = device.read();
@@ -382,10 +383,11 @@ namespace CardioMonitor.Core.Repository.BedController
         {
             try
             {
-                var device = GetBedUsbDevice();
-                if (device == null) { return; }
                 lock (_lockObject)
                 {
+                    var device = GetBedUsbDevice();
+                    if (device == null) { return; }
+
                     byte[] message = null;
                     switch (command)
                     {
