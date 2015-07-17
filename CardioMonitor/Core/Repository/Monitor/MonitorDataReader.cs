@@ -16,7 +16,6 @@ namespace CardioMonitor.Core.Repository.Monitor
             return Task.Factory.StartNew(() =>
             {
                 //StartConnection();
-                var outputData = 0;
                 var patientParams = new PatientParams();
                 var stopFlag = false;
 
@@ -211,8 +210,8 @@ namespace CardioMonitor.Core.Repository.Monitor
 
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
-                    //sListener.Shutdown(SocketShutdown.Both);
-                    //sListener.Close();
+                    sListener.Shutdown(SocketShutdown.Both);
+                    sListener.Close();
                     //Listener.Dispose();
                     // patientParams.InclinationAngle = 10.5;
                     return patientParams;

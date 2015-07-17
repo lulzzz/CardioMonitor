@@ -155,6 +155,10 @@ namespace CardioMonitor.Core.Repository.Monitor
             /*var patientParametrs = MonitorDataReader.GetPatientParams();
             return patientParametrs;*/
             var patientParametrs = MonitorDataReader.GetPatientParams();
+            if ((patientParametrs.Result.AverageArterialPressure == 0)&&(patientParametrs.Result.DiastolicArterialPressure == 0)&&(patientParametrs.Result.HeartRate == 0)&&(patientParametrs.Result.RepsirationRate == 0)&&(patientParametrs.Result.Spo2 == 0)&&(patientParametrs.Result.SystolicArterialPressure == 0))
+            {
+                patientParametrs = MonitorDataReader.GetPatientParams();
+            }
             return patientParametrs;
             //return _patientParams[Index];
         #endif

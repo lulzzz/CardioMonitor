@@ -208,7 +208,7 @@ namespace CardioMonitor.ViewModel{
                 ShowResultsEvent = ShowSessionResults
             };
             SessionViewModel = new SessionViewModel();
-            
+            //SessionViewModel.StartStatusTimer();
             SessionDataViewModel = new SessionDataViewModel();
             
             TreatmentDataViewModel = new TreatmentDataViewModel();
@@ -424,8 +424,7 @@ namespace CardioMonitor.ViewModel{
         private void StartSession(object sender, EventArgs args)
         {
             SessionViewModel.Patient = PatientsViewModel.SelectedPatient;
-            //SessionViewModel.StartStatusTimer();
-            
+            SessionViewModel.StartStatusTimer();
             MainTCSelectedIndex = (int) ViewIndex.SessionView;
         }
 
