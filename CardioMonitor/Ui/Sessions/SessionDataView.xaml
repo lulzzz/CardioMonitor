@@ -53,6 +53,8 @@
                                     Binding="{Binding FirstName}"/>
                 <DataGridTextColumn Header="Отчество"
                                     Binding="{Binding PatronymicName}"/>
+                <DataGridTextColumn Header="Дата рождения"
+                                    Binding="{Binding BirthDate, StringFormat='{}{0:dd.MM.yyyy}'}"/>
                 <DataGridTextColumn Header="Ид"
                                     Binding="{Binding Id}"/>
             </DataGrid.Columns>

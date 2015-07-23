@@ -64,5 +64,22 @@ namespace CardioMonitor.View
             _viewModel.UpdatePatiens();
         }
 
+        private async void MetroWindow_Closed(object sender, EventArgs e)
+        {   
+        }
+
+        private async void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            var closingDialogresult = await MessageHelper.Instance.ShowMessageAsync("Вы уверены, что хотите закрыть программу?", "Cardio Monitor", MessageDialogStyle.AffirmativeAndNegative);
+            if (closingDialogresult == MessageDialogResult.Affirmative) 
+            {
+                //Необходимо для закрытие из асинхронности
+                Closing -= MetroWindow_Closing;
+                Close();
+                e.Cancel = false;
+            }
+        }
+
     }
 }

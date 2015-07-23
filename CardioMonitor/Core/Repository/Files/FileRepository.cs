@@ -38,9 +38,13 @@ namespace CardioMonitor.Core.Repository.Files
                                                                          session.DateTime.Hour,
                                                                          session.DateTime.Minute,
                                                                          session.DateTime.Second);
-                var fileName = String.Format("{0}_{1}_{2}_{3}_{4}.cmsf", patient.LastName,
+                var birthDateSring = String.Format("{0}_{1}_{2}", session.DateTime.Day,
+                                                                        session.DateTime.Month,
+                                                                        session.DateTime.Year);
+                var fileName = String.Format("{0}_{1}_{2}_{3}_{4}_{5}.cmsf", patient.LastName,
                                                                          patient.FirstName,
                                                                          patient.PatronymicName,
+                                                                         birthDateSring,
                                                                          patient.Id,
                                                                          dateSring);
 
