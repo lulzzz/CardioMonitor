@@ -134,7 +134,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                                         Pulse4 = Pulse4 << 12;
                                         int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
 
-                                        if ((result > 0) && (result < 300))
+                                        if ((result > 0) && (result < 250))
                                         {
                                             patientParams.SystolicArterialPressure = result;
 
@@ -155,7 +155,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                                         Pulse4 = Pulse4 << 12;
                                         int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
 
-                                        if ((result >= 0) && (result <= 300))
+                                        if ((result >= 0) && (result <= 250))
                                         {
                                             patientParams.DiastolicArterialPressure = result;
 
@@ -176,12 +176,35 @@ namespace CardioMonitor.Core.Repository.Monitor
                                         Pulse4 = Pulse4 << 12;
                                         int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
 
-                                        if ((result > 0) && (result <= 300))
+                                        if ((result > 0) && (result <= 250))
                                         {
                                             patientParams.AverageArterialPressure = result;
 
                                         }
-                                    } // если все значения не нулевые (заполнились) - остановить поиск
+                                    }
+                                   /* if ((bytes[iterator + 2] >= 0x40) && (bytes[iterator + 2] <= 0x4F) && (bytes[iterator + 4] >= 0x10) && (bytes[iterator + 4] <= 0x1F))          //поиск давления в манжете
+                                    {
+                                        int Pulse1 = bytes[iterator + 6];
+                                        int Pulse2 = bytes[iterator + 8];
+                                        int Pulse3 = bytes[iterator + 10];
+                                        int Pulse4 = bytes[iterator + 12];
+                                        Pulse1 = Pulse1 >> 4;
+                                        Pulse2 = Pulse2 >> 4;
+                                        Pulse3 = Pulse3 >> 4;
+                                        Pulse4 = Pulse4 >> 4;
+                                        Pulse2 = Pulse2 << 4;
+                                        Pulse3 = Pulse3 << 8;
+                                        Pulse4 = Pulse4 << 12;
+                                        int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
+
+                                        if ((result >= 0) && (result <= 180))
+                                        {
+                                           // patientParams.RepsirationRate = result;
+                                           
+
+                                        }
+                                    }*/
+                                    // если все значения не нулевые (заполнились) - остановить поиск
                                     if ((patientParams.AverageArterialPressure != 0) &&
                                         (patientParams.DiastolicArterialPressure != 0) && (patientParams.HeartRate != 0) &&
                                         (patientParams.RepsirationRate != 0) && (patientParams.Spo2 != 0) &&
@@ -210,10 +233,8 @@ namespace CardioMonitor.Core.Repository.Monitor
 
                     handler.Shutdown(SocketShutdown.Both);
                     handler.Close();
-                    sListener.Shutdown(SocketShutdown.Both);
-                    sListener.Close();
-                    //Listener.Dispose();
-                    // patientParams.InclinationAngle = 10.5;
+                   // sListener.Shutdown(SocketShutdown.Both);
+                    sListener.Close();                   
                     return patientParams;
                 }
                 catch (Exception ex)

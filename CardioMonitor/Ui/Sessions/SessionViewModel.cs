@@ -393,8 +393,8 @@ namespace CardioMonitor.Ui.Sessions
                         _isNeedReversing = false;
                         _isReversing = true;
                         _mainTimer.Stop();
-                      /*  RemainingTime = (ElapsedTime.Minutes > 1) 
-                                        ? ElapsedTime - new TimeSpan(0, 1, 0) 
+                       /* RemainingTime = (ElapsedTime.Minutes > 1) 
+                                        ? ElapsedTime - new TimeSpan(0, 0, 30) 
                                         : ElapsedTime;*/
                         RemainingTime = ElapsedTime;
                         _mainTimer = new CardioTimer(TimerTick, RemainingTime, new TimeSpan(0, 0, 0, 1));
@@ -521,9 +521,9 @@ namespace CardioMonitor.Ui.Sessions
                     // Если накачка прошла неуспешно
                     if (!pumpingResult)
                     {
-                       // await MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку давления.");
+                        await MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку давления.");
                     }
-                    //Thread.Sleep(new TimeSpan(0, 0, 0, 50));
+                    
 
                 }
                 catch (TimeoutException)
@@ -543,7 +543,7 @@ namespace CardioMonitor.Ui.Sessions
                 _isUpping = true;
                 _isNeedReversing = false;
                 _isReversing = false;
-
+                _bedUsbController.ExecuteCommand(BedControlCommand.Start);
                 //TODO можно протестить все за 30 секунд, раскомментровать следующу строку, закомментровать следующую за ней
                // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 2, 0), new TimeSpan(0, 0, 0, 0, 100));
                 _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 18, 0), new TimeSpan(0, 0, 0, 1));
@@ -565,7 +565,7 @@ namespace CardioMonitor.Ui.Sessions
                     new DataPoint(_x++, _y++),
                     new DataPoint(_x++, _y++),
                 };
-                _bedUsbController.ExecuteCommand(BedControlCommand.Start);
+                
             }
             else
             {
@@ -602,7 +602,7 @@ namespace CardioMonitor.Ui.Sessions
 
             ElapsedTime += _oneSecond;
             RemainingTime -= _oneSecond;
-            if (ElapsedTime == RemainingTime)
+            if (ElapsedTime >= RemainingTime)
             {
                 _isUpping = false;
             }
@@ -625,6 +625,7 @@ namespace CardioMonitor.Ui.Sessions
             {
                 ThreadAssistant.StartInUiThread(SessionComplete);
             }
+            ThreadAssistant.StartInUiThread(StopTimerAndSaveSession);
             //Для ЭКГ графика
             //ThreadAssistant.StartInUiThread(() =>
             //    Points.Add(new DataPoint(x++, Math.Pow(-1, y)*y++)));
@@ -756,10 +757,11 @@ namespace CardioMonitor.Ui.Sessions
         {
             if (_bedUsbController.IsConnected())
             {
+                _bedUsbController.ExecuteCommand(BedControlCommand.Pause);
                 _mainTimer.Suspend();
                 StartButtonText = Localisation.SessionViewModel_StartButton_Text;
                 Session.Status = SessionStatus.Suspended;
-                _bedUsbController.ExecuteCommand(BedControlCommand.Pause);
+               
             }
             else
             {
@@ -775,10 +777,14 @@ namespace CardioMonitor.Ui.Sessions
 
             if (_bedUsbController.IsConnected())
             {
+                _bedUsbController.ExecuteCommand(BedControlCommand.Start);
+                StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
+                Session.Status = SessionStatus.InProgress;
+                await Task.Delay(new TimeSpan(0, 0, 2));
                 _mainTimer.Resume();
                 StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
                 Session.Status = SessionStatus.InProgress;
-                _bedUsbController.ExecuteCommand(BedControlCommand.Start);
+                
             }
             else
             {
@@ -829,11 +835,12 @@ namespace CardioMonitor.Ui.Sessions
         {
             if (_bedUsbController.IsConnected())
             {
+                _bedUsbController.ExecuteCommand(BedControlCommand.Reverse);
                 _isNeedReversing = true;
                 _autoPumping = new AutoPumping();
-                _previuosCheckPointAngle = -10;
-                _bedUsbController.ExecuteCommand(BedControlCommand.Reverse);
-                ThreadAssistant.StartInUiThread(() => {  MessageHelper.Instance.ShowMessageAsync("Запущен реверс"); });
+                _previuosCheckPointAngle = 30;
+                
+                //ThreadAssistant.StartInUiThread(() => {  MessageHelper.Instance.ShowMessageAsync("Запущен реверс"); });
                // await MessageHelper.Instance.ShowMessageAsync("Запущен реверс");
             }
             else
@@ -849,11 +856,13 @@ namespace CardioMonitor.Ui.Sessions
         {
             if (_bedUsbController.IsConnected())
             {
+                _bedUsbController.ExecuteCommand(BedControlCommand.EmergencyStop);
                 _mainTimer.Stop();
                 Session.Status = SessionStatus.Terminated;
                 SaveSession();
                 _startBedFlag = false;
-                _bedUsbController.ExecuteCommand(BedControlCommand.EmergencyStop);
+                
+
             }
             else
             {
@@ -881,6 +890,19 @@ namespace CardioMonitor.Ui.Sessions
         {
             _checkStatusTimer = new CardioTimer(StatusTimerTick, new TimeSpan(10, 0, 0, 0), new TimeSpan(0, 0, 0, 1));
             _checkStatusTimer.Start();
+        }
+
+        public void StopTimerAndSaveSession()
+        {
+            if ((Status == SessionStatus.InProgress)&&(CurrentAngle == 0)&&(RemainingTime < ElapsedTime))
+            {
+                SessionComplete();
+                _startBedFlag = false;
+                RemainingTime = TimeSpan.Zero;
+                ElapsedTime = TimeSpan.Zero;
+                if (_mainTimer != null) { _mainTimer.Stop(); }
+                if (_checkStatusTimer != null) { _checkStatusTimer.Stop(); }
+            }
         }
 
         private async void StatusTimerTick(object sender, EventArgs e)
@@ -913,28 +935,12 @@ namespace CardioMonitor.Ui.Sessions
                 }
             }*/
 
-           
-            //если кровать запущена и прешел флаг паузы - пауза
-           /* if ((BedStatus == BedStatus.Loop) && (_bedUsbController.GetStartFlag() == StartFlag.Pause) && (Session.Status == SessionStatus.InProgress))
-            {
-                Session.Status = SessionStatus.Suspended;
-            }
-            //если запущен цикл, кровать была на паузе и была выведена из нее - продолжить работу
-            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.GetStartFlag() == StartFlag.Start) && (Session.Status == SessionStatus.Suspended))
-            {
-                Session.Status = SessionStatus.InProgress;
-            }
-            //если кровать запущена и пришел флаг реверса - реверс
-
-            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.GetReverseFlag() == ReverseFlag.Reversed) && (Session.Status == SessionStatus.InProgress))
-            {
-                Session.Status = SessionStatus.InProgress;
-            }*/
             if ((BedStatus == BedStatus.Loop) && (_bedUsbController.StartFlag == StartFlag.Pause) && (Session.Status == SessionStatus.InProgress))
             {
                 Session.Status = SessionStatus.Suspended;
                 _mainTimer.Suspend();
                 StartButtonText = Localisation.SessionViewModel_StartButton_Text;
+                ThreadAssistant.StartInUiThread(() => { MessageHelper.Instance.ShowMessageAsync("Нажата пауза"); });
             }
             //если запущен цикл, кровать была на паузе и была выведена из нее - продолжить работу
             if ((BedStatus == BedStatus.Loop) && (_bedUsbController.StartFlag == StartFlag.Start) && (Session.Status == SessionStatus.Suspended))
@@ -942,6 +948,7 @@ namespace CardioMonitor.Ui.Sessions
                 Session.Status = SessionStatus.InProgress;
                 StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
                 _mainTimer.Resume();
+                ThreadAssistant.StartInUiThread(() => { MessageHelper.Instance.ShowMessageAsync("Нажат старт"); });
             }
             //если кровать запущена и пришел флаг реверса - реверс
             
@@ -951,7 +958,7 @@ namespace CardioMonitor.Ui.Sessions
                 && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing))
             {
                 _isNeedReversing = true;
-                _previuosCheckPointAngle = -10;
+                _previuosCheckPointAngle = 30;
                 _autoPumping = new AutoPumping();
                // await MessageHelper.Instance.ShowMessageAsync("Запущен реверс");
                 ThreadAssistant.StartInUiThread(() => { MessageHelper.Instance.ShowMessageAsync("Запущен реверс"); });

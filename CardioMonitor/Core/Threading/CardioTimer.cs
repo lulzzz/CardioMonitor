@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace CardioMonitor.Core.Threading
 {
@@ -51,6 +52,7 @@ namespace CardioMonitor.Core.Threading
                 if (!_isThreadSuspended)
                 {
                     _workTime -= _period;
+                    //Task.Factory.StartNew(() => _timerEvent(null, null));
                     _timerEvent(null, null);
                 }
             }

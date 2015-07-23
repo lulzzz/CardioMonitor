@@ -102,7 +102,7 @@
                 Margin="10"></Button>
         <TextBlock Grid.Row="4"
                    FontSize="14"
-                   Text="Тут будут графики"
+                   Text=""
                    Margin="10"
                    TextAlignment="Center"></TextBlock>
     </Grid>
