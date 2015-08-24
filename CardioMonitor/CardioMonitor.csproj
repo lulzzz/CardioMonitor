@@ -160,6 +160,7 @@
     <Compile Include="Core\Repository\BedController\ReverseFlag.cs" />
     <Compile Include="Core\Repository\BedController\StartFlag.cs" />
     <Compile Include="Core\Repository\Monitor\AutoPumpingRequest.cs" />
+    <Compile Include="Core\Repository\Monitor\CRC8.cs" />
     <Compile Include="Core\Threading\CardioTimer.cs" />
     <Compile Include="Core\Repository\BedController\BedStatus.cs" />
     <Compile Include="Core\Repository\BedController\BedMovingStatus.cs" />
