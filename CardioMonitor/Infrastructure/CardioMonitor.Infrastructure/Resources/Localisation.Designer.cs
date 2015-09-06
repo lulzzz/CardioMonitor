@@ -61,6 +61,15 @@ namespace CardioMonitor.Infrastructure.Resources {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на Данные не корректны.
+        /// </summary>
+        internal static string ArgumentNullExceptionMessage {
+            get {
+                return ResourceManager.GetString("ArgumentNullExceptionMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на Не удалость загрузить информация о сеансе из файла.
         /// </summary>
         internal static string FileRepository_LoadPatientException {
@@ -75,6 +84,15 @@ namespace CardioMonitor.Infrastructure.Resources {
         internal static string FileRepository_SavePatientException {
             get {
                 return ResourceManager.GetString("FileRepository_SavePatientException", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на Сеанс|*.cmsf.
+        /// </summary>
+        internal static string FileRepository_SeansFileFilter {
+            get {
+                return ResourceManager.GetString("FileRepository_SeansFileFilter", resourceCulture);
             }
         }
     }

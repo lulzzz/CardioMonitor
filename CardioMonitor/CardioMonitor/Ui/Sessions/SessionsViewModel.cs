@@ -5,6 +5,7 @@ using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Infrastructure.Models.Patients;
 using CardioMonitor.Infrastructure.Models.Session;
 using CardioMonitor.Infrastructure.Models.Treatment;
+using CardioMonitor.Infrastructure.Ui;
 using CardioMonitor.Infrastructure.Ui.Base;
 using CardioMonitor.Resources;
 using CardioMonitor.ViewModel;

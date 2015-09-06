@@ -5,7 +5,6 @@ using System.Windows.Data;
 using CardioMonitor.Core;
 using CardioMonitor.Ui.Sessions;
 using CardioMonitor.ViewModel;
-using CardioMonitor.ViewModel.Sessions;
 using OxyPlot;
 using Binding = System.Windows.Forms.Binding;
 using UserControl = System.Windows.Controls.UserControl;

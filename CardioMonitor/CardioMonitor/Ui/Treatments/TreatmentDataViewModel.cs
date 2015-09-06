@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using CardioMonitor.Infrastructure.Models.Patients;
 using CardioMonitor.Infrastructure.Models.Treatment;
+using CardioMonitor.Infrastructure.Ui;
 using CardioMonitor.Infrastructure.Ui.Base;
 using CardioMonitor.ViewModel;
 

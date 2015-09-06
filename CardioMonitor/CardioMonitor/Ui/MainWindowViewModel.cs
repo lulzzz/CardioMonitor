@@ -9,18 +9,20 @@ using CardioMonitor.Infrastructure.Models.Patients;
 using CardioMonitor.Infrastructure.Models.Session;
 using CardioMonitor.Infrastructure.Models.Treatment;
 using CardioMonitor.Infrastructure.Repository.Files;
+using CardioMonitor.Infrastructure.Ui;
 using CardioMonitor.Infrastructure.Ui.Base;
+using CardioMonitor.Infrastructure.Ui.Sessions;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Communication;
 using CardioMonitor.Ui.Patients;
 using CardioMonitor.Ui.Sessions;
 using CardioMonitor.Ui.Treatments;
 using CardioMonitor.ViewModel.Communication;
-using CardioMonitor.ViewModel.Sessions;
 using MahApps.Metro.Controls.Dialogs;
 using InfrastructureResourcces = CardioMonitor.Infrastructure;
 
-namespace CardioMonitor.ViewModel{
+namespace CardioMonitor.ViewModel
+{
 
     internal enum ViewIndex
     {
@@ -452,31 +454,7 @@ namespace CardioMonitor.ViewModel{
 
         private async void LoadSession(object sender, EventArgs args)
         {
-            var loadDialog = new OpenFileDialog {CheckFileExists = true, Filter = Localisation.FileRepository_SeansFileFilter};
-            var result = loadDialog.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                var message = String.Empty;
-                try
-                {
-                    var container = FileRepository.LoadFromFile(loadDialog.FileName);
-                    SessionDataViewModel.Session = new SessionModel {Session = container.Session};
-                    SessionDataViewModel.Patient = container.Patient;
-                    MainTCSelectedIndex = (int) ViewIndex.SessionDataView;
-                }
-                catch (ArgumentNullException)
-                {
-                    message = Localisation.ArgumentNullExceptionMessage;
-                }
-                catch (Exception ex)
-                {
-                    message = ex.Message;
-                }
-                if (!String.IsNullOrEmpty(message))
-                {
-                    await MessageHelper.Instance.ShowMessageAsync(message);
-                }
-            }
+            SessionDataViewModel.OpenFromFile();
         }
     }
 

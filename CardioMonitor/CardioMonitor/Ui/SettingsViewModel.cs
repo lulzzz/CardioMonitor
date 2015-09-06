@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.Core;
 using CardioMonitor.Core.Repository.DataBase;
+using CardioMonitor.Infrastructure.Ui;
 using CardioMonitor.Infrastructure.Ui.Base;
 using CardioMonitor.Resources;
 

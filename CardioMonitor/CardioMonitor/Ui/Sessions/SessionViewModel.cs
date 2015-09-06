@@ -13,6 +13,7 @@ using CardioMonitor.Infrastructure.Models.Patients;
 using CardioMonitor.Infrastructure.Models.Session;
 using CardioMonitor.Infrastructure.Models.Treatment;
 using CardioMonitor.Infrastructure.Repository.Files;
+using CardioMonitor.Infrastructure.Ui;
 using CardioMonitor.Infrastructure.Ui.Base;
 using CardioMonitor.Resources;
 using CardioMonitor.ViewModel;

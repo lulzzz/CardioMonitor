@@ -2,6 +2,7 @@
 using System.Windows;
 using CardioMonitor.Core;
 using CardioMonitor.Core.Threading;
+using CardioMonitor.Infrastructure.Ui;
 using CardioMonitor.ViewModel;
 using MahApps.Metro;
 using MahApps.Metro.Controls;

@@ -192,7 +192,6 @@
     <Compile Include="Ui\EcgController\EcgControllerView.xaml.cs">
       <DependentUpon>EcgControllerView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\Communication\PatientEventArgs.cs" />
     <Compile Include="Core\Repository\DataBase\DataBaseController.cs" />
     <Compile Include="Core\Repository\DataBase\DataBaseRepository.cs" />
@@ -213,12 +212,8 @@
       <DependentUpon>SessionsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\Sessions\SessionsViewModel.cs" />
-    <Compile Include="Ui\Sessions\SessionDataViewModel.cs" />
     <Compile Include="Ui\Sessions\SessionView.xaml.cs">
       <DependentUpon>SessionView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Ui\Sessions\SessionDataView.xaml.cs">
-      <DependentUpon>SessionDataView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\Sessions\SessionViewModel.cs" />
     <Compile Include="Ui\Treatments\TreatmentDataViewModel.cs" />
@@ -266,10 +261,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Ui\Sessions\SessionView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Ui\Sessions\SessionDataView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

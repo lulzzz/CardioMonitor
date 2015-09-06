@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CardioMonitor.View.SessionDataView"
+﻿<UserControl x:Class="CardioMonitor.Infrastructure.Ui.Sessions.SessionDataView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -74,7 +74,7 @@
                   CanUserResizeRows="False"
                   CanUserReorderColumns="False"
                   SelectionUnit="FullRow"
-                  IsReadOnly="True"
+                  IsReadOnly="{Binding IsReadOnly, Mode=TwoWay, NotifyOnSourceUpdated=True, UpdateSourceTrigger=PropertyChanged}"
                   CanUserSortColumns="False"
                   ColumnWidth="*">
             <DataGrid.Columns>

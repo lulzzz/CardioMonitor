@@ -1,0 +1,49 @@
+﻿<controls:MetroWindow
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                      xmlns:Sessions="clr-namespace:CardioMonitor.Infrastructure.Ui.Sessions;assembly=CardioMonitor.Infrastructure"
+                      x:Class="CardioSessionViewer.MainWindow"
+                      Title="Cardio session viewer" 
+                      Height="350" 
+                      Width="925"
+                      WindowStartupLocation="CenterScreen"
+                      GlowBrush="{DynamicResource AccentColorBrush}"
+                      WindowState="Maximized" 
+                      mc:Ignorable="d"  Icon="Resources/usbHeart.ico">
+    <controls:MetroWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro.Resources;component/Icons.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.buttons.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </controls:MetroWindow.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Sessions:SessionDataView
+            DataContext="{Binding SessionDataViewModel}"
+            Grid.Row="0"/>
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="1"
+			        HorizontalAlignment="Center"
+			        VerticalAlignment="Bottom">
+            <Button Content="Открыть"
+                    Command="{Binding OpenSessionCommand}"
+				Height="27"
+				Width="150"
+				Margin="10"/>
+            <Button Content="Сохранить"
+                    Command="{Binding SaveSessionCommand}"
+				Height="27"
+				Width="150"
+				Margin="10"/>
+        </StackPanel>
+    </Grid>
+
+</controls:MetroWindow>

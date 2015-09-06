@@ -1,7 +1,6 @@
 ﻿using System.Windows.Controls;
-using CardioMonitor.ViewModel.Sessions;
 
-namespace CardioMonitor.View
+namespace CardioMonitor.Infrastructure.Ui.Sessions
 {
     /// <summary>
     /// Interaction logic for SessionDataView.xaml

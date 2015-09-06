@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Infrastructure.Models.Patients;
+using CardioMonitor.Infrastructure.Ui;
 using CardioMonitor.Infrastructure.Ui.Base;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Communication;

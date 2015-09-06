@@ -207,7 +207,4 @@
   <data name="SettingsViewModel_Saved" xml:space="preserve">
     <value>Настройки сохранены</value>
   </data>
-  <data name="FileRepository_SeansFileFilter" xml:space="preserve">
-    <value>Сеанс|*.cmsf</value>
-  </data>
 </root>

@@ -1,6 +1,5 @@
 ﻿using System.Windows.Controls;
 using CardioMonitor.Ui.Sessions;
-using CardioMonitor.ViewModel.Sessions;
 
 namespace CardioMonitor.View
 {

@@ -9,6 +9,7 @@
                       xmlns:main="clr-namespace:CardioMonitor"
                       xmlns:treatmentData="clr-namespace:CardioMonitor.Patients.TreatmentData"
                       xmlns:view="clr-namespace:CardioMonitor.View"
+                      xmlns:sessions="clr-namespace:CardioMonitor.Infrastructure.Ui.Sessions;assembly=CardioMonitor.Infrastructure"
                       Title="Cardio monitor" 
                       Height="350" 
                       Width="925"
@@ -151,7 +152,7 @@
             <controls:MetroTabItem Header="Результаты сеанса"
                                    Visibility="Collapsed">
                 <Grid >
-                    <view:SessionDataView Margin="10,0"
+                    <sessions:SessionDataView Margin="10,0"
                                                      DataContext="{Binding SessionDataViewModel}"/>
                 </Grid>
             </controls:MetroTabItem>

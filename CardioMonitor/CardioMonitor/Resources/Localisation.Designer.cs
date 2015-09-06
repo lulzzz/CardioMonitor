@@ -196,15 +196,6 @@ namespace CardioMonitor.Resources {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на Сеанс|*.cmsf.
-        /// </summary>
-        internal static string FileRepository_SeansFileFilter {
-            get {
-                return ResourceManager.GetString("FileRepository_SeansFileFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Ищет локализованную строку, похожую на Все несохраненые изменения будут потеряны. Продолжить?.
         /// </summary>
         internal static string LostChangesConfirmation {
