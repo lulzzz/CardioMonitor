@@ -18,20 +18,23 @@ namespace CardioMonitor.Core.Repository.Files
         /// </summary>
         /// <param name="patient">Пациент, которому принадлежит сеанс</param>
         /// <param name="session">Сеанс пациента</param>
-        public static void SaveToFile(Patient patient, Session session)
+        /// <param name="filePath">Полный путь к файлу (по умолчанию создается директория с именем пациента, и файл сохраняется в нее)</param>
+        public static void SaveToFile(Patient patient, Session session, string filePath = null)
         {
             if (patient == null) throw new ArgumentNullException("patient");
             if (session == null) throw new ArgumentNullException("session");
-
-            try
+            if (filePath == null)
             {
-                var dirPath = String.Format("{0}_{1}_{2}_{3}", patient.LastName, patient.FirstName, patient.PatronymicName,
+                filePath = Settings.Settings.Instance.FilesDirectoryPath;
+                var dirName = String.Format("{0}_{1}_{2}_{3}", patient.LastName, patient.FirstName, patient.PatronymicName,
                 patient.Id);
-                dirPath = Path.Combine(Settings.Settings.Instance.FilesDirectoryPath, dirPath);
-                if (!Directory.Exists(dirPath))
+                filePath = Path.Combine(filePath, dirName);
+
+                if (!Directory.Exists(filePath))
                 {
-                    Directory.CreateDirectory(dirPath);
+                    Directory.CreateDirectory(filePath);
                 }
+
                 var dateSring = String.Format("{0}_{1}_{2}_{3}_{4}_{5}", session.DateTime.Day,
                                                                          session.DateTime.Month,
                                                                          session.DateTime.Year,
@@ -47,6 +50,11 @@ namespace CardioMonitor.Core.Repository.Files
                                                                          birthDateSring,
                                                                          patient.Id,
                                                                          dateSring);
+                filePath = Path.Combine(filePath, fileName);
+            }
+
+            try
+            {
 
                 var container = new SessionContainer
                 {
@@ -54,7 +62,7 @@ namespace CardioMonitor.Core.Repository.Files
                     Session = session
                 };
 
-                using (var savingStream = new FileStream(Path.Combine(dirPath, fileName), FileMode.Create))
+                using (var savingStream = new FileStream(filePath, FileMode.Create))
                 {
                     var bf = new BinaryFormatter();
                     bf.Serialize(savingStream, container);

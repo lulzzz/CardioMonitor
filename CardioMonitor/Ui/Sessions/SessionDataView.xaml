@@ -74,7 +74,7 @@
                   CanUserResizeRows="False"
                   CanUserReorderColumns="False"
                   SelectionUnit="FullRow"
-                  IsReadOnly="True"
+                  IsReadOnly="{Binding IsReadOnly}"
                   CanUserSortColumns="False"
                   ColumnWidth="*">
             <DataGrid.Columns>
@@ -96,7 +96,6 @@
         </DataGrid>
         <Button x:Name="SaveB"
                 Command="{Binding SaveCommand}"
-                Visibility="Collapsed"
                 Grid.Row="3"
                 Content="Сохранить в файл"
                 FontSize="12"

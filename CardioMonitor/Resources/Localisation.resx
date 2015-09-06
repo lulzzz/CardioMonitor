@@ -216,4 +216,7 @@
   <data name="SettingsViewModel_Saved" xml:space="preserve">
     <value>Настройки сохранены</value>
   </data>
+  <data name="SessionDataViewModel_FileSaved" xml:space="preserve">
+    <value>Файл сохранен</value>
+  </data>
 </root>
