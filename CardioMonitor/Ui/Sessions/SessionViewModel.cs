@@ -452,7 +452,7 @@ namespace CardioMonitor.Ui.Sessions
             _oneSecond = new TimeSpan(0,0,0,1);
             _isNeedReversing = false;
             _isReversing = false;
-            _halfSessionTime = new TimeSpan(0,0,9,0);
+            _halfSessionTime = new TimeSpan(0,0,10,0);
             _autoPumping = new AutoPumping();
             _updatePatientParamTimeout = new TimeSpan(0,0,8);
             _pumpingTimeout = new TimeSpan(0, 0, 8);
@@ -495,7 +495,7 @@ namespace CardioMonitor.Ui.Sessions
                 Session.TreatmentId = Treatment.Id;
                 Session.DateTime = DateTime.Now;
                 ElapsedTime = new TimeSpan(0, 0, 0, 0);
-                RemainingTime = new TimeSpan(0, 0, 18, 0);
+                RemainingTime = new TimeSpan(0, 0, 20, 0);
                 CurrentAngle = 0;
                 PeriodSeconds = 0;
                 PeriodNumber = 1;
@@ -546,7 +546,7 @@ namespace CardioMonitor.Ui.Sessions
                 _bedUsbController.ExecuteCommand(BedControlCommand.Start);
                 //TODO можно протестить все за 30 секунд, раскомментровать следующу строку, закомментровать следующую за ней
                // _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 2, 0), new TimeSpan(0, 0, 0, 0, 100));
-                _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 18, 0), new TimeSpan(0, 0, 0, 1));
+                _mainTimer = new CardioTimer(TimerTick, new TimeSpan(0, 0, 20, 0), new TimeSpan(0, 0, 0, 1));
                 _mainTimer.Start();
                 _startBedFlag = true;
 
@@ -685,8 +685,6 @@ namespace CardioMonitor.Ui.Sessions
                 CurrentAngle -= _isUpping ? DownAnglePerSecond : (-1) * DownAnglePerSecond;
             }
 #else
-            //TODO думаю, тебе здесь надо кое-что верунть, как было
-           // BedUsbController bedUSBController = new BedUsbController();
            CurrentAngle = await _bedUsbController.GetAngleXAsync(); 
         /*   if (1 == PeriodNumber)
            {
@@ -894,7 +892,7 @@ namespace CardioMonitor.Ui.Sessions
 
         public void StopTimerAndSaveSession()
         {
-            if ((Status == SessionStatus.InProgress)&&(CurrentAngle == 0)&&(RemainingTime < ElapsedTime))
+            if ((Status == SessionStatus.InProgress)&&(CurrentAngle == 0)&&(RemainingTime < ElapsedTime)&&(BedStatus == BedStatus.Ready))
             {
                 SessionComplete();
                 _startBedFlag = false;

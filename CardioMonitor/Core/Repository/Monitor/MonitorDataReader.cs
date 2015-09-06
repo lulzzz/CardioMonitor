@@ -37,11 +37,11 @@ namespace CardioMonitor.Core.Repository.Monitor
                     {
 
 
-                        var bytes = new byte[4096];
+                        var bytes = new byte[6096];
                         var bytebuf = new byte[1024];
                         var iterator = 0;
                         var i = 0;
-                        while (i < 4000)
+                        while (i < 6000)
                         {
                             int bytesRec = handler.Receive(bytebuf);
                             Array.ConstrainedCopy(bytebuf, 0, bytes, i, bytesRec);
@@ -58,128 +58,165 @@ namespace CardioMonitor.Core.Repository.Monitor
                                 {
                                     if ((bytes[iterator + 2] >= 0xC0) && (bytes[iterator + 2] <= 0xCF) && (bytes[iterator + 4] <= 0x0F))       //поиск ЧСС
                                     {
-                                        int Pulse1 = bytes[iterator + 6];
-                                        int Pulse2 = bytes[iterator + 8];
-                                        int Pulse3 = bytes[iterator + 10];
-                                        int Pulse4 = bytes[iterator + 12];
-                                        Pulse1 = Pulse1 >> 4;
-                                        Pulse2 = Pulse2 >> 4;
-                                        Pulse3 = Pulse3 >> 4;
-                                        Pulse4 = Pulse4 >> 4;
-                                        Pulse2 = Pulse2 << 4;
-                                        Pulse3 = Pulse3 << 8;
-                                        Pulse4 = Pulse4 << 12;
-                                        int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
-
-                                        if ((result >= 15) && (result <= 250))
+                                        byte[] newbyte = new byte[24];
+                                        Array.ConstrainedCopy(bytes, iterator, newbyte, 0, 24);
+                                        if (CRC8.crc8Calculation(newbyte) == bytes[iterator + 24])
                                         {
-                                            patientParams.HeartRate = result;
+                                            int Pulse1 = bytes[iterator + 6];
+                                            int Pulse2 = bytes[iterator + 8];
+                                            int Pulse3 = bytes[iterator + 10];
+                                            int Pulse4 = bytes[iterator + 12];
+                                            Pulse1 = Pulse1 >> 4;
+                                            Pulse2 = Pulse2 >> 4;
+                                            Pulse3 = Pulse3 >> 4;
+                                            Pulse4 = Pulse4 >> 4;
+                                            Pulse2 = Pulse2 << 4;
+                                            Pulse3 = Pulse3 << 8;
+                                            Pulse4 = Pulse4 << 12;
+                                            int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
 
+                                            if ((result >= 15) && (result <= 250))
+                                            {
+                                                patientParams.HeartRate = result;
+
+                                            }
                                         }
                                     }
                                     if ((bytes[iterator + 2] >= 0xA0) && (bytes[iterator + 2] <= 0xAF) && (bytes[iterator + 4] <= 0x0F))          //поиск ЧД
                                     {
-                                        int Pulse1 = bytes[iterator + 6];
-                                        int Pulse2 = bytes[iterator + 8];
-                                        int Pulse3 = bytes[iterator + 10];
-                                        int Pulse4 = bytes[iterator + 12];
-                                        Pulse1 = Pulse1 >> 4;
-                                        Pulse2 = Pulse2 >> 4;
-                                        Pulse3 = Pulse3 >> 4;
-                                        Pulse4 = Pulse4 >> 4;
-                                        Pulse2 = Pulse2 << 4;
-                                        Pulse3 = Pulse3 << 8;
-                                        Pulse4 = Pulse4 << 12;
-                                        int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
-
-                                        if ((result >= 0) && (result <= 180))
+                                         byte[] newbyte = new byte[24];
+                                        Array.ConstrainedCopy(bytes, iterator, newbyte, 0, 24);
+                                        if (CRC8.crc8Calculation(newbyte) == bytes[iterator + 24])
                                         {
-                                            patientParams.RepsirationRate = result;
+                                            int Pulse1 = bytes[iterator + 6];
+                                            int Pulse2 = bytes[iterator + 8];
+                                            int Pulse3 = bytes[iterator + 10];
+                                            int Pulse4 = bytes[iterator + 12];
+                                            Pulse1 = Pulse1 >> 4;
+                                            Pulse2 = Pulse2 >> 4;
+                                            Pulse3 = Pulse3 >> 4;
+                                            Pulse4 = Pulse4 >> 4;
+                                            Pulse2 = Pulse2 << 4;
+                                            Pulse3 = Pulse3 << 8;
+                                            Pulse4 = Pulse4 << 12;
+                                            int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
 
+                                            if ((result >= 0) && (result <= 180))   //ну или просто > 0
+                                            {
+                                                if ((result == 0) && (patientParams.RepsirationRate != 0))   //если по какой то причине возвращается ноль, хотя уже было получено ненулевое значение - проигнорировать ноль
+                                                {
+
+                                                }
+                                                else        //да, я знаю что такой if/else это редкая лажа
+                                                {
+                                                    patientParams.RepsirationRate = result;
+                                                }
+
+                                            }
                                         }
                                     }
                                     if ((bytes[iterator + 2] >= 0xD0) && (bytes[iterator + 2] <= 0xDF) && (bytes[iterator + 4] <= 0x0F))          //поиск SPO2
                                     {
-                                        int Pulse1 = bytes[iterator + 6];
-                                        int Pulse2 = bytes[iterator + 8];
-                                        int Pulse3 = bytes[iterator + 10];
-                                        int Pulse4 = bytes[iterator + 12];
-                                        Pulse1 = Pulse1 >> 4;
-                                        Pulse2 = Pulse2 >> 4;
-                                        Pulse3 = Pulse3 >> 4;
-                                        Pulse4 = Pulse4 >> 4;
-                                        Pulse2 = Pulse2 << 4;
-                                        Pulse3 = Pulse3 << 8;
-                                        Pulse4 = Pulse4 << 12;
-                                        int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
-
-                                        if ((result > 0) && (result <= 100))
+                                         byte[] newbyte = new byte[24];
+                                        Array.ConstrainedCopy(bytes, iterator, newbyte, 0, 24);
+                                        if (CRC8.crc8Calculation(newbyte) == bytes[iterator + 24])
                                         {
-                                            patientParams.Spo2 = result;
+                                            int Pulse1 = bytes[iterator + 6];
+                                            int Pulse2 = bytes[iterator + 8];
+                                            int Pulse3 = bytes[iterator + 10];
+                                            int Pulse4 = bytes[iterator + 12];
+                                            Pulse1 = Pulse1 >> 4;
+                                            Pulse2 = Pulse2 >> 4;
+                                            Pulse3 = Pulse3 >> 4;
+                                            Pulse4 = Pulse4 >> 4;
+                                            Pulse2 = Pulse2 << 4;
+                                            Pulse3 = Pulse3 << 8;
+                                            Pulse4 = Pulse4 << 12;
+                                            int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
 
+                                            if ((result > 0) && (result <= 100))
+                                            {
+                                                patientParams.Spo2 = result;
+
+                                            }
                                         }
                                     }
                                     if ((bytes[iterator + 2] >= 0x10) && (bytes[iterator + 2] <= 0x1F) && (bytes[iterator + 4] >= 0x10) && (bytes[iterator + 4] <= 0x1F)) //поиск АД среднее - на самом деле систолическое
                                     {
-                                        int Pulse1 = bytes[iterator + 6];
-                                        int Pulse2 = bytes[iterator + 8];
-                                        int Pulse3 = bytes[iterator + 10];
-                                        int Pulse4 = bytes[iterator + 12];
-                                        Pulse1 = Pulse1 >> 4;
-                                        Pulse2 = Pulse2 >> 4;
-                                        Pulse3 = Pulse3 >> 4;
-                                        Pulse4 = Pulse4 >> 4;
-                                        Pulse2 = Pulse2 << 4;
-                                        Pulse3 = Pulse3 << 8;
-                                        Pulse4 = Pulse4 << 12;
-                                        int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
-
-                                        if ((result > 0) && (result < 250))
+                                         byte[] newbyte = new byte[24];
+                                        Array.ConstrainedCopy(bytes, iterator, newbyte, 0, 24);
+                                        if (CRC8.crc8Calculation(newbyte) == bytes[iterator + 24])
                                         {
-                                            patientParams.SystolicArterialPressure = result;
+                                            int Pulse1 = bytes[iterator + 6];
+                                            int Pulse2 = bytes[iterator + 8];
+                                            int Pulse3 = bytes[iterator + 10];
+                                            int Pulse4 = bytes[iterator + 12];
+                                            Pulse1 = Pulse1 >> 4;
+                                            Pulse2 = Pulse2 >> 4;
+                                            Pulse3 = Pulse3 >> 4;
+                                            Pulse4 = Pulse4 >> 4;
+                                            Pulse2 = Pulse2 << 4;
+                                            Pulse3 = Pulse3 << 8;
+                                            Pulse4 = Pulse4 << 12;
+                                            int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
 
+                                            if ((result > 0) && (result < 250))
+                                            {
+                                                patientParams.SystolicArterialPressure = result;
+
+                                            }
                                         }
                                     }
                                     if ((bytes[iterator + 4] >= 0x10) && (bytes[iterator + 4] <= 0x1F) && (bytes[iterator + 2] >= 0x20) && (bytes[iterator + 2] <= 0x2F)) //поиск АД диастол
                                     {
-                                        int Pulse1 = bytes[iterator + 6];
-                                        int Pulse2 = bytes[iterator + 8];
-                                        int Pulse3 = bytes[iterator + 10];
-                                        int Pulse4 = bytes[iterator + 12];
-                                        Pulse1 = Pulse1 >> 4;
-                                        Pulse2 = Pulse2 >> 4;
-                                        Pulse3 = Pulse3 >> 4;
-                                        Pulse4 = Pulse4 >> 4;
-                                        Pulse2 = Pulse2 << 4;
-                                        Pulse3 = Pulse3 << 8;
-                                        Pulse4 = Pulse4 << 12;
-                                        int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
-
-                                        if ((result >= 0) && (result <= 250))
+                                         byte[] newbyte = new byte[24];
+                                        Array.ConstrainedCopy(bytes, iterator, newbyte, 0, 24);
+                                        if (CRC8.crc8Calculation(newbyte) == bytes[iterator + 24])
                                         {
-                                            patientParams.DiastolicArterialPressure = result;
+                                            int Pulse1 = bytes[iterator + 6];
+                                            int Pulse2 = bytes[iterator + 8];
+                                            int Pulse3 = bytes[iterator + 10];
+                                            int Pulse4 = bytes[iterator + 12];
+                                            Pulse1 = Pulse1 >> 4;
+                                            Pulse2 = Pulse2 >> 4;
+                                            Pulse3 = Pulse3 >> 4;
+                                            Pulse4 = Pulse4 >> 4;
+                                            Pulse2 = Pulse2 << 4;
+                                            Pulse3 = Pulse3 << 8;
+                                            Pulse4 = Pulse4 << 12;
+                                            int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
 
+                                            if ((result > 0) && (result <= 250))
+                                            {
+                                                patientParams.DiastolicArterialPressure = result;
+
+                                            }
                                         }
                                     }
-                                    if ((bytes[iterator + 4] >= 0x10) && (bytes[iterator + 4] <= 0x1F) && (bytes[iterator + 2] >= 0x30) && (bytes[iterator + 2] <= 0x3F)) //поиск АД сист
+                                    if ((bytes[iterator + 4] >= 0x10) && (bytes[iterator + 4] <= 0x1F) && (bytes[iterator + 2] >= 0x30) && (bytes[iterator + 2] <= 0x3F)) //поиск АД среднее
                                     {
-                                        int Pulse1 = bytes[iterator + 6];
-                                        int Pulse2 = bytes[iterator + 8];
-                                        int Pulse3 = bytes[iterator + 10];
-                                        int Pulse4 = bytes[iterator + 12];
-                                        Pulse1 = Pulse1 >> 4;
-                                        Pulse2 = Pulse2 >> 4;
-                                        Pulse3 = Pulse3 >> 4;
-                                        Pulse4 = Pulse4 >> 4;
-                                        Pulse2 = Pulse2 << 4;
-                                        Pulse3 = Pulse3 << 8;
-                                        Pulse4 = Pulse4 << 12;
-                                        int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
-
-                                        if ((result > 0) && (result <= 250))
+                                         byte[] newbyte = new byte[24];
+                                        Array.ConstrainedCopy(bytes, iterator, newbyte, 0, 24);
+                                        if (CRC8.crc8Calculation(newbyte) == bytes[iterator + 24])
                                         {
-                                            patientParams.AverageArterialPressure = result;
+                                            int Pulse1 = bytes[iterator + 6];
+                                            int Pulse2 = bytes[iterator + 8];
+                                            int Pulse3 = bytes[iterator + 10];
+                                            int Pulse4 = bytes[iterator + 12];
+                                            Pulse1 = Pulse1 >> 4;
+                                            Pulse2 = Pulse2 >> 4;
+                                            Pulse3 = Pulse3 >> 4;
+                                            Pulse4 = Pulse4 >> 4;
+                                            Pulse2 = Pulse2 << 4;
+                                            Pulse3 = Pulse3 << 8;
+                                            Pulse4 = Pulse4 << 12;
+                                            int result = Pulse1 + Pulse2 + Pulse3 + Pulse4;
 
+                                            if ((result > 0) && (result <= 250))
+                                            {
+                                                patientParams.AverageArterialPressure = result;
+
+                                            }
                                         }
                                     }
                                    /* if ((bytes[iterator + 2] >= 0x40) && (bytes[iterator + 2] <= 0x4F) && (bytes[iterator + 4] >= 0x10) && (bytes[iterator + 4] <= 0x1F))          //поиск давления в манжете
@@ -215,7 +252,7 @@ namespace CardioMonitor.Core.Repository.Monitor
                                         stopFlag = true;
                                     }
                                 }
-                                if (iterator > (bytes.Length - 24))
+                                if (iterator > (bytes.Length - 50))
                                 {
                                     iterator = 0;
                                     stopSearchingFlag = true;
