@@ -20,7 +20,7 @@ namespace CardioMonitor.Core.Repository.Monitor
         /// Угол,используемый для задания диапазона значений текущего угла, для которых
         /// необходимо вызвать накачку
         /// </summary>
-        private const double PumpingResolutionAgnle = 4.5;
+        private const double PumpingStartResolutionAgnle = 0.5;
 
         /// <summary>
         /// Специальная велична, необходимая для корректной работы определения разрешения
@@ -57,9 +57,9 @@ namespace CardioMonitor.Core.Repository.Monitor
                 _previuosPumpingAngle = 30;
             }
             // Для подъема
-            if (isUpping && ((currentAngle >= 10.5 - PumpingResolutionAgnle && currentAngle <= 10.5)
-                || (currentAngle >= 21 - PumpingResolutionAgnle && currentAngle <= 21)
-                || (currentAngle >= 30 - PumpingResolutionAgnle && currentAngle <= 30)))
+            if (isUpping && ((currentAngle >= 10.5 - PumpingStartResolutionAgnle && currentAngle <= 10.5)
+                || (currentAngle >= 21 - PumpingStartResolutionAgnle && currentAngle <= 21)
+                || (currentAngle >= 30 - PumpingStartResolutionAgnle && currentAngle <= 30)))
             {
                 //Чтобы метод не вызывался слишком часто
                 if (Math.Abs(currentAngle - _previuosPumpingAngle) < ResolutionToleranceAgnle)
@@ -78,9 +78,9 @@ namespace CardioMonitor.Core.Repository.Monitor
                 return true;
             }
             // Для спуска
-            if (!isUpping && ((currentAngle <= 10.5 + PumpingResolutionAgnle && currentAngle >= 10.5)
-                || (currentAngle <= 21 + PumpingResolutionAgnle && currentAngle >= 21)
-                || (currentAngle <= 0 + PumpingResolutionAgnle && currentAngle >= 0)))
+            if (!isUpping && ((currentAngle <= 10.5 + PumpingStartResolutionAgnle && currentAngle >= 10.5)
+                || (currentAngle <= 21 + PumpingStartResolutionAgnle && currentAngle >= 21)
+                || (currentAngle <= 0 + PumpingStartResolutionAgnle && currentAngle >= 0)))
             {
                 //Чтобы метод не вызывался слишком часто
                 if (Math.Abs(currentAngle - _previuosPumpingAngle) < ResolutionToleranceAgnle)
