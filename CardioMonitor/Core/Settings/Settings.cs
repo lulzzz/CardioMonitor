@@ -105,11 +105,11 @@ namespace CardioMonitor.Core.Settings
                     _instance = (Settings) bf.Deserialize(loadingStream);
                     loadingStream.Close();
                 }
-                _instance.DataBase.DataBase = "cardio_monitor_db";
-                _instance.DataBase.Source = "localhost";
-                _instance.DataBase.User = "root";
+                //_instance.DataBase.DataBase = "cardio_monitor_db";
+                //_instance.DataBase.Source = "localhost";
+                //_instance.DataBase.User = "root";
 
-                _instance.DataBase.Password = "gfhjkm";
+                //_instance.DataBase.Password = "gfhjkm";
             }
             catch (Exception ex)
             {
