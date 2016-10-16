@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="CardioMonitor.Ui.View.EcgController.EcgControllerView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:wpf="http://oxyplot.org/wpf"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="300">
+    <Grid>
+        <!--
+        TODO fix this
+        <wpf:PlotView x:Name="PlotView"
+                      x:FieldModifier="private"
+                      Margin="10">
+            <wpf:PlotView.Axes>
+                <wpf:LinearAxis Position="Bottom" Minimum="-20" Maximum="80" />
+                <wpf:LinearAxis Position="Left" Minimum="-10" Maximum="10" />
+            </wpf:PlotView.Axes>
+            <wpf:PlotView.Series>
+                <wpf:LineSeries ItemsSource="{Binding Points}"/>
+            </wpf:PlotView.Series>
+        </wpf:PlotView>-->
+    </Grid>
+</UserControl>
