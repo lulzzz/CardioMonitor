@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.ViewModel.Base
+﻿namespace CardioMonitor.Ui.Base
 {
     interface IViewModel
     {

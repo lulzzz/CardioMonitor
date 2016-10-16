@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -11,7 +11,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>CardioMonitor</RootNamespace>
     <AssemblyName>CardioMonitor</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -28,6 +28,7 @@
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -179,7 +180,7 @@
     <Compile Include="Ui\Communication\CardioEventArgs.cs" />
     <Compile Include="Core\Repository\Files\FileRepository.cs" />
     <Compile Include="Ui\Base\IViewModel.cs" />
-    <Compile Include="Ui\EcgController\EcgControllerView.xaml.cs">
+    <Compile Include="Ui\View\EcgController\EcgControllerView.xaml.cs">
       <DependentUpon>EcgControllerView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\MessageHelper.cs" />
@@ -192,100 +193,89 @@
     <Compile Include="Ui\Base\SimpleCommand.cs" />
     <Compile Include="Ui\Communication\TreatmentAction.cs" />
     <Compile Include="Ui\Communication\TreatmentEventArgs.cs" />
-    <Compile Include="Ui\MainWindowViewModel.cs" />
-    <Compile Include="Core\Models\Patients\Patient.cs" />
-    <Compile Include="Ui\Patients\PatientsView.xaml.cs">
+    <Compile Include="Ui\ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="Ui\View\Patients\PatientsView.xaml.cs">
       <DependentUpon>PatientsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Ui\Patients\PatientViewModel.cs" />
-    <Compile Include="Ui\Patients\PatientView.xaml.cs">
+    <Compile Include="Ui\ViewModel\Patients\PatientViewModel.cs" />
+    <Compile Include="Ui\View\Patients\PatientView.xaml.cs">
       <DependentUpon>PatientView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Ui\Patients\PatientsViewModel.cs" />
-    <Compile Include="Core\Models\Patients\PatientFullName.cs" />
-    <Compile Include="Ui\Sessions\SessionsView.xaml.cs">
+    <Compile Include="Ui\ViewModel\Patients\PatientsViewModel.cs" />
+    <Compile Include="Ui\View\Sessions\SessionsView.xaml.cs">
       <DependentUpon>SessionsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Ui\Sessions\SessionsViewModel.cs" />
-    <Compile Include="Core\Models\Session\PatientParams.cs" />
-    <Compile Include="Core\Models\Session\Session.cs" />
-    <Compile Include="Core\Models\Session\SessionContainer.cs" />
-    <Compile Include="Ui\Sessions\SessionDataViewModel.cs" />
-    <Compile Include="Core\Models\Session\SessionInfo.cs" />
-    <Compile Include="Ui\Sessions\SessionView.xaml.cs">
+    <Compile Include="Ui\ViewModel\Sessions\SessionsViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionDataViewModel.cs" />
+    <Compile Include="Ui\View\Sessions\SessionView.xaml.cs">
       <DependentUpon>SessionView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Core\Models\Session\SessionModel.cs" />
-    <Compile Include="Ui\Sessions\SessionDataView.xaml.cs">
+    <Compile Include="Ui\View\Sessions\SessionDataView.xaml.cs">
       <DependentUpon>SessionDataView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Core\Models\Session\SessionStatus.cs" />
-    <Compile Include="Ui\Sessions\SessionViewModel.cs" />
-    <Compile Include="Core\Models\Treatment\Statistic.cs" />
-    <Compile Include="Ui\Treatments\TreatmentDataViewModel.cs" />
-    <Compile Include="Core\Models\Treatment\TreatmentFullStatistic.cs" />
-    <Compile Include="Core\Models\Treatment\TreatmentParamStatistic.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Treatments\TreatmentDataViewModel.cs" />
     <Compile Include="Core\Repository\TreatmentStatisticBuilder.cs" />
-    <Compile Include="Ui\Treatments\TreatmentsView.xaml.cs">
+    <Compile Include="Ui\View\Treatments\TreatmentsView.xaml.cs">
       <DependentUpon>TreatmentsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Core\Models\Treatment\Treatment.cs" />
-    <Compile Include="Ui\Treatments\TreatmentDataView.xaml.cs">
+    <Compile Include="Ui\View\Treatments\TreatmentDataView.xaml.cs">
       <DependentUpon>TreatmentDataView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Ui\Treatments\TreatmentParametrGridView.xaml.cs">
+    <Compile Include="Ui\View\Treatments\TreatmentParametrGridView.xaml.cs">
       <DependentUpon>TreatmentParametrGridView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Ui\Treatments\TreatmentsViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Treatments\TreatmentsViewModel.cs" />
     <Compile Include="Core\Settings\AppApperanceData.cs" />
     <Compile Include="Core\Settings\DataBaseSettings.cs" />
     <Compile Include="Core\Settings\Settings.cs" />
-    <Compile Include="Ui\SettingsView.xaml.cs">
+    <Compile Include="Ui\View\Settings\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Ui\SettingsViewModel.cs" />
-    <Page Include="Ui\EcgController\EcgControllerView.xaml">
+    <Compile Include="Ui\ViewModel\Settings\SettingsViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionModel.cs" />
+    <Page Include="Ui\View\EcgController\EcgControllerView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Ui\MainWindow.xaml">
+    <Page Include="Ui\View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="Ui\MainWindow.xaml.cs">
+    <Compile Include="Ui\View\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Page Include="Ui\Patients\PatientsView.xaml">
+    <Page Include="Ui\View\Patients\PatientsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Ui\Patients\PatientView.xaml">
+    <Page Include="Ui\View\Patients\PatientView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Ui\Sessions\SessionsView.xaml">
+    <Page Include="Ui\View\Sessions\SessionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Ui\Sessions\SessionView.xaml">
+    <Page Include="Ui\View\Sessions\SessionView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Ui\Sessions\SessionDataView.xaml">
+    <Page Include="Ui\View\Sessions\SessionDataView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Ui\Treatments\TreatmentsView.xaml">
+    <Page Include="Ui\View\Treatments\TreatmentsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Ui\Treatments\TreatmentDataView.xaml">
+    <Page Include="Ui\View\Treatments\TreatmentDataView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Ui\Treatments\TreatmentParametrGridView.xaml">
+    <Page Include="Ui\View\Treatments\TreatmentParametrGridView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -293,7 +283,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Ui\SettingsView.xaml">
+    <Page Include="Ui\View\Settings\SettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -319,6 +309,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Core\Repository\DataBase\Scrypts\Updating\" />
+    <Folder Include="Ui\ViewModel\Ecg\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">
@@ -336,6 +327,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CardioMonitor.Models\CardioMonitor.Models.csproj">
+      <Project>{33247b5d-3763-4034-a97c-4c7922b04f9f}</Project>
+      <Name>CardioMonitor.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

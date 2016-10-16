@@ -2,8 +2,8 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
-using CardioMonitor.Core.Models.Session;
 using System.Threading.Tasks;
+using CardioMonitor.Models.Session;
 
 namespace CardioMonitor.Core.Repository.Monitor
 {

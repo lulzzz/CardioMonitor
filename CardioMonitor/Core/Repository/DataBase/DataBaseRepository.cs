@@ -2,10 +2,10 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Threading.Tasks;
-using CardioMonitor.Core.Models.Patients;
-using CardioMonitor.Core.Models.Session;
-using CardioMonitor.Core.Models.Treatment;
 using CardioMonitor.Logs;
+using CardioMonitor.Models.Patients;
+using CardioMonitor.Models.Session;
+using CardioMonitor.Models.Treatment;
 using CardioMonitor.Resources;
 using MySql.Data.MySqlClient;
 

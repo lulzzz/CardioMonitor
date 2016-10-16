@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.ViewModel.Communication
+﻿namespace CardioMonitor.Ui.Communication
 {
     public enum AccessMode
     {

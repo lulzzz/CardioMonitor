@@ -1,10 +1,11 @@
 ﻿using System;
+using CardioMonitor.Models.Patients;
 
-namespace CardioMonitor.ViewModel.Communication
+namespace CardioMonitor.Ui.Communication
 {
     public class PatientEventArgs : EventArgs
     {
-        public Core.Models.Patients.Patient Patient;
+        public Patient Patient;
         public AccessMode Mode;
     }
 }

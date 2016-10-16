@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using CardioMonitor.Logs;
-using CardioMonitor.ViewModel;
 
 namespace CardioMonitor.Core.Repository.Monitor
 {

@@ -1,7 +1,6 @@
 ﻿using System;
-using CardioMonitor.Core;
 
-namespace CardioMonitor.ViewModel.Communication
+namespace CardioMonitor.Ui.Communication
 {
     public class TreatmentEventArgs : EventArgs
     {

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using CardioMonitor.Core.Models.Session;
 using System.Threading.Tasks;
-using CardioMonitor.Core.Repository.Monitor;
+using CardioMonitor.Models.Session;
 
 namespace CardioMonitor.Core.Repository.Monitor
 {

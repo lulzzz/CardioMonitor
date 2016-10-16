@@ -1,13 +1,13 @@
 ﻿using System;
-using CardioMonitor.Core.Models.Treatment;
-using CardioMonitor.Patients.TreatmentData;
+using CardioMonitor.Models.Session;
+using CardioMonitor.Models.Treatment;
 
 namespace CardioMonitor.Core.Repository
 {
     //todo Временно не используется
     public class TreatmentStatisticBuilder
     {
-        public TreatmentFullStatistic Build(Core.Models.Session.Session[] sessions)
+        public TreatmentFullStatistic Build(Session[] sessions)
         {
             if (sessions == null) throw new ArgumentNullException("sessions");
 

@@ -7,10 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
 //using CardioMonitor.Patients.Session;
-using System.Windows;
-using System.Windows.Forms;
-using CardioMonitor.Core.Models.Session;
-using CardioMonitor.Core.Threading;
 
 namespace CardioMonitor.Core.Repository.Monitor
 {

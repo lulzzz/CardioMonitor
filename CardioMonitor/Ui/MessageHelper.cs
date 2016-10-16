@@ -2,7 +2,7 @@
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
-namespace CardioMonitor.ViewModel
+namespace CardioMonitor.Ui
 {
     public sealed class MessageHelper
     {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using CardioMonitor.Core.Models.Patients;
-using CardioMonitor.Core.Models.Session;
 using CardioMonitor.Logs;
+using CardioMonitor.Models.Patients;
+using CardioMonitor.Models.Session;
 using CardioMonitor.Resources;
 
 namespace CardioMonitor.Core.Repository.Files

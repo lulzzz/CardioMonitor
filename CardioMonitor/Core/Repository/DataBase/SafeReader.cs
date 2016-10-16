@@ -1,5 +1,5 @@
 ﻿using System;
-using CardioMonitor.Core.Models.Session;
+using CardioMonitor.Models.Session;
 using MySql.Data.MySqlClient;
 
 namespace CardioMonitor.Core.Repository.DataBase

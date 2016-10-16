@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace CardioMonitor.Core
+namespace CardioMonitor.Ui.Base
 {
     public class SimpleCommand : ICommand
     {
