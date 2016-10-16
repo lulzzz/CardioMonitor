@@ -19,7 +19,7 @@ namespace CardioMonitor.Core.Repository.DataBase
         {
             var initComand = "Database=" + Settings.Settings.Instance.DataBase.DataBase + ";Data Source=" +
                              Settings.Settings.Instance.DataBase.Source +
-                             ";User Id=" + Settings.Settings.Instance.DataBase.User + ";Password=gfhjkm" + ";Allow Zero Datetime=True;Convert Zero Datetime=True;charset=utf8";
+                             ";User Id=" + Settings.Settings.Instance.DataBase.User + ";Password=" +Settings.Settings.Instance.DataBase.Password + ";Allow Zero Datetime=True;Convert Zero Datetime=True;charset=utf8";
             _myConnect =  new MySqlConnection(initComand);
             _isOpen = false;
 
@@ -31,7 +31,7 @@ namespace CardioMonitor.Core.Repository.DataBase
         public DataBaseController(string dataBase, string source, string user, string password)
         {
             var initComand = "Database=" + dataBase + ";Data Source=" +
-                             source + ";User Id=" + user + ";Password=gfhjkm" + ";Allow Zero Datetime=True;Convert Zero Datetime=True;charset=utf8";
+                             source + ";User Id=" + user + ";Password=" + password + ";Allow Zero Datetime=True;Convert Zero Datetime=True;charset=utf8";
             _myConnect = new MySqlConnection(initComand);
             _isOpen = false;
 

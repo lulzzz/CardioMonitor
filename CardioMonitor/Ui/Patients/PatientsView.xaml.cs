@@ -1,4 +1,5 @@
 ﻿using System.Windows.Controls;
+using CardioMonitor.Ui.Patients;
 using CardioMonitor.ViewModel.Patients;
 using UserControl = System.Windows.Controls.UserControl;
 

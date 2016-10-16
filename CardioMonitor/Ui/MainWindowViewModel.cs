@@ -11,6 +11,8 @@ using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Core.Repository.Files;
 using CardioMonitor.Logs;
 using CardioMonitor.Resources;
+using CardioMonitor.Ui.Patients;
+using CardioMonitor.Ui.Sessions;
 using CardioMonitor.ViewModel.Communication;
 using CardioMonitor.ViewModel.Patients;
 using CardioMonitor.ViewModel.Sessions;
@@ -206,7 +208,9 @@ namespace CardioMonitor.ViewModel{
                 ShowResultsEvent = ShowSessionResults
             };
             SessionViewModel = new SessionViewModel();
+            //SessionViewModel.StartStatusTimer();
             SessionDataViewModel = new SessionDataViewModel();
+            
             TreatmentDataViewModel = new TreatmentDataViewModel();
             SettingsViewModel = new SettingsViewModel();
         }
@@ -420,7 +424,7 @@ namespace CardioMonitor.ViewModel{
         private void StartSession(object sender, EventArgs args)
         {
             SessionViewModel.Patient = PatientsViewModel.SelectedPatient;
-            
+            SessionViewModel.StartStatusTimer();
             MainTCSelectedIndex = (int) ViewIndex.SessionView;
         }
 

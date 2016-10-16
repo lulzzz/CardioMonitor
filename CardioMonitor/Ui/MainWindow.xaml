@@ -15,7 +15,8 @@
                       WindowStartupLocation="CenterScreen"
                       GlowBrush="{DynamicResource AccentColorBrush}"
                       WindowState="Maximized" 
-                      mc:Ignorable="d" Icon="..\Resources\usbHeart.ico" Loaded="MetroWindow_Loaded" >
+                      mc:Ignorable="d" Icon="..\Resources\usbHeart.ico" Loaded="MetroWindow_Loaded" 
+                      Closing="MetroWindow_Closing">
     <controls:MetroWindow.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -67,6 +68,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="2"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0"
@@ -162,5 +164,16 @@
             </controls:MetroTabItem>
 
         </controls:MetroAnimatedTabControl>
+        <StatusBar Grid.Row="3"
+                   Visibility="Collapsed">
+            <TextBlock Text="Подключение к монитору"/>
+            <Separator/>
+            <TextBlock Text="Подключение к кровати"/>
+            <Separator/>
+            <TextBlock Text="Подключение к базе данных"/>
+            <Separator/>
+            <TextBlock Text=""/>
+            
+        </StatusBar>
     </Grid>
 </controls:MetroWindow>

@@ -4,7 +4,6 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
-             xmlns:core="clr-namespace:CardioMonitor.Core"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:ecg="clr-namespace:CardioMonitor.Ui.EcgController"
              mc:Ignorable="d" 
@@ -106,7 +105,8 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </TabItem>
-            <TabItem Header="ЭКГ">
+            <TabItem Header="ЭКГ" 
+                     Visibility="Collapsed">
                 <ecg:EcgControllerView x:Name="EcgView"
                     Points="{Binding DataPoints}"
                     NeedUpdate="{Binding NeedUpdate}"/>
@@ -209,13 +209,13 @@
                            FontSize="28"/>
                 </Border>
             </Grid>
-            <Border Grid.Row="3"
+            <!--<Border Grid.Row="3"
                     Grid.Column="0"
                     BorderBrush="{DynamicResource AccentColorBrush}"
                     BorderThickness="2"
                     Width="250"
                     Margin="10">
-                <Grid >
+                 <Grid >
                     <Grid.RowDefinitions>
                         <RowDefinition/>
                         <RowDefinition/>
@@ -236,7 +236,7 @@
                                             Margin="5"/>
 
                 </Grid>
-            </Border>
+            </Border>-->
             
             
             <Grid Grid.Row="3"

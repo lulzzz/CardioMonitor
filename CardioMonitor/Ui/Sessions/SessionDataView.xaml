@@ -53,6 +53,8 @@
                                     Binding="{Binding FirstName}"/>
                 <DataGridTextColumn Header="Отчество"
                                     Binding="{Binding PatronymicName}"/>
+                <DataGridTextColumn Header="Дата рождения"
+                                    Binding="{Binding BirthDate, StringFormat='{}{0:dd.MM.yyyy}'}"/>
                 <DataGridTextColumn Header="Ид"
                                     Binding="{Binding Id}"/>
             </DataGrid.Columns>
@@ -72,7 +74,7 @@
                   CanUserResizeRows="False"
                   CanUserReorderColumns="False"
                   SelectionUnit="FullRow"
-                  IsReadOnly="True"
+                  IsReadOnly="{Binding IsReadOnly}"
                   CanUserSortColumns="False"
                   ColumnWidth="*">
             <DataGrid.Columns>
@@ -94,7 +96,6 @@
         </DataGrid>
         <Button x:Name="SaveB"
                 Command="{Binding SaveCommand}"
-                Visibility="Collapsed"
                 Grid.Row="3"
                 Content="Сохранить в файл"
                 FontSize="12"
@@ -102,7 +103,7 @@
                 Margin="10"></Button>
         <TextBlock Grid.Row="4"
                    FontSize="14"
-                   Text="Тут будут графики"
+                   Text=""
                    Margin="10"
                    TextAlignment="Center"></TextBlock>
     </Grid>

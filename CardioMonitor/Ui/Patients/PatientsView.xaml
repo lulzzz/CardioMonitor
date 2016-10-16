@@ -59,12 +59,16 @@
                   IsReadOnly="True"
                   ColumnWidth="*">
             <DataGrid.Columns>
+                <DataGridTextColumn Header="ИД"
+                                    Binding="{Binding Id}"/>
                 <DataGridTextColumn Header="Фамилия"
                                     Binding="{Binding LastName}"/>
                 <DataGridTextColumn Header="Имя"
                                     Binding="{Binding FirstName}"/>
                 <DataGridTextColumn Header="Отчество"
                                     Binding="{Binding PatronymicName}"/>
+                <DataGridTextColumn Header="Дата рождения"
+                                    Binding="{Binding BirthDate, StringFormat='{}{0:dd.MM.yyyy}'}"/>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Row="2"

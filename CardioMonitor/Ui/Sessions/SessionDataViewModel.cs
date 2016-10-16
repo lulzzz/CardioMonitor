@@ -1,8 +1,14 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.Core;
 using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Models.Session;
+using CardioMonitor.Core.Repository.DataBase;
+using CardioMonitor.Core.Repository.Files;
+using CardioMonitor.Logs;
+using CardioMonitor.Resources;
 using CardioMonitor.ViewModel.Base;
 
 namespace CardioMonitor.ViewModel.Sessions
@@ -34,13 +40,16 @@ namespace CardioMonitor.ViewModel.Sessions
             {
                 if (value != _patient)
                 {
-                    _patient = value; 
-                    PatientName = new PatientFullName
-                    {
-                        LastName = _patient.LastName,
-                        FirstName = _patient.FirstName,
-                        PatronymicName = _patient.PatronymicName,
-                    };
+                    _patient = value;
+
+                    PatientName = _patient != null
+                        ? new PatientFullName
+                        {
+                            LastName = _patient.LastName,
+                            FirstName = _patient.FirstName,
+                            PatronymicName = _patient.PatronymicName,
+                        }
+                        : new PatientFullName();
                     RisePropertyChanged("Patient");
                     RisePropertyChanged("Patients");
                 }
@@ -49,7 +58,10 @@ namespace CardioMonitor.ViewModel.Sessions
 
         public ObservableCollection<Patient> Patients
         {
-            get { return new ObservableCollection<Patient> { Patient }; }
+            get { return Patient != null 
+                    ? new ObservableCollection<Patient> { Patient }
+                    : new ObservableCollection<Patient>(); 
+            }
         }
 
         public SessionModel Session
@@ -65,6 +77,17 @@ namespace CardioMonitor.ViewModel.Sessions
             }
         }
 
+        public bool IsReadOnly
+        {
+            get { return _isReadOnly; }
+            set
+            {
+                _isReadOnly = value;
+                RisePropertyChanged("IsReadOnly");
+            }
+        }
+        private bool _isReadOnly;
+
         public ICommand SaveCommand
         {
             get
@@ -76,16 +99,44 @@ namespace CardioMonitor.ViewModel.Sessions
                 });
             }
         }
-
-
+        
         public SessionDataViewModel()
         {
-           
+            IsReadOnly = true;
         }
 
         public async void SaveToFile()
         {
-            await MessageHelper.Instance.ShowMessageAsync("Saved!");
+            var saveFileDialog = new SaveFileDialog {Filter = Localisation.FileRepository_SeansFileFilter};
+            var dialogResult = saveFileDialog.ShowDialog();
+            if (dialogResult == DialogResult.OK)
+            {
+
+                var exceptionMessage = String.Empty;
+                try
+                {
+                    FileRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
+                    await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionDataViewModel_FileSaved);
+                }
+                catch (ArgumentNullException ex)
+                {
+                    Logger.Instance.LogError("SessionViewModel", ex);
+                    exceptionMessage = Localisation.SessionViewModel_SaveSession_ArgumentNullException;
+                }
+                catch (Exception ex)
+                {
+                    exceptionMessage = ex.Message;
+                }
+                if (!String.IsNullOrEmpty(exceptionMessage))
+                {
+                    await MessageHelper.Instance.ShowMessageAsync(exceptionMessage);
+                }
+            }
+        }
+
+        public async void LoadFromFile()
+        {
+            await MessageHelper.Instance.ShowMessageAsync("Opened!");
         }
 
         public void Clear()

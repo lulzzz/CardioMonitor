@@ -2,18 +2,20 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CardioMonitor.Core;
+using CardioMonitor.Core.Models.Patients;
 using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Resources;
+using CardioMonitor.ViewModel;
 using CardioMonitor.ViewModel.Communication;
 using MahApps.Metro.Controls.Dialogs;
 
-namespace CardioMonitor.ViewModel.Patients
+namespace CardioMonitor.Ui.Patients
 {
     public class PatientsViewModel : Notifier
     {
         private int _seletedPatientIndex;
-        private Core.Models.Patients.Patient _selectePatient;
-        private ObservableCollection<Core.Models.Patients.Patient> _patients; 
+        private Patient _selectePatient;
+        private ObservableCollection<Patient> _patients; 
 
         private ICommand _addNewPatientCommand;
         private ICommand _deletePatientCommand;
