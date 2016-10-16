@@ -9,7 +9,7 @@ namespace CardioMonitor
     {
         public App()
         {
-            Core.Settings.Settings.LoadFromFile();
+            Settings.Settings.LoadFromFile();
         }
     }
 }

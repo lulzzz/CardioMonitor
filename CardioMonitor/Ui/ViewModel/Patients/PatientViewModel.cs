@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Windows.Input;
-using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Logs;
 using CardioMonitor.Models.Patients;
+using CardioMonitor.Repository.DataBase;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;

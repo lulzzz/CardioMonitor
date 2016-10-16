@@ -156,19 +156,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Core\Repository\BedController\BedControlCommand.cs" />
-    <Compile Include="Core\Repository\BedController\BedUsbController.cs" />
-    <Compile Include="Core\Repository\BedController\ReverseFlag.cs" />
-    <Compile Include="Core\Repository\BedController\StartFlag.cs" />
-    <Compile Include="Core\Repository\Monitor\AutoPumpingRequest.cs" />
-    <Compile Include="Core\Repository\Monitor\CRC8.cs" />
-    <Compile Include="Core\Threading\CardioTimer.cs" />
-    <Compile Include="Core\Repository\BedController\BedStatus.cs" />
-    <Compile Include="Core\Repository\BedController\BedMovingStatus.cs" />
-    <Compile Include="Core\Repository\Monitor\AutoPumping.cs" />
-    <Compile Include="Core\Repository\Monitor\MonitorDataReader.cs" />
-    <Compile Include="Core\Threading\TaskHelper.cs" />
-    <Compile Include="Core\Threading\ThreadAssistant.cs" />
+    <Compile Include="Bed\Usb\BedUsbController.cs" />
+    <Compile Include="Repository\Monitor\AutoPumpingRequest.cs" />
+    <Compile Include="Repository\Monitor\CRC8.cs" />
+    <Compile Include="Threading\CardioTimer.cs" />
+    <Compile Include="Repository\Monitor\AutoPumping.cs" />
+    <Compile Include="Repository\Monitor\MonitorDataReader.cs" />
+    <Compile Include="Threading\TaskHelper.cs" />
+    <Compile Include="Threading\ThreadAssistant.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -178,7 +173,7 @@
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Ui\Communication\AccessMode.cs" />
     <Compile Include="Ui\Communication\CardioEventArgs.cs" />
-    <Compile Include="Core\Repository\Files\FileRepository.cs" />
+    <Compile Include="Repository\Files\FileRepository.cs" />
     <Compile Include="Ui\Base\IViewModel.cs" />
     <Compile Include="Ui\View\EcgController\EcgControllerView.xaml.cs">
       <DependentUpon>EcgControllerView.xaml</DependentUpon>
@@ -186,10 +181,10 @@
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\Base\Notifier.cs" />
     <Compile Include="Ui\Communication\PatientEventArgs.cs" />
-    <Compile Include="Core\Repository\DataBase\DataBaseController.cs" />
-    <Compile Include="Core\Repository\DataBase\DataBaseRepository.cs" />
-    <Compile Include="Core\Repository\DataBase\SafeReader.cs" />
-    <Compile Include="Core\Repository\Monitor\MonitorRepository.cs" />
+    <Compile Include="Repository\DataBase\DataBaseController.cs" />
+    <Compile Include="Repository\DataBase\DataBaseRepository.cs" />
+    <Compile Include="Repository\DataBase\SafeReader.cs" />
+    <Compile Include="Repository\Monitor\MonitorRepository.cs" />
     <Compile Include="Ui\Base\SimpleCommand.cs" />
     <Compile Include="Ui\Communication\TreatmentAction.cs" />
     <Compile Include="Ui\Communication\TreatmentEventArgs.cs" />
@@ -215,7 +210,7 @@
     </Compile>
     <Compile Include="Ui\ViewModel\Sessions\SessionViewModel.cs" />
     <Compile Include="Ui\ViewModel\Treatments\TreatmentDataViewModel.cs" />
-    <Compile Include="Core\Repository\TreatmentStatisticBuilder.cs" />
+    <Compile Include="Repository\TreatmentStatisticBuilder.cs" />
     <Compile Include="Ui\View\Treatments\TreatmentsView.xaml.cs">
       <DependentUpon>TreatmentsView.xaml</DependentUpon>
     </Compile>
@@ -226,9 +221,9 @@
       <DependentUpon>TreatmentParametrGridView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\ViewModel\Treatments\TreatmentsViewModel.cs" />
-    <Compile Include="Core\Settings\AppApperanceData.cs" />
-    <Compile Include="Core\Settings\DataBaseSettings.cs" />
-    <Compile Include="Core\Settings\Settings.cs" />
+    <Compile Include="Settings\AppApperanceData.cs" />
+    <Compile Include="Settings\DataBaseSettings.cs" />
+    <Compile Include="Settings\Settings.cs" />
     <Compile Include="Ui\View\Settings\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>
@@ -294,7 +289,7 @@
     <None Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Core\Repository\DataBase\Scrypts\Creating\cm_db_creating_v_0_1_0_0.sql" />
+    <Content Include="Repository\DataBase\Scrypts\Creating\cm_db_creating_v_0_1_0_0.sql" />
     <Content Include="Resources\Entypo-license.txt" />
     <Content Include="Resources\WindowsIcons-license.txt" />
     <Content Include="Resources\usbHeart.ico">
@@ -308,7 +303,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Core\Repository\DataBase\Scrypts\Updating\" />
+    <Folder Include="Repository\DataBase\Scrypts\Updating\" />
     <Folder Include="Ui\ViewModel\Ecg\" />
   </ItemGroup>
   <ItemGroup>
@@ -329,9 +324,21 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CardioMonitor.Devices.Monitor.Abstract\CardioMonitor.Devices.Monitor.Infrastructure.csproj">
+      <Project>{e773219c-f1da-42a3-8e80-68bedac3e4f8}</Project>
+      <Name>CardioMonitor.Devices.Monitor.Infrastructure</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CardioMonitor.Models\CardioMonitor.Models.csproj">
       <Project>{33247b5d-3763-4034-a97c-4c7922b04f9f}</Project>
       <Name>CardioMonitor.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="CardioMonitor.Devices.Bed.Abstract\CardioMonitor.Devices.Bed.Infrastructure.csproj">
+      <Project>{bae2b28a-93f6-40a9-852c-2badd360e4fd}</Project>
+      <Name>CardioMonitor.Devices.Bed.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="CardioMonitor.Devices\CardioMonitor.Devices.csproj">
+      <Project>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</Project>
+      <Name>CardioMonitor.Devices</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

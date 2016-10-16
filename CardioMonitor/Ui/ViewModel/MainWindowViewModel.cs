@@ -2,13 +2,13 @@
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Input;
-using CardioMonitor.Core.Repository;
-using CardioMonitor.Core.Repository.DataBase;
-using CardioMonitor.Core.Repository.Files;
 using CardioMonitor.Logs;
 using CardioMonitor.Models.Patients;
 using CardioMonitor.Models.Session;
 using CardioMonitor.Models.Treatment;
+using CardioMonitor.Repository;
+using CardioMonitor.Repository.DataBase;
+using CardioMonitor.Repository.Files;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;

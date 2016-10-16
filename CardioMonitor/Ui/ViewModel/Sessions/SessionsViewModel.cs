@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using CardioMonitor.Core.Repository.DataBase;
 using CardioMonitor.Models.Patients;
 using CardioMonitor.Models.Session;
 using CardioMonitor.Models.Treatment;
+using CardioMonitor.Repository.DataBase;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using MahApps.Metro.Controls.Dialogs;

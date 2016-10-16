@@ -19,7 +19,7 @@ namespace CardioMonitor.Logs
         /// </summary>
         private Logger()
         {
-            _logsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Core.Settings.Settings.AppName, "Logs");
+            _logsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Settings.Settings.AppName, "Logs");
             try
             {
                 if (!Directory.Exists(_logsFolder))

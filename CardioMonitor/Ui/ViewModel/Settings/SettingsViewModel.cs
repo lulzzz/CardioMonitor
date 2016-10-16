@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Input;
-using CardioMonitor.Core.Repository.DataBase;
+using CardioMonitor.Repository.DataBase;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 
@@ -206,11 +206,11 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                AppThemes.FirstOrDefault(x => x.Name == Settings.Instance.SeletedAppThemeName);
             SelectedAccentColor =
                 AccentColors.FirstOrDefault(x => x.Name == Settings.Instance.SelectedAcentColorName);*/
-            FilesDirectoryPath = Core.Settings.Settings.Instance.FilesDirectoryPath;
-            DBLogin = Core.Settings.Settings.Instance.DataBase.User;
-            DBName = Core.Settings.Settings.Instance.DataBase.DataBase;
-            DBPassword = Core.Settings.Settings.Instance.DataBase.Password;
-            DBServerName = Core.Settings.Settings.Instance.DataBase.Source;
+            FilesDirectoryPath = CardioMonitor.Settings.Settings.Instance.FilesDirectoryPath;
+            DBLogin = CardioMonitor.Settings.Settings.Instance.DataBase.User;
+            DBName = CardioMonitor.Settings.Settings.Instance.DataBase.DataBase;
+            DBPassword = CardioMonitor.Settings.Settings.Instance.DataBase.Password;
+            DBServerName = CardioMonitor.Settings.Settings.Instance.DataBase.Source;
             _isValid = true;
             _isSettingsChanged = false;
         }
@@ -283,14 +283,14 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             {
                 /* Settings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
                 Settings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
-                Core.Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
+                CardioMonitor.Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
 
-                Core.Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
-                Core.Settings.Settings.Instance.DataBase.User = DBLogin;
-                Core.Settings.Settings.Instance.DataBase.DataBase = DBName;
-                Core.Settings.Settings.Instance.DataBase.Password = DBPassword;
-                Core.Settings.Settings.Instance.DataBase.Source = DBServerName;
-                Core.Settings.Settings.SaveToFile();
+                CardioMonitor.Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
+                CardioMonitor.Settings.Settings.Instance.DataBase.User = DBLogin;
+                CardioMonitor.Settings.Settings.Instance.DataBase.DataBase = DBName;
+                CardioMonitor.Settings.Settings.Instance.DataBase.Password = DBPassword;
+                CardioMonitor.Settings.Settings.Instance.DataBase.Source = DBServerName;
+                CardioMonitor.Settings.Settings.SaveToFile();
                 _isSettingsChanged = false;
                 await MessageHelper.Instance.ShowMessageAsync(Localisation.SettingsViewModel_Saved);
                 
@@ -307,7 +307,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         private void CancelSettings()
         {
-            Core.Settings.Settings.LoadFromFile();
+            CardioMonitor.Settings.Settings.LoadFromFile();
             InitializeSettings();
         }
     }
