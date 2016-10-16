@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CardioMonitor.Logs;
 
-namespace CardioMonitor.Monitor
+namespace CardioMonitor.Devices.Monitor
 {
     /// <summary>
     /// Отправка запроса на накачку давления

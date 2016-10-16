@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using CardioMonitor.Infrastructure.Logs;
 
 // ReSharper disable UnassignedField.Compiler
 // ReSharper disable LocalizableElement
@@ -8,7 +9,7 @@ namespace CardioMonitor.Logs
     /// <summary>
     /// Класс для записи лог-информации в файл
     /// </summary>
-    public class Logger
+    public class Logger : ILogger
     {
         private readonly string _logsFolder;
         private static Logger _instance;

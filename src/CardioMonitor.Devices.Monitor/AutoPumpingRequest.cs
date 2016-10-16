@@ -5,7 +5,7 @@ using System.Threading;
 
 //using CardioMonitor.Patients.Session;
 
-namespace CardioMonitor.Monitor
+namespace CardioMonitor.Devices.Monitor
 {
     public class AutoPumpingRequest
     {

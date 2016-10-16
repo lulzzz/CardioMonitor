@@ -1,14 +1,24 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CardioMonitor.Logs;
+using CardioMonitor.Infrastructure.Logs;
+using JetBrains.Annotations;
 
-namespace CardioMonitor.Threading
+namespace CardioMonitor.Infrastructure.Threading
 {
     /// <summary>
     /// Вспомогательный класс для работы с Task
     /// </summary>
-    public static class TaskHelper
+    public class TaskHelper
     {
+        private readonly ILogger _logger;
+
+        public TaskHelper([NotNull] ILogger logger)
+        {
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
+
+            _logger = logger;
+        }
+
         /// <summary>
         /// Запускает задачу, которая должна выполниться за определенное время,
         /// и в случае истечения таймаута генерирует TimeoutException
@@ -18,7 +28,7 @@ namespace CardioMonitor.Threading
         /// <param name="timeout">Значение таймаута</param>
         /// <returns>Выполнившуюся задачу</returns>
         /// <exception cref="TimeoutException">В случае невыполнения задачу за указанный временный промежуток</exception>
-        public static async Task<T> StartWithTimeout<T>(Task<T> task, TimeSpan timeout)
+        public async Task<T> StartWithTimeout<T>(Task<T> task, TimeSpan timeout)
         {
             var delayTask = Task.Delay(timeout);
             var firstToFinish = await Task.WhenAny(task, delayTask);
@@ -44,11 +54,11 @@ namespace CardioMonitor.Threading
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="task">Задача, в которой, вероятно, могло быть исключение</param>
-        private static void LogException<T>(Task<T> task)
+        private void LogException<T>(Task<T> task)
         {
             if (task.Exception != null)
             {
-                Logger.Instance.LogError("TaskHelper", task.Exception);
+                _logger.LogError("TaskHelper", task.Exception);
             }
         }
     }

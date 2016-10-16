@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Threading;
 
-namespace CardioMonitor.Threading
+namespace CardioMonitor.Infrastructure.Threading
 {
     /// <summary>
     /// Таймер, обертка вокруг BackgroundWorker с возможностью приостанавливать и возобновлять работу таймера

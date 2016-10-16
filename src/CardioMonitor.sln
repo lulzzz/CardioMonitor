@@ -27,6 +27,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor", "CardioMoni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Models", "CardioMonitor.Models\CardioMonitor.Models.csproj", "{33247B5D-3763-4034-A97C-4C7922B04F9F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Monitor", "CardioMonitor.Devices.Monitor\CardioMonitor.Devices.Monitor.csproj", "{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Infrastructure", "CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj", "{60422AEB-3748-4B0F-928E-689B1378A5EE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Monitor|Any CPU = Debug_Monitor|Any CPU
@@ -107,6 +111,22 @@ Global
 		{33247B5D-3763-4034-A97C-4C7922B04F9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33247B5D-3763-4034-A97C-4C7922B04F9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33247B5D-3763-4034-A97C-4C7922B04F9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60422AEB-3748-4B0F-928E-689B1378A5EE}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{60422AEB-3748-4B0F-928E-689B1378A5EE}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{60422AEB-3748-4B0F-928E-689B1378A5EE}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{60422AEB-3748-4B0F-928E-689B1378A5EE}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{60422AEB-3748-4B0F-928E-689B1378A5EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60422AEB-3748-4B0F-928E-689B1378A5EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60422AEB-3748-4B0F-928E-689B1378A5EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60422AEB-3748-4B0F-928E-689B1378A5EE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -121,5 +141,6 @@ Global
 		{D72BA3E3-1055-4602-97DE-8A1C3555CCF7} = {5E743ABF-6E8E-4CE2-87F8-A851DC3F7906}
 		{0CDD0798-75A2-400A-ADC1-8C2EDA709F1C} = {7B5F4E41-2C23-40FE-BF2D-97DD957DA14C}
 		{E773219C-F1DA-42A3-8E80-68BEDAC3E4F8} = {7B5F4E41-2C23-40FE-BF2D-97DD957DA14C}
+		{A14D3CF8-670B-47B2-BD4A-9B14F87A032E} = {7B5F4E41-2C23-40FE-BF2D-97DD957DA14C}
 	EndGlobalSection
 EndGlobal

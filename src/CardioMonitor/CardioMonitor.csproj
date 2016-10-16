@@ -146,13 +146,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Monitor\AutoPumpingRequest.cs" />
-    <Compile Include="Monitor\CRC8.cs" />
-    <Compile Include="Threading\CardioTimer.cs" />
-    <Compile Include="Monitor\AutoPumping.cs" />
-    <Compile Include="Monitor\MonitorDataReader.cs" />
-    <Compile Include="Threading\TaskHelper.cs" />
-    <Compile Include="Threading\ThreadAssistant.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -160,6 +153,7 @@
     </Compile>
     <Compile Include="Logs\Logger.cs" />
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Threading\ThreadAssistant.cs" />
     <Compile Include="Ui\Communication\AccessMode.cs" />
     <Compile Include="Ui\Communication\CardioEventArgs.cs" />
     <Compile Include="Repository\Files\FileRepository.cs" />
@@ -173,7 +167,6 @@
     <Compile Include="Repository\DataBase\DataBaseController.cs" />
     <Compile Include="Repository\DataBase\DataBaseRepository.cs" />
     <Compile Include="Repository\DataBase\SafeReader.cs" />
-    <Compile Include="Monitor\MonitorRepository.cs" />
     <Compile Include="Ui\Base\SimpleCommand.cs" />
     <Compile Include="Ui\Communication\TreatmentAction.cs" />
     <Compile Include="Ui\Communication\TreatmentEventArgs.cs" />
@@ -324,6 +317,14 @@
     <ProjectReference Include="..\CardioMonitor.Devices.Monitor.Infrastructure\CardioMonitor.Devices.Monitor.Infrastructure.csproj">
       <Project>{e773219c-f1da-42a3-8e80-68bedac3e4f8}</Project>
       <Name>CardioMonitor.Devices.Monitor.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CardioMonitor.Devices.Monitor\CardioMonitor.Devices.Monitor.csproj">
+      <Project>{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}</Project>
+      <Name>CardioMonitor.Devices.Monitor</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj">
+      <Project>{60422AEB-3748-4B0F-928E-689B1378A5EE}</Project>
+      <Name>CardioMonitor.Infrastructure</Name>
     </ProjectReference>
     <ProjectReference Include="..\CardioMonitor.Models\CardioMonitor.Models.csproj">
       <Project>{33247b5d-3763-4034-a97c-4c7922b04f9f}</Project>

@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using CardioMonitor.Models.Session;
 
-namespace CardioMonitor.Monitor
+namespace CardioMonitor.Devices.Monitor
 {
     /// <summary>
     /// Репозиторй для получения данных с монитора

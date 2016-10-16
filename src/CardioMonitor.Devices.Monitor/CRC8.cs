@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CardioMonitor.Monitor
+namespace CardioMonitor.Devices.Monitor
 {
     public static class CRC8
     {
