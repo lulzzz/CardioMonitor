@@ -66,7 +66,7 @@ namespace CardioMonitor.Settings
             }
             catch (Exception ex)
             {
-                Logger.Instance.LogError("Settings", ex);
+                //Logger.Instance.LogError("Settings", ex);
             }
         }
 
@@ -105,15 +105,16 @@ namespace CardioMonitor.Settings
                     _instance = (Settings) bf.Deserialize(loadingStream);
                     loadingStream.Close();
                 }
-                //_instance.DataBase.DataBase = "cardio_monitor_db";
-                //_instance.DataBase.Source = "localhost";
-                //_instance.DataBase.User = "root";
+                //todo fix this
+                _instance.DataBase.DataBase = "cardio_monitor_db";
+                _instance.DataBase.Source = "localhost";
+                _instance.DataBase.User = "root";
 
-                //_instance.DataBase.Password = "gfhjkm";
+                _instance.DataBase.Password = "gfhjkm";
             }
             catch (Exception ex)
             {
-                Logger.Instance.LogError("Settings", ex);
+                //Logger.Instance.LogError("Settings", ex);
                 _instance = new Settings();
                 SaveToFile();
             }
@@ -135,7 +136,7 @@ namespace CardioMonitor.Settings
             }
             catch (Exception ex)
             {
-                Logger.Instance.LogError("Settings", ex);
+                //Logger.Instance.LogError("Settings", ex);
             }
         }
     }

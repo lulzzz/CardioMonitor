@@ -8,7 +8,7 @@ namespace CardioMonitor.Models.Treatment
     public class Treatment
     {
         /// <summary>
-        /// Идентифкатор
+        /// Идентификатор
         /// </summary>
         public int Id { get; set; }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows;
+using CardioMonitor.IoC;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.ViewModel;
 using MahApps.Metro.Controls;
@@ -12,17 +13,18 @@ namespace CardioMonitor.Ui.View
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        private MainWindowViewModel _viewModel;
+        private readonly MainWindowViewModel _viewModel;
 
         public MainWindow()
         {
-            //inititalize messageHelper
+            //initialize messageHelper
             MessageHelper.Instance.Window = this;
-            _viewModel = new MainWindowViewModel();
+            _viewModel = IoCResolver.Resolve<MainWindowViewModel>();
             _viewModel.SessionViewModel.ThreadAssistant = new ThreadAssistant(this);
             DataContext = _viewModel;
             InitializeComponent();
             SettingsView.ViewModel = _viewModel.SettingsViewModel;
+
             /*try
             {
                 var accent = ThemeManager.GetAccent(Core.Settings.Settings.Instance.SelectedAcentColorName);
@@ -69,7 +71,11 @@ namespace CardioMonitor.Ui.View
         private async void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             e.Cancel = true;
-            var closingDialogresult = await MessageHelper.Instance.ShowMessageAsync("Вы уверены, что хотите закрыть программу?", "Cardio Monitor", MessageDialogStyle.AffirmativeAndNegative);
+            var closingDialogresult = 
+                await MessageHelper.Instance.ShowMessageAsync(
+                    "Вы уверены, что хотите закрыть программу?", 
+                    "Cardio Monitor", 
+                    MessageDialogStyle.AffirmativeAndNegative).ConfigureAwait(true);
             if (closingDialogresult == MessageDialogResult.Affirmative) 
             {
                 //Необходимо для закрытие из асинхронности

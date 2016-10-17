@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Windows.Input;
+using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Logs;
 using CardioMonitor.Models.Patients;
-using CardioMonitor.Repository.DataBase;
+using CardioMonitor.Repository;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
@@ -11,6 +12,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 {
     public class PatientViewModel : Notifier, IViewModel
     {
+        private readonly ILogger _logger;
+        private readonly PatientsRepository _patientsRepository;
         private AccessMode _accessMode;
         private string _lastName;
         private string _firstName;
@@ -18,6 +21,15 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         private int _id;
         private DateTime? _birthDate;
         private ICommand _saveCommand;
+
+        public PatientViewModel(ILogger logger, PatientsRepository patientsRepository)
+        {
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (patientsRepository == null) throw new ArgumentNullException(nameof(patientsRepository));
+
+            _logger = logger;
+            _patientsRepository = patientsRepository;
+        }
 
         public EventHandler MoveBackwardEvent { get; set; }
 
@@ -147,11 +159,11 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 switch (AccessMode)
                 {
                     case AccessMode.Create:
-                        DataBaseRepository.Instance.AddPatient(Patient);
+                        _patientsRepository.AddPatient(Patient);
                         message = Localisation.PatientViewModel_Patient_Added;
                         break;
                     case AccessMode.Edit:
-                        DataBaseRepository.Instance.UpdatePatient(Patient);
+                        _patientsRepository.UpdatePatient(Patient);
                         message = Localisation.PatientViewModel_Patient_Updated;
                         break;
                 }
@@ -164,7 +176,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             }
             catch (ArgumentNullException ex)
             {
-                Logger.Instance.LogError("PatientViewModel",ex);
+                _logger.LogError(nameof(PatientViewModel),ex);
                 message = Localisation.ArgumentNullExceptionMessage;
             }
             catch (Exception ex)

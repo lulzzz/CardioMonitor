@@ -2,7 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CardioMonitor.Models.Patients;
-using CardioMonitor.Repository.DataBase;
+using CardioMonitor.Repository;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
@@ -12,6 +12,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 {
     public class PatientsViewModel : Notifier
     {
+        private readonly PatientsRepository _patientsRepository;
         private int _seletedPatientIndex;
         private Patient _selectePatient;
         private ObservableCollection<Patient> _patients; 
@@ -181,8 +182,12 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         public EventHandler ShowTreatmentResults { get; set; }
         public EventHandler OpenSessionHandler { get; set; }
 
-        public PatientsViewModel()
+        public PatientsViewModel(PatientsRepository patientsRepository)
         {
+            if (patientsRepository == null) throw new ArgumentNullException(nameof(patientsRepository));
+
+            _patientsRepository = patientsRepository;
+
             Patients = new ObservableCollection<Patient>();
         }
 
@@ -215,7 +220,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 {
                     try
                     {
-                        DataBaseRepository.Instance.DeletePatient(SelectedPatient.Id);
+                        _patientsRepository.DeletePatient(SelectedPatient.Id);
                         Patients.Remove(SelectedPatient);
                         SelectedPatient = null;
                     }

@@ -2,9 +2,10 @@
 using System.Collections.ObjectModel;
 using System.Windows.Forms;
 using System.Windows.Input;
+using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Logs;
 using CardioMonitor.Models.Patients;
-using CardioMonitor.Repository.Files;
+using CardioMonitor.Repository;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 
@@ -12,11 +13,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class SessionDataViewModel : Notifier, IViewModel
     {
+        private readonly ILogger _logger;
+        private readonly FileRepository _fileRepository;
         private PatientFullName _patientName;
         private Patient _patient;
         private SessionModel _session;
         private ICommand _saveCommand;
-
+        
         public PatientFullName PatientName
         {
             get { return _patientName; }
@@ -97,8 +100,16 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
         
-        public SessionDataViewModel()
+        public SessionDataViewModel(
+            ILogger logger,
+            FileRepository fileRepository)
         {
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (fileRepository == null) throw new ArgumentNullException(nameof(fileRepository));
+
+            _logger = logger;
+            _fileRepository = fileRepository;
+
             IsReadOnly = true;
         }
 
@@ -112,12 +123,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 var exceptionMessage = String.Empty;
                 try
                 {
-                    FileRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
+                    _fileRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
                     await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionDataViewModel_FileSaved);
                 }
                 catch (ArgumentNullException ex)
                 {
-                    Logger.Instance.LogError("SessionViewModel", ex);
+                    _logger.LogError(nameof(SessionDataViewModel), ex);
                     exceptionMessage = Localisation.SessionViewModel_SaveSession_ArgumentNullException;
                 }
                 catch (Exception ex)

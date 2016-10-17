@@ -12,7 +12,6 @@ namespace CardioMonitor.Ui.View.Sessions
 
         public PatientTreatmentSessionsView()
         {
-            _viewModel = new SessionsViewModel();
             DataContext = _viewModel;
 
             InitializeComponent();

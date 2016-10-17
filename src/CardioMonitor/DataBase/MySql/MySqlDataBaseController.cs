@@ -1,22 +1,25 @@
 ﻿using System;
-using CardioMonitor.Logs;
+using CardioMonitor.Infrastructure.Logs;
 using MySql.Data.MySqlClient;
 
-namespace CardioMonitor.Repository.DataBase
+namespace CardioMonitor.DataBase.MySql
 {
     /// <summary>
     /// Контроллер для непосредственного взаимодействия с базой данных
     /// </summary>
-    internal class DataBaseController
+    internal class MySqlDataBaseController : IDataBaseController
     {
+        private readonly ILogger _logger;
+
         private static MySqlConnection _myConnect;
         private bool _isOpen;
         
         /// <summary>
         /// Контроллер для непосредственного взаимодействия с базой данных
         /// </summary>
-        public DataBaseController()
+        public MySqlDataBaseController(ILogger logger)
         {
+            _logger = logger;
             var initComand = "Database=" + Settings.Settings.Instance.DataBase.DataBase + ";" +
                              "Data Source=" + Settings.Settings.Instance.DataBase.Source +
                              ";User Id=" + Settings.Settings.Instance.DataBase.User + 
@@ -30,8 +33,14 @@ namespace CardioMonitor.Repository.DataBase
         /// <summary>
         /// Контроллер для непосредственного взаимодействия с базой данных
         /// </summary>
-        public DataBaseController(string dataBase, string source, string user, string password)
+        public MySqlDataBaseController(
+            ILogger logger,
+            string dataBase, 
+            string source, 
+            string user, 
+            string password)
         {
+            _logger = logger;
             var initComand = "Database=" + dataBase + ";" +
                              "Data Source=" + source + 
                              ";User Id=" + user + 
@@ -47,30 +56,36 @@ namespace CardioMonitor.Repository.DataBase
         /// </summary>
         /// <param name="query">SQL запрос</param>
         /// <returns>MySqlDataReader для чтения результатов</returns>
-        /// <remarks>Открывает соединение с базой данных. Пока его не закрыть, другие запросы выплоняться не будут</remarks>
+        /// <remarks>Открывает соединение с базой данных. Пока его не закрыть, другие запросы выполняться не будут</remarks>
         /// <remarks>Использовать для запросов типа Select</remarks>
-        public MySqlDataReader ConnectDB(string query)
+        public ISqlDataReader ConnectDb(string query)
         {
             if (_isOpen)
             {
                 throw new AccessViolationException();
             }
             _isOpen = true;
-            var cmd = new MySqlCommand(query, _myConnect);
+            var command = new MySqlCommand(query, _myConnect);
             _myConnect.Open();
-            var reader = cmd.ExecuteReader();
-            return reader;
+            var reader = command.ExecuteReader();
+           
+            return new CardioMySqlDataReader(reader);
         }
 
         /// <summary>
-        /// Закрывает соединие с базой данных
+        /// Закрывает соединение с базой данных
         /// </summary>
         /// <param name="reader">MySqlDataReader, содержащий открытое соединение</param>
-        public void DisConnectDB(MySqlDataReader reader)
+        public void DisсonnectDb(ISqlDataReader reader)
         {
-            if (reader == null) { throw new ArgumentNullException("reader");}
+            var mySqlReader = reader as CardioMySqlDataReader;
+            if (mySqlReader == null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
             _isOpen = false;
-            reader.Close();
+            mySqlReader.Reader?.Close();
             _myConnect.Close();
         }
 
@@ -81,9 +96,9 @@ namespace CardioMonitor.Repository.DataBase
         /// <remarks>Использовать для запросов типа Insert, Delete, Update, т.е. не возвращающих данных</remarks>
         public void ExecuteQuery(string query)
         {
-            var cmd = new MySqlCommand(query, _myConnect);
+            var comand = new MySqlCommand(query, _myConnect);
             _myConnect.Open();
-            cmd.ExecuteNonQuery();
+            comand.ExecuteNonQuery();
             _myConnect.Close();
         }
 
@@ -101,7 +116,7 @@ namespace CardioMonitor.Repository.DataBase
             }
             catch (Exception e)
             {
-                Logger.Instance.LogError("DataBaseController", e);
+                _logger.LogError("MySqlDataBaseController", e);
                 return false;
             }
         }

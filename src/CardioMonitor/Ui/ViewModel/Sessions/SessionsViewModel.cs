@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Models.Patients;
 using CardioMonitor.Models.Session;
 using CardioMonitor.Models.Treatment;
-using CardioMonitor.Repository.DataBase;
+using CardioMonitor.Repository;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using MahApps.Metro.Controls.Dialogs;
@@ -13,6 +14,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class SessionsViewModel : Notifier, IViewModel
     {
+        private readonly SessionsRepository _sessionsRepository;
         private PatientFullName _patientName;
         private DateTime _treatmentStartDate;
         private SessionInfo _selectedSessionInfo;
@@ -21,6 +23,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _startSessionCommand;
         private ICommand _deleteSessionCommand;
         private ICommand _showResultsCommand;
+
+        public SessionsViewModel(
+            SessionsRepository sessionsRepository)
+        {
+            if (sessionsRepository == null) throw new ArgumentNullException(nameof(sessionsRepository));
+            
+            _sessionsRepository = sessionsRepository;
+        }
 
         public PatientFullName PatientName
         {
@@ -137,7 +147,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 {
                     try
                     {
-                        DataBaseRepository.Instance.DeleteSession(sessionInfo.Id);
+                        _sessionsRepository.DeleteSession(sessionInfo.Id);
                         SessionInfos.Remove(sessionInfo);
                     }
                     catch (Exception ex)

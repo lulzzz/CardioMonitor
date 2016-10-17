@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
+using CardioMonitor.Infrastructure.Logs;
 
 namespace CardioMonitor.Devices.Monitor
 {
     /// <summary>
     /// Отправка запроса на накачку давления
     /// </summary>
-    public class AutoPumping
+    public class AutoPumpingResolver
     {
         private double _previuosPumpingAngle;
         
@@ -23,6 +24,15 @@ namespace CardioMonitor.Devices.Monitor
         /// Без нее все плохо, слишком часто вызывается метод
         /// </remarks>
         private const double ResolutionToleranceAgnle = 6;
+
+        private readonly ILogger _logger;
+
+        public AutoPumpingResolver(ILogger logger)
+        {
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
+
+            _logger = logger;
+        }
 
         /// <summary>
         /// Выполняет автонакачку
@@ -58,14 +68,14 @@ namespace CardioMonitor.Devices.Monitor
                 //Чтобы метод не вызывался слишком часто
                 if (Math.Abs(currentAngle - _previuosPumpingAngle) < ResolutionToleranceAgnle)
                 {
-                    Logger.Instance.Log(String.Format("Current angle: {0}\t" +
+                    _logger.Log(String.Format("Current angle: {0}\t" +
                                               "PreviousAngle: {1}\t" +
                                               "Upping status: {2}\t" +
                                               "Result:        {3}\t", currentAngle, _previuosPumpingAngle, isUpping, false));
                     return false;
                 }
                 _previuosPumpingAngle = currentAngle;
-                Logger.Instance.Log(String.Format("Current angle: {0}\t" +
+                _logger.Log(String.Format("Current angle: {0}\t" +
                                               "PreviousAngle: {1}\t" +
                                               "Upping status: {2}\t" +
                                               "Result:        {3}\t", currentAngle, _previuosPumpingAngle, isUpping, true));
@@ -79,21 +89,21 @@ namespace CardioMonitor.Devices.Monitor
                 //Чтобы метод не вызывался слишком часто
                 if (Math.Abs(currentAngle - _previuosPumpingAngle) < ResolutionToleranceAgnle)
                 {
-                    Logger.Instance.Log(String.Format("Current angle: {0}\t" +
+                    _logger.Log(String.Format("Current angle: {0}\t" +
                                               "PreviousAngle: {1}\t" +
                                               "Upping status: {2}\t" +
                                               "Result:        {3}\t", currentAngle, _previuosPumpingAngle, isUpping, false));
                     return false;
                 }
                 _previuosPumpingAngle = currentAngle;
-                Logger.Instance.Log(String.Format("Current angle: {0}\t" +
+                _logger.Log(String.Format("Current angle: {0}\t" +
                                               "PreviousAngle: {1}\t" +
                                               "Upping status: {2}\t" +
                                               "Result:        {3}\t", currentAngle, _previuosPumpingAngle, isUpping, true));
                 return true;
             }
             //Для всех остальных случаев
-            Logger.Instance.Log(String.Format("Current angle: {0}\t" +
+            _logger.Log(String.Format("Current angle: {0}\t" +
                                               "PreviousAngle: {1}\t" +
                                               "Upping status: {2}\t" +
                                               "Result:        {3}\t", currentAngle, _previuosPumpingAngle, isUpping, false));

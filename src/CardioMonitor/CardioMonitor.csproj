@@ -118,6 +118,10 @@
       <HintPath>..\packages\OxyPlot.Wpf.1.0.0\lib\net45\OxyPlot.Wpf.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SimpleInjector, Version=3.2.3.0, Culture=neutral, PublicKeyToken=984cb50dea722e99, processorArchitecture=MSIL">
+      <HintPath>..\packages\SimpleInjector.3.2.3\lib\net45\SimpleInjector.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -146,6 +150,21 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DataBase\DataBaseError.cs" />
+    <Compile Include="DataBase\DataBaseFactory.cs" />
+    <Compile Include="DataBase\IDataBaseController.cs" />
+    <Compile Include="DataBase\IDataBaseErrorTranslator.cs" />
+    <Compile Include="DataBase\ISafeReader.cs" />
+    <Compile Include="DataBase\ISqlDataReader.cs" />
+    <Compile Include="DataBase\MySql\CardioMySqlDataReader.cs" />
+    <Compile Include="DataBase\MySql\MySqlErrorTranslator.cs" />
+    <Compile Include="Devices\DeviceControllerFactory.cs" />
+    <Compile Include="Devices\IDeviceControllerFactory.cs" />
+    <Compile Include="Devices\Monitor\AutoPumpingResolver.cs" />
+    <Compile Include="IoC\IoCResolver.cs" />
+    <Compile Include="Repository\PatientsRepository.cs" />
+    <Compile Include="Repository\SessionsRepository.cs" />
+    <Compile Include="Repository\TreatmentsRepository.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -156,7 +175,7 @@
     <Compile Include="Threading\ThreadAssistant.cs" />
     <Compile Include="Ui\Communication\AccessMode.cs" />
     <Compile Include="Ui\Communication\CardioEventArgs.cs" />
-    <Compile Include="Repository\Files\FileRepository.cs" />
+    <Compile Include="Repository\FileRepository.cs" />
     <Compile Include="Ui\Base\IViewModel.cs" />
     <Compile Include="Ui\View\EcgController\EcgControllerView.xaml.cs">
       <DependentUpon>EcgControllerView.xaml</DependentUpon>
@@ -164,9 +183,9 @@
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\Base\Notifier.cs" />
     <Compile Include="Ui\Communication\PatientEventArgs.cs" />
-    <Compile Include="Repository\DataBase\DataBaseController.cs" />
-    <Compile Include="Repository\DataBase\DataBaseRepository.cs" />
-    <Compile Include="Repository\DataBase\SafeReader.cs" />
+    <Compile Include="DataBase\MySql\MySqlDataBaseController.cs" />
+    <Compile Include="Repository\DataBaseRepository.cs" />
+    <Compile Include="DataBase\MySql\MySqlSafeReader.cs" />
     <Compile Include="Ui\Base\SimpleCommand.cs" />
     <Compile Include="Ui\Communication\TreatmentAction.cs" />
     <Compile Include="Ui\Communication\TreatmentEventArgs.cs" />
@@ -192,7 +211,7 @@
     </Compile>
     <Compile Include="Ui\ViewModel\Sessions\SessionViewModel.cs" />
     <Compile Include="Ui\ViewModel\Treatments\TreatmentDataViewModel.cs" />
-    <Compile Include="Repository\TreatmentStatisticBuilder.cs" />
+    <Compile Include="Statistics\TreatmentStatisticBuilder.cs" />
     <Compile Include="Ui\View\Treatments\TreatmentsView.xaml.cs">
       <DependentUpon>TreatmentsView.xaml</DependentUpon>
     </Compile>
@@ -275,7 +294,7 @@
     <None Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Repository\DataBase\Scrypts\Creating\cm_db_creating_v_0_1_0_0.sql" />
+    <Content Include="DataBase\MySql\Scrypts\Creating\cm_db_creating_v_0_1_0_0.sql" />
     <Content Include="Resources\Entypo-license.txt" />
     <Content Include="Resources\WindowsIcons-license.txt" />
     <Content Include="Resources\usbHeart.ico">
@@ -289,7 +308,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Repository\DataBase\Scrypts\Updating\" />
+    <Folder Include="DataBase\MySql\Scrypts\Updating\" />
     <Folder Include="Ui\ViewModel\Ecg\" />
   </ItemGroup>
   <ItemGroup>

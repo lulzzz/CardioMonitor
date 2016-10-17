@@ -2,17 +2,17 @@
 using CardioMonitor.Models.Session;
 using MySql.Data.MySqlClient;
 
-namespace CardioMonitor.Repository.DataBase
+namespace CardioMonitor.DataBase.MySql
 {
     /// <summary>
     /// Класс для безопасного чтения данных из результата SQL запроса 
     /// </summary>
     /// <remarks>
-    /// В случае успеха возвращает запрашиваемое значение, если такой ячекйки нет,
+    /// В случае успеха возвращает запрашиваемое значение, если такой ячейки нет,
     /// то будет возвращено некоторое значение по умолчанию, 
     /// исключения выбрасываться не будут
     /// </remarks>
-    internal class SafeReader
+    internal class MySqlSafeReader
     {
         readonly MySqlDataReader _reader;
 
@@ -20,7 +20,7 @@ namespace CardioMonitor.Repository.DataBase
         /// Класс для безопасного чтения данных из результата SQL запроса 
         /// </summary>
         /// <param name="reader">MySqlDataReader с результатом SQL запроса</param>
-        public SafeReader(MySqlDataReader reader)
+        public MySqlSafeReader(MySqlDataReader reader)
         {
             _reader = reader;
         }
@@ -48,11 +48,11 @@ namespace CardioMonitor.Repository.DataBase
         /// <summary>
         /// Возвращает дробное число
         /// </summary>
-        /// <param name="columndIndex">Номер колонки</param>
+        /// <param name="columnIndex">Номер колонки</param>
         /// <returns></returns>
-        public double GetDouble(int columndIndex)
+        public double GetDouble(int columnIndex)
         {
-            return  !_reader.IsDBNull(columndIndex) ?_reader.GetDouble(columndIndex) :0;
+            return  !_reader.IsDBNull(columnIndex) ?_reader.GetDouble(columnIndex) :0;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace CardioMonitor.Repository.DataBase
         /// </summary>
         /// <param name="colIndex">Номер колонки</param>
         /// <returns></returns>
-        public SessionStatus GetSesionStatus(int colIndex)
+        public SessionStatus GetSessionStatus(int colIndex)
         {
             return (SessionStatus)GetInt(colIndex);
         }

@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Input;
+using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Logs;
 using CardioMonitor.Models.Patients;
 using CardioMonitor.Models.Session;
 using CardioMonitor.Models.Treatment;
 using CardioMonitor.Repository;
-using CardioMonitor.Repository.DataBase;
-using CardioMonitor.Repository.Files;
 using CardioMonitor.Resources;
+using CardioMonitor.Statistics;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
 using CardioMonitor.Ui.ViewModel.Patients;
@@ -34,6 +35,11 @@ namespace CardioMonitor.Ui.ViewModel{
 
     public class MainWindowViewModel : Notifier
     {
+        private readonly ILogger _logger;
+        private readonly PatientsRepository _patientsRepository;
+        private readonly TreatmentsRepository _treatmentsRepository;
+        private readonly SessionsRepository _sessionsRepository;
+        private readonly FileRepository _fileRepository;
         private ICommand _moveBackwardComand;
         private int _mainTCSelectedIndex;
         private int _mainTCPreviosSelectedIndex;
@@ -182,9 +188,27 @@ namespace CardioMonitor.Ui.ViewModel{
 
 #endregion
 
-        public MainWindowViewModel()
+        public MainWindowViewModel(
+            ILogger logger,
+            PatientsRepository patientsRepository,
+            TreatmentsRepository treatmentsRepository,
+            SessionsRepository sessionsRepository,
+            FileRepository fileRepository,
+            DataBaseRepository dataBaseRepository)
         {
-            PatientsViewModel = new PatientsViewModel
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (patientsRepository == null) throw new ArgumentNullException(nameof(patientsRepository));
+            if (treatmentsRepository == null) throw new ArgumentNullException(nameof(treatmentsRepository));
+            if (sessionsRepository == null) throw new ArgumentNullException(nameof(sessionsRepository));
+            if (fileRepository == null) throw new ArgumentNullException(nameof(fileRepository));
+
+            _logger = logger;
+            _patientsRepository = patientsRepository;
+            _treatmentsRepository = treatmentsRepository;
+            _sessionsRepository = sessionsRepository;
+            _fileRepository = fileRepository;
+
+            PatientsViewModel = new PatientsViewModel(patientsRepository)
             {
                 OpenPatienEvent = OpetPatientTreatmentsHanlder,
                 AddEditPatient = AddEditPatientHanlder,
@@ -192,7 +216,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 ShowTreatmentResults = ShowTreatmentResults,
                 OpenSessionHandler = LoadSession
             };
-            PatientViewModel = new PatientViewModel
+            PatientViewModel = new PatientViewModel(logger, patientsRepository)
             {
                 MoveBackwardEvent = MoveBackwardPatient
             };
@@ -201,17 +225,17 @@ namespace CardioMonitor.Ui.ViewModel{
                 OpenSessionsEvent = StartOrContinueTreatmentSession,
                 ShowResultsEvent = ShowTreatmentResults
             };
-            SessionsViewModel = new SessionsViewModel
+            SessionsViewModel = new SessionsViewModel(sessionsRepository)
             {
                 StartSessionEvent = StartSession,
                 ShowResultsEvent = ShowSessionResults
             };
-            SessionViewModel = new SessionViewModel();
+            SessionViewModel = new SessionViewModel(logger, fileRepository, sessionsRepository);
             //SessionViewModel.StartStatusTimer();
-            SessionDataViewModel = new SessionDataViewModel();
+            SessionDataViewModel = new SessionDataViewModel(logger, fileRepository);
             
             TreatmentDataViewModel = new TreatmentDataViewModel();
-            SettingsViewModel = new SettingsViewModel();
+            SettingsViewModel = new SettingsViewModel(dataBaseRepository);
         }
 
         public void UpdatePatiens()
@@ -219,7 +243,10 @@ namespace CardioMonitor.Ui.ViewModel{
             var message = String.Empty;
             try
             {
-                PatientsViewModel.Patients = DataBaseRepository.Instance.GetPatients();
+                var patients = _patientsRepository.GetPatients();
+                PatientsViewModel.Patients = patients != null
+                    ? new ObservableCollection<Patient>(patients) 
+                    : new ObservableCollection<Patient>();
             }
             catch (Exception ex)
             {
@@ -330,7 +357,7 @@ namespace CardioMonitor.Ui.ViewModel{
             }
             catch (Exception ex)
             {
-                Logger.Instance.LogError("MainWindowViewModel",ex);
+                _logger.LogError("MainWindowViewModel",ex);
             }
         }
 
@@ -342,12 +369,12 @@ namespace CardioMonitor.Ui.ViewModel{
             try
             {
 
-                var treamtnets = DataBaseRepository.Instance.GetTreatments(patient.Id);
-                var treatment = treamtnets.FirstOrDefault();
+                var treatments = _treatmentsRepository.GetTreatments(patient.Id);
+                var treatment = treatments.FirstOrDefault();
                 if (null == treatment)
                 {
-                    DataBaseRepository.Instance.AddTreatment(new Treatment { StartDate = DateTime.Now, PatientId = patient.Id });
-                    treatment = DataBaseRepository.Instance.GetTreatments(patient.Id).FirstOrDefault();
+                    _treatmentsRepository.AddTreatment(new Treatment { StartDate = DateTime.Now, PatientId = patient.Id });
+                    treatment = _treatmentsRepository.GetTreatments(patient.Id).FirstOrDefault();
                     if (null == treatment)
                     {
                         await MessageHelper.Instance.ShowMessageAsync(Localisation.MainWindowViewModel_CantLoadList);
@@ -377,8 +404,10 @@ namespace CardioMonitor.Ui.ViewModel{
 
         private void UpdateSessionInfos()
         {
-            var sessions = DataBaseRepository.Instance.GetSessionInfos(SessionsViewModel.Treatment.Id);
-            SessionsViewModel.SessionInfos = sessions;
+            var sessions = _sessionsRepository.GetSessionInfos(SessionsViewModel.Treatment.Id);
+            SessionsViewModel.SessionInfos = sessions != null
+                ? new ObservableCollection<SessionInfo>(sessions)
+                : new ObservableCollection<SessionInfo>();
         }
 
         private async void UpdateSessionInfosSave()
@@ -433,7 +462,7 @@ namespace CardioMonitor.Ui.ViewModel{
             try
             {
 
-                var session = DataBaseRepository.Instance.GetSession(SessionsViewModel.SelectedSessionInfo.Id);
+                var session = _sessionsRepository.GetSession(SessionsViewModel.SelectedSessionInfo.Id);
                 SessionDataViewModel.Session = new SessionModel {Session = session};
                 SessionDataViewModel.Patient = PatientsViewModel.SelectedPatient;
                 MainTCSelectedIndex = (int)ViewIndex.SessionDataView;
@@ -457,7 +486,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 var message = String.Empty;
                 try
                 {
-                    var container = FileRepository.LoadFromFile(loadDialog.FileName);
+                    var container = _fileRepository.LoadFromFile(loadDialog.FileName);
                     SessionDataViewModel.Session = new SessionModel {Session = container.Session};
                     SessionDataViewModel.Patient = container.Patient;
                     MainTCSelectedIndex = (int) ViewIndex.SessionDataView;

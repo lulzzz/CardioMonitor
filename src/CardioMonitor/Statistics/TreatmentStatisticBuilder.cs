@@ -2,14 +2,14 @@
 using CardioMonitor.Models.Session;
 using CardioMonitor.Models.Treatment;
 
-namespace CardioMonitor.Repository
+namespace CardioMonitor.Statistics
 {
     //todo Временно не используется
     public class TreatmentStatisticBuilder
     {
         public TreatmentFullStatistic Build(Session[] sessions)
         {
-            if (sessions == null) throw new ArgumentNullException("sessions");
+            if (sessions == null) throw new ArgumentNullException(nameof(sessions));
 
             var heartRate = new TreatmentParamStatistic {Name = "ЧСС"};
             var repsirationRate = new TreatmentParamStatistic { Name = "ЧД" };

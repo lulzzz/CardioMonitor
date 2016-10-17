@@ -2,6 +2,9 @@
 
 namespace CardioMonitor.Infrastructure.Logs
 {
+    /// <summary>
+    /// Интерфейс логгер, доступного из любого места приложения
+    /// </summary>
     public interface ILogger
     {
         /// <summary>

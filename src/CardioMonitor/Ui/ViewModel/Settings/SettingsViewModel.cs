@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Input;
-using CardioMonitor.Repository.DataBase;
+using CardioMonitor.Repository;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 
@@ -11,6 +11,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 {
     public class SettingsViewModel : Notifier, IDataErrorInfo
     {
+        private readonly DataBaseRepository _dataBaseRepository;
         private string _filesDirectoryPath;
         private ICommand _chooseFolderCommand;
         private ICommand _closeCommand;
@@ -186,8 +187,10 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             }
         }
 
-        public SettingsViewModel()
+        public SettingsViewModel(DataBaseRepository dataBaseRepository)
         {
+            if (dataBaseRepository == null) throw new ArgumentNullException(nameof(dataBaseRepository));
+            _dataBaseRepository = dataBaseRepository;
             /*
             AccentColors = ThemeManager.Accents
                                             .Select(a => new AppApperanceData { Name = a.Name, ColorBrush = a.Resources["AccentColorBrush"] as Brush })
@@ -269,7 +272,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             var message = String.Empty;
             try
             {
-                await DataBaseRepository.Instance.CheckConnectionAsync(DBName, DBServerName, DBLogin, DBPassword);
+                await _dataBaseRepository.CheckConnectionAsync(DBName, DBServerName, DBLogin, DBPassword);
             }
             catch (Exception ex)
             {

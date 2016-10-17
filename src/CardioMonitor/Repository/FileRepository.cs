@@ -1,33 +1,41 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using CardioMonitor.Logs;
+using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Models.Patients;
 using CardioMonitor.Models.Session;
 using CardioMonitor.Resources;
 
-namespace CardioMonitor.Repository.Files
+namespace CardioMonitor.Repository
 {
     /// <summary>
     /// Репозиторий для доступа к файлам
     /// </summary>
-    public static class FileRepository
+    public class FileRepository
     {
+        private readonly ILogger _logger;
+
+        public FileRepository(ILogger logger)
+        {
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
+
+            _logger = logger;
+        }
+
         /// <summary>
         /// Сохраняет в файл информацию о сеансе
         /// </summary>
         /// <param name="patient">Пациент, которому принадлежит сеанс</param>
         /// <param name="session">Сеанс пациента</param>
         /// <param name="filePath">Полный путь к файлу (по умолчанию создается директория с именем пациента, и файл сохраняется в нее)</param>
-        public static void SaveToFile(Patient patient, Session session, string filePath = null)
+        public void SaveToFile(Patient patient, Session session, string filePath = null)
         {
-            if (patient == null) throw new ArgumentNullException("patient");
-            if (session == null) throw new ArgumentNullException("session");
+            if (patient == null) throw new ArgumentNullException(nameof(patient));
+            if (session == null) throw new ArgumentNullException(nameof(session));
             if (filePath == null)
             {
                 filePath = Settings.Settings.Instance.FilesDirectoryPath;
-                var dirName = String.Format("{0}_{1}_{2}_{3}", patient.LastName, patient.FirstName, patient.PatronymicName,
-                patient.Id);
+                var dirName = $"{patient.LastName}_{patient.FirstName}_{patient.PatronymicName}_{patient.Id}";
                 filePath = Path.Combine(filePath, dirName);
 
                 if (!Directory.Exists(filePath))
@@ -35,21 +43,11 @@ namespace CardioMonitor.Repository.Files
                     Directory.CreateDirectory(filePath);
                 }
 
-                var dateSring = String.Format("{0}_{1}_{2}_{3}_{4}_{5}", session.DateTime.Day,
-                                                                         session.DateTime.Month,
-                                                                         session.DateTime.Year,
-                                                                         session.DateTime.Hour,
-                                                                         session.DateTime.Minute,
-                                                                         session.DateTime.Second);
-                var birthDateSring = String.Format("{0}_{1}_{2}", session.DateTime.Day,
-                                                                        session.DateTime.Month,
-                                                                        session.DateTime.Year);
-                var fileName = String.Format("{0}_{1}_{2}_{3}_{4}_{5}.cmsf", patient.LastName,
-                                                                         patient.FirstName,
-                                                                         patient.PatronymicName,
-                                                                         birthDateSring,
-                                                                         patient.Id,
-                                                                         dateSring);
+                var dateSring =
+                    $"{session.DateTime.Day}_{session.DateTime.Month}_{session.DateTime.Year}_{session.DateTime.Hour}_{session.DateTime.Minute}_{session.DateTime.Second}";
+                var birthDateSring = $"{session.DateTime.Day}_{session.DateTime.Month}_{session.DateTime.Year}";
+                var fileName =
+                    $"{patient.LastName}_{patient.FirstName}_{patient.PatronymicName}_{birthDateSring}_{patient.Id}_{dateSring}.cmsf";
                 filePath = Path.Combine(filePath, fileName);
             }
 
@@ -71,20 +69,20 @@ namespace CardioMonitor.Repository.Files
             }
             catch (Exception ex)
             {
-                Logger.Instance.LogError("File repositry", ex);
+                _logger.LogError(nameof(FileRepository), ex);
                 throw new Exception(Localisation.FileRepository_SavePatientException);
             }
             
         }
 
         /// <summary>
-        /// Загружает инфомрацию о сеансе из файла
+        /// Загружает информацию о сеансе из файла
         /// </summary>
         /// <param name="filePath">Полный путь к файлу сеансу</param>
         /// <returns>Сенас</returns>
-        public static SessionContainer LoadFromFile(string filePath)
+        public SessionContainer LoadFromFile(string filePath)
         {
-            if (String.IsNullOrWhiteSpace(filePath)) { throw new ArgumentNullException("filePath"); }
+            if (String.IsNullOrWhiteSpace(filePath)) { throw new ArgumentNullException(nameof(filePath)); }
 
             try
             {
@@ -99,7 +97,7 @@ namespace CardioMonitor.Repository.Files
             }
             catch (Exception ex)
             {
-                Logger.Instance.LogError("File repositry", ex);
+                _logger.LogError(nameof(FileRepository), ex);
                 throw new Exception(Localisation.FileRepository_LoadPatientException);
             }
         }

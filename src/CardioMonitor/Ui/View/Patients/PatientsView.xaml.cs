@@ -13,7 +13,6 @@ namespace CardioMonitor.Ui.View.Patients
 
         public PatientsView()
         {
-            _viewModel = new PatientsViewModel();
             DataContext = _viewModel;
 
             InitializeComponent();

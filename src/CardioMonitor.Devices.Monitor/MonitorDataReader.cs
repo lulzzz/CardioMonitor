@@ -4,6 +4,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
+using CardioMonitor.Models.Session;
 
 namespace CardioMonitor.Devices.Monitor
 {

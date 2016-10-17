@@ -12,13 +12,11 @@ namespace CardioMonitor.Logs
     public class Logger : ILogger
     {
         private readonly string _logsFolder;
-        private static Logger _instance;
-        private static readonly object LockObject = new object();
 
         /// <summary>
-        /// Закрытй конструктор
+        /// Класс для записи лог-информации в файл
         /// </summary>
-        private Logger()
+        public Logger()
         {
             _logsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Settings.Settings.AppName, "Logs");
             try
@@ -35,24 +33,6 @@ namespace CardioMonitor.Logs
         }
 
         /// <summary>
-        /// Класс для записи лог-информации в файл
-        /// </summary>
-        public static Logger Instance
-        {
-            get
-            {
-                if (null != _instance)
-                {
-                    return _instance;
-                }
-                lock (LockObject)
-                {
-                    return _instance ?? (_instance = new Logger());
-                }
-            }
-        }
-
-        /// <summary>
         /// Добавляет запись об ошибке в лог
         /// </summary>
         /// <param name="className">Названия класса, в котором произошла ошибка</param>
@@ -63,8 +43,9 @@ namespace CardioMonitor.Logs
             {
                 var fileName = _logsFolder + @"\Error_" + DateTime.Today.Date.ToShortDateString() + ".log";
                 var textFile = new StreamWriter(fileName, true);
-                var logMessage = String.Format("{0} {1}\nException info: \n{2}\n------------\n", className, DateTime.Now.ToShortTimeString(), exceptionInfo);
-                await textFile.WriteAsync(logMessage);
+                var logMessage =
+                    $"{className} {DateTime.Now.ToShortTimeString()}\nException info: \n{exceptionInfo}\n------------\n";
+                await textFile.WriteAsync(logMessage).ConfigureAwait(false);
                 textFile.Close();
             }
             catch (Exception ex)
@@ -84,8 +65,9 @@ namespace CardioMonitor.Logs
             {
                 var fileName = _logsFolder + @"\Error_" + DateTime.Today.Date.ToShortDateString() + ".log";
                 var textFile = new StreamWriter(fileName, true);
-                var logMessage = String.Format("{0} {1} \nMessage: \n{2} \nSource: \n{3} \nStackTrace: \n{4}\n------------\n", className, DateTime.Now.ToShortTimeString(), ex.Message, ex.Source, ex.StackTrace);
-                await textFile.WriteAsync(logMessage);
+                var logMessage =
+                    $"{className} {DateTime.Now.ToShortTimeString()} \nMessage: \n{ex.Message} \nSource: \n{ex.Source} \nStackTrace: \n{ex.StackTrace}\n------------\n";
+                await textFile.WriteAsync(logMessage).ConfigureAwait(false);
                 textFile.Close();
             }
             catch (Exception logEx)
@@ -104,8 +86,8 @@ namespace CardioMonitor.Logs
             {
                 var fileName = _logsFolder + @"\Querry_" + DateTime.Today.Date.ToShortDateString() + ".log";
                 var textFile = new StreamWriter(fileName, true);
-                var logMessage = String.Format("{0} \nException info: \n{1}\n------------\n", DateTime.Now.ToShortTimeString(), query);
-                await textFile.WriteAsync(logMessage);
+                var logMessage = $"{DateTime.Now.ToShortTimeString()} \nException info: \n{query}\n------------\n";
+                await textFile.WriteAsync(logMessage).ConfigureAwait(false);
                 textFile.Close();
             }
             catch (Exception ex)
@@ -120,8 +102,8 @@ namespace CardioMonitor.Logs
             {
                 var fileName = _logsFolder + @"\Message_" + DateTime.Today.Date.ToShortDateString() + ".log";
                 var textFile = new StreamWriter(fileName, true);
-                var logMessage = String.Format("{0} \nInfo: \n{1}\n------------\n", DateTime.Now.ToShortTimeString(), message);
-                await textFile.WriteAsync(logMessage);
+                var logMessage = $"{DateTime.Now.ToShortTimeString()} \nInfo: \n{message}\n------------\n";
+                await textFile.WriteAsync(logMessage).ConfigureAwait(false);
                 textFile.Close();
             }
             catch (Exception ex)
