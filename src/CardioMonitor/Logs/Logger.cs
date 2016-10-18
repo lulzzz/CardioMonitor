@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using CardioMonitor.Infrastructure.Logs;
+using CardioMonitor.Settings;
 
 // ReSharper disable UnassignedField.Compiler
 // ReSharper disable LocalizableElement
@@ -16,9 +17,9 @@ namespace CardioMonitor.Logs
         /// <summary>
         /// Класс для записи лог-информации в файл
         /// </summary>
-        public Logger()
+        public Logger(ICardioSettings settings)
         {
-            _logsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Settings.Settings.AppName, "Logs");
+            _logsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), SettingsConstants.AppName, "Logs");
             try
             {
                 if (!Directory.Exists(_logsFolder))

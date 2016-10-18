@@ -24,9 +24,9 @@ namespace CardioMonitor.DataBase
         /// <summary>
         /// Возвращает дробное число
         /// </summary>
-        /// <param name="columndIndex">Номер колонки</param>
+        /// <param name="columnIndex">Номер колонки</param>
         /// <returns></returns>
-        double GetDouble(int columndIndex);
+        double GetDouble(int columnIndex);
 
 
         /// <summary>
@@ -38,6 +38,6 @@ namespace CardioMonitor.DataBase
 
         DateTime? GetNullableDateTime(int colIndex);
 
-        SessionStatus GetSesionStatus(int colIndex);
+        SessionStatus GetSessionStatus(int colIndex);
     }
 }

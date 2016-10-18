@@ -4,6 +4,7 @@ using CardioMonitor.DataBase;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Models.Treatment;
 using CardioMonitor.Resources;
+using CardioMonitor.Settings;
 
 namespace CardioMonitor.Repository
 {
@@ -11,16 +12,20 @@ namespace CardioMonitor.Repository
     {
         private readonly DataBaseFactory _dataBaseFactory;
         private readonly ILogger _logger;
+        private readonly ICardioSettings _settings;
 
         public TreatmentsRepository(
             DataBaseFactory dataBaseFactory,
-            ILogger logger)
+            ILogger logger,
+            ICardioSettings settings)
         {
             if (dataBaseFactory == null) throw new ArgumentNullException(nameof(dataBaseFactory));
             if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             _dataBaseFactory = dataBaseFactory;
             _logger = logger;
+            _settings = settings;
         }
 
 
@@ -37,7 +42,7 @@ namespace CardioMonitor.Repository
                 var control = _dataBaseFactory.CreateDataBaseController();
                 var output = new List<Treatment>();
                 query =
-                    $"SELECT * FROM {Settings.Settings.Instance.DataBase.DataBase}.treatments " +
+                    $"SELECT * FROM {_settings.DataBase.DataBase}.treatments " +
                     $"WHERE PatientId='{patientId}'";
                 var reader = control.ConnectDb(query);
                 var safeReader = _dataBaseFactory.CreateSafeReader(reader);
@@ -95,7 +100,7 @@ namespace CardioMonitor.Repository
             try
             {
                 query =
-                    $"INSERT INTO {Settings.Settings.Instance.DataBase.DataBase}.treatments (PatientId,StartDate) " +
+                    $"INSERT INTO {_settings.DataBase.DataBase}.treatments (PatientId,StartDate) " +
                     $"VALUES ('{treatment.PatientId}','{treatment.StartDate:yyyy-MM-dd HH:mm:ss}')";
                 var control = _dataBaseFactory.CreateDataBaseController();
                 control.ExecuteQuery(query);
@@ -133,7 +138,7 @@ namespace CardioMonitor.Repository
             try
             {
                 query =
-                    $"DELETE FROM {Settings.Settings.Instance.DataBase.DataBase}.treatments WHERE id='{treatmentId}'";
+                    $"DELETE FROM {_settings.DataBase.DataBase}.treatments WHERE id='{treatmentId}'";
 
                 var control = _dataBaseFactory.CreateDataBaseController();
                 control.ExecuteQuery(query);

@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.Repository;
 using CardioMonitor.Resources;
+using CardioMonitor.Settings;
 using CardioMonitor.Ui.Base;
 
 namespace CardioMonitor.Ui.ViewModel.Settings
@@ -12,7 +13,8 @@ namespace CardioMonitor.Ui.ViewModel.Settings
     public class SettingsViewModel : Notifier, IDataErrorInfo
     {
         private readonly DataBaseRepository _dataBaseRepository;
-        private string _filesDirectoryPath;
+        private readonly ICardioSettings _settings;
+        private string _sessionsFilesDirectoryPath;
         private ICommand _chooseFolderCommand;
         private ICommand _closeCommand;
         private ICommand _saveCommand;
@@ -26,12 +28,12 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         #region Apperance settings
         /*
-        private AppApperanceData _selectedAccentColor;
-        private AppApperanceData _selectedAppTheme;
-        public List<AppApperanceData> AccentColors { get; set; }
-        public List<AppApperanceData> AppThemes { get; set; }
+        private AppAppearanceSettings _selectedAccentColor;
+        private AppAppearanceSettings _selectedAppTheme;
+        public List<AppAppearanceSettings> AccentColors { get; set; }
+        public List<AppAppearanceSettings> AppThemes { get; set; }
 
-        public AppApperanceData SelectedAccentColor
+        public AppAppearanceSettings SelectedAccentColor
         {
             get { return _selectedAccentColor; }
             set
@@ -49,7 +51,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             }
         }
 
-        public AppApperanceData SelectedAppTheme
+        public AppAppearanceSettings SelectedAppTheme
         {
             get { return _selectedAppTheme; }
             set
@@ -68,15 +70,15 @@ namespace CardioMonitor.Ui.ViewModel.Settings
         }*/
         #endregion
 
-        public string FilesDirectoryPath
+        public string SessionsFilesDirectoryPath
         {
-            get { return _filesDirectoryPath; }
+            get { return _sessionsFilesDirectoryPath; }
             set
             {
-                if (value != _filesDirectoryPath)
+                if (value != _sessionsFilesDirectoryPath)
                 {
-                    _filesDirectoryPath = value;
-                    RisePropertyChanged("FilesDirectoryPath");
+                    _sessionsFilesDirectoryPath = value;
+                    RisePropertyChanged("SessionsFilesDirectoryPath");
                     _isSettingsChanged = true;
                 }
             }
@@ -187,17 +189,22 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             }
         }
 
-        public SettingsViewModel(DataBaseRepository dataBaseRepository)
+        public SettingsViewModel(
+            DataBaseRepository dataBaseRepository,
+            ICardioSettings settings)
         {
             if (dataBaseRepository == null) throw new ArgumentNullException(nameof(dataBaseRepository));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+
             _dataBaseRepository = dataBaseRepository;
+            _settings = settings;
             /*
             AccentColors = ThemeManager.Accents
-                                            .Select(a => new AppApperanceData { Name = a.Name, ColorBrush = a.Resources["AccentColorBrush"] as Brush })
+                                            .Select(a => new AppAppearanceSettings { Name = a.Name, ColorBrush = a.Resources["AccentColorBrush"] as Brush })
                                             .ToList();
 
             AppThemes = ThemeManager.AppThemes
-                                           .Select(a => new AppApperanceData { Name = a.Name, BorderColorBrush = a.Resources["BlackColorBrush"] as Brush, ColorBrush = a.Resources["WhiteColorBrush"] as Brush })
+                                           .Select(a => new AppAppearanceSettings { Name = a.Name, BorderColorBrush = a.Resources["BlackColorBrush"] as Brush, ColorBrush = a.Resources["WhiteColorBrush"] as Brush })
                                            .ToList();*/
             InitializeSettings();
             _isSettingsChanged = false;
@@ -206,14 +213,14 @@ namespace CardioMonitor.Ui.ViewModel.Settings
         private void InitializeSettings()
         {
             /*SelectedAppTheme =
-               AppThemes.FirstOrDefault(x => x.Name == Settings.Instance.SeletedAppThemeName);
+               AppThemes.FirstOrDefault(x => x.Name == CardioSettings.Instance.SeletedAppThemeName);
             SelectedAccentColor =
-                AccentColors.FirstOrDefault(x => x.Name == Settings.Instance.SelectedAcentColorName);*/
-            FilesDirectoryPath = CardioMonitor.Settings.Settings.Instance.FilesDirectoryPath;
-            DBLogin = CardioMonitor.Settings.Settings.Instance.DataBase.User;
-            DBName = CardioMonitor.Settings.Settings.Instance.DataBase.DataBase;
-            DBPassword = CardioMonitor.Settings.Settings.Instance.DataBase.Password;
-            DBServerName = CardioMonitor.Settings.Settings.Instance.DataBase.Source;
+                AccentColors.FirstOrDefault(x => x.Name == CardioSettings.Instance.SelectedAcentColorName);*/
+            SessionsFilesDirectoryPath = _settings.SessionsFilesDirectoryPath;
+            DBLogin = _settings.DataBase.User;
+            DBName = _settings.DataBase.DataBase;
+            DBPassword = _settings.DataBase.Password;
+            DBServerName = _settings.DataBase.Source;
             _isValid = true;
             _isSettingsChanged = false;
         }
@@ -224,7 +231,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
         {
             get
             {
-                if (columnName == "FilesDirectoryPath" && !Directory.Exists(FilesDirectoryPath))
+                if (columnName == "SessionsFilesDirectoryPath" && !Directory.Exists(SessionsFilesDirectoryPath))
                 {
                     _isValid = false;
                     return Localisation.SettingsViewModel_DirectoryDoesNotExist;
@@ -260,11 +267,11 @@ namespace CardioMonitor.Ui.ViewModel.Settings
         {
             var folderBrowserDialog = new FolderBrowserDialog
             {
-                SelectedPath = FilesDirectoryPath,
+                SelectedPath = SessionsFilesDirectoryPath,
                 Description = Localisation.SettingsViewModel_ChooseFolder
             };
             folderBrowserDialog.ShowDialog();
-            FilesDirectoryPath = folderBrowserDialog.SelectedPath;
+            SessionsFilesDirectoryPath = folderBrowserDialog.SelectedPath;
         }
 
         private async void SaveSettings()
@@ -284,16 +291,17 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             }
             else
             {
-                /* Settings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
-                Settings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
-                CardioMonitor.Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
+                /* CardioSettings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
+                CardioSettings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
+                _settings.SessionsFilesDirectoryPath = SessionsFilesDirectoryPath;
 
-                CardioMonitor.Settings.Settings.Instance.FilesDirectoryPath = FilesDirectoryPath;
-                CardioMonitor.Settings.Settings.Instance.DataBase.User = DBLogin;
-                CardioMonitor.Settings.Settings.Instance.DataBase.DataBase = DBName;
-                CardioMonitor.Settings.Settings.Instance.DataBase.Password = DBPassword;
-                CardioMonitor.Settings.Settings.Instance.DataBase.Source = DBServerName;
-                CardioMonitor.Settings.Settings.SaveToFile();
+                _settings.DataBase.User = DBLogin;
+                _settings.DataBase.DataBase = DBName;
+                _settings.DataBase.Password = DBPassword;
+                _settings.DataBase.Source = DBServerName;
+
+                //TODO saving settings
+                //CardioMonitor.Settings.CardioSettings.SaveToFile();
                 _isSettingsChanged = false;
                 await MessageHelper.Instance.ShowMessageAsync(Localisation.SettingsViewModel_Saved);
                 
@@ -310,7 +318,6 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         private void CancelSettings()
         {
-            CardioMonitor.Settings.Settings.LoadFromFile();
             InitializeSettings();
         }
     }

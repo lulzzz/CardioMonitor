@@ -10,6 +10,7 @@ using CardioMonitor.Models.Session;
 using CardioMonitor.Models.Treatment;
 using CardioMonitor.Repository;
 using CardioMonitor.Resources;
+using CardioMonitor.Settings;
 using CardioMonitor.Statistics;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
@@ -194,13 +195,15 @@ namespace CardioMonitor.Ui.ViewModel{
             TreatmentsRepository treatmentsRepository,
             SessionsRepository sessionsRepository,
             FileRepository fileRepository,
-            DataBaseRepository dataBaseRepository)
+            DataBaseRepository dataBaseRepository,
+            ICardioSettings settings)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             if (patientsRepository == null) throw new ArgumentNullException(nameof(patientsRepository));
             if (treatmentsRepository == null) throw new ArgumentNullException(nameof(treatmentsRepository));
             if (sessionsRepository == null) throw new ArgumentNullException(nameof(sessionsRepository));
             if (fileRepository == null) throw new ArgumentNullException(nameof(fileRepository));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             _logger = logger;
             _patientsRepository = patientsRepository;
@@ -235,7 +238,7 @@ namespace CardioMonitor.Ui.ViewModel{
             SessionDataViewModel = new SessionDataViewModel(logger, fileRepository);
             
             TreatmentDataViewModel = new TreatmentDataViewModel();
-            SettingsViewModel = new SettingsViewModel(dataBaseRepository);
+            SettingsViewModel = new SettingsViewModel(dataBaseRepository, settings);
         }
 
         public void UpdatePatiens()

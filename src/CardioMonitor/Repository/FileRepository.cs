@@ -5,6 +5,7 @@ using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Models.Patients;
 using CardioMonitor.Models.Session;
 using CardioMonitor.Resources;
+using CardioMonitor.Settings;
 
 namespace CardioMonitor.Repository
 {
@@ -14,12 +15,15 @@ namespace CardioMonitor.Repository
     public class FileRepository
     {
         private readonly ILogger _logger;
+        private readonly ICardioSettings _settings;
 
-        public FileRepository(ILogger logger)
+        public FileRepository(ILogger logger, ICardioSettings settings)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             _logger = logger;
+            _settings = settings;
         }
 
         /// <summary>
@@ -34,7 +38,7 @@ namespace CardioMonitor.Repository
             if (session == null) throw new ArgumentNullException(nameof(session));
             if (filePath == null)
             {
-                filePath = Settings.Settings.Instance.FilesDirectoryPath;
+                filePath = _settings.SessionsFilesDirectoryPath;
                 var dirName = $"{patient.LastName}_{patient.FirstName}_{patient.PatronymicName}_{patient.Id}";
                 filePath = Path.Combine(filePath, dirName);
 

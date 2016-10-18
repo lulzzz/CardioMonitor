@@ -4,6 +4,7 @@ using CardioMonitor.DataBase;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Models.Patients;
 using CardioMonitor.Resources;
+using CardioMonitor.Settings;
 using MySql.Data.MySqlClient;
 
 namespace CardioMonitor.Repository
@@ -12,16 +13,20 @@ namespace CardioMonitor.Repository
     {
         private readonly DataBaseFactory _dataBaseFactory;
         private readonly ILogger _logger;
+        private readonly ICardioSettings _settings;
 
         public PatientsRepository(
             DataBaseFactory dataBaseFactory,
-            ILogger logger)
+            ILogger logger,
+            ICardioSettings settings)
         {
             if (dataBaseFactory == null) throw new ArgumentNullException(nameof(dataBaseFactory));
             if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             _dataBaseFactory = dataBaseFactory;
             _logger = logger;
+            _settings = settings;
         }
 
 
@@ -39,7 +44,7 @@ namespace CardioMonitor.Repository
 
                 query =
                     "SELECT id, FirstName, PatronymicName, LastName, BirthDate " +
-                    $"FROM {Settings.Settings.Instance.DataBase.DataBase}.patients";
+                    $"FROM {_settings.DataBase.DataBase}.patients";
                 var reader = control.ConnectDb(query);
                 var sReader = _dataBaseFactory.CreateSafeReader(reader);
 
@@ -97,7 +102,7 @@ namespace CardioMonitor.Repository
             {
                 var patientBirthDate = patient.BirthDate ?? new DateTime();
                 query =
-                    $"INSERT INTO {Settings.Settings.Instance.DataBase.DataBase}.patients " +
+                    $"INSERT INTO {_settings.DataBase.DataBase}.patients " +
                     "(LastName,FirstName,PatronymicName, BirthDate)" +
                     $" VALUES ('{patient.LastName}','{patient.FirstName}','{patient.PatronymicName}', '{patientBirthDate:yyyy-MM-dd H:mm:ss}')";
                 var control = _dataBaseFactory.CreateDataBaseController();
@@ -142,7 +147,7 @@ namespace CardioMonitor.Repository
             {
                 var patientBirthDate = patient.BirthDate ?? new DateTime();
                 query =
-                    $"UPDATE {Settings.Settings.Instance.DataBase.DataBase}.patients " +
+                    $"UPDATE {_settings.DataBase.DataBase}.patients " +
                     $"SET LastName='{patient.LastName}', FirstName='{patient.FirstName}', " +
                         $"PatronymicName='{patient.PatronymicName}', BirthDate='{patientBirthDate:yyyy-MM-dd H:mm:ss}' " +
                     $"WHERE id='{patient.Id}'";
@@ -183,7 +188,7 @@ namespace CardioMonitor.Repository
             try
             {
                 query =
-                    $"DELETE FROM {Settings.Settings.Instance.DataBase.DataBase}.patients WHERE id='{patientId}'";
+                    $"DELETE FROM {_settings.DataBase.DataBase}.patients WHERE id='{patientId}'";
 
                 var control = _dataBaseFactory.CreateDataBaseController();
                 control.ExecuteQuery(query);

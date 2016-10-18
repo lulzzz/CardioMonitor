@@ -12,7 +12,7 @@ namespace CardioMonitor.DataBase.MySql
     /// то будет возвращено некоторое значение по умолчанию, 
     /// исключения выбрасываться не будут
     /// </remarks>
-    internal class MySqlSafeReader
+    internal class MySqlSafeReader : ISafeReader
     {
         readonly MySqlDataReader _reader;
 
@@ -23,6 +23,11 @@ namespace CardioMonitor.DataBase.MySql
         public MySqlSafeReader(MySqlDataReader reader)
         {
             _reader = reader;
+        }
+
+        public bool CanRead()
+        {
+            return _reader.Read();
         }
 
         /// <summary>
@@ -71,7 +76,7 @@ namespace CardioMonitor.DataBase.MySql
             return (dateTime.Equals(new DateTime(0001, 01, 01))) ? null: new DateTime?(dateTime);
 
         }
-
+        
         /// <summary>
         /// Возвращает статус сессии
         /// </summary>

@@ -5,6 +5,7 @@ using CardioMonitor.DataBase;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Models.Session;
 using CardioMonitor.Resources;
+using CardioMonitor.Settings;
 
 namespace CardioMonitor.Repository
 {
@@ -12,16 +13,20 @@ namespace CardioMonitor.Repository
     {
         private readonly DataBaseFactory _dataBaseFactory;
         private readonly ILogger _logger;
+        private readonly ICardioSettings _settings;
 
         public SessionsRepository(
             DataBaseFactory dataBaseFactory,
-            ILogger logger)
+            ILogger logger,
+            ICardioSettings settings)
         {
             if (dataBaseFactory == null) throw new ArgumentNullException(nameof(dataBaseFactory));
             if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             _dataBaseFactory = dataBaseFactory;
             _logger = logger;
+            _settings = settings;
         }
 
 
@@ -39,7 +44,7 @@ namespace CardioMonitor.Repository
                 var output = new List<SessionInfo>();
                 query =
                     "SELECT id, DateTime, Status " +
-                    $"FROM {Settings.Settings.Instance.DataBase.DataBase}.sessions " +
+                    $"FROM {_settings.DataBase.DataBase}.sessions " +
                     $"WHERE TreatmentID='{treatmentId}'";
                 var reader = control.ConnectDb(query);
                 var safeReader = _dataBaseFactory.CreateSafeReader(reader);
@@ -90,7 +95,7 @@ namespace CardioMonitor.Repository
             try
             {
                 query =
-                    $"DELETE FROM {Settings.Settings.Instance.DataBase.DataBase}.sessions " +
+                    $"DELETE FROM {_settings.DataBase.DataBase}.sessions " +
                     $"WHERE id='{sessionId}'";
                 var control = _dataBaseFactory.CreateDataBaseController();
                 control.ExecuteQuery(query);
@@ -133,14 +138,14 @@ namespace CardioMonitor.Repository
             try
             {
                 query =
-                    $"INSERT INTO {Settings.Settings.Instance.DataBase.DataBase}.sessions (TreatmentId, DateTime, Status) " +
+                    $"INSERT INTO {_settings.DataBase.DataBase}.sessions (TreatmentId, DateTime, Status) " +
                     $"VALUES ('{session.TreatmentId}','{session.DateTime:yyyy-MM-dd HH:mm:ss}','{(int) session.Status}')";
                 var control = _dataBaseFactory.CreateDataBaseController();
                 control.ExecuteQuery(query);
 
                 //getting id of new 
                 query =
-                    $"SELECT id FROM {Settings.Settings.Instance.DataBase.DataBase}.sessions " +
+                    $"SELECT id FROM {_settings.DataBase.DataBase}.sessions " +
                     $"WHERE TreatmentId='{session.TreatmentId}' " +
                     $"AND DateTime='{session.DateTime:yyyy-MM-dd HH:mm:ss}' AND Status='{(int) session.Status}'";
                 var reader = control.ConnectDb(query);
@@ -154,7 +159,7 @@ namespace CardioMonitor.Repository
                     const string columns =
                         "Iteration,SessionId,InclinationAngle,HeartRate,RepsirationRate,Spo2,SystolicArterialPressure,DiastolicArterialPressure,AverageArterialPressure";
                     query =
-                        $"INSERT INTO {Settings.Settings.Instance.DataBase.DataBase}.params ({columns}) " +
+                        $"INSERT INTO {_settings.DataBase.DataBase}.params ({columns}) " +
                         $"VALUES ('{param.Iteraton}','{sessionId}','{param.InclinationAngle.ToString(CultureInfo.GetCultureInfoByIetfLanguageTag("en"))}','{param.HeartRate}','{param.RepsirationRate}','{param.Spo2}','{param.SystolicArterialPressure}','{param.DiastolicArterialPressure}','{param.AverageArterialPressure}')";
                     control.ExecuteQuery(query);
                 }
@@ -192,7 +197,7 @@ namespace CardioMonitor.Repository
             var query = String.Empty;
             try
             {
-                query = $"SELECT * FROM {Settings.Settings.Instance.DataBase.DataBase}.sessions " +
+                query = $"SELECT * FROM {_settings.DataBase.DataBase}.sessions " +
                         $"WHERE id='{sessionId}'";
                 var control = _dataBaseFactory.CreateDataBaseController();
 
@@ -205,12 +210,12 @@ namespace CardioMonitor.Repository
                     session.Id = safeReader.GetInt(0);
                     session.TreatmentId = safeReader.GetInt(1);
                     session.DateTime = safeReader.GetDateTime(2);
-                    session.Status = safeReader.GetSesionStatus(3);
+                    session.Status = safeReader.GetSessionStatus(3);
                 }
                 control.DisсonnectDb(reader);
 
                 query =
-                    $"SELECT * FROM {Settings.Settings.Instance.DataBase.DataBase}.params " +
+                    $"SELECT * FROM {_settings.DataBase.DataBase}.params " +
                     $"WHERE SessionId='{sessionId}'";
                 reader = control.ConnectDb(query);
                 safeReader = _dataBaseFactory.CreateSafeReader(reader);

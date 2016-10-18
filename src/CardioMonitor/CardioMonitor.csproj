@@ -172,6 +172,8 @@
     </Compile>
     <Compile Include="Logs\Logger.cs" />
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="Settings\ICardioSettings.cs" />
+    <Compile Include="Settings\SettingsConstants.cs" />
     <Compile Include="Threading\ThreadAssistant.cs" />
     <Compile Include="Ui\Communication\AccessMode.cs" />
     <Compile Include="Ui\Communication\CardioEventArgs.cs" />
@@ -222,9 +224,9 @@
       <DependentUpon>TreatmentParametrGridView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\ViewModel\Treatments\TreatmentsViewModel.cs" />
-    <Compile Include="Settings\AppApperanceData.cs" />
+    <Compile Include="Settings\AppAppearanceSettings.cs" />
     <Compile Include="Settings\DataBaseSettings.cs" />
-    <Compile Include="Settings\Settings.cs" />
+    <Compile Include="Settings\CardioSettings.cs" />
     <Compile Include="Ui\View\Settings\SettingsView.xaml.cs">
       <DependentUpon>SettingsView.xaml</DependentUpon>
     </Compile>

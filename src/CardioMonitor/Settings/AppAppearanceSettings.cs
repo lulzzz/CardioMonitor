@@ -6,7 +6,7 @@ namespace CardioMonitor.Settings
     /// Настройки внешнего вида
     /// </summary>
     /// <remarks>Временно не используются</remarks>
-    public class AppApperanceData
+    public class AppAppearanceSettings
     {
         public string Name { get; set; }
         public Brush BorderColorBrush { get; set; }

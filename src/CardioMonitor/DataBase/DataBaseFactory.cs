@@ -1,6 +1,7 @@
 ﻿using System;
 using CardioMonitor.DataBase.MySql;
 using CardioMonitor.Infrastructure.Logs;
+using CardioMonitor.Settings;
 
 namespace CardioMonitor.DataBase
 {
@@ -14,15 +15,22 @@ namespace CardioMonitor.DataBase
         /// </summary>
         private readonly ILogger _logger;
 
+        private readonly ICardioSettings _settings;
+
         /// <summary>
         /// Фабрика по созданию всех объектов для взаимодействия с базой
         /// </summary>
         /// <param name="logger">Логгер</param>
-        public DataBaseFactory(ILogger logger)
+        /// <param name="settings"></param>
+        public DataBaseFactory(
+            ILogger logger,
+            ICardioSettings settings)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
 
             _logger = logger;
+            _settings = settings;
         }
 
         /// <summary>
@@ -31,7 +39,7 @@ namespace CardioMonitor.DataBase
         /// <returns></returns>
         public IDataBaseController CreateDataBaseController()
         {
-            return new MySqlDataBaseController(_logger);
+            return new MySqlDataBaseController(_logger, _settings);
         }
 
         /// <summary>
@@ -57,7 +65,7 @@ namespace CardioMonitor.DataBase
             var typedReader = reader as CardioMySqlDataReader;
             if (typedReader != null)
             {
-                return new MySqlSafeReader(typedReader.Reader) as ISafeReader;
+                return new MySqlSafeReader(typedReader.Reader);
             }
 
             return null;

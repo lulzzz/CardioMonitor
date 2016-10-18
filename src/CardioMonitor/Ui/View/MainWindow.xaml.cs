@@ -27,8 +27,8 @@ namespace CardioMonitor.Ui.View
 
             /*try
             {
-                var accent = ThemeManager.GetAccent(Core.Settings.Settings.Instance.SelectedAcentColorName);
-                var appTheme = ThemeManager.GetAppTheme(Core.Settings.Settings.Instance.SeletedAppThemeName);
+                var accent = ThemeManager.GetAccent(Core.CardioSettings.CardioSettings.Instance.SelectedAcentColorName);
+                var appTheme = ThemeManager.GetAppTheme(Core.CardioSettings.CardioSettings.Instance.SeletedAppThemeName);
                 ThemeManager.ChangeAppStyle(Application.Current, accent, appTheme);
             }
             catch

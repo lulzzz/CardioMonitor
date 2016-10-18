@@ -5,8 +5,7 @@ namespace CardioMonitor.Settings
     /// <summary>
     /// Настройки подключения к базе данных
     /// </summary>
-    [Serializable]
-    public class DataBaseSettings
+    public class DataBaseSettings 
     {
         /// <summary>
         /// Название базы данных

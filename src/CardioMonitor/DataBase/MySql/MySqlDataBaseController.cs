@@ -1,5 +1,6 @@
 ﻿using System;
 using CardioMonitor.Infrastructure.Logs;
+using CardioMonitor.Settings;
 using MySql.Data.MySqlClient;
 
 namespace CardioMonitor.DataBase.MySql
@@ -17,13 +18,17 @@ namespace CardioMonitor.DataBase.MySql
         /// <summary>
         /// Контроллер для непосредственного взаимодействия с базой данных
         /// </summary>
-        public MySqlDataBaseController(ILogger logger)
+        public MySqlDataBaseController(ILogger logger, ICardioSettings settings)
         {
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (settings == null) throw new ArgumentNullException(nameof(settings));
+
             _logger = logger;
-            var initComand = "Database=" + Settings.Settings.Instance.DataBase.DataBase + ";" +
-                             "Data Source=" + Settings.Settings.Instance.DataBase.Source +
-                             ";User Id=" + Settings.Settings.Instance.DataBase.User + 
-                             ";Password=" +Settings.Settings.Instance.DataBase.Password + 
+
+            var initComand = "Database=" + settings.DataBase.DataBase + ";" +
+                             "Data Source=" + settings.DataBase.Source +
+                             ";User Id=" + settings.DataBase.User + 
+                             ";Password=" + settings.DataBase.Password + 
                              ";Allow Zero Datetime=True;Convert Zero Datetime=True;charset=utf8";
             _myConnect =  new MySqlConnection(initComand);
             _isOpen = false;
