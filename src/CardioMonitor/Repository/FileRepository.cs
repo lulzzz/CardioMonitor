@@ -36,16 +36,14 @@ namespace CardioMonitor.Repository
         {
             if (patient == null) throw new ArgumentNullException(nameof(patient));
             if (session == null) throw new ArgumentNullException(nameof(session));
+
+            var dirPath = _settings.SessionsFilesDirectoryPath;
             if (filePath == null)
             {
                 filePath = _settings.SessionsFilesDirectoryPath;
-                var dirName = $"{patient.LastName}_{patient.FirstName}_{patient.PatronymicName}_{patient.Id}";
-                filePath = Path.Combine(filePath, dirName);
+                dirPath = $"{patient.LastName}_{patient.FirstName}_{patient.PatronymicName}_{patient.Id}";
+                filePath = Path.Combine(filePath, dirPath);
 
-                if (!Directory.Exists(filePath))
-                {
-                    Directory.CreateDirectory(filePath);
-                }
 
                 var dateSring =
                     $"{session.DateTime.Day}_{session.DateTime.Month}_{session.DateTime.Year}_{session.DateTime.Hour}_{session.DateTime.Minute}_{session.DateTime.Second}";
@@ -54,9 +52,18 @@ namespace CardioMonitor.Repository
                     $"{patient.LastName}_{patient.FirstName}_{patient.PatronymicName}_{birthDateSring}_{patient.Id}_{dateSring}.cmsf";
                 filePath = Path.Combine(filePath, fileName);
             }
+            else
+            {
+                dirPath = Path.GetDirectoryName(filePath);
+            }
 
             try
             {
+
+                if (!Directory.Exists(dirPath))
+                {
+                    Directory.CreateDirectory(dirPath);
+                }
 
                 var container = new SessionContainer
                 {

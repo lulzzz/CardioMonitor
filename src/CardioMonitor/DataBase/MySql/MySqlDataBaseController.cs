@@ -25,10 +25,10 @@ namespace CardioMonitor.DataBase.MySql
 
             _logger = logger;
 
-            var initComand = "Database=" + settings.DataBase.DataBase + ";" +
-                             "Data Source=" + settings.DataBase.Source +
-                             ";User Id=" + settings.DataBase.User + 
-                             ";Password=" + settings.DataBase.Password + 
+            var initComand = "Database=" + settings.DataBaseSettings.DataBase + ";" +
+                             "Data Source=" + settings.DataBaseSettings.Source +
+                             ";User Id=" + settings.DataBaseSettings.User + 
+                             ";Password=" + settings.DataBaseSettings.Password + 
                              ";Allow Zero Datetime=True;Convert Zero Datetime=True;charset=utf8";
             _myConnect =  new MySqlConnection(initComand);
             _isOpen = false;

@@ -44,7 +44,7 @@ namespace CardioMonitor.Repository
 
                 query =
                     "SELECT id, FirstName, PatronymicName, LastName, BirthDate " +
-                    $"FROM {_settings.DataBase.DataBase}.patients";
+                    $"FROM {_settings.DataBaseSettings.DataBase}.patients";
                 var reader = control.ConnectDb(query);
                 var sReader = _dataBaseFactory.CreateSafeReader(reader);
 
@@ -102,7 +102,7 @@ namespace CardioMonitor.Repository
             {
                 var patientBirthDate = patient.BirthDate ?? new DateTime();
                 query =
-                    $"INSERT INTO {_settings.DataBase.DataBase}.patients " +
+                    $"INSERT INTO {_settings.DataBaseSettings.DataBase}.patients " +
                     "(LastName,FirstName,PatronymicName, BirthDate)" +
                     $" VALUES ('{patient.LastName}','{patient.FirstName}','{patient.PatronymicName}', '{patientBirthDate:yyyy-MM-dd H:mm:ss}')";
                 var control = _dataBaseFactory.CreateDataBaseController();
@@ -147,7 +147,7 @@ namespace CardioMonitor.Repository
             {
                 var patientBirthDate = patient.BirthDate ?? new DateTime();
                 query =
-                    $"UPDATE {_settings.DataBase.DataBase}.patients " +
+                    $"UPDATE {_settings.DataBaseSettings.DataBase}.patients " +
                     $"SET LastName='{patient.LastName}', FirstName='{patient.FirstName}', " +
                         $"PatronymicName='{patient.PatronymicName}', BirthDate='{patientBirthDate:yyyy-MM-dd H:mm:ss}' " +
                     $"WHERE id='{patient.Id}'";
@@ -188,7 +188,7 @@ namespace CardioMonitor.Repository
             try
             {
                 query =
-                    $"DELETE FROM {_settings.DataBase.DataBase}.patients WHERE id='{patientId}'";
+                    $"DELETE FROM {_settings.DataBaseSettings.DataBase}.patients WHERE id='{patientId}'";
 
                 var control = _dataBaseFactory.CreateDataBaseController();
                 control.ExecuteQuery(query);

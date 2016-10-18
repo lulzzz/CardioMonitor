@@ -217,10 +217,10 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             SelectedAccentColor =
                 AccentColors.FirstOrDefault(x => x.Name == CardioSettings.Instance.SelectedAcentColorName);*/
             SessionsFilesDirectoryPath = _settings.SessionsFilesDirectoryPath;
-            DBLogin = _settings.DataBase.User;
-            DBName = _settings.DataBase.DataBase;
-            DBPassword = _settings.DataBase.Password;
-            DBServerName = _settings.DataBase.Source;
+            DBLogin = _settings.DataBaseSettings.User;
+            DBName = _settings.DataBaseSettings.DataBase;
+            DBPassword = _settings.DataBaseSettings.Password;
+            DBServerName = _settings.DataBaseSettings.Source;
             _isValid = true;
             _isSettingsChanged = false;
         }
@@ -295,13 +295,11 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                 CardioSettings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
                 _settings.SessionsFilesDirectoryPath = SessionsFilesDirectoryPath;
 
-                _settings.DataBase.User = DBLogin;
-                _settings.DataBase.DataBase = DBName;
-                _settings.DataBase.Password = DBPassword;
-                _settings.DataBase.Source = DBServerName;
+                _settings.DataBaseSettings = new DataBaseSettings(DBName, DBServerName, DBLogin, DBPassword);
 
-                //TODO saving settings
-                //CardioMonitor.Settings.CardioSettings.SaveToFile();
+                var settingsManager = new SettingsManager();
+                settingsManager.Save(_settings);
+
                 _isSettingsChanged = false;
                 await MessageHelper.Instance.ShowMessageAsync(Localisation.SettingsViewModel_Saved);
                 

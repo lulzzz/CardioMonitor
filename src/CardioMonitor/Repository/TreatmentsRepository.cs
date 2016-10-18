@@ -42,7 +42,7 @@ namespace CardioMonitor.Repository
                 var control = _dataBaseFactory.CreateDataBaseController();
                 var output = new List<Treatment>();
                 query =
-                    $"SELECT * FROM {_settings.DataBase.DataBase}.treatments " +
+                    $"SELECT * FROM {_settings.DataBaseSettings.DataBase}.treatments " +
                     $"WHERE PatientId='{patientId}'";
                 var reader = control.ConnectDb(query);
                 var safeReader = _dataBaseFactory.CreateSafeReader(reader);
@@ -100,7 +100,7 @@ namespace CardioMonitor.Repository
             try
             {
                 query =
-                    $"INSERT INTO {_settings.DataBase.DataBase}.treatments (PatientId,StartDate) " +
+                    $"INSERT INTO {_settings.DataBaseSettings.DataBase}.treatments (PatientId,StartDate) " +
                     $"VALUES ('{treatment.PatientId}','{treatment.StartDate:yyyy-MM-dd HH:mm:ss}')";
                 var control = _dataBaseFactory.CreateDataBaseController();
                 control.ExecuteQuery(query);
@@ -138,7 +138,7 @@ namespace CardioMonitor.Repository
             try
             {
                 query =
-                    $"DELETE FROM {_settings.DataBase.DataBase}.treatments WHERE id='{treatmentId}'";
+                    $"DELETE FROM {_settings.DataBaseSettings.DataBase}.treatments WHERE id='{treatmentId}'";
 
                 var control = _dataBaseFactory.CreateDataBaseController();
                 control.ExecuteQuery(query);

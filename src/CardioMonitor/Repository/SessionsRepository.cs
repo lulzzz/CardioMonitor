@@ -44,7 +44,7 @@ namespace CardioMonitor.Repository
                 var output = new List<SessionInfo>();
                 query =
                     "SELECT id, DateTime, Status " +
-                    $"FROM {_settings.DataBase.DataBase}.sessions " +
+                    $"FROM {_settings.DataBaseSettings.DataBase}.sessions " +
                     $"WHERE TreatmentID='{treatmentId}'";
                 var reader = control.ConnectDb(query);
                 var safeReader = _dataBaseFactory.CreateSafeReader(reader);
@@ -95,7 +95,7 @@ namespace CardioMonitor.Repository
             try
             {
                 query =
-                    $"DELETE FROM {_settings.DataBase.DataBase}.sessions " +
+                    $"DELETE FROM {_settings.DataBaseSettings.DataBase}.sessions " +
                     $"WHERE id='{sessionId}'";
                 var control = _dataBaseFactory.CreateDataBaseController();
                 control.ExecuteQuery(query);
@@ -138,14 +138,14 @@ namespace CardioMonitor.Repository
             try
             {
                 query =
-                    $"INSERT INTO {_settings.DataBase.DataBase}.sessions (TreatmentId, DateTime, Status) " +
+                    $"INSERT INTO {_settings.DataBaseSettings.DataBase}.sessions (TreatmentId, DateTime, Status) " +
                     $"VALUES ('{session.TreatmentId}','{session.DateTime:yyyy-MM-dd HH:mm:ss}','{(int) session.Status}')";
                 var control = _dataBaseFactory.CreateDataBaseController();
                 control.ExecuteQuery(query);
 
                 //getting id of new 
                 query =
-                    $"SELECT id FROM {_settings.DataBase.DataBase}.sessions " +
+                    $"SELECT id FROM {_settings.DataBaseSettings.DataBase}.sessions " +
                     $"WHERE TreatmentId='{session.TreatmentId}' " +
                     $"AND DateTime='{session.DateTime:yyyy-MM-dd HH:mm:ss}' AND Status='{(int) session.Status}'";
                 var reader = control.ConnectDb(query);
@@ -159,7 +159,7 @@ namespace CardioMonitor.Repository
                     const string columns =
                         "Iteration,SessionId,InclinationAngle,HeartRate,RepsirationRate,Spo2,SystolicArterialPressure,DiastolicArterialPressure,AverageArterialPressure";
                     query =
-                        $"INSERT INTO {_settings.DataBase.DataBase}.params ({columns}) " +
+                        $"INSERT INTO {_settings.DataBaseSettings.DataBase}.params ({columns}) " +
                         $"VALUES ('{param.Iteraton}','{sessionId}','{param.InclinationAngle.ToString(CultureInfo.GetCultureInfoByIetfLanguageTag("en"))}','{param.HeartRate}','{param.RepsirationRate}','{param.Spo2}','{param.SystolicArterialPressure}','{param.DiastolicArterialPressure}','{param.AverageArterialPressure}')";
                     control.ExecuteQuery(query);
                 }
@@ -197,7 +197,7 @@ namespace CardioMonitor.Repository
             var query = String.Empty;
             try
             {
-                query = $"SELECT * FROM {_settings.DataBase.DataBase}.sessions " +
+                query = $"SELECT * FROM {_settings.DataBaseSettings.DataBase}.sessions " +
                         $"WHERE id='{sessionId}'";
                 var control = _dataBaseFactory.CreateDataBaseController();
 
@@ -215,7 +215,7 @@ namespace CardioMonitor.Repository
                 control.DisсonnectDb(reader);
 
                 query =
-                    $"SELECT * FROM {_settings.DataBase.DataBase}.params " +
+                    $"SELECT * FROM {_settings.DataBaseSettings.DataBase}.params " +
                     $"WHERE SessionId='{sessionId}'";
                 reader = control.ConnectDb(query);
                 safeReader = _dataBaseFactory.CreateSafeReader(reader);

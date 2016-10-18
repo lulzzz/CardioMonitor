@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using CardioMonitor.DataBase;
+﻿using CardioMonitor.DataBase;
 using CardioMonitor.Devices;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Infrastructure.Threading;
@@ -28,7 +26,7 @@ namespace CardioMonitor
             var container = new Container();
             IoCResolver.SetContainer(container);
             
-            container.RegisterSingleton<ICardioSettings>(GetSettings);
+            container.RegisterSingleton(GetSettings);
             container.Register<ILogger, Logger>(Lifestyle.Singleton);
             container.Register<IDeviceControllerFactory, DeviceControllerFactory>(Lifestyle.Singleton);
             container.Register<TaskHelper, TaskHelper>(Lifestyle.Singleton);
@@ -45,13 +43,11 @@ namespace CardioMonitor
             
         }
 
-        private CardioSettings GetSettings()
+        private ICardioSettings GetSettings()
         {
-
-            var sessionsFilesDirectoryPath =
-                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), SettingsConstants.AppName);
-
-            return new CardioSettings();
+            var settingsManager = new SettingsManager();
+            return settingsManager.Load();
         }
+
     }
 }
