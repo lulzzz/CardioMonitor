@@ -78,13 +78,14 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                 if (value != _sessionsFilesDirectoryPath)
                 {
                     _sessionsFilesDirectoryPath = value;
-                    RisePropertyChanged("SessionsFilesDirectoryPath");
+                    RisePropertyChanged(nameof(SessionsFilesDirectoryPath));
                     _isSettingsChanged = true;
                 }
             }
         }
 
-
+        #region Commands
+        
         public ICommand ChooseFolderCommand
         {
             get
@@ -127,13 +128,15 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                 return _saveCommand ?? (_saveCommand = new SimpleCommand
                 {
                     ExecuteDelegate = x => SaveSettings(),
-                    CanExecuteDelegate = x => _isValid && _isSettingsChanged
+                    CanExecuteDelegate = x => IsValid && _isSettingsChanged
                 });
             }
         }
 
+        #endregion
 
-        public string DBServerName
+
+        public string DbServerName
         {
             get { return _dbServerName; }
             set
@@ -141,13 +144,13 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                 if (value != _dbServerName)
                 {
                     _dbServerName = value;
-                    RisePropertyChanged("DBServerName");
+                    RisePropertyChanged(nameof(DbServerName));
                     _isSettingsChanged = true;
                 }
             }
         }
 
-        public string DBName
+        public string DbName
         {
             get { return _dbName; }
             set
@@ -155,13 +158,13 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                 if (value != _dbName)
                 {
                     _dbName = value;
-                    RisePropertyChanged("DBName");
+                    RisePropertyChanged(nameof(DbName));
                     _isSettingsChanged = true;
                 }
             }
         }
 
-        public string DBLogin
+        public string DbLogin
         {
             get { return _dbLogin; }
             set
@@ -169,13 +172,13 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                 if (value != _dbLogin)
                 {
                     _dbLogin = value;
-                    RisePropertyChanged("DBLogin");
+                    RisePropertyChanged(nameof(DbLogin));
                     _isSettingsChanged = true;
                 }
             }
         }
 
-        public string DBPassword
+        public string DbPassword
         {
             get { return _dbPassword; }
             set
@@ -183,7 +186,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                 if (value != _dbPassword)
                 {
                     _dbPassword = value;
-                    RisePropertyChanged("DBPassword");
+                    RisePropertyChanged(nameof(DbPassword));
                     _isSettingsChanged = true;
                 }
             }
@@ -217,27 +220,31 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             SelectedAccentColor =
                 AccentColors.FirstOrDefault(x => x.Name == CardioSettings.Instance.SelectedAcentColorName);*/
             SessionsFilesDirectoryPath = _settings.SessionsFilesDirectoryPath;
-            DBLogin = _settings.DataBaseSettings.User;
-            DBName = _settings.DataBaseSettings.DataBase;
-            DBPassword = _settings.DataBaseSettings.Password;
-            DBServerName = _settings.DataBaseSettings.Source;
+            DbLogin = _settings.DataBaseSettings.User;
+            DbName = _settings.DataBaseSettings.DataBase;
+            DbPassword = _settings.DataBaseSettings.Password;
+            DbServerName = _settings.DataBaseSettings.Source;
             _isValid = true;
             _isSettingsChanged = false;
         }
 
-        #region IDataErrorInfoRealisation
+        #region Validation
 
         public string this[string columnName]
         {
             get
             {
-                if (columnName == "SessionsFilesDirectoryPath" && !Directory.Exists(SessionsFilesDirectoryPath))
+                if (columnName == nameof(SessionsFilesDirectoryPath) && !Directory.Exists(SessionsFilesDirectoryPath))
                 {
                     _isValid = false;
                     return Localisation.SettingsViewModel_DirectoryDoesNotExist;
                 }
-                if (columnName == "DBServerName" || columnName == "DBName" || columnName == "DBLogin" || columnName == "DBPassword")
+                if (columnName == nameof(DbLogin) 
+                    || columnName == nameof(DbName)
+                    || columnName == nameof(DbPassword)
+                    || columnName == nameof(DbPassword))
                 {
+                    //todo need some realtime validation
                     /*try
                     {
                         DataBaseRepository.Instance.CheckConnection(DBName,DBServerName, DBLogin, DBPassword);
@@ -261,6 +268,21 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             }
         }
 
+        public bool IsValid
+        {
+            get { return _isValid; }
+            set
+            {
+                var oldValod = _isValid;
+                _isValid = value;
+
+                if (oldValod != value)
+                {
+                    RisePropertyChanged(nameof(IsValid));
+                }
+            }
+        }
+
         #endregion
 
         public void ChooseFolder()
@@ -279,7 +301,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             var message = String.Empty;
             try
             {
-                await _dataBaseRepository.CheckConnectionAsync(DBName, DBServerName, DBLogin, DBPassword);
+                await _dataBaseRepository.CheckConnectionAsync(DbName, DbServerName, DbLogin, DbPassword);
             }
             catch (Exception ex)
             {
@@ -295,7 +317,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                 CardioSettings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
                 _settings.SessionsFilesDirectoryPath = SessionsFilesDirectoryPath;
 
-                _settings.DataBaseSettings = new DataBaseSettings(DBName, DBServerName, DBLogin, DBPassword);
+                _settings.DataBaseSettings = new DataBaseSettings(DbName, DbServerName, DbLogin, DbPassword);
 
                 var settingsManager = new SettingsManager();
                 settingsManager.Save(_settings);
