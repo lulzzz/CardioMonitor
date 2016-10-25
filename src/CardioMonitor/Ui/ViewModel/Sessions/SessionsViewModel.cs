@@ -5,7 +5,8 @@ using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Models.Patients;
 using CardioMonitor.Models.Session;
 using CardioMonitor.Models.Treatment;
-using CardioMonitor.Repository;
+using CardioMonitor.Repositories;
+using CardioMonitor.Repositories.Abstract;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using MahApps.Metro.Controls.Dialogs;
@@ -14,7 +15,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class SessionsViewModel : Notifier, IViewModel
     {
-        private readonly SessionsRepository _sessionsRepository;
+        private readonly ISessionsRepository _sessionsRepository;
         private PatientFullName _patientName;
         private DateTime _treatmentStartDate;
         private SessionInfo _selectedSessionInfo;
@@ -25,7 +26,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _showResultsCommand;
 
         public SessionsViewModel(
-            SessionsRepository sessionsRepository)
+            ISessionsRepository sessionsRepository)
         {
             if (sessionsRepository == null) throw new ArgumentNullException(nameof(sessionsRepository));
             

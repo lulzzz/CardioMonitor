@@ -1,4 +1,5 @@
 ﻿using CardioMonitor.Devices.Bed.Infrastructure;
+using CardioMonitor.Devices.Monitor.Infrastructure;
 
 namespace CardioMonitor.Devices
 {
@@ -16,5 +17,7 @@ namespace CardioMonitor.Devices
         /// </summary>
         /// <returns></returns>
         IBedController CreateBedController();
+
+        IMonitorController CreateMonitorController();
     }
 }

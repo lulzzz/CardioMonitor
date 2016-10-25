@@ -1,4 +1,5 @@
 ﻿
+using System.Threading.Tasks;
 using CardioMonitor.Models.Session;
 
 namespace CardioMonitor.Devices.Monitor.Infrastructure
@@ -6,18 +7,18 @@ namespace CardioMonitor.Devices.Monitor.Infrastructure
     /// <summary>
     /// Контроллер для взаимодействия с медицинским монитором
     /// </summary>
-    interface IMonitorController
+    public interface IMonitorController : IDeviceController
     {
         /// <summary>
         /// Накачка манжеты рукава для измерения давления
         /// </summary>
         /// <returns></returns>
-        bool PumpCuff();
+        Task<bool> PumpCuffAsync();
 
         /// <summary>
         /// Возвращает показатели пациента, снятые с монитора
         /// </summary>
         /// <returns></returns>
-        PatientParams GetPatientParams();
+        Task<PatientParams> GetPatientParamsAsync();
     }
 }

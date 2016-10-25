@@ -2,14 +2,15 @@
 using System.Threading.Tasks;
 using CardioMonitor.DataBase;
 using CardioMonitor.Infrastructure.Logs;
+using CardioMonitor.Repositories.Abstract;
 using CardioMonitor.Resources;
 
-namespace CardioMonitor.Repository
+namespace CardioMonitor.Repositories
 {
     /// <summary>
     /// Репозиторий для доступа к базе данных
     /// </summary>
-    public class DataBaseRepository
+    internal class DataBaseRepository : IDataBaseRepository
     {
         private readonly DataBaseFactory _dataBaseFactory;
         private readonly ILogger _logger;

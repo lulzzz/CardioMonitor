@@ -3,7 +3,8 @@ using System.Windows.Input;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Logs;
 using CardioMonitor.Models.Patients;
-using CardioMonitor.Repository;
+using CardioMonitor.Repositories;
+using CardioMonitor.Repositories.Abstract;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
@@ -13,7 +14,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
     public class PatientViewModel : Notifier, IViewModel
     {
         private readonly ILogger _logger;
-        private readonly PatientsRepository _patientsRepository;
+        private readonly IPatientsRepository _patientsRepository;
         private AccessMode _accessMode;
         private string _lastName;
         private string _firstName;
@@ -22,7 +23,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         private DateTime? _birthDate;
         private ICommand _saveCommand;
 
-        public PatientViewModel(ILogger logger, PatientsRepository patientsRepository)
+        public PatientViewModel(ILogger logger, IPatientsRepository patientsRepository)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             if (patientsRepository == null) throw new ArgumentNullException(nameof(patientsRepository));

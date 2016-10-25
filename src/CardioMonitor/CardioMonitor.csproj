@@ -70,6 +70,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>CardioMonitor.Bootstraper</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="FirstFloor.ModernUI">
       <HintPath>Libs\FirstFloor.ModernUI.dll</HintPath>
@@ -151,6 +154,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Bootstraper.cs" />
     <Compile Include="DataBase\DataBaseError.cs" />
     <Compile Include="DataBase\DataBaseFactory.cs" />
     <Compile Include="DataBase\IDataBaseController.cs" />
@@ -162,10 +166,14 @@
     <Compile Include="Devices\DeviceControllerFactory.cs" />
     <Compile Include="Devices\IDeviceControllerFactory.cs" />
     <Compile Include="Devices\Monitor\AutoPumpingResolver.cs" />
-    <Compile Include="IoC\IoCResolver.cs" />
-    <Compile Include="Repository\PatientsRepository.cs" />
-    <Compile Include="Repository\SessionsRepository.cs" />
-    <Compile Include="Repository\TreatmentsRepository.cs" />
+    <Compile Include="Repositories\Abstract\IDataBaseRepository.cs" />
+    <Compile Include="Files\IFilesManager.cs" />
+    <Compile Include="Repositories\Abstract\IPatientsRepository.cs" />
+    <Compile Include="Repositories\Abstract\ISessionsRepository.cs" />
+    <Compile Include="Repositories\Abstract\ITreatmentsRepository.cs" />
+    <Compile Include="Repositories\PatientsRepository.cs" />
+    <Compile Include="Repositories\SessionsRepository.cs" />
+    <Compile Include="Repositories\TreatmentsRepository.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -179,16 +187,13 @@
     <Compile Include="Threading\ThreadAssistant.cs" />
     <Compile Include="Ui\Communication\AccessMode.cs" />
     <Compile Include="Ui\Communication\CardioEventArgs.cs" />
-    <Compile Include="Repository\FileRepository.cs" />
+    <Compile Include="Files\FilesManager.cs" />
     <Compile Include="Ui\Base\IViewModel.cs" />
-    <Compile Include="Ui\View\EcgController\EcgControllerView.xaml.cs">
-      <DependentUpon>EcgControllerView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\Base\Notifier.cs" />
     <Compile Include="Ui\Communication\PatientEventArgs.cs" />
     <Compile Include="DataBase\MySql\MySqlDataBaseController.cs" />
-    <Compile Include="Repository\DataBaseRepository.cs" />
+    <Compile Include="Repositories\DataBaseRepository.cs" />
     <Compile Include="DataBase\MySql\MySqlSafeReader.cs" />
     <Compile Include="Ui\Base\SimpleCommand.cs" />
     <Compile Include="Ui\Communication\TreatmentAction.cs" />
@@ -237,10 +242,6 @@
     <Page Include="Resources\IconsNonShared.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="Ui\View\EcgController\EcgControllerView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Ui\View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -314,6 +315,7 @@
   <ItemGroup>
     <Folder Include="DataBase\MySql\Scrypts\Updating\" />
     <Folder Include="Ui\ViewModel\Ecg\" />
+    <Folder Include="Ui\View\EcgController\" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">

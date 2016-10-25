@@ -2,10 +2,11 @@
 using System.Collections.ObjectModel;
 using System.Windows.Forms;
 using System.Windows.Input;
+using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Logs;
 using CardioMonitor.Models.Patients;
-using CardioMonitor.Repository;
+using CardioMonitor.Repositories;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 
@@ -14,7 +15,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     public class SessionDataViewModel : Notifier, IViewModel
     {
         private readonly ILogger _logger;
-        private readonly FileRepository _fileRepository;
+        private readonly IFilesManager _filesRepository;
         private PatientFullName _patientName;
         private Patient _patient;
         private SessionModel _session;
@@ -102,13 +103,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         
         public SessionDataViewModel(
             ILogger logger,
-            FileRepository fileRepository)
+            IFilesManager filesRepository)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (fileRepository == null) throw new ArgumentNullException(nameof(fileRepository));
+            if (filesRepository == null) throw new ArgumentNullException(nameof(filesRepository));
 
             _logger = logger;
-            _fileRepository = fileRepository;
+            _filesRepository = filesRepository;
 
             IsReadOnly = true;
         }
@@ -123,7 +124,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 var exceptionMessage = String.Empty;
                 try
                 {
-                    _fileRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
+                    _filesRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
                     await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionDataViewModel_FileSaved);
                 }
                 catch (ArgumentNullException ex)

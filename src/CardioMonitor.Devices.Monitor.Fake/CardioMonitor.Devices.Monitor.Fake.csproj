@@ -41,10 +41,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FakeMonitorRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CardioMonitor.Devices.Monitor.Infrastructure\CardioMonitor.Devices.Monitor.Infrastructure.csproj">
+      <Project>{e773219c-f1da-42a3-8e80-68bedac3e4f8}</Project>
+      <Name>CardioMonitor.Devices.Monitor.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
+      <Project>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</Project>
+      <Name>CardioMonitor.Devices</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CardioMonitor.Models\CardioMonitor.Models.csproj">
+      <Project>{33247B5D-3763-4034-A97C-4C7922B04F9F}</Project>
+      <Name>CardioMonitor.Models</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

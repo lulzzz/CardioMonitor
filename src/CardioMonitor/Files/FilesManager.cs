@@ -7,17 +7,17 @@ using CardioMonitor.Models.Session;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 
-namespace CardioMonitor.Repository
+namespace CardioMonitor.Files 
 {
     /// <summary>
     /// Репозиторий для доступа к файлам
     /// </summary>
-    public class FileRepository
+    internal class FilesManager : IFilesManager
     {
         private readonly ILogger _logger;
         private readonly ICardioSettings _settings;
 
-        public FileRepository(ILogger logger, ICardioSettings settings)
+        public FilesManager(ILogger logger, ICardioSettings settings)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
@@ -80,7 +80,7 @@ namespace CardioMonitor.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(nameof(FileRepository), ex);
+                _logger.LogError(nameof(FilesManager), ex);
                 throw new Exception(Localisation.FileRepository_SavePatientException);
             }
             
@@ -108,7 +108,7 @@ namespace CardioMonitor.Repository
             }
             catch (Exception ex)
             {
-                _logger.LogError(nameof(FileRepository), ex);
+                _logger.LogError(nameof(FilesManager), ex);
                 throw new Exception(Localisation.FileRepository_LoadPatientException);
             }
         }

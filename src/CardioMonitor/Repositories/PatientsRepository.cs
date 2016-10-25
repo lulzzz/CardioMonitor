@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using CardioMonitor.DataBase;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Models.Patients;
+using CardioMonitor.Repositories.Abstract;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 using MySql.Data.MySqlClient;
 
-namespace CardioMonitor.Repository
+namespace CardioMonitor.Repositories
 {
-    public class PatientsRepository
+    internal class PatientsRepository : IPatientsRepository
     {
         private readonly DataBaseFactory _dataBaseFactory;
         private readonly ILogger _logger;

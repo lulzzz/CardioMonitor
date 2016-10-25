@@ -4,12 +4,13 @@ using System.Globalization;
 using CardioMonitor.DataBase;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Models.Session;
+using CardioMonitor.Repositories.Abstract;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 
-namespace CardioMonitor.Repository
+namespace CardioMonitor.Repositories
 {
-    public class SessionsRepository
+    internal class SessionsRepository : ISessionsRepository
     {
         private readonly DataBaseFactory _dataBaseFactory;
         private readonly ILogger _logger;

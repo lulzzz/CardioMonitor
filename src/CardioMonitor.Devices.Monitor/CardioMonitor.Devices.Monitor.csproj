@@ -41,13 +41,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AutoPumpingRequest.cs" />
-    <Compile Include="CRC8.cs" />
-    <Compile Include="MonitorDataReader.cs" />
-    <Compile Include="MonitorRepository.cs" />
+    <Compile Include="CRC8Calculator.cs" />
+    <Compile Include="MonitorController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CardioMonitor.Devices.Monitor.Infrastructure\CardioMonitor.Devices.Monitor.Infrastructure.csproj">
+      <Project>{e773219c-f1da-42a3-8e80-68bedac3e4f8}</Project>
+      <Name>CardioMonitor.Devices.Monitor.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
+      <Project>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</Project>
+      <Name>CardioMonitor.Devices</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CardioMonitor.Models\CardioMonitor.Models.csproj">
       <Project>{33247b5d-3763-4034-a97c-4c7922b04f9f}</Project>
       <Name>CardioMonitor.Models</Name>

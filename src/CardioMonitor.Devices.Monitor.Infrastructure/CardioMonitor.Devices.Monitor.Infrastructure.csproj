@@ -45,6 +45,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
+      <Project>{c8ee2e87-12dd-43e4-bab0-04e09de9a651}</Project>
+      <Name>CardioMonitor.Devices</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CardioMonitor.Models\CardioMonitor.Models.csproj">
       <Project>{33247b5d-3763-4034-a97c-4c7922b04f9f}</Project>
       <Name>CardioMonitor.Models</Name>

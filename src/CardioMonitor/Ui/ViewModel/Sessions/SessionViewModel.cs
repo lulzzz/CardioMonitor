@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Bed.Usb;
 using CardioMonitor.Devices.Monitor;
+using CardioMonitor.Devices.Monitor.Infrastructure;
+using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Infrastructure.Threading;
-using CardioMonitor.IoC;
 using CardioMonitor.Logs;
 using CardioMonitor.Models.Patients;
 using CardioMonitor.Models.Session;
 using CardioMonitor.Models.Treatment;
-using CardioMonitor.Repository;
+using CardioMonitor.Repositories;
+using CardioMonitor.Repositories.Abstract;
 using CardioMonitor.Resources;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
@@ -118,13 +121,15 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private readonly object _passedCheckPointsAnglesLockObject;
 
         private double _previuosCheckPointAngle;
-        private readonly BedUsbController _bedUsbController;
+        private readonly IBedController _bedUsbController;
 
         private readonly TaskHelper _taskHelper;
         private readonly ILogger _logger;
-        private readonly FileRepository _fileRepository;
-        private readonly SessionsRepository _sessionsRepository;
+        private readonly IFilesManager _filesRepository;
+        private readonly ISessionsRepository _sessionsRepository;
+        private readonly IDeviceControllerFactory _deviceControllerFactory;
 
+        private readonly IMonitorController _monitorController;
         #endregion
 
         #region Свойства
@@ -454,16 +459,21 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public SessionViewModel(
             ILogger logger,
-            FileRepository fileRepository,
-            SessionsRepository sessionsRepository)
+            IFilesManager filesRepository,
+            ISessionsRepository sessionsRepository,
+            IDeviceControllerFactory deviceControllerFactory,
+            TaskHelper taskHelper)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (fileRepository == null) throw new ArgumentNullException(nameof(fileRepository));
+            if (filesRepository == null) throw new ArgumentNullException(nameof(filesRepository));
             if (sessionsRepository == null) throw new ArgumentNullException(nameof(sessionsRepository));
+            if (deviceControllerFactory == null) throw new ArgumentNullException(nameof(deviceControllerFactory));
+            if (taskHelper == null) throw new ArgumentNullException(nameof(taskHelper));
 
             _logger = logger;
-            _fileRepository = fileRepository;
+            _filesRepository = filesRepository;
             _sessionsRepository = sessionsRepository;
+            _deviceControllerFactory = deviceControllerFactory;
 
             Session = new SessionModel();
             _oneSecond = new TimeSpan(0,0,0,1);
@@ -476,11 +486,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _passedCheckPointsAnglesLockObject = new object();
             // Контрольные точки
             _checkPointsAngles = new List<double> {0, 10.5, 21, 30};
-            _bedUsbController = new BedUsbController();
+            _bedUsbController = _deviceControllerFactory.CreateBedController();
 
-            _taskHelper = IoCResolver.Resolve<TaskHelper>();
-            _logger = IoCResolver.Resolve<ILogger>();
+            _taskHelper = taskHelper;
+            _logger = logger;
             _autoPumpingResolver = new AutoPumpingResolver(_logger);
+            _monitorController = deviceControllerFactory.CreateMonitorController();
         }
 
         /// <summary>
@@ -529,7 +540,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 try
                 {
 
-                    var pumpingTask = _autoPumpingResolver.Pump();
+                    var pumpingTask = _monitorController.PumpCuffAsync();
                     //на посылку команды накачки выделяем 5 секунд
                     var pumpingResult = await _taskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
                     
@@ -630,7 +641,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             UpdateAngle();
             var currentAngle = CurrentAngle;
             //Накачка давления при необходимости
-            if (_autoPumpingResolver.CheckNeedPumping(currentAngle, _isUpping))
+            if (_autoPumpingResolver.NeedPumping(currentAngle, _isUpping))
             {
                 Pump();
             }
@@ -662,7 +673,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 //Мы берем задачу накачки, но пока не запускае ее.
                 try
                 {
-                    var pumpingTask = _autoPumpingResolver.Pump();
+                    var pumpingTask = _monitorController.PumpCuffAsync();
                     var pumpingResult = _taskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
                     ExecutionStatus = String.Empty;
 
@@ -751,7 +762,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             PatientParams param;
             try
             {
-                var gettingParamsTask = MonitorRepository.Instance.GetPatientParams();
+                var gettingParamsTask = _monitorController.GetPatientParamsAsync();
                 param = await _taskHelper.StartWithTimeout(gettingParamsTask, _updatePatientParamTimeout);
             }
             catch (TimeoutException)
@@ -827,7 +838,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             var exceptionMessage = String.Empty;
             try
             {
-                _fileRepository.SaveToFile(Patient, Session.Session);
+                _filesRepository.SaveToFile(Patient, Session.Session);
                 _sessionsRepository.AddSession(Session.Session);
                 await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionViewModel_SessionCompeted);
             }
@@ -953,7 +964,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 }
             }*/
 
-            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.StartFlag == StartFlag.Pause) && (Session.Status == SessionStatus.InProgress))
+            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.GetStartFlag() == StartFlag.Pause) && (Session.Status == SessionStatus.InProgress))
             {
                 Session.Status = SessionStatus.Suspended;
                 _mainTimer.Suspend();
@@ -961,7 +972,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 ThreadAssistant.StartInUiThread(() => { MessageHelper.Instance.ShowMessageAsync("Нажата пауза"); });
             }
             //если запущен цикл, кровать была на паузе и была выведена из нее - продолжить работу
-            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.StartFlag == StartFlag.Start) && (Session.Status == SessionStatus.Suspended))
+            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.GetStartFlag() == StartFlag.Start) && (Session.Status == SessionStatus.Suspended))
             {
                 Session.Status = SessionStatus.InProgress;
                 StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
@@ -972,7 +983,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             
             //TODO исправить этом при первом случае
             // здесь вы найдете ебучий костыль 
-            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.ReverseFlag == ReverseFlag.Reversed) && (Session.Status == SessionStatus.InProgress)
+            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.GetReverseFlag() == ReverseFlag.Reversed) && (Session.Status == SessionStatus.InProgress)
                 && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing))
             {
                 _isNeedReversing = true;

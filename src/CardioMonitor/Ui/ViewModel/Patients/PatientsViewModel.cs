@@ -2,7 +2,8 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
 using CardioMonitor.Models.Patients;
-using CardioMonitor.Repository;
+using CardioMonitor.Repositories;
+using CardioMonitor.Repositories.Abstract;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
@@ -12,7 +13,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 {
     public class PatientsViewModel : Notifier
     {
-        private readonly PatientsRepository _patientsRepository;
+        private readonly IPatientsRepository _patientsRepository;
         private int _seletedPatientIndex;
         private Patient _selectePatient;
         private ObservableCollection<Patient> _patients; 
@@ -182,7 +183,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         public EventHandler ShowTreatmentResults { get; set; }
         public EventHandler OpenSessionHandler { get; set; }
 
-        public PatientsViewModel(PatientsRepository patientsRepository)
+        public PatientsViewModel(IPatientsRepository patientsRepository)
         {
             if (patientsRepository == null) throw new ArgumentNullException(nameof(patientsRepository));
 

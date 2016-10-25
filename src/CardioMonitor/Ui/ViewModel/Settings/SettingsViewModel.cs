@@ -3,7 +3,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Forms;
 using System.Windows.Input;
-using CardioMonitor.Repository;
+using CardioMonitor.Repositories;
+using CardioMonitor.Repositories.Abstract;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui.Base;
@@ -12,7 +13,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 {
     public class SettingsViewModel : Notifier, IDataErrorInfo
     {
-        private readonly DataBaseRepository _dataBaseRepository;
+        private readonly IDataBaseRepository _dataBaseRepository;
         private readonly ICardioSettings _settings;
         private string _sessionsFilesDirectoryPath;
         private ICommand _chooseFolderCommand;
@@ -193,7 +194,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
         }
 
         public SettingsViewModel(
-            DataBaseRepository dataBaseRepository,
+            IDataBaseRepository dataBaseRepository,
             ICardioSettings settings)
         {
             if (dataBaseRepository == null) throw new ArgumentNullException(nameof(dataBaseRepository));

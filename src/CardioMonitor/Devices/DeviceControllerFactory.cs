@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Bed.Usb;
+using CardioMonitor.Devices.Monitor;
+using CardioMonitor.Devices.Monitor.Infrastructure;
 
 namespace CardioMonitor.Devices
 {
@@ -32,7 +34,7 @@ namespace CardioMonitor.Devices
             var badController = controller as IBedController;
             if (badController == null)
             {
-                badController = CreaBedController();
+                badController = _CreateBedController();
                 if (!_controllers.TryAdd(typeof(IBedController), badController))
                 {
                     return null;
@@ -42,9 +44,31 @@ namespace CardioMonitor.Devices
             return badController;
         }
 
-        private IBedController CreaBedController()
+
+        private IBedController _CreateBedController()
         {
             return new BedUsbController();
+        }
+
+        public IMonitorController CreateMonitorController()
+        {
+            IDeviceController controller;
+            _controllers.TryGetValue(typeof(IMonitorController), out controller);
+            var badController = controller as IMonitorController;
+            if (badController == null)
+            {
+                badController = _CreateMonitorController();
+                if (!_controllers.TryAdd(typeof(IMonitorController), badController))
+                {
+                    return null;
+                }
+            }
+
+            return badController;
+        }
+        private IMonitorController _CreateMonitorController()
+        {
+            return new MonitorController();
         }
     }
 }

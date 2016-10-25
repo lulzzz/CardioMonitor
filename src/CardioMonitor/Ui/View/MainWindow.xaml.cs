@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows;
-using CardioMonitor.IoC;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.ViewModel;
 using MahApps.Metro.Controls;
@@ -15,11 +14,12 @@ namespace CardioMonitor.Ui.View
     {
         private readonly MainWindowViewModel _viewModel;
 
-        public MainWindow()
+        public MainWindow(MainWindowViewModel viewModel)
         {
+            if (viewModel == null) throw new ArgumentNullException(nameof(viewModel));
             //initialize messageHelper
             MessageHelper.Instance.Window = this;
-            _viewModel = IoCResolver.Resolve<MainWindowViewModel>();
+            _viewModel = viewModel;
             _viewModel.SessionViewModel.ThreadAssistant = new ThreadAssistant(this);
             DataContext = _viewModel;
             InitializeComponent();

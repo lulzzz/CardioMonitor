@@ -3,12 +3,17 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Input;
+using CardioMonitor.Devices;
+using CardioMonitor.Devices.Monitor.Infrastructure;
+using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
+using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Logs;
 using CardioMonitor.Models.Patients;
 using CardioMonitor.Models.Session;
 using CardioMonitor.Models.Treatment;
-using CardioMonitor.Repository;
+using CardioMonitor.Repositories;
+using CardioMonitor.Repositories.Abstract;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 using CardioMonitor.Statistics;
@@ -37,10 +42,10 @@ namespace CardioMonitor.Ui.ViewModel{
     public class MainWindowViewModel : Notifier
     {
         private readonly ILogger _logger;
-        private readonly PatientsRepository _patientsRepository;
-        private readonly TreatmentsRepository _treatmentsRepository;
-        private readonly SessionsRepository _sessionsRepository;
-        private readonly FileRepository _fileRepository;
+        private readonly IPatientsRepository _patientsRepository;
+        private readonly ITreatmentsRepository _treatmentsRepository;
+        private readonly ISessionsRepository _sessionsRepository;
+        private readonly IFilesManager _filesRepository;
         private ICommand _moveBackwardComand;
         private int _mainTCSelectedIndex;
         private int _mainTCPreviosSelectedIndex;
@@ -191,25 +196,29 @@ namespace CardioMonitor.Ui.ViewModel{
 
         public MainWindowViewModel(
             ILogger logger,
-            PatientsRepository patientsRepository,
-            TreatmentsRepository treatmentsRepository,
-            SessionsRepository sessionsRepository,
-            FileRepository fileRepository,
-            DataBaseRepository dataBaseRepository,
-            ICardioSettings settings)
+            IPatientsRepository patientsRepository,
+            ITreatmentsRepository treatmentsRepository,
+            ISessionsRepository sessionsRepository,
+            IFilesManager filesRepository,
+            IDataBaseRepository dataBaseRepository,
+            IDeviceControllerFactory deviceControllerFactory,
+            ICardioSettings settings,
+            TaskHelper taskHelper)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             if (patientsRepository == null) throw new ArgumentNullException(nameof(patientsRepository));
             if (treatmentsRepository == null) throw new ArgumentNullException(nameof(treatmentsRepository));
             if (sessionsRepository == null) throw new ArgumentNullException(nameof(sessionsRepository));
-            if (fileRepository == null) throw new ArgumentNullException(nameof(fileRepository));
+            if (filesRepository == null) throw new ArgumentNullException(nameof(filesRepository));
+            if (deviceControllerFactory == null) throw new ArgumentNullException(nameof(deviceControllerFactory));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
+            if (taskHelper == null) throw new ArgumentNullException(nameof(taskHelper));
 
             _logger = logger;
             _patientsRepository = patientsRepository;
             _treatmentsRepository = treatmentsRepository;
             _sessionsRepository = sessionsRepository;
-            _fileRepository = fileRepository;
+            _filesRepository = filesRepository;
 
             PatientsViewModel = new PatientsViewModel(patientsRepository)
             {
@@ -233,9 +242,9 @@ namespace CardioMonitor.Ui.ViewModel{
                 StartSessionEvent = StartSession,
                 ShowResultsEvent = ShowSessionResults
             };
-            SessionViewModel = new SessionViewModel(logger, fileRepository, sessionsRepository);
+            SessionViewModel = new SessionViewModel(logger, filesRepository, sessionsRepository, deviceControllerFactory, taskHelper);
             //SessionViewModel.StartStatusTimer();
-            SessionDataViewModel = new SessionDataViewModel(logger, fileRepository);
+            SessionDataViewModel = new SessionDataViewModel(logger, filesRepository);
             
             TreatmentDataViewModel = new TreatmentDataViewModel();
             SettingsViewModel = new SettingsViewModel(dataBaseRepository, settings);
@@ -489,7 +498,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 var message = String.Empty;
                 try
                 {
-                    var container = _fileRepository.LoadFromFile(loadDialog.FileName);
+                    var container = _filesRepository.LoadFromFile(loadDialog.FileName);
                     SessionDataViewModel.Session = new SessionModel {Session = container.Session};
                     SessionDataViewModel.Patient = container.Patient;
                     MainTCSelectedIndex = (int) ViewIndex.SessionDataView;
