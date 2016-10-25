@@ -71,7 +71,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>CardioMonitor.Bootstraper</StartupObject>
+    <StartupObject>CardioMonitor.App</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="FirstFloor.ModernUI">
@@ -154,7 +154,6 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Bootstraper.cs" />
     <Compile Include="DataBase\DataBaseError.cs" />
     <Compile Include="DataBase\DataBaseFactory.cs" />
     <Compile Include="DataBase\IDataBaseController.cs" />
