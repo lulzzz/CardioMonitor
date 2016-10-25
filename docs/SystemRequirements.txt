@@ -1,0 +1,5 @@
+Supported OS: Windows 10
+.Net Framework: 4.6.1
+CPU:
+Memory:
+Hdd: 
