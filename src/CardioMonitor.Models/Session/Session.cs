@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.ObjectModel;
 
 namespace CardioMonitor.Models.Session
 {
@@ -10,12 +9,12 @@ namespace CardioMonitor.Models.Session
     public class Session
     {
         /// <summary>
-        /// Идентифкатор
+        /// Идентификатор
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Идентифкатор курса лечения
+        /// Идентификатор курса лечения
         /// </summary>
         public int TreatmentId { get; set; }
 
@@ -30,18 +29,12 @@ namespace CardioMonitor.Models.Session
         public SessionStatus Status { get; set; }
 
         /// <summary>
-        /// Показтели пациента за сенас
-        /// </summary>
-        public ObservableCollection<PatientParams> PatientParams { get; set; }
-
-        /// <summary>
         /// Сеанс
         /// </summary>
         public Session()
         {
             DateTime = new DateTime();
             Status = SessionStatus.Unknown;
-            PatientParams = new ObservableCollection<PatientParams>();
         }
     }
 }
