@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.CoreServices.Patients
 {
-    internal class PatientService : IPatientsService
+    public class PatientService : IPatientsService
     {
         [NotNull]
         private readonly ICardioMonitorUnitOfWorkFactory _factory;

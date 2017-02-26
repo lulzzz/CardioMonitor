@@ -52,6 +52,7 @@
     <Compile Include="Session\SessionCycle.cs" />
     <Compile Include="Session\SessionInfo.cs" />
     <Compile Include="Session\SessionStatus.cs" />
+    <Compile Include="Treatment\ITreatmentsService.cs" />
     <Compile Include="Treatment\Statistic.cs" />
     <Compile Include="Treatment\Treatment.cs" />
     <Compile Include="Treatment\TreatmentFullStatistic.cs" />
