@@ -8,7 +8,7 @@
         /// <summary>
         /// Идентификатор
         /// </summary>
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         /// <summary>
         /// Специальное поле для корректной сортировки этих параметров
@@ -23,32 +23,32 @@
         /// <summary>
         /// Частота сердечных сокращений (ЧСС)
         /// </summary>
-        public int HeartRate { get; set; }
+        public short HeartRate { get; set; }
 
         /// <summary>
         /// Частотат дыхания (ЧД)
         /// </summary>
-        public int RepsirationRate { get; set; }
+        public short RepsirationRate { get; set; }
 
         /// <summary>
         /// SPO2
         /// </summary>
-        public int Spo2 { get; set; }
+        public short Spo2 { get; set; }
 
         /// <summary>
         /// Систолическое артериальное давление
         /// </summary>
-        public int SystolicArterialPressure { get; set; }
+        public short SystolicArterialPressure { get; set; }
 
         /// <summary>
         /// Диастолическое артериальное давление
         /// </summary>
-        public int DiastolicArterialPressure { get; set; }
+        public short DiastolicArterialPressure { get; set; }
 
         /// <summary>
         /// Среднее артериальное давлние 
         /// </summary>
-        public int AverageArterialPressure { get; set; }
+        public short AverageArterialPressure { get; set; }
 
         public int SessionCycleId { get; set; }
 

@@ -21,12 +21,12 @@
         /// </summary>
         public string SessionsFilesDirectoryPath { get; set; }
 
-        /// <summary>
-        /// Настройки подключения к базе данных (MySQL)
-        /// </summary>
-        public DataBaseSettings DataBaseSettings { get; set; }
+        public string ConnectionString { get; set; }
 
-        public string SqlLiteConnectionString { get; set; }
+        /// <summary>
+        /// Настройки подключения к базе данных 
+        /// </summary>
+        //public DataBaseSettings DataBaseSettings { get; set; }
         
     }
 }

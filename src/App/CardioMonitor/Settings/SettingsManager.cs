@@ -7,8 +7,7 @@ namespace CardioMonitor.Settings
 {
     public class SettingsManager
     {
-        private readonly string ActiveConnectionStringName = "Active";
-        private readonly string SqlLiteConnectionStringName = "SqlLite";
+        private readonly string ActiveConnectionStringName = "PostgreSql";
 
         private readonly string SessionFilesDirectoryPathName = "SessionsFilesDirectoryPath";
 
@@ -16,11 +15,9 @@ namespace CardioMonitor.Settings
         {
             var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             var appSettings = configFile.AppSettings.Settings;
-            var connectionString = GetConnectionString(settings);
-            configFile.ConnectionStrings.ConnectionStrings[ActiveConnectionStringName].ConnectionString = connectionString;
-
-            configFile.ConnectionStrings.ConnectionStrings[SqlLiteConnectionStringName].ConnectionString 
-                = settings.SqlLiteConnectionString;
+            var connectionString = settings.ConnectionString;
+            //configFile.ConnectionStrings.ConnectionStrings[ActiveConnectionStringName].ConnectionString = connectionString;
+            
             appSettings[SessionFilesDirectoryPathName].Value = settings.SessionsFilesDirectoryPath;
 
             configFile.Save(ConfigurationSaveMode.Modified, true);
@@ -29,19 +26,21 @@ namespace CardioMonitor.Settings
 
         }
 
-        private string GetConnectionString(ICardioSettings settings)
-        {
-            var  builder = new SqlConnectionStringBuilder();
-            builder["DATABASE"] = settings.DataBaseSettings.DataBase;
-            builder["SERVER"] = settings.DataBaseSettings.Source;
-            builder["UID"] = settings.DataBaseSettings.User;
-            builder["PASSWORD"] = settings.DataBaseSettings.Password;
-            return builder.ConnectionString;
-        }
+        //private string GetConnectionString(ICardioSettings settings)
+        //{
+        //    var builder = new SqlConnectionStringBuilder
+        //    {
+        //        ["Database"] = settings.DataBaseSettings.DataBase,
+        //        ["Server"] = settings.DataBaseSettings.Source,
+        //        ["User id"] = settings.DataBaseSettings.User,
+        //        ["Password"] = settings.DataBaseSettings.Password,
+        //        ["Port"] = settings.DataBaseSettings.Port
+        //    };
+        //    return builder.ConnectionString;
+        //}
 
         public ICardioSettings Load()
         {
-            var dataBaseSettings = GetDataBaseSettings();
 
             var defaultSessionsFilesDirectoryPath =
                 Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), SettingsConstants.AppName);
@@ -53,28 +52,25 @@ namespace CardioMonitor.Settings
             {
                 sessionsFilesDirectoryPath = defaultSessionsFilesDirectoryPath;
             }
-            //var sqlLiteSettings =
-            //    ConfigurationManager.ConnectionStrings[SqlLiteConnectionStringName].ConnectionString;
 
             return new CardioSettings
             {
-                DataBaseSettings = dataBaseSettings,
                 SessionsFilesDirectoryPath = sessionsFilesDirectoryPath,
-                //SqlLiteConnectionString = sqlLiteSettings
+                //ConnectionString = ConfigurationManager.ConnectionStrings[ActiveConnectionStringName].ConnectionString
             };
         }
 
 
-        private DataBaseSettings GetDataBaseSettings()
-        {
-            var settings =
-                ConfigurationManager.ConnectionStrings[ActiveConnectionStringName];
+        //private DataBaseSettings GetDataBaseSettings()
+        //{
+        //    var settings =
+        //        ConfigurationManager.ConnectionStrings[ActiveConnectionStringName];
             
-            if (settings == null)
-                return null;
+        //    if (settings == null)
+        //        return null;
 
-            var builder = new SqlConnectionStringBuilder(settings.ConnectionString);
-            return new DataBaseSettings(builder.InitialCatalog, builder.DataSource, builder.UserID, builder.Password);
-        }
+        //    return null;
+        //    //return new DataBaseSettings(builder.InitialCatalog, builder.DataSource, builder.UserID, builder.Password);
+        //}
     }
 }

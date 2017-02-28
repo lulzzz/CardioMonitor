@@ -141,7 +141,7 @@ namespace CardioMonitor.Devices.Monitor
 
                                             if ((result >= 15) && (result <= 250))
                                             {
-                                                patientParams.HeartRate = result;
+                                                patientParams.HeartRate = (short)result;
 
                                             }
                                         }
@@ -173,7 +173,7 @@ namespace CardioMonitor.Devices.Monitor
                                                 }
                                                 else        //да, я знаю что такой if/else это редкая лажа
                                                 {
-                                                    patientParams.RepsirationRate = result;
+                                                    patientParams.RepsirationRate = (short)result;
                                                 }
 
                                             }
@@ -200,7 +200,7 @@ namespace CardioMonitor.Devices.Monitor
 
                                             if ((result > 0) && (result <= 100))
                                             {
-                                                patientParams.Spo2 = result;
+                                                patientParams.Spo2 = (short)result;
 
                                             }
                                         }
@@ -226,7 +226,7 @@ namespace CardioMonitor.Devices.Monitor
 
                                             if ((result > 0) && (result < 250))
                                             {
-                                                patientParams.SystolicArterialPressure = result;
+                                                patientParams.SystolicArterialPressure = (short)result;
 
                                             }
                                         }
@@ -252,7 +252,7 @@ namespace CardioMonitor.Devices.Monitor
 
                                             if ((result > 0) && (result <= 250))
                                             {
-                                                patientParams.DiastolicArterialPressure = result;
+                                                patientParams.DiastolicArterialPressure = (short)result;
 
                                             }
                                         }
@@ -278,7 +278,7 @@ namespace CardioMonitor.Devices.Monitor
 
                                             if ((result > 0) && (result <= 250))
                                             {
-                                                patientParams.AverageArterialPressure = result;
+                                                patientParams.AverageArterialPressure = (short)result;
 
                                             }
                                         }

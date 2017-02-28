@@ -23,6 +23,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
         private string _dbName;
         private string _dbLogin;
         private string _dbPassword;
+        private string _dbPort;
 
         #region Apperance settings
         /*
@@ -148,6 +149,22 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             }
         }
 
+
+        public string DbPort
+        {
+            get { return _dbPort; }
+            set
+            {
+                if (value != _dbPort)
+                {
+                    _dbPort = value;
+                    RisePropertyChanged(nameof(DbPort));
+                    _isSettingsChanged = true;
+                }
+            }
+        }
+
+
         public string DbName
         {
             get { return _dbName; }
@@ -214,10 +231,11 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             SelectedAccentColor =
                 AccentColors.FirstOrDefault(x => x.Name == CardioSettings.Instance.SelectedAcentColorName);*/
             SessionsFilesDirectoryPath = _settings.SessionsFilesDirectoryPath;
-            DbLogin = _settings.DataBaseSettings.User;
-            DbName = _settings.DataBaseSettings.DataBase;
-            DbPassword = _settings.DataBaseSettings.Password;
-            DbServerName = _settings.DataBaseSettings.Source;
+            //DbLogin = _settings.DataBaseSettings.User;
+            //DbName = _settings.DataBaseSettings.DataBase;
+            //DbPassword = _settings.DataBaseSettings.Password;
+            //DbServerName = _settings.DataBaseSettings.Source;
+            //DbPort = _settings.DataBaseSettings.Port;
             _isValid = true;
             _isSettingsChanged = false;
         }
@@ -297,7 +315,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             CardioSettings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
             _settings.SessionsFilesDirectoryPath = SessionsFilesDirectoryPath;
 
-            _settings.DataBaseSettings = new DataBaseSettings(DbName, DbServerName, DbLogin, DbPassword);
+            //_settings.DataBaseSettings = new DataBaseSettings(DbName, DbServerName, DbPort, DbLogin, DbPassword);
 
             var settingsManager = new SettingsManager();
             settingsManager.Save(_settings);

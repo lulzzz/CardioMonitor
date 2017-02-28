@@ -1,6 +1,4 @@
 ﻿using System.Data.Entity;
-using System.Data.Entity.Core.EntityClient;
-using System.Data.SQLite.EF6;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreContracts.Treatment;

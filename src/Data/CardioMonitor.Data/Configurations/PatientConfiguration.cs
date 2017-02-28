@@ -8,6 +8,7 @@ namespace CardioMonitor.Data.Ef.Configurations
         public PatientConfiguration()
         {
             ToTable("Patients").HasKey(x => x.Id);
+            
             Property(x => x.FirstName).HasColumnName("FirstName");
             Property(x => x.PatronymicName).HasColumnName("PatronymicName");
             Property(x => x.LastName).HasColumnName("LastName");

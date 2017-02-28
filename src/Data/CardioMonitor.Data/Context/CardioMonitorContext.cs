@@ -18,7 +18,17 @@ namespace CardioMonitor.Data.Ef.Context
         public virtual DbSet<SessionEntity> Sessions { get; set; }
         public virtual DbSet<SessionCycleEntity> SessionCycles { get; set; }
         public virtual DbSet<PatientParamsEntity> PatientParams { get; set; }
-        
+
+        static CardioMonitorContext()
+        {
+            Database.SetInitializer<CardioMonitorContext>(null);
+        }
+
+        //public CardioMonitorContext() : base("DefaultConnection")
+        //{
+        //    Database.CreateIfNotExists();
+        //}
+
 
         //public CardioMonitorContext(string connection)
         //    : base(connection)
@@ -28,6 +38,9 @@ namespace CardioMonitor.Data.Ef.Context
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            Database.SetInitializer<CardioMonitorContext>(null);
+            modelBuilder.HasDefaultSchema("public");
+
             var typesToRegister = Assembly.GetAssembly(typeof(CardioMonitorContext))
                 .GetTypes()
                 .Where(type => !String.IsNullOrEmpty(type.Namespace))

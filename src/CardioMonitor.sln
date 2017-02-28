@@ -57,6 +57,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.BLL.Mappers",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Dal", "Dal", "{A5037BBA-6297-4556-B2B9-F09E8989543C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scrypts", "scrypts", "{467A2E62-1F73-4D37-8CF6-2E4A40F95272}"
+	ProjectSection(SolutionItems) = preProject
+		init_1_0_0.sql = init_1_0_0.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Monitor|Any CPU = Debug_Monitor|Any CPU

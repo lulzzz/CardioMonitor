@@ -25,10 +25,7 @@ namespace CardioMonitor.Ui.Base
 
         public void Execute(object parameter)
         {
-            if (ExecuteDelegate != null)
-            {
-                ExecuteDelegate(parameter);
-            }
+            ExecuteDelegate?.Invoke(parameter);
         }
     }
 }

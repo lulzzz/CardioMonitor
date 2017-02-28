@@ -10,12 +10,12 @@ namespace CardioMonitor.Settings
         [NotNull]
         string SessionsFilesDirectoryPath { get; set; }
 
-        /// <summary>
-        /// Настройки подключения к базе данных
-        /// </summary>
-        [NotNull]
-        DataBaseSettings DataBaseSettings { get; set; }
+        ///// <summary>
+        ///// Настройки подключения к базе данных
+        ///// </summary>
+        //[NotNull]
+        //DataBaseSettings DataBaseSettings { get; set; }
 
-        string SqlLiteConnectionString { get; set; }
+        string ConnectionString { get; set; }
     }
 }
