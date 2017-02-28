@@ -54,7 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context\CardioMonitorContext.cs" />
-    <Compile Include="UnitOfWork\CardioMonitorUnitOfWork.cs" />
+    <Compile Include="UnitOfWork\CardioMonitorEfUnitOfWork.cs" />
     <Compile Include="Configurations\PatientConfiguration.cs" />
     <Compile Include="Configurations\PatientParamsConfiguration.cs" />
     <Compile Include="Configurations\SessionConfiguration.cs" />
@@ -64,7 +64,7 @@
     <Compile Include="Repositories\PatientsRepository.cs" />
     <Compile Include="Repositories\SessionsRepository.cs" />
     <Compile Include="Repositories\TreatmentsRepository.cs" />
-    <Compile Include="UnitOfWork\CardioMonitorUnitOfWorkFactory.cs" />
+    <Compile Include="UnitOfWork\CardioMonitorEfUnitOfWorkFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CardioMonitor.Data.Common\CardioMonitor.Data.Common.csproj">

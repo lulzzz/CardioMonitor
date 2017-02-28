@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
+using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
@@ -9,7 +11,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
     public class PatientViewModel : Notifier, IViewModel
     {
         private readonly ILogger _logger;
-        private readonly IPatientsRepository _patientsRepository;
+        private readonly IPatientsService _patientsService;
         private AccessMode _accessMode;
         private string _lastName;
         private string _firstName;
@@ -18,13 +20,13 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         private DateTime? _birthDate;
         private ICommand _saveCommand;
 
-        public PatientViewModel(ILogger logger, IPatientsRepository patientsRepository)
+        public PatientViewModel(ILogger logger, IPatientsService patientsService)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (patientsRepository == null) throw new ArgumentNullException(nameof(patientsRepository));
+            if (patientsService == null) throw new ArgumentNullException(nameof(patientsService));
 
             _logger = logger;
-            _patientsRepository = patientsRepository;
+            _patientsService = patientsService;
         }
 
         public EventHandler MoveBackwardEvent { get; set; }
@@ -155,20 +157,17 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 switch (AccessMode)
                 {
                     case AccessMode.Create:
-                        _patientsRepository.AddPatient(Patient);
+                        _patientsService.Add(Patient);
                         message = Localisation.PatientViewModel_Patient_Added;
                         break;
                     case AccessMode.Edit:
-                        _patientsRepository.UpdatePatient(Patient);
+                        _patientsService.Edit(Patient);
                         message = Localisation.PatientViewModel_Patient_Updated;
                         break;
                 }
                 IsSaved = true;
                 var hanlder = MoveBackwardEvent;
-                if (hanlder != null)
-                {
-                    hanlder(null, null);
-                }
+                hanlder?.Invoke(null, null);
             }
             catch (ArgumentNullException ex)
             {

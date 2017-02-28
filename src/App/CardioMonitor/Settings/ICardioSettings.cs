@@ -15,5 +15,7 @@ namespace CardioMonitor.Settings
         /// </summary>
         [NotNull]
         DataBaseSettings DataBaseSettings { get; set; }
+
+        string SqlLiteConnectionString { get; set; }
     }
 }

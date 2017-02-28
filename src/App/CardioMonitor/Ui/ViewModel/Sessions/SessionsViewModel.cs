@@ -1,14 +1,18 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.BLL.CoreContracts.Session;
+using CardioMonitor.BLL.CoreContracts.Treatment;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class SessionsViewModel : Notifier, IViewModel
     {
-        private readonly ISessionsRepository _sessionsRepository;
+        private readonly ISessionsService _sessionsService;
         private PatientFullName _patientName;
         private DateTime _treatmentStartDate;
         private SessionInfo _selectedSessionInfo;
@@ -19,11 +23,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _showResultsCommand;
 
         public SessionsViewModel(
-            ISessionsRepository sessionsRepository)
+            ISessionsService sessionsService)
         {
-            if (sessionsRepository == null) throw new ArgumentNullException(nameof(sessionsRepository));
+            if (sessionsService == null) throw new ArgumentNullException(nameof(sessionsService));
             
-            _sessionsRepository = sessionsRepository;
+            _sessionsService = sessionsService;
         }
 
         public PatientFullName PatientName
@@ -141,7 +145,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 {
                     try
                     {
-                        _sessionsRepository.DeleteSession(sessionInfo.Id);
+                        _sessionsService.Delete(sessionInfo.Id);
                         SessionInfos.Remove(sessionInfo);
                     }
                     catch (Exception ex)
@@ -159,10 +163,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private void ShowResults()
         {
             var handler = ShowResultsEvent;
-            if (null != handler)
-            {
-                handler(this, null);
-            }
+            handler?.Invoke(this, null);
         }
 
         public void Clear()

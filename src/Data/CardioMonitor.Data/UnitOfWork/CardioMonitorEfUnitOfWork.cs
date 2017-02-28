@@ -7,9 +7,9 @@ using CardioMonitor.Data.Ef.Repositories;
 
 namespace CardioMonitor.Data.Ef.UnitOfWork
 {
-    public class CardioMonitorUnitOfWork : Common.UnitOfWork.UnitOfWork, ICardioMonitorUnitOfWork
+    public class CardioMonitorEfUnitOfWork : Common.UnitOfWork.UnitOfWork, ICardioMonitorUnitOfWork
     {
-        public CardioMonitorUnitOfWork(IUnitOfWorkContext context) : base(context)
+        public CardioMonitorEfUnitOfWork(IUnitOfWorkContext context) : base(context)
         {
             if (context== null) throw new ArgumentNullException(nameof(context));
             var cardioMonitorContext = context.Context as CardioMonitorContext;

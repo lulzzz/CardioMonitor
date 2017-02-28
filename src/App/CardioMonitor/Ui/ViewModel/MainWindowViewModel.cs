@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
@@ -37,9 +38,9 @@ namespace CardioMonitor.Ui.ViewModel{
     public class MainWindowViewModel : Notifier
     {
         private readonly ILogger _logger;
-        private readonly IPatientsRepository _patientsRepository;
-        private readonly ITreatmentsRepository _treatmentsRepository;
-        private readonly ISessionsRepository _sessionsRepository;
+        private readonly IPatientsService _patientsService;
+        private readonly ITreatmentsService _treatmentsService;
+        private readonly ISessionsService _sessionsService;
         private readonly IFilesManager _filesRepository;
         private ICommand _moveBackwardComand;
         private int _mainTCSelectedIndex;
@@ -191,31 +192,30 @@ namespace CardioMonitor.Ui.ViewModel{
 
         public MainWindowViewModel(
             ILogger logger,
-            IPatientsRepository patientsRepository,
-            ITreatmentsRepository treatmentsRepository,
-            ISessionsRepository sessionsRepository,
+            IPatientsService patientsService,
+            ITreatmentsService treatmentsService,
+            ISessionsService sessionsService,
             IFilesManager filesRepository,
-            IDataBaseRepository dataBaseRepository,
             IDeviceControllerFactory deviceControllerFactory,
             ICardioSettings settings,
             TaskHelper taskHelper)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (patientsRepository == null) throw new ArgumentNullException(nameof(patientsRepository));
-            if (treatmentsRepository == null) throw new ArgumentNullException(nameof(treatmentsRepository));
-            if (sessionsRepository == null) throw new ArgumentNullException(nameof(sessionsRepository));
+            if (patientsService == null) throw new ArgumentNullException(nameof(patientsService));
+            if (treatmentsService == null) throw new ArgumentNullException(nameof(treatmentsService));
+            if (sessionsService == null) throw new ArgumentNullException(nameof(sessionsService));
             if (filesRepository == null) throw new ArgumentNullException(nameof(filesRepository));
             if (deviceControllerFactory == null) throw new ArgumentNullException(nameof(deviceControllerFactory));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             if (taskHelper == null) throw new ArgumentNullException(nameof(taskHelper));
 
             _logger = logger;
-            _patientsRepository = patientsRepository;
-            _treatmentsRepository = treatmentsRepository;
-            _sessionsRepository = sessionsRepository;
+            _patientsService = patientsService;
+            _treatmentsService = treatmentsService;
+            _sessionsService = sessionsService;
             _filesRepository = filesRepository;
 
-            PatientsViewModel = new PatientsViewModel(patientsRepository)
+            PatientsViewModel = new PatientsViewModel(patientsService)
             {
                 OpenPatienEvent = OpetPatientTreatmentsHanlder,
                 AddEditPatient = AddEditPatientHanlder,
@@ -223,7 +223,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 ShowTreatmentResults = ShowTreatmentResults,
                 OpenSessionHandler = LoadSession
             };
-            PatientViewModel = new PatientViewModel(logger, patientsRepository)
+            PatientViewModel = new PatientViewModel(logger, patientsService)
             {
                 MoveBackwardEvent = MoveBackwardPatient
             };
@@ -232,17 +232,17 @@ namespace CardioMonitor.Ui.ViewModel{
                 OpenSessionsEvent = StartOrContinueTreatmentSession,
                 ShowResultsEvent = ShowTreatmentResults
             };
-            SessionsViewModel = new SessionsViewModel(sessionsRepository)
+            SessionsViewModel = new SessionsViewModel(sessionsService)
             {
                 StartSessionEvent = StartSession,
                 ShowResultsEvent = ShowSessionResults
             };
-            SessionViewModel = new SessionViewModel(logger, filesRepository, sessionsRepository, deviceControllerFactory, taskHelper);
+            SessionViewModel = new SessionViewModel(logger, filesRepository, sessionsService, deviceControllerFactory, taskHelper);
             //SessionViewModel.StartStatusTimer();
             SessionDataViewModel = new SessionDataViewModel(logger, filesRepository);
             
             TreatmentDataViewModel = new TreatmentDataViewModel();
-            SettingsViewModel = new SettingsViewModel(dataBaseRepository, settings);
+            SettingsViewModel = new SettingsViewModel(settings);
         }
 
         public void UpdatePatiens()
@@ -250,7 +250,7 @@ namespace CardioMonitor.Ui.ViewModel{
             var message = String.Empty;
             try
             {
-                var patients = _patientsRepository.GetPatients();
+                var patients = _patientsService.GetAll();
                 PatientsViewModel.Patients = patients != null
                     ? new ObservableCollection<Patient>(patients) 
                     : new ObservableCollection<Patient>();
@@ -376,12 +376,12 @@ namespace CardioMonitor.Ui.ViewModel{
             try
             {
 
-                var treatments = _treatmentsRepository.GetTreatments(patient.Id);
+                var treatments = _treatmentsService.GetAll(patient.Id);
                 var treatment = treatments.FirstOrDefault();
                 if (null == treatment)
                 {
-                    _treatmentsRepository.AddTreatment(new Treatment { StartDate = DateTime.Now, PatientId = patient.Id });
-                    treatment = _treatmentsRepository.GetTreatments(patient.Id).FirstOrDefault();
+                    _treatmentsService.Add(new Treatment { StartDate = DateTime.Now, PatientId = patient.Id });
+                    treatment = _treatmentsService.GetAll(patient.Id).FirstOrDefault();
                     if (null == treatment)
                     {
                         await MessageHelper.Instance.ShowMessageAsync(Localisation.MainWindowViewModel_CantLoadList);
@@ -411,7 +411,7 @@ namespace CardioMonitor.Ui.ViewModel{
 
         private void UpdateSessionInfos()
         {
-            var sessions = _sessionsRepository.GetSessionInfos(SessionsViewModel.Treatment.Id);
+            var sessions = _sessionsService.GetInfos(SessionsViewModel.Treatment.Id);
             SessionsViewModel.SessionInfos = sessions != null
                 ? new ObservableCollection<SessionInfo>(sessions)
                 : new ObservableCollection<SessionInfo>();
@@ -441,11 +441,11 @@ namespace CardioMonitor.Ui.ViewModel{
             //getting result
             var session = new SessionModel {DateTime = new DateTime()};
             
-            var statisticBuilder = new TreatmentStatisticBuilder();
-            TreatmentDataViewModel.Statistic = statisticBuilder.Build(new[]
-            {
-                session.Session, session.Session, session.Session, session.Session, session.Session, session.Session, session.Session,session.Session ,session.Session ,session.Session
-            });
+            //var statisticBuilder = new TreatmentStatisticBuilder();
+            //TreatmentDataViewModel.Statistic = statisticBuilder.Build(new[]
+            //{
+            //    session.Session, session.Session, session.Session, session.Session, session.Session, session.Session, session.Session,session.Session ,session.Session ,session.Session
+            //});
             TreatmentDataViewModel.PatientName = new PatientFullName
             {
                 LastName = PatientsViewModel.SelectedPatient.LastName,
@@ -469,7 +469,7 @@ namespace CardioMonitor.Ui.ViewModel{
             try
             {
 
-                var session = _sessionsRepository.GetSession(SessionsViewModel.SelectedSessionInfo.Id);
+                var session = _sessionsService.Get(SessionsViewModel.SelectedSessionInfo.Id);
                 SessionDataViewModel.Session = new SessionModel {Session = session};
                 SessionDataViewModel.Patient = PatientsViewModel.SelectedPatient;
                 MainTCSelectedIndex = (int)ViewIndex.SessionDataView;

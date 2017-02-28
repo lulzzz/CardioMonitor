@@ -3,9 +3,16 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.BLL.CoreContracts.Session;
+using CardioMonitor.BLL.CoreContracts.Treatment;
 using CardioMonitor.Devices;
+using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor;
+using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Files;
+using CardioMonitor.Infrastructure.Logs;
+using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Resources;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
@@ -114,7 +121,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private readonly TaskHelper _taskHelper;
         private readonly ILogger _logger;
         private readonly IFilesManager _filesRepository;
-        private readonly ISessionsRepository _sessionsRepository;
+        private readonly ISessionsService _sessionsService;
         private readonly IDeviceControllerFactory _deviceControllerFactory;
 
         private readonly IMonitorController _monitorController;
@@ -414,16 +421,16 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public ThreadAssistant ThreadAssistant { get; set; }
 
-        private ObservableCollection<DataPoint> _points;
-        public ObservableCollection<DataPoint> Points
-        {
-            get { return _points; }
-            set
-            {
-                _points = value;
-                RisePropertyChanged("Points");
-            }
-        }
+        //private ObservableCollection<DataPoint> _points;
+        //public ObservableCollection<DataPoint> Points
+        //{
+        //    get { return _points; }
+        //    set
+        //    {
+        //        _points = value;
+        //        RisePropertyChanged("Points");
+        //    }
+        //}
 
         private string _executionStatus;
 
@@ -448,19 +455,19 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public SessionViewModel(
             ILogger logger,
             IFilesManager filesRepository,
-            ISessionsRepository sessionsRepository,
+            ISessionsService sessionsService,
             IDeviceControllerFactory deviceControllerFactory,
             TaskHelper taskHelper)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
             if (filesRepository == null) throw new ArgumentNullException(nameof(filesRepository));
-            if (sessionsRepository == null) throw new ArgumentNullException(nameof(sessionsRepository));
+            if (sessionsService == null) throw new ArgumentNullException(nameof(sessionsService));
             if (deviceControllerFactory == null) throw new ArgumentNullException(nameof(deviceControllerFactory));
             if (taskHelper == null) throw new ArgumentNullException(nameof(taskHelper));
 
             _logger = logger;
             _filesRepository = filesRepository;
-            _sessionsRepository = sessionsRepository;
+            _sessionsService = sessionsService;
             _deviceControllerFactory = deviceControllerFactory;
 
             Session = new SessionModel();
@@ -575,15 +582,15 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     UpdateData(currentAngle);
                 }
 
-                Points = new ObservableCollection<DataPoint>
-                {
-                    new DataPoint(_x++, _y++),
-                    new DataPoint(_x++, _y++),
-                    new DataPoint(_x++, _y++),
-                    new DataPoint(_x++, _y++),
-                    new DataPoint(_x++, _y++),
-                    new DataPoint(_x++, _y++),
-                };
+                //Points = new ObservableCollection<DataPoint>
+                //{
+                //    new DataPoint(_x++, _y++),
+                //    new DataPoint(_x++, _y++),
+                //    new DataPoint(_x++, _y++),
+                //    new DataPoint(_x++, _y++),
+                //    new DataPoint(_x++, _y++),
+                //    new DataPoint(_x++, _y++),
+                //};
                 
             }
             else
@@ -828,7 +835,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 _filesRepository.SaveToFile(Patient, Session.Session);
                 //todo это работать не будет
-                _sessionsRepository.AddSession(Session.Session.ToEntity());
+                _sessionsService.Add(Session.Session);
                 await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionViewModel_SessionCompeted);
             }
             catch (ArgumentNullException ex)

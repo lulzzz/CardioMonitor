@@ -14,12 +14,7 @@
         /// Специальное поле для корректной сортировки этих параметров
         /// </summary>
         public int Iteration { get; set; }
-
-        /// <summary>
-        /// Идентификатор сеанса лечения
-        /// </summary>
-        public int SessionId { get; set; }
-
+        
         /// <summary>
         /// Угол наклона кровати
         /// </summary>

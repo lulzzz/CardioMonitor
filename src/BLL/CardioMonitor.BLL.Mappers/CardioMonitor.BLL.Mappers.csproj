@@ -48,6 +48,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SessionMapper.cs" />
     <Compile Include="SessionStatusMapper.cs" />
+    <Compile Include="TreatmentsMapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Data\CardioMonitor.Data.Contracts\CardioMonitor.Data.Contracts.csproj">

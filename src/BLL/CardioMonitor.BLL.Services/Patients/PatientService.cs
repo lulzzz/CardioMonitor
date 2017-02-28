@@ -25,7 +25,9 @@ namespace CardioMonitor.BLL.CoreServices.Patients
 
             using (var uow = _factory.Create())
             {
+                uow.BeginTransation();
                 uow.Patients.AddPatient(patient.ToEntity());
+                uow.Commit();
             }
         }
 
@@ -44,17 +46,19 @@ namespace CardioMonitor.BLL.CoreServices.Patients
 
             using (var uow = _factory.Create())
             {
+                uow.BeginTransation();
                 uow.Patients.UpdatePatient(patient.ToEntity());
+                uow.Commit();
             }
         }
 
-        public void Delete(Patient patient)
+        public void Delete(int patientId)
         {
-            if (patient == null) throw new ArgumentNullException(nameof(patient));
-
             using (var uow = _factory.Create())
             {
-                uow.Patients.DeletePatient(patient.Id);
+                uow.BeginTransation();
+                uow.Patients.DeletePatient(patientId);
+                uow.Commit();
             }
         }
     }

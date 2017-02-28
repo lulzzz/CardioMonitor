@@ -31,6 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
     <Reference Include="JetBrains.Annotations">
       <HintPath>..\..\Data\CardioMonitor.Data.Common\bin\Debug\JetBrains.Annotations.dll</HintPath>
     </Reference>
@@ -47,6 +48,7 @@
     <Compile Include="Patients\PatientService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sessions\SessionsService.cs" />
+    <Compile Include="Treatments\TreatmentsService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Data\CardioMonitor.Data.Common\CardioMonitor.Data.Common.csproj">
@@ -66,9 +68,7 @@
       <Name>CardioMonitor.BLL.CoreContracts</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Treatments\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

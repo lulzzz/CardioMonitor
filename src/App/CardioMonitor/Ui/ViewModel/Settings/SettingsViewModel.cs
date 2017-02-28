@@ -11,7 +11,6 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 {
     public class SettingsViewModel : Notifier, IDataErrorInfo
     {
-        private readonly IDataBaseRepository _dataBaseRepository;
         private readonly ICardioSettings _settings;
         private string _sessionsFilesDirectoryPath;
         private ICommand _chooseFolderCommand;
@@ -191,14 +190,10 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             }
         }
 
-        public SettingsViewModel(
-            IDataBaseRepository dataBaseRepository,
-            ICardioSettings settings)
+        public SettingsViewModel(ICardioSettings settings)
         {
-            if (dataBaseRepository == null) throw new ArgumentNullException(nameof(dataBaseRepository));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            _dataBaseRepository = dataBaseRepository;
+            
             _settings = settings;
             /*
             AccentColors = ThemeManager.Accents
@@ -297,34 +292,18 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         private async void SaveSettings()
         {
-            var message = String.Empty;
-            try
-            {
-                await _dataBaseRepository.CheckConnectionAsync(DbName, DbServerName, DbLogin, DbPassword);
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            if (!String.IsNullOrEmpty(message))
-            {
-                await MessageHelper.Instance.ShowMessageAsync(message);
-            }
-            else
-            {
-                /* CardioSettings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
-                CardioSettings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
-                _settings.SessionsFilesDirectoryPath = SessionsFilesDirectoryPath;
 
-                _settings.DataBaseSettings = new DataBaseSettings(DbName, DbServerName, DbLogin, DbPassword);
+            /* CardioSettings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
+            CardioSettings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
+            _settings.SessionsFilesDirectoryPath = SessionsFilesDirectoryPath;
 
-                var settingsManager = new SettingsManager();
-                settingsManager.Save(_settings);
+            _settings.DataBaseSettings = new DataBaseSettings(DbName, DbServerName, DbLogin, DbPassword);
 
-                _isSettingsChanged = false;
-                await MessageHelper.Instance.ShowMessageAsync(Localisation.SettingsViewModel_Saved);
-                
-            }
+            var settingsManager = new SettingsManager();
+            settingsManager.Save(_settings);
+
+            _isSettingsChanged = false;
+            await MessageHelper.Instance.ShowMessageAsync(Localisation.SettingsViewModel_Saved);
         }
 
         private void CloseSettings()

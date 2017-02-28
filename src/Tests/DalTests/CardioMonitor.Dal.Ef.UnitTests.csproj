@@ -6,8 +6,8 @@
     <ProjectGuid>{30D57049-A4F5-4CA7-A5BD-DBD9FFAD5A64}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>DalTests</RootNamespace>
-    <AssemblyName>DalTests</AssemblyName>
+    <RootNamespace>CardioMonitor.Dal.Ef.UnitTests</RootNamespace>
+    <AssemblyName>CardioMonitor.Dal.Ef.UnitTests</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>

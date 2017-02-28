@@ -10,6 +10,6 @@ namespace CardioMonitor.BLL.CoreContracts.Patients
 
         void Edit(Patient patient);
 
-        void Delete(Patient patient);
+        void Delete(int patientId);
     }
 }

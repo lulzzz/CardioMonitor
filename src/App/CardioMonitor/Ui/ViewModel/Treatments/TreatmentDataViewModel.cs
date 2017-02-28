@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
+using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.BLL.CoreContracts.Treatment;
 using CardioMonitor.Ui.Base;
 
 namespace CardioMonitor.Ui.ViewModel.Treatments

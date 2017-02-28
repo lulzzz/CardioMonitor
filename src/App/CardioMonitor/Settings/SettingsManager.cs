@@ -8,6 +8,7 @@ namespace CardioMonitor.Settings
     public class SettingsManager
     {
         private readonly string ActiveConnectionStringName = "Active";
+        private readonly string SqlLiteConnectionStringName = "SqlLite";
 
         private readonly string SessionFilesDirectoryPathName = "SessionsFilesDirectoryPath";
 
@@ -17,6 +18,9 @@ namespace CardioMonitor.Settings
             var appSettings = configFile.AppSettings.Settings;
             var connectionString = GetConnectionString(settings);
             configFile.ConnectionStrings.ConnectionStrings[ActiveConnectionStringName].ConnectionString = connectionString;
+
+            configFile.ConnectionStrings.ConnectionStrings[SqlLiteConnectionStringName].ConnectionString 
+                = settings.SqlLiteConnectionString;
             appSettings[SessionFilesDirectoryPathName].Value = settings.SessionsFilesDirectoryPath;
 
             configFile.Save(ConfigurationSaveMode.Modified, true);
@@ -49,11 +53,14 @@ namespace CardioMonitor.Settings
             {
                 sessionsFilesDirectoryPath = defaultSessionsFilesDirectoryPath;
             }
+            //var sqlLiteSettings =
+            //    ConfigurationManager.ConnectionStrings[SqlLiteConnectionStringName].ConnectionString;
 
             return new CardioSettings
             {
                 DataBaseSettings = dataBaseSettings,
-                SessionsFilesDirectoryPath = sessionsFilesDirectoryPath
+                SessionsFilesDirectoryPath = sessionsFilesDirectoryPath,
+                //SqlLiteConnectionString = sqlLiteSettings
             };
         }
 

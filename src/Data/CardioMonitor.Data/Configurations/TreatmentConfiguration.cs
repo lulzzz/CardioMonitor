@@ -8,7 +8,6 @@ namespace CardioMonitor.Data.Ef.Configurations
         public TreatmentConfiguration()
         {
             ToTable("Treatments").HasKey(x => x.Id);
-            Property(x => x.LastSessionDate).HasColumnName("LastSessionDate");
             Property(x => x.StartDate).HasColumnName("StartDate");
             
             HasMany(x => x.Sessions)

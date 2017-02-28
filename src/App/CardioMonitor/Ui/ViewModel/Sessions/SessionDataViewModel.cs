@@ -2,7 +2,9 @@
 using System.Collections.ObjectModel;
 using System.Windows.Forms;
 using System.Windows.Input;
+using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.Files;
+using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 

@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CardioMonitor.BLL.CoreContracts.Session
 {
     /// <summary>
     /// Сеанс
     /// </summary>
-    [Serializable]
     public class Session
     {
         /// <summary>
@@ -27,6 +27,8 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         /// Статус сеанса
         /// </summary>
         public SessionStatus Status { get; set; }
+
+        public List<SessionCycle> Cycles { get; set; }
 
         /// <summary>
         /// Сеанс

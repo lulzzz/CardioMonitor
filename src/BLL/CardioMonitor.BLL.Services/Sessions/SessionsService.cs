@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using CardioMonitor.BLL.CoreContracts.Session;
+using CardioMonitor.BLL.Mappers;
 using CardioMonitor.Data.Contracts.UnitOfWork;
 using JetBrains.Annotations;
 
@@ -17,29 +19,55 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
             _factory = factory;
         }
 
-        public void Add(Session patient)
+        public void Add(Session session)
         {
-            if (patient == null) throw new ArgumentNullException(nameof(patient));
+            if (session == null) throw new ArgumentNullException(nameof(session));
 
             using (var uow = _factory.Create())
             {
-                uow.Sessions.AddSession(patient.ToEntity());
+                uow.BeginTransation();
+
+                uow.Sessions.AddSession(session.ToEntity());
+                uow.Commit();
             }
         }
 
-        public List<Session> GetAll()
+
+        public Session Get(int sessionId)
         {
-            throw new System.NotImplementedException();
+            using (var uow = _factory.Create())
+            {
+                return uow.Sessions.GetSession(sessionId).ToDomain();
+            }
         }
 
-        public void Edit(Session patient)
+
+        public List<Session> GetAll(int treatmentId)
         {
-            throw new System.NotImplementedException();
+            using (var uow = _factory.Create())
+            {
+                return uow.Sessions.GetSessions(treatmentId)?.Select(x => x.ToDomain()).ToList();
+            }
         }
 
-        public void Delete(Session patient)
+
+        public List<SessionInfo> GetInfos(int treatmentId)
         {
-            throw new System.NotImplementedException();
+            using (var uow = _factory.Create())
+            {
+                return uow.Sessions.GetSessions(treatmentId)?.Select(x => x.ToInfoDomain()).ToList();
+            }
+        }
+
+
+        public void Delete(int sessionId)
+        {
+            using (var uow = _factory.Create())
+            {
+                uow.BeginTransation();
+                uow.Sessions.DeleteSession(sessionId);
+                uow.Commit();
+            }
         }
     }
 }

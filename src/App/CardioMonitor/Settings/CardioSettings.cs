@@ -22,9 +22,11 @@
         public string SessionsFilesDirectoryPath { get; set; }
 
         /// <summary>
-        /// Настройки подключения к базе данных
+        /// Настройки подключения к базе данных (MySQL)
         /// </summary>
         public DataBaseSettings DataBaseSettings { get; set; }
+
+        public string SqlLiteConnectionString { get; set; }
         
     }
 }

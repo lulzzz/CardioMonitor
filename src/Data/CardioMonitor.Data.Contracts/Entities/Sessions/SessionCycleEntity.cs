@@ -20,6 +20,7 @@ namespace CardioMonitor.Data.Contracts.Entities.Sessions
         public ICollection<PatientParamsEntity> PatientParams { get; set; }
 
         public int SessionId { get; set; }
+
         public virtual SessionEntity SessionEntity { get; set; }
     }
 }

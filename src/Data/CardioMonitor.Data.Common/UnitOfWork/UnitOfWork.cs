@@ -10,6 +10,8 @@ namespace CardioMonitor.Data.Common.UnitOfWork
         [NotNull]
         public IUnitOfWorkContext Context { get; }
 
+        private DbContextTransaction _transaction;
+
         protected UnitOfWork(IUnitOfWorkContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
@@ -36,12 +38,23 @@ namespace CardioMonitor.Data.Common.UnitOfWork
 
         public void Commit()
         {
+            //todo надо ли это?
             Context.SaveChanges();
+            _transaction?.Commit();
         }
 
         public void Rollback()
         {
+            //todo надо ли это?
             Context.Rollback();
+
+            _transaction?.Rollback();
+        }
+
+        public bool BeginTransation()
+        {
+            _transaction = BeginTransaction();
+            return _transaction != null;
         }
 
         public DbContextTransaction BeginTransaction()
@@ -59,6 +72,7 @@ namespace CardioMonitor.Data.Common.UnitOfWork
 
             if (disposing)
             {
+                _transaction?.Dispose();
                 Context.Dispose();
             }
 

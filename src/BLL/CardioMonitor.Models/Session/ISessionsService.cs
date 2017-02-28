@@ -1,16 +1,18 @@
 ﻿using System.Collections.Generic;
-using CardioMonitor.BLL.CoreContracts.Patients;
 
 namespace CardioMonitor.BLL.CoreContracts.Session
 {
     public interface ISessionsService
     {
-        void Add(Session patient);
+        void Add(Session session);
 
-        List<Session> GetAll();
+        Session Get(int sessionId);
 
-        void Edit(Session patient);
+        List<Session> GetAll(int treatmentId);
 
-        void Delete(Session patient);
+
+        List<SessionInfo> GetInfos(int treatmentId);
+
+        void Delete(int sessionId);
     }
 }

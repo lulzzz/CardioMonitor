@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
 {
     public class PatientsViewModel : Notifier
     {
-        private readonly IPatientsRepository _patientsRepository;
+        private readonly IPatientsService _patientsService;
         private int _seletedPatientIndex;
         private Patient _selectePatient;
         private ObservableCollection<Patient> _patients; 
@@ -179,31 +181,23 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         public EventHandler ShowTreatmentResults { get; set; }
         public EventHandler OpenSessionHandler { get; set; }
 
-        public PatientsViewModel(IPatientsRepository patientsRepository)
+        public PatientsViewModel(IPatientsService patientsService)
         {
-            if (patientsRepository == null) throw new ArgumentNullException(nameof(patientsRepository));
+            if (patientsService == null) throw new ArgumentNullException(nameof(patientsService));
 
-            _patientsRepository = patientsRepository;
+            _patientsService = patientsService;
 
             Patients = new ObservableCollection<Patient>();
         }
 
         private void AddNewPatient()
         {
-            var handler = AddEditPatient;
-            if (null != handler)
-            {
-                handler(this, new PatientEventArgs {Patient = new Patient(), Mode = AccessMode.Create});
-            }
+            AddEditPatient?.Invoke(this, new PatientEventArgs { Patient = new Patient(), Mode = AccessMode.Create });
         }
 
         private void EditPatient()
         {
-            var handler = AddEditPatient;
-            if (null != handler)
-            {
-                handler(this, new PatientEventArgs { Patient = SelectedPatient, Mode = AccessMode.Edit });
-            }
+            AddEditPatient?.Invoke(this, new PatientEventArgs { Patient = SelectedPatient, Mode = AccessMode.Edit });
         }
 
         private async void DeletePatient()
@@ -217,7 +211,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 {
                     try
                     {
-                        _patientsRepository.DeletePatient(SelectedPatient.Id);
+                        _patientsService.Delete(SelectedPatient.Id);
                         Patients.Remove(SelectedPatient);
                         SelectedPatient = null;
                     }
@@ -238,11 +232,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             var patient = sender as Patient;
             if (null == patient) { return; }
             //here we send id of patientEntity and
-            var handler = OpenPatienEvent;
-            if (null != handler)
-            {
-                handler(this, new CardioEventArgs(patient.Id));
-            }
+            OpenPatienEvent?.Invoke(this, new CardioEventArgs(patient.Id));
         }
         
         private void PatientSearch(object sender)
@@ -268,28 +258,19 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         private void OpenSessions()
         {
             var handler = OpenSessionsHandler;
-            if (null != handler)
-            {
-                handler(this, null);
-            }
+            handler?.Invoke(this, null);
         }
 
         private void ShowResults()
         {
             var handler = ShowTreatmentResults;
-            if (null != handler)
-            {
-                handler(this, null);
-            }
+            handler?.Invoke(this, null);
         }
 
         private void OpenSession()
         {
             var handler = OpenSessionHandler;
-            if (null != handler)
-            {
-                handler(this, null);
-            }
+            handler?.Invoke(this, null);
         }
     }
 }

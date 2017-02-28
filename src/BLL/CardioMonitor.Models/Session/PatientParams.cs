@@ -1,11 +1,8 @@
-﻿using System;
-
-namespace CardioMonitor.BLL.CoreContracts.Session
+﻿namespace CardioMonitor.BLL.CoreContracts.Session
 {
     /// <summary>
     /// Показатели пациента
     /// </summary>
-    [Serializable]
     public class PatientParams
     {
         /// <summary>
@@ -17,11 +14,6 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         /// Специальное поле для корректной сортировки этих параметров
         /// </summary>
         public int Iteraton { get; set; }
-
-        /// <summary>
-        /// Идентификатор сеанса лечения
-        /// </summary>
-        public int SessionId { get; set; }
 
         /// <summary>
         /// Угол наклона кровати

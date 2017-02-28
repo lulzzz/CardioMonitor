@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Ui.Base;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
@@ -108,7 +109,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     TreatmentId = TreatmentId,
                     DateTime = DateTime,
                     Status = Status,
-                    PatientParams = PatientParams
+                    //PatientParams = PatientParams
                 };
             }
             set
@@ -117,7 +118,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 TreatmentId = value.TreatmentId;
                 DateTime = value.DateTime;
                 Status = value.Status;
-                PatientParams = value.PatientParams;
+                //PatientParams = value.PatientParams;
             }
         }
 

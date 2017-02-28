@@ -1,4 +1,5 @@
 ﻿using System;
+using CardioMonitor.BLL.CoreContracts.Patients;
 
 namespace CardioMonitor.Ui.Communication
 {

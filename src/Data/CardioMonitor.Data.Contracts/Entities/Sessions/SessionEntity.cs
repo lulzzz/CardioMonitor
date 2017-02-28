@@ -25,11 +25,6 @@ namespace CardioMonitor.Data.Contracts.Entities.Sessions
         public SessionCompletionStatus Status { get; set; }
         
         /// <summary>
-        /// Циклы сеанса
-        /// </summary>
-        public virtual ICollection<SessionCycleEntity> Cycles { get; set; }
-
-        /// <summary>
         /// Идентификатор курса лечения
         /// </summary>
         public int TreatmentId { get; set; }
@@ -38,5 +33,10 @@ namespace CardioMonitor.Data.Contracts.Entities.Sessions
         /// Курс лечения
         /// </summary>
         public virtual TreatmentEntity TreatmentEntity { get; set; }
+        
+        /// <summary>
+        /// Циклы сеанса
+        /// </summary>
+        public virtual ICollection<SessionCycleEntity> Cycles { get; set; }
     }
 }

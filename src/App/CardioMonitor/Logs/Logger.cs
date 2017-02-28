@@ -17,7 +17,7 @@ namespace CardioMonitor.Logs
         /// <summary>
         /// Класс для записи лог-информации в файл
         /// </summary>
-        public Logger(ICardioSettings settings)
+        public Logger()
         {
             _logsFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), SettingsConstants.AppName, "Logs");
             try

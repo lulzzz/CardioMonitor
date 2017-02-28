@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.BLL.CoreContracts.Treatment;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
+using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.Ui.ViewModel.Treatments
 {

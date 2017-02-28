@@ -7,10 +7,9 @@ namespace CardioMonitor.BLL.CoreContracts.Session
     /// </summary>
     public class SessionCycle
     {
-        public SessionCycle(List<PatientParams> patientParams)
-        {
-            PatientParams = patientParams;
-        }
+        public int SessionId { get; set; }
+
+        public int CycleNumber { get; set; }
 
         /// <summary>
         /// Показатели пациента за сенас

@@ -29,7 +29,9 @@ namespace CardioMonitor.Data.Common.UnitOfWork
 
         void Rollback();
 
-        DbContextTransaction BeginTransaction();
+        bool BeginTransation();
+
+        //DbContextTransaction BeginTransaction();
 
 
     }

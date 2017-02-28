@@ -6,11 +6,11 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.Data.Ef.UnitOfWork
 {
-    public class CardioMonitorUnitOfWorkFactory : ICardioMonitorUnitOfWorkFactory
+    public class CardioMonitorEfUnitOfWorkFactory : ICardioMonitorUnitOfWorkFactory
     {
         private readonly CardioMonitorContext _context;
 
-        public CardioMonitorUnitOfWorkFactory([NotNull] CardioMonitorContext context)
+        public CardioMonitorEfUnitOfWorkFactory([NotNull] CardioMonitorContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             _context = context;
@@ -18,7 +18,7 @@ namespace CardioMonitor.Data.Ef.UnitOfWork
         
         public ICardioMonitorUnitOfWork Create()
         {
-            return new CardioMonitorUnitOfWork(new UnitOfWorkContext(_context));
+            return new CardioMonitorEfUnitOfWork(new UnitOfWorkContext(_context));
         }
     }
 }

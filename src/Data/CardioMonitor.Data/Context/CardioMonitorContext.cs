@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.ModelConfiguration;
@@ -15,20 +16,19 @@ namespace CardioMonitor.Data.Ef.Context
         public virtual DbSet<PatientEntity> Patients { get; set; }
         public virtual DbSet<TreatmentEntity> Treatments { get; set; }
         public virtual DbSet<SessionEntity> Sessions { get; set; }
+        public virtual DbSet<SessionCycleEntity> SessionCycles { get; set; }
+        public virtual DbSet<PatientParamsEntity> PatientParams { get; set; }
+        
 
-        public CardioMonitorContext()
-        {
-        }
-
-        public CardioMonitorContext(string connectionString)
-            : base(connectionString)
-        {
-            (this as IObjectContextAdapter).ObjectContext.ContextOptions.UseCSharpNullComparisonBehavior = true;
-        }
+        //public CardioMonitorContext(string connection)
+        //    : base(connection)
+        //{
+        //    (this as IObjectContextAdapter).ObjectContext.ContextOptions.UseCSharpNullComparisonBehavior = true;
+        //}
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            var typesToRegister = Assembly.GetExecutingAssembly()
+            var typesToRegister = Assembly.GetAssembly(typeof(CardioMonitorContext))
                 .GetTypes()
                 .Where(type => !String.IsNullOrEmpty(type.Namespace))
                 .Where(type => type.BaseType != null && type.BaseType.IsGenericType &&
