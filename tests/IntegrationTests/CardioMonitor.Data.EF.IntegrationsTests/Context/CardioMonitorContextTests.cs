@@ -1,12 +1,12 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace DalTests
+namespace CardioMonitor.Dal.Ef.UnitTests.Context
 {
     [TestClass]
-    public class UnitTest1
+    public class CardioMonitorContextTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void CreateDB()
         {
         }
     }

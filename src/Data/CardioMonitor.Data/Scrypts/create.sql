@@ -1,0 +1,4 @@
+﻿CREATE DATABASE IF NOT EXISTS %db_name%
+    WITH OWNER = %owner%
+    ENCODING = 'UTF8'
+    CONNECTION LIMIT = -1

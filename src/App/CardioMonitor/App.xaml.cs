@@ -28,6 +28,7 @@ namespace CardioMonitor
     {
         public App()
         {
+            //todo add startup window
             var container = Bootstrap();
             var mainWindow = container.GetInstance<MainWindow>();
             mainWindow.Show();
@@ -39,13 +40,13 @@ namespace CardioMonitor
 
             var settings = GetSettings();
             container.RegisterSingleton(settings);
-            var context = new CardioMonitorContext();
-            container.RegisterSingleton((DbContext) context);
-            container.RegisterSingleton(context);
+            //var context = new CardioMonitorContext();
+            //container.RegisterSingleton((DbContext) context);
+            //container.RegisterSingleton(context);
             container.Register<ILogger, Logger>(Lifestyle.Singleton);
             container.Register<IDeviceControllerFactory, DeviceControllerFactory>(Lifestyle.Singleton);
             container.Register<TaskHelper, TaskHelper>(Lifestyle.Singleton);
-            container.Register<IUnitOfWorkContext, UnitOfWorkContext>(Lifestyle.Singleton);
+            //container.Register<IUnitOfWorkContext, UnitOfWorkContext>(Lifestyle.Singleton);
             container.Register<ICardioMonitorUnitOfWorkFactory, CardioMonitorEfUnitOfWorkFactory>(Lifestyle.Singleton);
             container.Register<IPatientsService, PatientService>(Lifestyle.Singleton);
             container.Register<ITreatmentsService, TreatmentsService>(Lifestyle.Singleton);

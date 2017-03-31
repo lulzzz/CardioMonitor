@@ -21,15 +21,9 @@ namespace CardioMonitor.Data.Ef.Context
 
         static CardioMonitorContext()
         {
-            Database.SetInitializer<CardioMonitorContext>(null);
+            //Database.SetInitializer(new ContextInitializer());
         }
-
-        //public CardioMonitorContext() : base("DefaultConnection")
-        //{
-        //    Database.CreateIfNotExists();
-        //}
-
-
+        
         //public CardioMonitorContext(string connection)
         //    : base(connection)
         //{
