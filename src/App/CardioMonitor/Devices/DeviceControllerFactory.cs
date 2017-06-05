@@ -49,7 +49,7 @@ namespace CardioMonitor.Devices
         {
             return new BedUsbController();
         }
-
+        
         public IMonitorController CreateMonitorController()
         {
             IDeviceController controller;
@@ -68,7 +68,7 @@ namespace CardioMonitor.Devices
         }
         private IMonitorController _CreateMonitorController()
         {
-            return new MonitorController();
+            return new OldMonitorController();
         }
     }
 }

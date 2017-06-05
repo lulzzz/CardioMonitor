@@ -42,7 +42,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// <summary>
         /// Возвращает угол наклона кровати по оси Y
         /// </summary>
-        double GetAngleY();
+        double GetAngleY(); //todo устарел, не используется
         
         /// <summary>
         /// Возвращает признак подключения устройство

@@ -42,7 +42,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CRC8Calculator.cs" />
+    <Compile Include="ECG.cs" />
     <Compile Include="MonitorController.cs" />
+    <Compile Include="OldMonitorController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

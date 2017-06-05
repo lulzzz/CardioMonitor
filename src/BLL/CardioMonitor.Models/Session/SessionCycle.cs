@@ -12,7 +12,7 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         public int CycleNumber { get; set; }
 
         /// <summary>
-        /// Показатели пациента за сенас
+        /// Показатели пациента за сеанс
         /// </summary>
         public List<PatientParams> PatientParams { get; set; }
     }

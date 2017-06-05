@@ -45,6 +45,7 @@
     <Compile Include="Patients\Patient.cs" />
     <Compile Include="Patients\PatientFullName.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Session\PatientECG.cs" />
     <Compile Include="Session\ISessionsService.cs" />
     <Compile Include="Session\PatientParams.cs" />
     <Compile Include="Session\Session.cs" />
