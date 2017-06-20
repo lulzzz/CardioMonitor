@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
@@ -23,12 +24,12 @@ namespace CardioMonitor.Data.Ef.Context
         {
             //Database.SetInitializer(new ContextInitializer());
         }
-        
-        //public CardioMonitorContext(string connection)
-        //    : base(connection)
-        //{
-        //    (this as IObjectContextAdapter).ObjectContext.ContextOptions.UseCSharpNullComparisonBehavior = true;
-        //}
+
+        public CardioMonitorContext(string connection)
+            : base(connection)
+        {
+            (this as IObjectContextAdapter).ObjectContext.ContextOptions.UseCSharpNullComparisonBehavior = true;
+        }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

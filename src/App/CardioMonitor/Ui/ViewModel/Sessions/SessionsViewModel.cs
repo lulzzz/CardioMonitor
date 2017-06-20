@@ -26,7 +26,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             ISessionsService sessionsService)
         {
             if (sessionsService == null) throw new ArgumentNullException(nameof(sessionsService));
-            
             _sessionsService = sessionsService;
         }
 
@@ -127,10 +126,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private void StartSession()
         {
             var handler = StartSessionEvent;
-            if (null != handler)
-            {
-                handler(this, null);
-            }
+            handler?.Invoke(this, null);
         }
 
         private async void DeleteSession()

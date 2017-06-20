@@ -20,7 +20,7 @@ namespace CardioMonitor.Statistics
 
     //        foreach (var session in sessions)
     //        {
-    //            foreach (var param in session.PatientParams)
+    //            foreach (var param in session.Cycles)
     //            {
     //                heartRate.AddStatisticPart(param.Iteraton, param.InclinationAngle,param.HeartRate);
     //                repsirationRate.AddStatisticPart(param.Iteraton,param.InclinationAngle, param.RepsirationRate);

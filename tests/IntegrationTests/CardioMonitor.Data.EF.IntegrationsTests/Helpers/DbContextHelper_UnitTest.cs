@@ -11,8 +11,8 @@ namespace CardioMonitor.Dal.Ef.UnitTests.Helpers
         [TestMethod]
         public void CreateContext_Test()
         {
-            var context = DbContextHelper.GetInitializeContext();
-            var a = context.Patients.FirstOrDefault();
+         //   var context = DbContextHelper.GetInitializeContext();
+          //  var a = context.Patients.FirstOrDefault();
         }
     }
 }
