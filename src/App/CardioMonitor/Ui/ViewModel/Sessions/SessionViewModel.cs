@@ -513,6 +513,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         private async void SessionStart()
         {
+            var cycles = new List<SessionCycleViewModel>();
+            for (int i = 0; i < RepeatCount; i++)
+            {
+                cycles.Add(new SessionCycleViewModel());
+            }
+            Session.Cycles = new ObservableCollection<SessionCycleViewModel>(cycles);
             BedStatus = _bedUsbController.GetBedStatus();
             if (BedStatus == BedStatus.Ready)
             {
@@ -770,7 +776,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
             //TODO по-хорошему, надо предусмотреть обработку и других исключений 
             param.InclinationAngle = Math.Abs(currentAngle) < Tolerance ? 0 : currentAngle;
-            ThreadAssistant.StartInUiThread(() => Session.PatientParams.Add(param));
+            //ThreadAssistant.StartInUiThread(() => Session.Cycles.Add(param));
         }
         
         

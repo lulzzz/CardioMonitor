@@ -8,10 +8,18 @@ namespace CardioMonitor.Data.Ef.UnitOfWork
 {
     public class CardioMonitorEfUnitOfWorkFactory : ICardioMonitorUnitOfWorkFactory
     {
+        private readonly string _connectionString;
+
+        public CardioMonitorEfUnitOfWorkFactory([NotNull] string connectionString)
+        {
+            if (String.IsNullOrEmpty(connectionString)) throw new ArgumentNullException(nameof(connectionString));
+
+            _connectionString = connectionString;
+        }
         
         public ICardioMonitorUnitOfWork Create()
         {
-            return new CardioMonitorEfUnitOfWork(new UnitOfWorkContext(new CardioMonitorContext()));
+            return new CardioMonitorEfUnitOfWork(new UnitOfWorkContext(new CardioMonitorContext(_connectionString)));
         }
     }
 }

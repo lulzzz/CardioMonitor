@@ -7,7 +7,7 @@ namespace CardioMonitor.Settings
 {
     public class SettingsManager
     {
-        private readonly string ActiveConnectionStringName = "PostgreSql";
+        private readonly string ActiveConnectionStringName = "CardioMonitorContext";
 
         private readonly string SessionFilesDirectoryPathName = "SessionsFilesDirectoryPath";
 
@@ -56,7 +56,7 @@ namespace CardioMonitor.Settings
             return new CardioSettings
             {
                 SessionsFilesDirectoryPath = sessionsFilesDirectoryPath,
-                //ConnectionString = ConfigurationManager.ConnectionStrings[ActiveConnectionStringName].ConnectionString
+                ConnectionString = ConfigurationManager.ConnectionStrings[ActiveConnectionStringName].ConnectionString
             };
         }
 

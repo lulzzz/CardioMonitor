@@ -15,5 +15,7 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         /// Показатели пациента за сеанс
         /// </summary>
         public List<PatientParams> PatientParams { get; set; }
+
+        //todo ecg
     }
 }

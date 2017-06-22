@@ -33,7 +33,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Bed.I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Bed.Fake", "Devices\Bed\CardioMonitor.Devices.Bed.Fake\CardioMonitor.Devices.Bed.Fake.csproj", "{D72BA3E3-1055-4602-97DE-8A1C3555CCF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Bed.RJ", "Devices\Bed\CardioMonitor.Devices.Bed.RJ\CardioMonitor.Devices.Bed.RJ.csproj", "{7B951BC1-B035-41AE-B43A-8DD69ADF51F3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Bed.UDP", "Devices\Bed\CardioMonitor.Devices.Bed.RJ\CardioMonitor.Devices.Bed.UDP.csproj", "{7B951BC1-B035-41AE-B43A-8DD69ADF51F3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Bed.Usb", "Devices\Bed\CardioMonitor.Devices.Bed.Usb\CardioMonitor.Devices.Bed.Usb.csproj", "{11C9D72E-FE6A-4186-BDBA-3232DFFB7CF8}"
 EndProject

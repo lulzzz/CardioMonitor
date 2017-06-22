@@ -1,12 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Ui.Base;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     /// <summary>
-    /// Модель сеансаов для SessionView
+    /// Модель сеансаов для Session (обертка)
     /// </summary>
     public class SessionModel: Notifier
     {
@@ -14,7 +16,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private int _treatmentId;
         private DateTime _dateTime;
         private SessionStatus _status;
-        private ObservableCollection<PatientParams> _patientParams;
+        private ObservableCollection<SessionCycleViewModel> _cycles;
 
         /// <summary>
         /// Идентифкатор
@@ -83,15 +85,15 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// <summary>
         /// Показатели пациента
         /// </summary>
-        public ObservableCollection<PatientParams> PatientParams
+        public ObservableCollection<SessionCycleViewModel> Cycles
         {
-            get { return _patientParams; }
+            get { return _cycles; }
             set
             {
-                if (value != _patientParams)
+                if (value != _cycles)
                 {
-                    _patientParams = value;
-                    RisePropertyChanged("PatientParams");
+                    _cycles = value;
+                    RisePropertyChanged("Cycles");
                 }
             }
         }
@@ -109,7 +111,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     TreatmentId = TreatmentId,
                     DateTime = DateTime,
                     Status = Status,
-                    //PatientParams = PatientParams
+                    Cycles = new List<SessionCycle>(Cycles.Select(x => new SessionCycle
+                    {
+                        CycleNumber = x.CycleNumber,
+                        PatientParams = new List<PatientParams>(x.PatientParams)
+                    }))
                 };
             }
             set
@@ -118,18 +124,22 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 TreatmentId = value.TreatmentId;
                 DateTime = value.DateTime;
                 Status = value.Status;
-                //PatientParams = value.PatientParams;
+                Cycles = new ObservableCollection<SessionCycleViewModel>(value.Cycles.Select(x => new SessionCycleViewModel
+                {
+                    CycleNumber = x.CycleNumber,
+                    PatientParams = new ObservableCollection<PatientParams>(x.PatientParams)
+                }));
             }
         }
 
         /// <summary>
-        /// Модель сеансаов для SessionView
+        /// Модель сеансаов для Session
         /// </summary>
         public SessionModel()
         {
             DateTime = new DateTime();
             Status = SessionStatus.Unknown;
-            PatientParams = new ObservableCollection<PatientParams>();
+            Cycles = new ObservableCollection<SessionCycleViewModel>();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
@@ -245,24 +246,31 @@ namespace CardioMonitor.Ui.ViewModel{
             SettingsViewModel = new SettingsViewModel(settings);
         }
 
-        public void UpdatePatiens()
+        public async void UpdatePatiens()
         {
             var message = String.Empty;
+            var a = await MessageHelper.Instance.ShowProgressDialogAsync("Загрузка списка пациентов...")
+                .ConfigureAwait(true);
             try
             {
-                var patients = _patientsService.GetAll();
+                var patients = await Task.Factory.StartNew(() => _patientsService.GetAll()).ConfigureAwait(true);
                 PatientsViewModel.Patients = patients != null
-                    ? new ObservableCollection<Patient>(patients) 
+                    ? new ObservableCollection<Patient>(patients)
                     : new ObservableCollection<Patient>();
+
             }
             catch (Exception ex)
             {
                 message = ex.Message;
             }
+            finally
+            {
+                await a.CloseAsync().ConfigureAwait(true);
+            }
             if (!String.IsNullOrEmpty(message))
             {
 
-                MessageHelper.Instance.ShowMessageAsync(message);
+                await MessageHelper.Instance.ShowMessageAsync(message);
             }
         }
 

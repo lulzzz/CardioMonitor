@@ -1,4 +1,5 @@
-﻿using System.Data.Entity;
+﻿using System.Configuration;
+using System.Data.Entity;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreContracts.Treatment;
@@ -40,14 +41,10 @@ namespace CardioMonitor
 
             var settings = GetSettings();
             container.RegisterSingleton(settings);
-            //var context = new CardioMonitorContext();
-            //container.RegisterSingleton((DbContext) context);
-            //container.RegisterSingleton(context);
             container.Register<ILogger, Logger>(Lifestyle.Singleton);
             container.Register<IDeviceControllerFactory, DeviceControllerFactory>(Lifestyle.Singleton);
             container.Register<TaskHelper, TaskHelper>(Lifestyle.Singleton);
-            //container.Register<IUnitOfWorkContext, UnitOfWorkContext>(Lifestyle.Singleton);
-            container.Register<ICardioMonitorUnitOfWorkFactory, CardioMonitorEfUnitOfWorkFactory>(Lifestyle.Singleton);
+            container.Register<ICardioMonitorUnitOfWorkFactory>(() => new CardioMonitorEfUnitOfWorkFactory("CardioMonitorContext"), Lifestyle.Singleton);
             container.Register<IPatientsService, PatientService>(Lifestyle.Singleton);
             container.Register<ITreatmentsService, TreatmentsService>(Lifestyle.Singleton);
             container.Register<ISessionsService, SessionsService>(Lifestyle.Singleton);

@@ -13,7 +13,7 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
         [NotNull]
         private readonly ICardioMonitorUnitOfWorkFactory _factory;
 
-        public SessionsService(ICardioMonitorUnitOfWorkFactory factory)
+        public SessionsService([NotNull] ICardioMonitorUnitOfWorkFactory factory)
         {
             if (factory == null) throw new ArgumentNullException(nameof(factory));
             _factory = factory;
