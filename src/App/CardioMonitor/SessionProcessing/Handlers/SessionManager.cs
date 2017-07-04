@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.SessionProcessing.Events;
+using CardioMonitor.SessionProcessing.Events.Session;
 using Enexure.MicroBus;
 
 namespace CardioMonitor.SessionProcessing.Handlers
@@ -9,11 +10,11 @@ namespace CardioMonitor.SessionProcessing.Handlers
     /// Управляет всем процессом сеанса
     /// </summary>
     public class SessionManager :
-        ICommandHandler<SessionStartEvent>,
-        ICommandHandler<SessionEmergencyStoppedEvent>,
-        ICommandHandler<SessionResumedEvent>,
-        ICommandHandler<SessionSuspendedEvent>,
-        ICommandHandler<SessionCompletedEvent>
+        IEventHandler<SessionStartEvent>,
+        IEventHandler<SessionEmergencyStoppedEvent>,
+        IEventHandler<SessionResumedEvent>,
+        IEventHandler<SessionSuspendedEvent>,
+        IEventHandler<SessionCompletedEvent>
     {
         public Task Handle(SessionStartEvent command)
         {

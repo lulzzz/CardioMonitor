@@ -1,7 +1,7 @@
 ﻿using System;
 using CardioMonitor.Infrastructure.Logs;
 
-namespace CardioMonitor.Devices.Monitor
+namespace CardioMonitor.SessionProcessing.Resolvers
 {
     /// <summary>
     /// Отправка запроса на накачку давления

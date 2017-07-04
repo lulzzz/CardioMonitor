@@ -157,7 +157,7 @@
     </Compile>
     <Compile Include="Devices\DeviceControllerFactory.cs" />
     <Compile Include="Devices\IDeviceControllerFactory.cs" />
-    <Compile Include="Devices\Monitor\AutoPumpingResolver.cs" />
+    <Compile Include="SessionProcessing\Resolvers\AutoPumpingResolver.cs" />
     <Compile Include="Files\IFilesManager.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -166,28 +166,29 @@
     </Compile>
     <Compile Include="Logs\Logger.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="SessionProcessing\Events\AngleRecievedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\AngleRequestedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\CycleCompletedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\CycleStartedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\EcgEventRecieved.cs" />
-    <Compile Include="SessionProcessing\Events\EcqRequest.cs" />
-    <Compile Include="SessionProcessing\Events\PatientParamsRecievedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\PatientParamsRequested.cs" />
-    <Compile Include="SessionProcessing\Events\PumpingRequestedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\SessionCompletedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\SessionEmergencyStoppedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\SessionResumedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\SessionStartEvent.cs" />
-    <Compile Include="SessionProcessing\Events\SessionSuspendedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\TimeUpdatedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Devices\AngleRecievedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Devices\AngleRequestedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Control\CheckPointReachedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Cycle\CycleCompletedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Cycle\CycleStartRequestedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Devices\EcgEventRecieved.cs" />
+    <Compile Include="SessionProcessing\Events\Devices\EcqRequestEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Devices\PatientParamsRecievedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Devices\PatientParamsRequestEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Devices\PumpingCompletedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Devices\PumpingRequestedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Session\SessionCompletedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Session\SessionEmergencyStoppedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Session\SessionResumedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Session\SessionStartEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Session\SessionSuspendedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Control\TimeUpdatedEvent.cs" />
     <Compile Include="SessionProcessing\Handlers\BedManager.cs" />
     <Compile Include="SessionProcessing\Handlers\CardioMonitorManager.cs" />
-    <Compile Include="SessionProcessing\Handlers\CheckPointResolver.cs" />
+    <Compile Include="SessionProcessing\Resolvers\CheckPointResolver.cs" />
     <Compile Include="SessionProcessing\Handlers\CycleManager.cs" />
     <Compile Include="SessionProcessing\Handlers\DisplayedEventCollector.cs" />
     <Compile Include="SessionProcessing\Handlers\SessionManager.cs" />
-    <Compile Include="SessionProcessing\Handlers\SyncTimeManager.cs" />
     <Compile Include="SessionProcessing\SessionProcessor.cs" />
     <Compile Include="Settings\ICardioSettings.cs" />
     <Compile Include="Settings\SettingsConstants.cs" />

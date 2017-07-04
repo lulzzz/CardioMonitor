@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using CardioMonitor.SessionProcessing.Events;
+using CardioMonitor.SessionProcessing.Events.Cycle;
 using Enexure.MicroBus;
 
 namespace CardioMonitor.SessionProcessing.Handlers
@@ -8,10 +9,12 @@ namespace CardioMonitor.SessionProcessing.Handlers
     /// Менеджер управления циклом
     /// </summary>
     public class CycleManager : 
-        ICommandHandler<CycleStartedEvent>,
-        ICommandHandler<CycleCompletedEvent>
+        IEventHandler<CycleStartRequestedEvent>,
+        IEventHandler<CycleCompletedEvent>
     {
-        public Task Handle(CycleStartedEvent command)
+
+
+        public Task Handle(CycleStartRequestedEvent command)
         {
             throw new System.NotImplementedException();
         }

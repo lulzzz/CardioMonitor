@@ -14,6 +14,7 @@ using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Resources;
+using CardioMonitor.SessionProcessing.Resolvers;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
 
@@ -28,61 +29,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     {
         #region Константы
 
-        private readonly IReadOnlyList<double> _checkPointsAngles; 
-
-        /// <summary>
-        /// Таймаут запроса параметром пациента
-        /// </summary>
-        private readonly TimeSpan _updatePatientParamTimeout;
-
-        private readonly TimeSpan _pumpingTimeout;
-        
-        private readonly TimeSpan _angleUpdateTimeout;
-        
         /// <summary>
         /// Точность для сравнение double величин
         /// </summary>
         private const double Tolerance = 0.1e-12;
 
-        /// <summary>
-        /// Специальная велична, необходимая для корректной работы определения разрешения
-        /// </summary>
-        /// <remarks>
-        /// Без нее все плохо, слишком часто вызывается метод
-        /// </remarks>
-        private const double ResolutionToleranceAgnle = 6;
-
-        /// <summary>
-        /// Скорость подъема кровати
-        /// </summary>
-        /// <remarks>
-        /// Эмуляция работы железа
-        /// </remarks>
-        private const double UpAnglePerSecond = 0.6;
-
-        /// <summary>
-        /// Скорость спуска кровати
-        /// </summary>
-        /// <remarks>
-        /// Эмуляция работы железа
-        /// </remarks>
-        private const double DownAnglePerSecond = 0.3;
-
-        /// <summary>
-        /// Длительность одного периода в цикле
-        /// </summary>
-        /// <remarks>
-        /// Эмуляция работы железа
-        /// </remarks>
-        private const int PeriodDuration = 5;
-
-        /// <summary>
-        /// Количество периодов в одном цикле
-        /// </summary>
-        /// <remarks>
-        /// Эмуляция работы железа
-        /// </remarks>
-        private const int PeriodsCount = 6;
+        
 
         #endregion
 
@@ -113,9 +65,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private CardioTimer _checkStatusTimer;
         private AutoPumpingResolver _autoPumpingResolver;
         private bool _startBedFlag = false;
-        private readonly object _passedCheckPointsAnglesLockObject;
 
-        private double _previuosCheckPointAngle;
         private readonly IBedController _bedUsbController;
 
         private readonly TaskHelper _taskHelper;
@@ -189,8 +139,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 if (Math.Abs(value - _currentAngle) > Tolerance)
                 {
-
-                   // _currentAngle = value > 0 ? value : 0;
                     _currentAngle = value;
                     RisePropertyChanged("CurrentAngle");
                 }
@@ -357,65 +305,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         }
 
         public bool IsConnected { get; set; }
-
-        #region Эмуляция работы железа
-
-        /// <summary>
-        /// Прошедшие секунды одного периода
-        /// </summary>
-        /// <remarks>5 секунд на один период</remarks>
-        private int PeriodSeconds
-        {
-            get { return _periodSesonds; }
-            set
-            {
-                if (value > PeriodDuration)
-                {
-                    _periodSesonds = 1;
-                    PeriodNumber++;
-                }
-                else
-                {
-                    _periodSesonds = value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Номер периода
-        /// </summary>
-        /// <remarks>1 из 6</remarks>
-        private int PeriodNumber
-        {
-            get { return _periodNumber; }
-            set
-            {
-                if (value > PeriodsCount)
-                {
-                    _periodNumber = 1;
-                    if (_isNeedReversing && !_isReversing)
-                    {
-                        _isUpping = false;
-                        _isNeedReversing = false;
-                        _isReversing = true;
-                        _mainTimer.Stop();
-                       /* RemainingTime = (ElapsedTime.Minutes > 1) 
-                                        ? ElapsedTime - new TimeSpan(0, 0, 30) 
-                                        : ElapsedTime;*/
-                        RemainingTime = ElapsedTime;
-                        _mainTimer = new CardioTimer(TimerTick, RemainingTime, new TimeSpan(0, 0, 0, 1));
-                        _mainTimer.Start();
-                    }
-                }
-                else
-                {
-                    _periodNumber = value;
-                }
-            }
-        }
-
-        #endregion
-
+        
         /// <summary>
         /// Помощник потоков для выполнения фунциий в потоке GUI
         /// </summary>
@@ -475,12 +365,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _isNeedReversing = false;
             _isReversing = false;
             _halfSessionTime = new TimeSpan(0,0,10,0);
-            _updatePatientParamTimeout = new TimeSpan(0,0,8);
-            _pumpingTimeout = new TimeSpan(0, 0, 8);
-            _angleUpdateTimeout = new TimeSpan(0, 0, 1);
-            _passedCheckPointsAnglesLockObject = new object();
-            // Контрольные точки
-            _checkPointsAngles = new List<double> {0, 10.5, 21, 30};
             _bedUsbController = _deviceControllerFactory.CreateBedController();
 
             _taskHelper = taskHelper;
@@ -529,9 +413,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 ElapsedTime = new TimeSpan(0, 0, 0, 0);
                 RemainingTime = new TimeSpan(0, 0, 20, 0);
                 CurrentAngle = 0;
-                PeriodSeconds = 0;
-                PeriodNumber = 1;
-                _previuosCheckPointAngle = -10;
 
                 ExecutionStatus = "Старт...";
                 var isPumpingFailed = false;
@@ -582,12 +463,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 _mainTimer.Start();
                 _startBedFlag = true;
 
-                var currentAngle = CurrentAngle;
-                if (IsNeedUpdateData(currentAngle))
-                {
-                    UpdateData(currentAngle);
-                }
-
+                
                 //Points = new ObservableCollection<DataPoint>
                 //{
                 //    new DataPoint(_x++, _y++),
@@ -647,11 +523,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 Pump();
             }
 
-            //По идеи уже здесь должно гарантироваться, что только один поток запустит обновление
-            if (IsNeedUpdateData(currentAngle))
-            {
-                UpdateData(currentAngle);
-            }
+           
             
             if (TimeSpan.Zero == RemainingTime)
             {
@@ -665,120 +537,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             //NeedUpdate = true;
             //_mainTimer.Resume();
         }
-
-        private void Pump()
-        {
-            Task.Factory.StartNew(() =>
-            {
-                //ExecutionStatus = "Выполняется накачка кровати...";
-                //Мы берем задачу накачки, но пока не запускае ее.
-                try
-                {
-                    var pumpingTask = _monitorController.PumpCuffAsync();
-                    var pumpingResult = _taskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
-                    ExecutionStatus = String.Empty;
-
-
-                    if (!pumpingResult.Result)
-                    {
-                        // Нужно решить, что делать, если не удалось провести накачку
-                        // Пока так
-                        // EmergencyStop();
-                         MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку");
-                    }
-                }
-                catch (TimeoutException)
-                {
-                    //если бесконечено соединение
-                }
-                catch (Exception)
-                {
-                    //на остальные случаи
-                    //TODO Вообще сюда надо будет добавить обработчики и логирование
-                }
-            });
-        }
-
-        /// <summary>
-        /// Обновляет угол наклона
-        /// </summary>
-        /// <remarks>
-        /// Эмуляция работы железа
-        /// </remarks>
-        private async void UpdateAngle()
-        {
-#if Debug_No_Monitor
-            if (1 == PeriodNumber)
-            {
-                CurrentAngle += _isUpping ? UpAnglePerSecond : (-1)*UpAnglePerSecond;
-            }
-            if (2 == PeriodNumber)
-            {
-                CurrentAngle -= _isUpping ? DownAnglePerSecond : (-1) * DownAnglePerSecond;
-            }
-#else
-           CurrentAngle = await _bedUsbController.GetAngleXAsync(); 
-        /*   if (1 == PeriodNumber)
-           {
-               CurrentAngle += _isUpping ? UpAnglePerSecond : (-1) * UpAnglePerSecond;
-           }
-           if (2 == PeriodNumber)
-           {
-               CurrentAngle -= _isUpping ? DownAnglePerSecond : (-1) * DownAnglePerSecond;
-           }*/
-          
-#endif
-        }
-
-        /// <summary>
-        /// Проверяет, есть ли необходимость запросить данные в данном угле
-        /// </summary>
-        /// <param name="currentAngle">Текущий угол</param>
-        /// <returns>Разрешение обновления</returns>
-        private bool IsNeedUpdateData(double currentAngle)
-        {
-            lock (_passedCheckPointsAnglesLockObject)
-            {
-                if (_checkPointsAngles == null) { return false; }
-
-                foreach (var checkPointAngle in _checkPointsAngles)
-                {
-                    if (Math.Abs(currentAngle - checkPointAngle) < Tolerance)
-                    {
-                        if (Math.Abs(_previuosCheckPointAngle - checkPointAngle) < ResolutionToleranceAgnle) { return false; }
-
-                        _previuosCheckPointAngle = checkPointAngle;
-                        return true;
-                    }
-                }
-                return false;
-            }
-        }
-        
-        /// <summary>
-        /// Обновляет данные
-        /// </summary>
-        private async void UpdateData(double currentAngle)
-        {
-            PatientParams param;
-            try
-            {
-                var gettingParamsTask = _monitorController.GetPatientParamsAsync();
-                param = await _taskHelper.StartWithTimeout(gettingParamsTask, _updatePatientParamTimeout);
-            }
-            catch (TimeoutException)
-            {
-                param = new PatientParams
-                {
-                    RepsirationRate = -1,
-                    HeartRate = -1
-                };
-            }
-            //TODO по-хорошему, надо предусмотреть обработку и других исключений 
-            param.InclinationAngle = Math.Abs(currentAngle) < Tolerance ? 0 : currentAngle;
-            //ThreadAssistant.StartInUiThread(() => Session.Cycles.Add(param));
-        }
-        
+      
         
         /// <summary>
         /// Приостанавливает сеанс
@@ -869,7 +628,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 _bedUsbController.ExecuteCommand(BedControlCommand.Reverse);
                 _isNeedReversing = true;
                 _autoPumpingResolver = new AutoPumpingResolver(_logger);
-                _previuosCheckPointAngle = 30;
                 
                 //ThreadAssistant.StartInUiThread(() => {  MessageHelper.Instance.ShowMessageAsync("Запущен реверс"); });
                // await MessageHelper.Instance.ShowMessageAsync("Запущен реверс");
@@ -989,7 +747,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing))
             {
                 _isNeedReversing = true;
-                _previuosCheckPointAngle = 30;
                 _autoPumpingResolver = new AutoPumpingResolver(_logger);
                // await MessageHelper.Instance.ShowMessageAsync("Запущен реверс");
                 ThreadAssistant.StartInUiThread(() => { MessageHelper.Instance.ShowMessageAsync("Запущен реверс"); });
