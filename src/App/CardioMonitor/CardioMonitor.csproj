@@ -166,6 +166,29 @@
     </Compile>
     <Compile Include="Logs\Logger.cs" />
     <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="SessionProcessing\Events\AngleRecievedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\AngleRequestedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\CycleCompletedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\CycleStartedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\EcgEventRecieved.cs" />
+    <Compile Include="SessionProcessing\Events\EcqRequest.cs" />
+    <Compile Include="SessionProcessing\Events\PatientParamsRecievedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\PatientParamsRequested.cs" />
+    <Compile Include="SessionProcessing\Events\PumpingRequestedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\SessionCompletedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\SessionEmergencyStoppedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\SessionResumedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\SessionStartEvent.cs" />
+    <Compile Include="SessionProcessing\Events\SessionSuspendedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\TimeUpdatedEvent.cs" />
+    <Compile Include="SessionProcessing\Handlers\BedManager.cs" />
+    <Compile Include="SessionProcessing\Handlers\CardioMonitorManager.cs" />
+    <Compile Include="SessionProcessing\Handlers\CheckPointResolver.cs" />
+    <Compile Include="SessionProcessing\Handlers\CycleManager.cs" />
+    <Compile Include="SessionProcessing\Handlers\DisplayedEventCollector.cs" />
+    <Compile Include="SessionProcessing\Handlers\SessionManager.cs" />
+    <Compile Include="SessionProcessing\Handlers\SyncTimeManager.cs" />
+    <Compile Include="SessionProcessing\SessionProcessor.cs" />
     <Compile Include="Settings\ICardioSettings.cs" />
     <Compile Include="Settings\SettingsConstants.cs" />
     <Compile Include="Settings\SettingsManager.cs" />
@@ -305,7 +328,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="SessionProcessing\" />
     <Folder Include="Ui\ViewModel\Ecg\" />
     <Folder Include="Ui\View\EcgController\" />
   </ItemGroup>
