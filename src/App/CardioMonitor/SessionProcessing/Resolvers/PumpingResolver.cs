@@ -4,9 +4,9 @@ using CardioMonitor.Infrastructure.Logs;
 namespace CardioMonitor.SessionProcessing.Resolvers
 {
     /// <summary>
-    /// Отправка запроса на накачку давления
+    /// Класс для проверки необходимости в начкачке давления в манжете
     /// </summary>
-    public class AutoPumpingResolver
+    public class PumpingResolver
     {
         private double _previuosPumpingAngle;
         
@@ -26,7 +26,7 @@ namespace CardioMonitor.SessionProcessing.Resolvers
 
         private readonly ILogger _logger;
 
-        public AutoPumpingResolver(ILogger logger)
+        public PumpingResolver(ILogger logger)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
 
@@ -59,17 +59,13 @@ namespace CardioMonitor.SessionProcessing.Resolvers
                 //Чтобы метод не вызывался слишком часто
                 if (Math.Abs(currentAngle - _previuosPumpingAngle) < ResolutionToleranceAgnle)
                 {
-                    _logger.Log(String.Format("Current angle: {0}\t" +
-                                              "PreviousAngle: {1}\t" +
-                                              "Upping status: {2}\t" +
-                                              "Result:        {3}\t", currentAngle, _previuosPumpingAngle, isUpping, false));
+                    _logger.Log($"Current angle: {currentAngle}\t" + $"PreviousAngle: {_previuosPumpingAngle}\t" +
+                                $"Upping status: {isUpping}\t" + $"Result:        {false}\t");
                     return false;
                 }
                 _previuosPumpingAngle = currentAngle;
-                _logger.Log(String.Format("Current angle: {0}\t" +
-                                              "PreviousAngle: {1}\t" +
-                                              "Upping status: {2}\t" +
-                                              "Result:        {3}\t", currentAngle, _previuosPumpingAngle, isUpping, true));
+                _logger.Log($"Current angle: {currentAngle}\t" + $"PreviousAngle: {_previuosPumpingAngle}\t" +
+                            $"Upping status: {isUpping}\t" + $"Result:        {true}\t");
                 return true;
             }
             // Для спуска

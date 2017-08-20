@@ -120,6 +120,10 @@
       <HintPath>..\..\packages\SimpleInjector.4.0.8\lib\net45\SimpleInjector.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Stateless, Version=3.0.0.0, Culture=neutral, PublicKeyToken=93038f0927583c9a, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Stateless.3.1.0\lib\net45\Stateless.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
@@ -157,7 +161,15 @@
     </Compile>
     <Compile Include="Devices\DeviceControllerFactory.cs" />
     <Compile Include="Devices\IDeviceControllerFactory.cs" />
-    <Compile Include="SessionProcessing\Resolvers\AutoPumpingResolver.cs" />
+    <Compile Include="SessionProcessing\AngleProcessor.cs" />
+    <Compile Include="SessionProcessing\Events\Cycle\CycleEmergencyStopRequestedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Cycle\CycleResumeRequestedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Cycle\CycleReverseRequestedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Cycle\CycleStoppedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Cycle\CycleSuspendRequestedEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Session\ISessionEvent.cs" />
+    <Compile Include="SessionProcessing\Events\Devices\AngleRecievedEvent.cs" />
+    <Compile Include="SessionProcessing\Resolvers\PumpingResolver.cs" />
     <Compile Include="Files\IFilesManager.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -166,8 +178,6 @@
     </Compile>
     <Compile Include="Logs\Logger.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="SessionProcessing\Events\Devices\AngleRecievedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\Devices\AngleRequestedEvent.cs" />
     <Compile Include="SessionProcessing\Events\Control\CheckPointReachedEvent.cs" />
     <Compile Include="SessionProcessing\Events\Cycle\CycleCompletedEvent.cs" />
     <Compile Include="SessionProcessing\Events\Cycle\CycleStartRequestedEvent.cs" />
@@ -179,17 +189,16 @@
     <Compile Include="SessionProcessing\Events\Devices\PumpingRequestedEvent.cs" />
     <Compile Include="SessionProcessing\Events\Session\SessionCompletedEvent.cs" />
     <Compile Include="SessionProcessing\Events\Session\SessionEmergencyStoppedEvent.cs" />
-    <Compile Include="SessionProcessing\Events\Session\SessionResumedEvent.cs" />
     <Compile Include="SessionProcessing\Events\Session\SessionStartEvent.cs" />
-    <Compile Include="SessionProcessing\Events\Session\SessionSuspendedEvent.cs" />
     <Compile Include="SessionProcessing\Events\Control\TimeUpdatedEvent.cs" />
-    <Compile Include="SessionProcessing\Handlers\BedManager.cs" />
-    <Compile Include="SessionProcessing\Handlers\CardioMonitorManager.cs" />
+    <Compile Include="SessionProcessing\Handlers\CardioMonitorProcessor.cs" />
     <Compile Include="SessionProcessing\Resolvers\CheckPointResolver.cs" />
     <Compile Include="SessionProcessing\Handlers\CycleManager.cs" />
     <Compile Include="SessionProcessing\Handlers\DisplayedEventCollector.cs" />
     <Compile Include="SessionProcessing\Handlers\SessionManager.cs" />
     <Compile Include="SessionProcessing\SessionProcessor.cs" />
+    <Compile Include="SessionProcessing\StateMachine\CycleStates.cs" />
+    <Compile Include="SessionProcessing\TimeProcessor.cs" />
     <Compile Include="Settings\ICardioSettings.cs" />
     <Compile Include="Settings\SettingsConstants.cs" />
     <Compile Include="Settings\SettingsManager.cs" />

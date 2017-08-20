@@ -13,7 +13,7 @@ namespace CardioMonitor.SessionProcessing.Handlers
     /// <summary>
     /// Менеджер взаимодействия с кроватью
     /// </summary>
-    public class CardioMonitorManager : 
+    public class CardioMonitorProcessor : 
         IEventHandler<PatientParamsRequestEvent>,
         IEventHandler<EcqRequestEvent>,
         IEventHandler<PumpingRequestedEvent>
@@ -39,7 +39,7 @@ namespace CardioMonitor.SessionProcessing.Handlers
 
         private readonly IMicroBus _bus;
 
-        public CardioMonitorManager(
+        public CardioMonitorProcessor(
             [NotNull] IMonitorController monitorController, 
             [NotNull] TaskHelper taskHelper,
             [NotNull] IMicroBus bus)
@@ -82,10 +82,11 @@ namespace CardioMonitor.SessionProcessing.Handlers
             });
         }
 
-        public Task Handle([NotNull] EcqRequestEvent @event)
+        public async Task Handle([NotNull] EcqRequestEvent @event)
         {
             if (@event == null) throw new ArgumentNullException(nameof(@event));
-            throw new System.NotImplementedException();
+            //throw new System.NotImplementedException();
+            await Task.Yield();
         }
 
         public async Task Handle([NotNull] PumpingRequestedEvent @event)
