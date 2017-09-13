@@ -6,6 +6,7 @@ namespace CardioMonitor.SessionProcessing.Resolvers
     /// <summary>
     /// Класс для проверки необходимости в начкачке давления в манжете
     /// </summary>
+    //todo поддержать гибкую схему углов
     public class PumpingResolver
     {
         private double _previuosPumpingAngle;
