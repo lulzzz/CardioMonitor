@@ -6,18 +6,21 @@ namespace CardioMonitor.SessionProcessing.Events.Control
     /// <summary>
     /// Событие обновления времени цикла
     /// </summary>
-    public class TimeUpdatedEvent : IEvent
+    /// <remarks>
+    /// Т.е. реакция на каждый тик таймера
+    /// </remarks>
+    internal class TimeUpdatedEvent : IEvent
     {
-        public TimeUpdatedEvent(TimeSpan cycleTime, TimeSpan elapsedTime)
+        public TimeUpdatedEvent(TimeSpan cycleDuration, TimeSpan elapsedTime)
         {
-            CycleTime = cycleTime;
+            CycleDuration = cycleDuration;
             ElapsedTime = elapsedTime;
         }
 
         /// <summary>
         /// Длительность цикла
         /// </summary>
-        public TimeSpan CycleTime { get; }
+        public TimeSpan CycleDuration { get; }
 
         /// <summary>
         /// Прошедшее время
@@ -27,7 +30,7 @@ namespace CardioMonitor.SessionProcessing.Events.Control
         /// <summary>
         /// Оставшееся время
         /// </summary>
-        public TimeSpan RemainingTime => CycleTime - ElapsedTime;
+        public TimeSpan RemainingTime => CycleDuration - ElapsedTime;
 
     }
 }

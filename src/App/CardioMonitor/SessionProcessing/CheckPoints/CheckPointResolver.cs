@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using JetBrains.Annotations;
 
-namespace CardioMonitor.SessionProcessing.Resolvers
+namespace CardioMonitor.SessionProcessing
 {
     /// <summary>
     /// Определитель контрольных точек и принятия решения о запросе данных, накачке и т.д.
     /// </summary>
     /// <remarks>
-    /// Новый цикл - новый инстанс
+    /// Новый цикл - нужно сбросить состояния
     /// </remarks>
-    public class CheckPointResolver
+    internal class CheckPointResolver
     {
 
         /// <summary>
@@ -28,18 +30,28 @@ namespace CardioMonitor.SessionProcessing.Resolvers
         /// <remarks>
         /// Без нее все плохо, слишком часто вызывается метод
         /// </remarks>
-        private const double ResolutionToleranceAgnle = 6;
+        private readonly double _resolutionToleranceAngle;
 
+        private readonly double _minCheckPointAngle;
+
+        /// <summary>
+        /// Смещение, чтобы все работало как надо
+        /// </summary>
+        private const double AngleOffset = 10;
+        
         private double _previuosCheckPointAngle;
         
-
-
         private readonly object _passedCheckPointsAnglesLockObject = new object();
 
-        public CheckPointResolver()
+        public CheckPointResolver([NotNull] double[] checkPointAngles)
         {
-            _checkPointsAngles = new List<double> { 0, 10.5, 21, 30 };
-            _previuosCheckPointAngle = -10;
+            if (checkPointAngles == null) throw new ArgumentNullException(nameof(checkPointAngles));
+            if (checkPointAngles.Length == 0)
+                throw new ArgumentException("Value cannot be an empty collection.", nameof(checkPointAngles));
+            
+            _checkPointsAngles = new List<double> (checkPointAngles);
+            _previuosCheckPointAngle = _checkPointsAngles.Min() - AngleOffset;
+            _resolutionToleranceAngle = checkPointAngles.Max() / checkPointAngles.Length;
         }
         
 
@@ -58,7 +70,7 @@ namespace CardioMonitor.SessionProcessing.Resolvers
                 {
                     if (Math.Abs(currentAngle - checkPointAngle) < Tolerance)
                     {
-                        if (Math.Abs(_previuosCheckPointAngle - checkPointAngle) < ResolutionToleranceAgnle) { return false; }
+                        if (Math.Abs(_previuosCheckPointAngle - checkPointAngle) < _resolutionToleranceAngle) { return false; }
 
                         _previuosCheckPointAngle = checkPointAngle;
                         return true;
@@ -73,7 +85,7 @@ namespace CardioMonitor.SessionProcessing.Resolvers
         /// </summary>
         public void ConsiderReversing()
         {
-            _previuosCheckPointAngle = 30;
+            _previuosCheckPointAngle =_checkPointsAngles.Max();
         }
     }
 }

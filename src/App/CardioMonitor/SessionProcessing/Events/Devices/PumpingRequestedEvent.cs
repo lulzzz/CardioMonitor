@@ -2,7 +2,10 @@
 
 namespace CardioMonitor.SessionProcessing.Events.Devices
 {
-    public class PumpingRequestedEvent : IEvent
+    /// <summary>
+    /// Запрос на накачку манжеты 
+    /// </summary>
+    internal class PumpingRequestedEvent : IEvent
     {
         
     }

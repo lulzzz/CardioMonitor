@@ -14,7 +14,7 @@ using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Resources;
-using CardioMonitor.SessionProcessing.Resolvers;
+using CardioMonitor.SessionProcessing;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
 

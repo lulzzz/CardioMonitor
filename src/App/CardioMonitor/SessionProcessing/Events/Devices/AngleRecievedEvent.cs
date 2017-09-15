@@ -2,7 +2,10 @@
 
 namespace CardioMonitor.SessionProcessing.Events.Devices
 {
-    public class AngleRecievedEvent : IEvent
+    /// <summary>
+    /// События получения значения текущего угла наклона кровати
+    /// </summary>
+    internal class AngleRecievedEvent : IEvent
     {
         public AngleRecievedEvent(double currentAngle)
         {

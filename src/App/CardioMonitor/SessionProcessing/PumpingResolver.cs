@@ -1,12 +1,12 @@
 ﻿using System;
 using CardioMonitor.Infrastructure.Logs;
 
-namespace CardioMonitor.SessionProcessing.Resolvers
+namespace CardioMonitor.SessionProcessing
 {
     /// <summary>
     /// Класс для проверки необходимости в начкачке давления в манжете
     /// </summary>
-    //todo поддержать гибкую схему углов
+    [Obsolete("Вроде не нужен, но пока оставим")]
     public class PumpingResolver
     {
         private double _previuosPumpingAngle;

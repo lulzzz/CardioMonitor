@@ -3,17 +3,16 @@ using System.Threading.Tasks;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
-using CardioMonitor.SessionProcessing.Events;
 using CardioMonitor.SessionProcessing.Events.Devices;
 using Enexure.MicroBus;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.SessionProcessing.Handlers
+namespace CardioMonitor.SessionProcessing
 {
     /// <summary>
     /// Менеджер взаимодействия с кроватью
     /// </summary>
-    public class CardioMonitorProcessor : 
+    internal class CardioMonitorProcessor : 
         IEventHandler<PatientParamsRequestEvent>,
         IEventHandler<EcqRequestEvent>,
         IEventHandler<PumpingRequestedEvent>

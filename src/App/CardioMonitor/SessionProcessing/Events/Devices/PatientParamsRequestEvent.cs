@@ -3,9 +3,9 @@
 namespace CardioMonitor.SessionProcessing.Events.Devices
 {
     /// <summary>
-    /// Запрос на получение данных пациента для кровати
+    /// Запрос на получение данных пациента для монитора
     /// </summary>
-    public class PatientParamsRequestEvent : IEvent
+    internal class PatientParamsRequestEvent : IEvent
     {
         /// <summary>
         /// Текущий угол наклона кровати

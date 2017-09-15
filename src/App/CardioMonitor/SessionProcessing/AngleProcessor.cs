@@ -2,23 +2,18 @@
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.SessionProcessing.Events.Control;
-using CardioMonitor.SessionProcessing.Events.Cycle;
 using CardioMonitor.SessionProcessing.Events.Devices;
-using CardioMonitor.SessionProcessing.Resolvers;
 using Enexure.MicroBus;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.SessionProcessing
 {
     /// <summary>
-    /// Обработчик угла наклона кровати
+    /// Класс для получения и обработки значения текущего угла наклона кровати 
     /// </summary>
-    /// <remarks>
-    /// Должен быть один на цикл
-    /// </remarks>
-    public class AngleProcessor : 
+    internal class AngleProcessor : 
         IEventHandler<TimeUpdatedEvent>,
-        IEventHandler<CycleReverseRequestedEvent>
+        IEventHandler<ReverseCommand>
     {
         private readonly IBedController _bedController;
         private readonly IMicroBus _bus;
@@ -69,7 +64,7 @@ namespace CardioMonitor.SessionProcessing
             await _bus.PublishAsync(new AngleRecievedEvent(currentAngle));
         }
 
-        public async Task Handle(CycleReverseRequestedEvent @event)
+        public async Task Handle(ReverseCommand @event)
         {
             await Task.Yield();
             _checkPointResolver.ConsiderReversing();

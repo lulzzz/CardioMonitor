@@ -2,7 +2,10 @@
 
 namespace CardioMonitor.SessionProcessing.Events.Devices
 {
-    public class EcgEventRecieved : IEvent
+    /// <summary>
+    /// Событие получение данных ЭКГ
+    /// </summary>
+    internal class EcgEventRecieved : IEvent
     {
         
     }

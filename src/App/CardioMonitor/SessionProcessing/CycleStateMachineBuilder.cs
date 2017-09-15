@@ -1,72 +1,14 @@
 ﻿using System;
-using CardioMonitor.BLL.CoreContracts.Session;
+using CardioMonitor.SessionProcessing.CycleStateMachine;
 using JetBrains.Annotations;
 using Stateless;
 
-namespace CardioMonitor.SessionProcessing.StateMachine
+namespace CardioMonitor.SessionProcessing
 {
-    public enum CycleStates
-    {
-        NotStarted,
-        Prepared,
-        InProgress,
-        Suspedned,
-        EmergencyStopped,
-        Completed
-    }
-
-    public enum CycleTriggers
-    {
-        Start,
-        PreparingCompleted,
-        Suspend,
-        Resume,
-        EmergencyStop,
-        Complete
-    }
-
-    //todo потенциально сделать ViewModel для уведомления
-    public class SessionContext
-    {
-        /// <summary>
-        /// Агрегированный статус сеанса
-        /// </summary>
-        public SessionStatus SessionStatus { get; private set; }
-
-        /// <summary>
-        /// Длительность цикла
-        /// </summary>
-        public TimeSpan CycleTime { get; private set; }
-
-        /// <summary>
-        /// Прошедшее время
-        /// </summary>
-        public TimeSpan ElapsedTime { get; private set; }
-
-        /// <summary>
-        /// Оставшееся время
-        /// </summary>
-        public TimeSpan RemainingTime => CycleTime - ElapsedTime;
-    }
-
-    public class CycleStateMachine
-    {
-        private readonly StateMachine<CycleStates, CycleTriggers> _stateMachine;
-
-
-        public CycleStateMachine(
-            StateMachine<CycleStates, CycleTriggers> stateMachine)
-        {
-            _stateMachine = stateMachine;
-        }
-
-        public void Fire(CycleTriggers trigger)
-        {
-            _stateMachine.Fire(trigger);
-        }
-    }
-
-    public class CycleStateMachineBuilder
+    /// <summary>
+    /// Построитель машины состояния цикла
+    /// </summary>
+    internal class CycleStateMachineBuilder
     {
         private Action<SessionContext> _onPreparedAction;
         private Action<SessionContext> _onInPorgressAction;
@@ -96,7 +38,7 @@ namespace CardioMonitor.SessionProcessing.StateMachine
             return this;
         }
 
-        public void Buid()
+        public StateMachine<CycleStates, CycleTriggers> Buid()
         {
             var stateMachine = new StateMachine<CycleStates, CycleTriggers>(CycleStates.NotStarted);
 
@@ -141,12 +83,14 @@ namespace CardioMonitor.SessionProcessing.StateMachine
 
             stateMachine
                 .Configure(CycleStates.Completed)
-                .Permit(CycleTriggers.Start, CycleStates.Prepared)
+                .Permit(CycleTriggers.Reset, CycleStates.NotStarted)
                 .OnEntry(() =>
                 {
                     _onCompletedAction.Invoke(_sessionContext);
                 });
 
+
+            return stateMachine;
         }
     }
 }

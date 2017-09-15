@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.SessionProcessing.Handlers
+﻿namespace CardioMonitor.SessionProcessing
 {
     /// <summary>
     /// Агрегатор событий, которые надо отобразить в UI

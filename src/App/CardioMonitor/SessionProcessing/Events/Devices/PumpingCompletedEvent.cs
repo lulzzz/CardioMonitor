@@ -5,7 +5,7 @@ namespace CardioMonitor.SessionProcessing.Events.Devices
     /// <summary>
     /// Событие, возникающие при завершении накачки манжеты
     /// </summary>
-    public class PumpingCompletedEvent : IEvent
+    internal class PumpingCompletedEvent : IEvent
     {
         /// <summary>
         /// Признак успешной накачки

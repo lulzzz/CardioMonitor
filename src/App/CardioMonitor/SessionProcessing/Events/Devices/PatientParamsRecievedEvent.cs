@@ -6,7 +6,7 @@ namespace CardioMonitor.SessionProcessing.Events.Devices
     /// <summary>
     /// Событие получения данные пациента
     /// </summary>
-    public class PatientParamsRecievedEvent : IEvent
+    internal class PatientParamsRecievedEvent : IEvent
     {
         /// <summary>
         /// Показатели пациента
