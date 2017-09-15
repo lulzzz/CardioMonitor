@@ -2,7 +2,7 @@
 {
     public class CheckPointAnglesFactory
     {
-        public double[] Craete(MaxAngle maxAngle)
+        public double[] Create(MaxAngle maxAngle)
         {
             switch (maxAngle)
             {

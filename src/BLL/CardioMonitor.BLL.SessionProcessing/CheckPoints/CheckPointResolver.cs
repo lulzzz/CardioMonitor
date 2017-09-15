@@ -35,7 +35,7 @@ namespace CardioMonitor.SessionProcessing
         private readonly double _minCheckPointAngle;
 
         /// <summary>
-        /// Смещение, чтобы все работало как надо
+        /// Смещение, чтобы определение первой ключевой точки сработало
         /// </summary>
         private const double AngleOffset = 10;
         

@@ -27,5 +27,6 @@ namespace CardioMonitor.SessionProcessing
         /// Оставшееся время
         /// </summary>
         public TimeSpan RemainingTime => CycleTime - ElapsedTime;
+        
     }
 }

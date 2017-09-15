@@ -9,7 +9,7 @@ namespace CardioMonitor.SessionProcessing
     /// <summary>
     /// Обработчик времени цикла
     /// </summary>
-    public class TimeController
+    internal class TimeController
     {
         /// <summary>
         /// Шина событий 

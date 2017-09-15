@@ -119,6 +119,13 @@ namespace CardioMonitor.Devices.Bed.Usb
             }
         }
 
+        public async Task<TimeSpan> GetCycleDurationAsync()
+        {
+            //todo
+            await Task.Yield();
+            return TimeSpan.FromMinutes(20);
+        }
+
         /// <summary>
         /// Запрос флага старт/пауза (0 - пауза, 1- старт, -1 - изначальное состояние) и флага реверса (0 - реверс не вызван, 1 - вызван, -1 - изначальное состояние)
         /// </summary>
