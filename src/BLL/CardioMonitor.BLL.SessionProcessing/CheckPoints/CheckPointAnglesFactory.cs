@@ -6,7 +6,7 @@
         {
             switch (maxAngle)
             {
-                case MaxAngle._7_5:
+                case MaxAngle._7Dot5:
                     return new[]
                     {
                         0,
@@ -20,7 +20,7 @@
                         9,
                         0
                     };
-                case MaxAngle._10_5:
+                case MaxAngle._10Dot5:
                     return new[]
                     {
                         0,
@@ -34,7 +34,7 @@
                         12,
                         0
                     };
-                case MaxAngle._13_5:
+                case MaxAngle._13Do5:
                     return new[]
                     {
                         0,
@@ -52,7 +52,7 @@
                         7.5,
                         0
                     };
-                case MaxAngle._16_5:
+                case MaxAngle._16Dot5:
                     return new[]
                     {
                         0,
@@ -70,7 +70,7 @@
                         9,
                         0
                     };
-                case MaxAngle._19_5:
+                case MaxAngle._19Dot5:
                     return new[]
                     {
                         0,
@@ -88,7 +88,7 @@
                         10.5,
                         0
                     };
-                case MaxAngle._22_5:
+                case MaxAngle._22Dot5:
                     return new[]
                     {
                         0,
@@ -110,7 +110,7 @@
                         7.5,
                         0
                     };
-                case MaxAngle._25_5:
+                case MaxAngle._25Dot5:
                     return new[]
                     {
                         0,
@@ -132,7 +132,7 @@
                         9,
                         0
                     };
-                case MaxAngle._28_5:
+                case MaxAngle._28Dot5:
                     return new[]
                     {
                         0,
@@ -154,7 +154,7 @@
                         10.5,
                         0
                     };
-                case MaxAngle._31_5:
+                case MaxAngle._31Dot5:
                     return new[]
                     {
                         0,

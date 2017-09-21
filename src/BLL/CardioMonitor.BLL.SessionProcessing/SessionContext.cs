@@ -23,10 +23,6 @@ namespace CardioMonitor.SessionProcessing
         /// </summary>
         public TimeSpan ElapsedTime { get; private set; }
 
-        /// <summary>
-        /// Оставшееся время
-        /// </summary>
-        public TimeSpan RemainingTime => CycleTime - ElapsedTime;
         
     }
 }

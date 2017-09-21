@@ -7,6 +7,14 @@ namespace CardioMonitor.SessionProcessing.Events.Devices
     /// </summary>
     internal class PumpingRequestedEvent : IEvent
     {
+        /// <summary>
+        /// Количество попыток накачки
+        /// </summary>
+        public int RepeatsCount { get; }
         
+        public PumpingRequestedEvent(int repeatsCount)
+        {
+            RepeatsCount = repeatsCount;
+        }     
     }
 }
