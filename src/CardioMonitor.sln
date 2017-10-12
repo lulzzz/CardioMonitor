@@ -64,6 +64,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Integrations", "Integration
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Data.EF.IntegrationsTests", "..\tests\IntegrationTests\CardioMonitor.Data.EF.IntegrationsTests\CardioMonitor.Data.EF.IntegrationsTests.csproj", "{30D57049-A4F5-4CA7-A5BD-DBD9FFAD5A64}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.BLL.SessionProcessing", "BLL\CardioMonitor.BLL.SessionProcessing\CardioMonitor.BLL.SessionProcessing.csproj", "{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Monitor|Any CPU = Debug_Monitor|Any CPU
@@ -208,6 +210,14 @@ Global
 		{30D57049-A4F5-4CA7-A5BD-DBD9FFAD5A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{30D57049-A4F5-4CA7-A5BD-DBD9FFAD5A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{30D57049-A4F5-4CA7-A5BD-DBD9FFAD5A64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -239,5 +249,6 @@ Global
 		{A5037BBA-6297-4556-B2B9-F09E8989543C} = {63E2DC94-33E0-447B-936E-5AD5B4BA15D6}
 		{5AA0AAFD-1B20-49A8-98FE-ED54808240D6} = {63E2DC94-33E0-447B-936E-5AD5B4BA15D6}
 		{30D57049-A4F5-4CA7-A5BD-DBD9FFAD5A64} = {5AA0AAFD-1B20-49A8-98FE-ED54808240D6}
+		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898} = {8F6753BC-36B1-4360-B3F2-8EE4506E78EE}
 	EndGlobalSection
 EndGlobal

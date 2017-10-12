@@ -1,12 +1,13 @@
 ﻿using System;
 using CardioMonitor.Infrastructure.Logs;
 
-namespace CardioMonitor.Devices.Monitor
+namespace CardioMonitor.SessionProcessing
 {
     /// <summary>
-    /// Отправка запроса на накачку давления
+    /// Класс для проверки необходимости в начкачке давления в манжете
     /// </summary>
-    public class AutoPumpingResolver
+    [Obsolete("Вроде не нужен, но пока оставим")]
+    public class PumpingResolver
     {
         private double _previuosPumpingAngle;
         
@@ -26,7 +27,7 @@ namespace CardioMonitor.Devices.Monitor
 
         private readonly ILogger _logger;
 
-        public AutoPumpingResolver(ILogger logger)
+        public PumpingResolver(ILogger logger)
         {
             if (logger == null) throw new ArgumentNullException(nameof(logger));
 
@@ -59,17 +60,13 @@ namespace CardioMonitor.Devices.Monitor
                 //Чтобы метод не вызывался слишком часто
                 if (Math.Abs(currentAngle - _previuosPumpingAngle) < ResolutionToleranceAgnle)
                 {
-                    _logger.Log(String.Format("Current angle: {0}\t" +
-                                              "PreviousAngle: {1}\t" +
-                                              "Upping status: {2}\t" +
-                                              "Result:        {3}\t", currentAngle, _previuosPumpingAngle, isUpping, false));
+                    _logger.Log($"Current angle: {currentAngle}\t" + $"PreviousAngle: {_previuosPumpingAngle}\t" +
+                                $"Upping status: {isUpping}\t" + $"Result:        {false}\t");
                     return false;
                 }
                 _previuosPumpingAngle = currentAngle;
-                _logger.Log(String.Format("Current angle: {0}\t" +
-                                              "PreviousAngle: {1}\t" +
-                                              "Upping status: {2}\t" +
-                                              "Result:        {3}\t", currentAngle, _previuosPumpingAngle, isUpping, true));
+                _logger.Log($"Current angle: {currentAngle}\t" + $"PreviousAngle: {_previuosPumpingAngle}\t" +
+                            $"Upping status: {isUpping}\t" + $"Result:        {true}\t");
                 return true;
             }
             // Для спуска
