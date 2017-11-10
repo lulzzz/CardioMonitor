@@ -64,7 +64,7 @@ namespace CardioMonitor.SessionProcessing
     /// Точка входа по факту. Через нее все взаимодействие
     /// </remarks>
     public class SessionProcessingModule 
-        : ISessionProcessingModule,
+        : ISessionProcessingModule
 
     {
         private readonly SessionParams _sessionParams;

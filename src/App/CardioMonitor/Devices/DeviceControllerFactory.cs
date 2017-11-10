@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using CardioMonitor.Devices.Bed.Infrastructure;
-using CardioMonitor.Devices.Bed.Usb;
+using CardioMonitor.Devices.Bed.UDP;
 using CardioMonitor.Devices.Monitor;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 
@@ -47,7 +47,7 @@ namespace CardioMonitor.Devices
 
         private IBedController _CreateBedController()
         {
-            return new BedUsbController();
+            return new BedUDPController();
         }
         
         public IMonitorController CreateMonitorController()

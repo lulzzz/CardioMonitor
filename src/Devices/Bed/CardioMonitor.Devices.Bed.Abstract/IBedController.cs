@@ -20,7 +20,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// </summary>
         /// <returns></returns>
         Task<TimeSpan> GetCycleDurationAsync();
-
+        
         /// <summary>
         /// Запрос флага старт/пауза (0 - пауза, 1- старт, -1 - изначальное состояние) и флага реверса (0 - реверс не вызван, 1 - вызван, -1 - изначальное состояние)
         /// </summary>
@@ -46,16 +46,15 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         Task<double> GetAngleXAsync();
 
         /// <summary>
-        /// Возвращает угол наклона кровати по оси Y
-        /// </summary>
-        double GetAngleY(); //todo устарел, не используется
-        
-        /// <summary>
         /// Возвращает признак подключения устройство
         /// </summary>
         /// <returns></returns>
         bool IsConnected();
 
         void ExecuteCommand(BedControlCommand command);
+
+        //так-с, что тут у нас, ага
+
+
     }
 }
