@@ -20,8 +20,9 @@
     <controls:MetroWindow.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro.Resources;component/Icons.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.buttons.xaml"/>
+                <ResourceDictionary Source="/Resources/Icons.xaml" />
+                <!--<ResourceDictionary Source="pack://application:,,,/MahApps.Metro.Resources;component/Icons.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.buttons.xaml"/>-->
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="btv" />
         </ResourceDictionary>
@@ -83,7 +84,8 @@
                     Command="{Binding MoveBackwardCommand}"
                     CommandParameter="{Binding ElementName=MainTC, Path=SelectedIndex }">
                 <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource MetroCircleButtonStyle}">
+                    <!--BasedOn="{StaticResource MetroCircleButtonStyle}"-->
+                    <Style TargetType="Button" >
                         <Setter Property="Visibility" Value="Visible"/>
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding ElementName=MainTC, Path=SelectedIndex}" Value="0">

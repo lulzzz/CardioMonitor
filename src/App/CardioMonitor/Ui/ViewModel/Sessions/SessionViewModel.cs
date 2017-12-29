@@ -6,6 +6,7 @@ using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreContracts.Treatment;
+using CardioMonitor.BLL.SessionProcessing.Processing;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor;
@@ -14,6 +15,7 @@ using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Resources;
+using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.SessionProcessing;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
@@ -51,7 +53,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private TimeSpan _remainingTime;
         private int _repeatCount;
         private string _startButtonText;
-        private int _periodSesonds;
+        private int _periodSeconds;
         private int _periodNumber;
         private bool _isUpping;
         private bool _isNeedReversing;
@@ -424,7 +426,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
                     var pumpingTask = _monitorController.PumpCuffAsync();
                     //на посылку команды накачки выделяем 5 секунд
-                    var pumpingResult = await _taskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
+                    var pumpingResult = await _taskHelper.StartWithTimeout(pumpingTask, /*_pumpingTimeout*/new TimeSpan(0, 0, 5));
                     
                     // просто ожидаем 60 скеунд
                     await Task.Delay(new TimeSpan(0,0,60));
@@ -514,13 +516,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 _isUpping = false;
             }
-            PeriodSeconds++;
-            UpdateAngle();
+            _periodSeconds++;
+            //UpdateAngle(); todo
             var currentAngle = CurrentAngle;
             //Накачка давления при необходимости
             if (_pumpingResolver.NeedPumping(currentAngle, _isUpping))
             {
-                Pump();
+               // Pump(); todo
             }
 
            

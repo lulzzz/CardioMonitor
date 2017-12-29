@@ -7,7 +7,7 @@ using CardioMonitor.SessionProcessing.Events.Devices;
 using Enexure.MicroBus;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.SessionProcessing
+namespace CardioMonitor.BLL.SessionProcessing.Processing
 {
     /// <summary>
     /// Менеджер взаимодействия с кроватью

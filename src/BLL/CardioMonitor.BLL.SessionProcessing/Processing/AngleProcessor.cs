@@ -52,7 +52,7 @@ namespace CardioMonitor.SessionProcessing
             var needPumping = _pumpingResolver.NeedPumping(currentAngle, _isUpping);
             if (needPumping)
             {
-                await _bus.PublishAsync(new PumpingRequestedEvent());
+                await _bus.PublishAsync(new PumpingRequestedEvent(1));
             }
 
             var isCheckPoint = _checkPointResolver.IsNeedUpdateData(currentAngle);

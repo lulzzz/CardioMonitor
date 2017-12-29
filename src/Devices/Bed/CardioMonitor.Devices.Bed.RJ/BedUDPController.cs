@@ -41,7 +41,7 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         public BedStatus GetBedStatus()
         {
-            
+            return BedStatus.Ready;
         }
 
         public BedMovingStatus GetBedMovingStatus()

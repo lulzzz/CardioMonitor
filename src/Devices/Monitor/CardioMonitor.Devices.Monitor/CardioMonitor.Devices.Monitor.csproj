@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="CRC8Calculator.cs" />
     <Compile Include="MonitorController.cs" />
+    <Compile Include="MonitorTCPClient.cs" />
     <Compile Include="OldMonitorController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

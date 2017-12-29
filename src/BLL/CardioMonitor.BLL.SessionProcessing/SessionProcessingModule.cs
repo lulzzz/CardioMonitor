@@ -2,15 +2,15 @@
 using System.Threading.Tasks;
 using Autofac;
 using CardioMonitor.Devices.Bed.Infrastructure;
+using CardioMonitor.SessionProcessing;
 using CardioMonitor.SessionProcessing.CycleStateMachine;
 using CardioMonitor.SessionProcessing.Events.Control;
 using CardioMonitor.SessionProcessing.Events.Devices;
 using Enexure.MicroBus;
 using Enexure.MicroBus.Autofac;
-using JetBrains.Annotations;
 using Stateless;
 
-namespace CardioMonitor.SessionProcessing
+namespace CardioMonitor.BLL.SessionProcessing
 {
     public interface ISessionProcessingModule
     {
@@ -184,7 +184,7 @@ namespace CardioMonitor.SessionProcessing
         {
             // накачка манжеты, измерение ЭКГ проводится внутри обработки сеанса
             SessionInitializeStarted?.Invoke(this, EventArgs.Empty);
-            _bus.(new PumpingRequestedEvent(PumpingRepeatsCountOnStart));
+            _bus.PublishAsync(new PumpingRequestedEvent(PumpingRepeatsCountOnStart));
         }
 
         

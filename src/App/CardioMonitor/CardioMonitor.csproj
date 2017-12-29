@@ -228,6 +228,10 @@
     </Compile>
     <Compile Include="Ui\ViewModel\Settings\SettingsViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionModel.cs" />
+    <Page Include="Resources\Icons.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Resources\IconsNonShared.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -277,17 +281,17 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Resources\Icons.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Ui\View\Settings\SettingsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <Content Include="Resources\Entypo-license.txt" />
+    <Content Include="Resources\WindowsIcons-license.txt" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <Content Include="cm.sqlite">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -295,8 +299,6 @@
     <None Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\Entypo-license.txt" />
-    <Content Include="Resources\WindowsIcons-license.txt" />
     <Content Include="Resources\usbHeart.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -333,6 +335,10 @@
       <Project>{c0d8f259-356c-449f-9aa8-d42e48bb517d}</Project>
       <Name>CardioMonitor.BLL.CoreServices</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\BLL\CardioMonitor.BLL.SessionProcessing\CardioMonitor.BLL.SessionProcessing.csproj">
+      <Project>{b95d28fb-7ea5-4e4b-bda3-441f9ba2f898}</Project>
+      <Name>CardioMonitor.BLL.SessionProcessing</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\BLL\CardioMonitor.Models\CardioMonitor.BLL.CoreContracts.csproj">
       <Project>{33247B5D-3763-4034-A97C-4C7922B04F9F}</Project>
       <Name>CardioMonitor.BLL.CoreContracts</Name>
@@ -352,6 +358,10 @@
     <ProjectReference Include="..\..\Devices\Bed\CardioMonitor.Devices.Bed.Abstract\CardioMonitor.Devices.Bed.Infrastructure.csproj">
       <Project>{BAE2B28A-93F6-40A9-852C-2BADD360E4FD}</Project>
       <Name>CardioMonitor.Devices.Bed.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Devices\Bed\CardioMonitor.Devices.Bed.RJ\CardioMonitor.Devices.Bed.UDP.csproj">
+      <Project>{7b951bc1-b035-41ae-b43a-8dd69adf51f3}</Project>
+      <Name>CardioMonitor.Devices.Bed.UDP</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Devices\Bed\CardioMonitor.Devices.Bed.Usb\CardioMonitor.Devices.Bed.Usb.csproj">
       <Project>{11C9D72E-FE6A-4186-BDBA-3232DFFB7CF8}</Project>
