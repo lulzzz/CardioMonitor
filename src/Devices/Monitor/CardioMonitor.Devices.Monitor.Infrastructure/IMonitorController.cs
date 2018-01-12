@@ -20,5 +20,11 @@ namespace CardioMonitor.Devices.Monitor.Infrastructure
         /// </summary>
         /// <returns></returns>
         Task<PatientParams> GetPatientParamsAsync();
+
+        /// <summary>
+        /// Возвращает параметры пациента, связанные с давлением
+        /// </summary>
+        /// <returns></returns>
+        Task<PatientPressureParams> GetPatientPressureParams();
     }
 }

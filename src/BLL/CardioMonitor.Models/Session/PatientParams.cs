@@ -35,19 +35,19 @@
         /// </summary>
         public short Spo2 { get; set; }
 
-        /// <summary>
-        /// Систолическое артериальное давление
-        /// </summary>
-        public short SystolicArterialPressure { get; set; }
+        ///// <summary>
+        ///// Систолическое артериальное давление
+        ///// </summary>
+        //public short SystolicArterialPressure { get; set; }
 
-        /// <summary>
-        /// Диастолическое артериальное давление
-        /// </summary>
-        public short DiastolicArterialPressure { get; set; }
+        ///// <summary>
+        ///// Диастолическое артериальное давление
+        ///// </summary>
+        //public short DiastolicArterialPressure { get; set; }
 
-        /// <summary>
-        /// Среднее артериальное давлние 
-        /// </summary>
-        public short AverageArterialPressure { get; set; }
+        ///// <summary>
+        ///// Среднее артериальное давлние 
+        ///// </summary>
+        //public short AverageArterialPressure { get; set; }
     }
 }

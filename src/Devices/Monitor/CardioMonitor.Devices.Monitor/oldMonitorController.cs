@@ -8,7 +8,7 @@ using CardioMonitor.Devices.Monitor.Infrastructure;
 
 namespace CardioMonitor.Devices.Monitor
 {
-    public class OldMonitorController : IMonitorController
+    public class OldMonitorController 
     {
         public Task<bool> PumpCuffAsync()
         {
@@ -61,18 +61,18 @@ namespace CardioMonitor.Devices.Monitor
         /// </summary>
         /// <returns>Показатели пациента</returns>
         /// <remarks>Эмулирует работу с монитором. Сюда следует поместить логику считывания данных с монитора</remarks>
-        public Task<PatientParams> GetPatientParamsAsync()
-        {
-            var patientParameters = _GetPatientParamsAsync();
-            if ((patientParameters.Result.AverageArterialPressure == 0) &&
-                (patientParameters.Result.DiastolicArterialPressure == 0) && (patientParameters.Result.HeartRate == 0) &&
-                (patientParameters.Result.RepsirationRate == 0) && (patientParameters.Result.Spo2 == 0) &&
-                (patientParameters.Result.SystolicArterialPressure == 0))
-            {
-                patientParameters = _GetPatientParamsAsync();
-            }
-            return patientParameters;
-        }
+        //public Task<PatientParams> GetPatientParamsAsync()
+        //{
+        //    var patientParameters = _GetPatientParamsAsync();
+        //    if ((patientParameters.Result.AverageArterialPressure == 0) &&
+        //        (patientParameters.Result.DiastolicArterialPressure == 0) && (patientParameters.Result.HeartRate == 0) &&
+        //        (patientParameters.Result.RepsirationRate == 0) && (patientParameters.Result.Spo2 == 0) &&
+        //        (patientParameters.Result.SystolicArterialPressure == 0))
+        //    {
+        //        patientParameters = _GetPatientParamsAsync();
+        //    }
+        //    return patientParameters;
+        //}
 
         //TODO Need to refact
         private Task<PatientParams> _GetPatientParamsAsync()

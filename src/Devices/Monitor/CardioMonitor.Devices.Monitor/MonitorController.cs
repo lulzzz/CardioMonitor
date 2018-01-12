@@ -15,12 +15,20 @@ namespace CardioMonitor.Devices.Monitor
     /// </summary>
     public class MonitorController : IMonitorController
     {
+        
         private UdpClient _udpClient;
         private readonly int localUdpPort = 30304;
         private IPAddress remoteMonitorIpAddress;
         private readonly int remoteMonitorTcpPort = 9761;
 
+        private NetworkStream _stream;
         private TcpClient _tcpClient;
+
+        /// <summary>
+        /// наличие подключения к КардиоМонитору
+        /// </summary>
+        public bool IsMonitorConnected { get; set; } = false;
+
         public Task<bool> PumpCuffAsync()
         {
             throw new NotImplementedException();
@@ -30,12 +38,28 @@ namespace CardioMonitor.Devices.Monitor
         {
             throw new NotImplementedException();
         }
+
+        public Task<PatientPressureParams> GetPatientPressureParams()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<PatientECG> GetPatientECGAsync()
+        {
+            return Task.Factory.StartNew(() =>
+            {
+
+                PatientECG patientECG = new PatientECG();
+                return patientECG;
+            });
+        }
         
         //черновой вариант - отрефачить после тестов с новым монитором
         public void Listner()
         {
             try
             {
+                if (IsMonitorConnected) throw new Exception("Монитор уже подключен");
                 IPEndPoint localUdpIp = new IPEndPoint(IPAddress.Any, localUdpPort);
                 _udpClient = new UdpClient(localUdpIp);
                 while (true)
@@ -43,10 +67,11 @@ namespace CardioMonitor.Devices.Monitor
                     IPEndPoint remoteUdpIp = null;
                     byte[] message = _udpClient.Receive(ref remoteUdpIp);
                     remoteMonitorIpAddress = remoteUdpIp.Address;
-                    ConnectToMonitor(new IPEndPoint(remoteMonitorIpAddress,remoteMonitorTcpPort));
+                    ConnectToMonitor(new IPEndPoint(remoteMonitorIpAddress, remoteMonitorTcpPort));
                 }
 
             }
+            
             catch (Exception e)
             {
                 Console.WriteLine(e);
@@ -65,7 +90,13 @@ namespace CardioMonitor.Devices.Monitor
             {
                 _tcpClient = new TcpClient();
                 _tcpClient.Connect(remoteMonitorEndPoint);
-                NetworkStream ns = _tcpClient.GetStream();
+                _stream = _tcpClient.GetStream();
+                IsMonitorConnected = true;
+            }
+            catch (SocketException)
+            {
+                //todo throw Exception - ошибка подключения
+                IsMonitorConnected = false;
             }
             catch (Exception e)
             {
@@ -74,5 +105,7 @@ namespace CardioMonitor.Devices.Monitor
             }
 
         }
+
+        
     }
 }

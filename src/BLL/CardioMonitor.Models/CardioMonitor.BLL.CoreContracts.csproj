@@ -48,6 +48,7 @@
     <Compile Include="Session\PatientECG.cs" />
     <Compile Include="Session\ISessionsService.cs" />
     <Compile Include="Session\PatientParams.cs" />
+    <Compile Include="Session\PatientPressureParams.cs" />
     <Compile Include="Session\Session.cs" />
     <Compile Include="Session\SessionContainer.cs" />
     <Compile Include="Session\SessionCycle.cs" />
