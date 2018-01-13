@@ -64,13 +64,13 @@ namespace CardioMonitor.SessionProcessing
     /// Точка входа по факту. Через нее все взаимодействие
     /// </remarks>
     public class SessionProcessingModule 
-        : ISessionProcessingModule,
+        : ISessionProcessingModule
 
     {
         private readonly SessionParams _sessionParams;
         private IMicroBus _bus;
         private readonly IBedController _bedController;
-        private TimeController _timeController;
+        private CycleTimeController _cycleTimeController;
         
         
         
@@ -157,7 +157,7 @@ namespace CardioMonitor.SessionProcessing
             var container = builder.Build();
             _bus = container.Resolve<IMicroBus>();
             
-            _timeController = new TimeController(_bus);
+           // _timeController = new TimeController(_bus);
         }
 
         #region Методы
@@ -169,7 +169,7 @@ namespace CardioMonitor.SessionProcessing
             // при старте мы должны узнать длительность сеанса, запустить обработку сеанса
 
             var cycleDuration = await _bedController.GetCycleDurationAsync().ConfigureAwait(false);
-            _timeController.Init(cycleDuration, _cycleTick);
+            _cycleTimeController.Init(cycleDuration, _cycleTick);
             
             var cycleStateMachineBuilder = new CycleStateMachineBuilder();
             cycleStateMachineBuilder.SetOnPreparedAction(PrepareCycle);
@@ -184,7 +184,7 @@ namespace CardioMonitor.SessionProcessing
         {
             // накачка манжеты, измерение ЭКГ проводится внутри обработки сеанса
             SessionInitializeStarted?.Invoke(this, EventArgs.Empty);
-            _bus.(new PumpingRequestedEvent(PumpingRepeatsCountOnStart));
+            //_bus.(new PumpingRequestedEvent(PumpingRepeatsCountOnStart));
         }
 
         

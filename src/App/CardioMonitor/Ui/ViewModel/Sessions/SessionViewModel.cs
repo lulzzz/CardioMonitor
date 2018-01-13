@@ -14,11 +14,9 @@ using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Resources;
-using CardioMonitor.SessionProcessing;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
 
-//using CardioMonitor.Core.Repository.Controller;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
@@ -63,7 +61,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private CardioTimer _mainTimer;
         private CardioTimer _checkStatusTimer;
-        private PumpingResolver _pumpingResolver;
+//        private PumpingResolver _pumpingResolver;
         private bool _startBedFlag = false;
 
         private readonly IBedController _bedUsbController;
@@ -369,7 +367,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
             _taskHelper = taskHelper;
             _logger = logger;
-            _pumpingResolver = new PumpingResolver(_logger);
+           // _pumpingResolver = new PumpingResolver(_logger);
             _monitorController = deviceControllerFactory.CreateMonitorController();
         }
 
@@ -424,7 +422,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
                     var pumpingTask = _monitorController.PumpCuffAsync();
                     //на посылку команды накачки выделяем 5 секунд
-                    var pumpingResult = await _taskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
+                 //   var pumpingResult = await _taskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
                     
                     // просто ожидаем 60 скеунд
                     await Task.Delay(new TimeSpan(0,0,60));
@@ -432,10 +430,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     await progressController.CloseAsync();
 
                     // Если накачка прошла неуспешно
-                    if (!pumpingResult)
-                    {
-                        await MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку давления.");
-                    }
+//                    if (!pumpingResult)
+//                    {
+//                        await MessageHelper.Instance.ShowMessageAsync("Не удалось провести накачку давления.");
+//                    }
                     
 
                 }
@@ -514,14 +512,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 _isUpping = false;
             }
-            PeriodSeconds++;
-            UpdateAngle();
-            var currentAngle = CurrentAngle;
-            //Накачка давления при необходимости
-            if (_pumpingResolver.NeedPumping(currentAngle, _isUpping))
-            {
-                Pump();
-            }
+//            PeriodSeconds++;
+//            UpdateAngle();
+//            var currentAngle = CurrentAngle;
+//            //Накачка давления при необходимости
+//            if (_pumpingResolver.NeedPumping(currentAngle, _isUpping))
+//            {
+//                Pump();
+//            }
 
            
             
@@ -627,7 +625,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 _bedUsbController.ExecuteCommand(BedControlCommand.Reverse);
                 _isNeedReversing = true;
-                _pumpingResolver = new PumpingResolver(_logger);
+//                _pumpingResolver = new PumpingResolver(_logger);
                 
                 //ThreadAssistant.StartInUiThread(() => {  MessageHelper.Instance.ShowMessageAsync("Запущен реверс"); });
                // await MessageHelper.Instance.ShowMessageAsync("Запущен реверс");
@@ -672,7 +670,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             Session = new SessionModel();
             if (_mainTimer != null) {_mainTimer.Stop();}
             if (_checkStatusTimer != null) { _checkStatusTimer.Stop(); }
-            _pumpingResolver = new PumpingResolver(_logger);
+//            _pumpingResolver = new PumpingResolver(_logger);
             _startBedFlag = false;
         }
         public void StartStatusTimer()
@@ -747,7 +745,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing))
             {
                 _isNeedReversing = true;
-                _pumpingResolver = new PumpingResolver(_logger);
+//                _pumpingResolver = new PumpingResolver(_logger);
                // await MessageHelper.Instance.ShowMessageAsync("Запущен реверс");
                 ThreadAssistant.StartInUiThread(() => { MessageHelper.Instance.ShowMessageAsync("Запущен реверс"); });
             }

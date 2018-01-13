@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks.Dataflow;
+using CardioMonitor.BLL.SessionProcessing.Pipelines;
 using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.SessionProcessing.Events.Control;
 using Enexure.MicroBus;
@@ -9,12 +11,9 @@ namespace CardioMonitor.SessionProcessing
     /// <summary>
     /// Обработчик времени цикла
     /// </summary>
-    internal class TimeController
+    internal class CycleTimeController
     {
-        /// <summary>
-        /// Шина событий 
-        /// </summary>
-        private readonly IMicroBus _bus;
+        [NotNull] private readonly BroadcastBlock<PipelineContext> _broadcastBlock;
 
         [CanBeNull]
         private CardioTimer _timer;
@@ -27,23 +26,19 @@ namespace CardioMonitor.SessionProcessing
         /// <summary>
         /// Длительность одного цикла
         /// </summary>
-        public TimeSpan CycleDuration { get; private set; }
+        private TimeSpan _cycleDuration;
 
         /// <summary>
         /// Прошедшее время цикла
         /// </summary>
-        public TimeSpan ElapsedTime { get; private set; }
+        private TimeSpan _elapsedTime;
 
-        /// <summary>
-        /// Оставшееся время
-        /// </summary>
-        public TimeSpan RemainingTime => CycleDuration - ElapsedTime;
 
-        public TimeController([NotNull] IMicroBus bus)
+
+        public CycleTimeController([NotNull] BroadcastBlock<PipelineContext> broadcastBlock)
         {
-            if (bus == null) throw new ArgumentNullException(nameof(bus));
-
-            _bus = bus;
+            _broadcastBlock = broadcastBlock ?? throw new ArgumentNullException(nameof(broadcastBlock));
+            IsPaused = false;
         }
         
         /// <summary>
@@ -55,14 +50,21 @@ namespace CardioMonitor.SessionProcessing
         {
             _timer?.Stop();
             _timer = new CardioTimer(TimerTick, cycleDuration, cycleTick);
-            CycleDuration = cycleDuration;
+            _cycleDuration = cycleDuration;
             _cycleTickDuration = cycleTick;
         }
 
         private async void TimerTick(object sender, EventArgs args)
         {
-            await _bus.PublishAsync(new TimeUpdatedEvent(CycleDuration, ElapsedTime)).ConfigureAwait(false);
-            ElapsedTime += _cycleTickDuration;
+            _elapsedTime += _cycleTickDuration;
+            var context = new PipelineContext();
+            
+            var timeParams = new TimeContextParamses(_cycleDuration, _elapsedTime);
+            context.AddOrUpdate(timeParams);
+            
+            await _broadcastBlock
+                .SendAsync(context)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -72,8 +74,11 @@ namespace CardioMonitor.SessionProcessing
         {
             if (_timer == null) throw new InvalidOperationException("Timer not initialised");
             _timer.Start();
-            ElapsedTime = TimeSpan.Zero;
+            _elapsedTime = TimeSpan.Zero;
+            IsPaused = false;
         }
+
+        public bool IsPaused { get; private set; }
 
         /// <summary>
         /// Остановливает контроллер
@@ -82,6 +87,7 @@ namespace CardioMonitor.SessionProcessing
         {
             if (_timer == null) throw new InvalidOperationException("Timer not initialised");
             _timer.Stop();
+            IsPaused = false;
         }
 
         /// <summary>
@@ -91,6 +97,7 @@ namespace CardioMonitor.SessionProcessing
         {
             if (_timer == null) throw new InvalidOperationException("Timer not initialised");
             _timer.Suspend();
+            IsPaused = true;
         }
 
         /// <summary>
@@ -101,6 +108,7 @@ namespace CardioMonitor.SessionProcessing
             if (_timer == null) throw new InvalidOperationException("Timer not initialised");
 
             _timer.Resume();
+            IsPaused = false;
         }
 
     }

@@ -15,7 +15,7 @@ namespace CardioMonitor.SessionProcessing
     internal class CardioMonitorProcessor : 
         IEventHandler<PatientParamsRequestEvent>,
         IEventHandler<EcqRequestEvent>,
-        IEventHandler<PumpingRequestedEvent>,
+        IEventHandler<PumpingRequestedEvent>
     {
 
         /// <summary>
