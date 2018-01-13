@@ -17,8 +17,10 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Angle
             _bedController = bedController ?? throw new ArgumentNullException(nameof(bedController));
         }
         
-        public async Task<PipelineContext> ProcessAsync(PipelineContext context)
+        public async Task<PipelineContext> ProcessAsync([NotNull] PipelineContext context)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            
             var currentAngle = await _bedController
                 .GetAngleXAsync()
                 .ConfigureAwait(false);
@@ -27,8 +29,9 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Angle
             return context;
         }
 
-        public bool CanProcess(PipelineContext context)
+        public bool CanProcess([NotNull] PipelineContext context)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
             return true;
         }
     }

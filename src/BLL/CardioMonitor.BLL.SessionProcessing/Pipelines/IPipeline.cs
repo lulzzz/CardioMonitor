@@ -11,5 +11,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
         Task PauseAsync();
 
         Task ResetAsync();
+
+        void ProcessReverseRequest();
     }
 }

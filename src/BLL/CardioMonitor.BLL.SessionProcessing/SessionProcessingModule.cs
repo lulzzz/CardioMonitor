@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 using Autofac;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.SessionProcessing.CycleStateMachine;
-using CardioMonitor.SessionProcessing.Events.Control;
-using CardioMonitor.SessionProcessing.Events.Devices;
 using Enexure.MicroBus;
 using Enexure.MicroBus.Autofac;
 using JetBrains.Annotations;
@@ -191,8 +189,7 @@ namespace CardioMonitor.SessionProcessing
         
         private void CompleteCyclePreparation()
         {
-            _bus.PublishAsync(new EcqRequestEvent());
-            SessionInitilizeCompleted?.Invoke(this, EventArgs.Empty);
+             SessionInitilizeCompleted?.Invoke(this, EventArgs.Empty);
             _stateMachine.Fire(CycleTriggers.PreparingCompleted);
         }
 
@@ -208,7 +205,7 @@ namespace CardioMonitor.SessionProcessing
 
         public void Reverse(CommandType commandType)
         {
-            _bus.PublishAsync(new ReverseCommand());
+          //  _bus.PublishAsync(new ReverseCommand());
         }
 
         public void EmergencyStop(CommandType commandType)

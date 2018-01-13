@@ -2,6 +2,9 @@ using System;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.Pipelines;
 using CardioMonitor.Devices.Bed.Infrastructure;
+using CardioMonitor.Devices.Monitor.Infrastructure;
+using CardioMonitor.Infrastructure.Logs;
+using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.SessionProcessing;
 using Moq;
 using Xunit;
@@ -20,7 +23,9 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
         {
             var pipeline = new Pipeline(_startParams,
                 Mock.Of<IBedController>(),
-                Mock.Of<ICheckPointResolver>());
+                Mock.Of<ICheckPointResolver>(),
+                Mock.Of<IMonitorController>(),
+                new TaskHelper(Mock.Of<ILogger>()));
 
             TimeSpan? elapsedTime = null;
             pipeline.OnElapsedTimeChanged += (sender, span) => elapsedTime = span;

@@ -2,8 +2,6 @@
 using System.Threading.Tasks.Dataflow;
 using CardioMonitor.BLL.SessionProcessing.Pipelines;
 using CardioMonitor.Infrastructure.Threading;
-using CardioMonitor.SessionProcessing.Events.Control;
-using Enexure.MicroBus;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.SessionProcessing

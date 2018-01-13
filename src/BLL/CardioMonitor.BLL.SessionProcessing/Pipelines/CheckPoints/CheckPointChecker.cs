@@ -16,8 +16,10 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
             _checkPointResolver = checkPointResolver ?? throw new ArgumentNullException(nameof(checkPointResolver));
         }
 
-        public async Task<PipelineContext> ProcessAsync(PipelineContext context)
+        public async Task<PipelineContext> ProcessAsync([NotNull] PipelineContext context)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            
             await Task.Yield();
             var angleParams = context.TryGetAngleParam();
             if (angleParams == null) return context;
@@ -34,8 +36,9 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
             return context;
         }
 
-        public bool CanProcess(PipelineContext context)
+        public bool CanProcess([NotNull] PipelineContext context)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
             return true;
         }
     }

@@ -13,5 +13,7 @@
     <ProjectReference Include="..\..\BLL\CardioMonitor.BLL.SessionProcessing\CardioMonitor.BLL.SessionProcessing.csproj" />
     <ProjectReference Include="..\..\Devices\Bed\CardioMonitor.Devices.Bed.Abstract\CardioMonitor.Devices.Bed.Infrastructure.csproj" />
     <ProjectReference Include="..\..\Devices\CardioMonitor.Devices\CardioMonitor.Devices.csproj" />
+    <ProjectReference Include="..\..\Devices\Monitor\CardioMonitor.Devices.Monitor.Infrastructure\CardioMonitor.Devices.Monitor.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
