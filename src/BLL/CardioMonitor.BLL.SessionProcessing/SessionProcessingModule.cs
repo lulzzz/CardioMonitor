@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Autofac;
+using CardioMonitor.BLL.SessionProcessing.CycleStateMachine;
+using CardioMonitor.BLL.SessionProcessing.Pipelines.Time;
+using CardioMonitor.BLL.SessionProcessing.Processing;
 using CardioMonitor.Devices.Bed.Infrastructure;
-using CardioMonitor.SessionProcessing.CycleStateMachine;
 using Enexure.MicroBus;
 using Enexure.MicroBus.Autofac;
-using JetBrains.Annotations;
 using Stateless;
 
-namespace CardioMonitor.SessionProcessing
+namespace CardioMonitor.BLL.SessionProcessing
 {
     public interface ISessionProcessingModule
     {

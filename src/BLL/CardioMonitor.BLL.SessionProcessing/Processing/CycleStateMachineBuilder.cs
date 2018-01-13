@@ -1,9 +1,9 @@
 ﻿using System;
-using CardioMonitor.SessionProcessing.CycleStateMachine;
+using CardioMonitor.BLL.SessionProcessing.CycleStateMachine;
 using JetBrains.Annotations;
 using Stateless;
 
-namespace CardioMonitor.SessionProcessing
+namespace CardioMonitor.BLL.SessionProcessing.Processing
 {
     /// <summary>
     /// Построитель машины состояния цикла

@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.SessionProcessing.CycleStateMachine
+﻿namespace CardioMonitor.BLL.SessionProcessing.CycleStateMachine
 {
     /// <summary>
     /// Возможные состояния цикла

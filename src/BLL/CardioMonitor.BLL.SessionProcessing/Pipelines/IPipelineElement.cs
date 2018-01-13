@@ -1,9 +1,8 @@
-﻿using System.Diagnostics.SymbolStore;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines.ActionBlocks
+namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 {
-    public interface IPipelineElement
+    internal interface IPipelineElement
     {
         Task<PipelineContext> ProcessAsync(PipelineContext context);
 

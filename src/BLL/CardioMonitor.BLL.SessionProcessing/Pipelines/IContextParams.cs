@@ -2,7 +2,7 @@
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 {
-    public interface IContextParams
+    internal interface IContextParams
     {
         Guid ParamsTypeId { get; }
     }

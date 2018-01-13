@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.SessionProcessing.CycleStateMachine
+﻿namespace CardioMonitor.BLL.SessionProcessing.CycleStateMachine
 {
     /// <summary>
     /// Триггеры для перехода между состояниямми в StateMachine

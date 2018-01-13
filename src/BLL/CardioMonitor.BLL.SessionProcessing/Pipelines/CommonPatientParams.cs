@@ -1,6 +1,6 @@
 ﻿namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 {
-    public class CommonPatientParams
+    internal class CommonPatientParams
     {
         public CommonPatientParams(
             double inclinationAngle,

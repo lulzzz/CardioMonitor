@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
 {
-    public class CommonPatientContextParams : IContextParams
+    internal class CommonPatientContextParams : IContextParams
     {
         public static readonly Guid CommonPatientParamsId = new Guid("c571aac1-4c5c-4def-9296-1aef33953ae4");
 
@@ -42,7 +42,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
         public short Spo2 { get;  }
     }
 
-    public static class CommonPatientParamsContextExtensions
+    internal static class CommonPatientParamsContextExtensions
     {
         public static CommonPatientContextParams TryGetCommonPatientParams([NotNull] this PipelineContext context)
         {

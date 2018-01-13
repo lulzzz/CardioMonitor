@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks.Dataflow;
-using CardioMonitor.BLL.SessionProcessing.Pipelines;
 using CardioMonitor.Infrastructure.Threading;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.SessionProcessing
+namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Time
 {
     /// <summary>
     /// Обработчик времени цикла
@@ -30,7 +29,6 @@ namespace CardioMonitor.SessionProcessing
         /// Прошедшее время цикла
         /// </summary>
         private TimeSpan _elapsedTime;
-
 
 
         public CycleTimeController([NotNull] BroadcastBlock<PipelineContext> broadcastBlock)

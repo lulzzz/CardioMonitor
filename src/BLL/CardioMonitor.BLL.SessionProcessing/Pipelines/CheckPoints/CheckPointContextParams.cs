@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
 {
-    public class CheckPointContextParams : IContextParams
+    internal class CheckPointContextParams : IContextParams
     {
         public static readonly Guid CheckPointContextParamsId = new Guid("19338674-ba21-45cd-8bcc-1e6a9dddac24");
         
@@ -20,7 +20,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
         public bool IsMaxCheckPoint { get; }
     }
 
-    public static class CheckPointParamsContextExnteions
+    internal static class CheckPointParamsContextExnteions
     {
         public static CheckPointContextParams TryGetCheckPointParams([NotNull] this PipelineContext context)
         {

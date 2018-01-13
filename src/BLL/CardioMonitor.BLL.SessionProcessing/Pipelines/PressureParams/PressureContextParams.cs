@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams
 {
-    public class PressureContextParams : IContextParams
+    internal class PressureContextParams : IContextParams
     {
         public static readonly Guid PressureParamsId = new Guid("59c3d092-78d1-4e6e-b3d5-22a4ca3d298c");
         
@@ -42,7 +42,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams
         public short AverageArterialPressure { get;  }
     }
 
-    public static class PressureParamsContextExntensions
+    internal static class PressureParamsContextExntensions
     {
         public static PressureContextParams TryGetPressureParams([NotNull] this PipelineContext context)
         {

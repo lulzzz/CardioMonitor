@@ -2,24 +2,24 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.ActionBlocks;
+using CardioMonitor.BLL.SessionProcessing.CheckPoints;
+using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.Pipelines.Angle;
 using CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints;
 using CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams;
 using CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams;
+using CardioMonitor.BLL.SessionProcessing.Pipelines.Time;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
-using CardioMonitor.SessionProcessing;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 {
-    public class Pipeline : 
+    internal class Pipeline : 
         IPipeline,
         IDisposable
     {
-        //todo reverse
         [NotNull] private readonly ICheckPointResolver _checkPointResolver;
         private readonly CycleTimeController _cycleTimeController;
 
@@ -28,11 +28,6 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
         private readonly BroadcastBlock<PipelineContext> _timeBroadcastBlock;
         private readonly ActionBlock<PipelineContext> _collectorBlock;
         
-        /// <summary>
-        /// Внутренние блоки Pipeline, которые будут между получением времени и агрегацией данных
-        /// </summary>
-        private readonly List<IPipelineElement> _pipelineInnerBlocks;
-
         public event EventHandler<TimeSpan> OnElapsedTimeChanged;
         
         public event EventHandler<double> OnCurrentAngleRecieved;
@@ -41,6 +36,8 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
         
         public event EventHandler<CommonPatientParams> OnCommonPatientParamsRecieved;
 
+        public event EventHandler<SessionProcessingException> OnException; 
+        
         public Pipeline(
             [NotNull] PipelineStartParams startParams,
             [NotNull] IBedController bedController,
@@ -55,18 +52,15 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
             
             _startParams = startParams ?? throw new ArgumentNullException(nameof(startParams));
 
-            _pipelineInnerBlocks = new List<IPipelineElement>();
 
             _timeBroadcastBlock = new BroadcastBlock<PipelineContext>(context => context);
             _collectorBlock = new ActionBlock<PipelineContext>(CollectDataFromPipeline);
 
             var angleReciever = new AngleReciever(bedController);
-            _pipelineInnerBlocks.Add(angleReciever);
             var anlgeRecieveBlock =
                 new TransformBlock<PipelineContext, PipelineContext>(context => angleReciever.ProcessAsync(context));
 
             var checkPointChecker = new CheckPointChecker(checkPointResolver);
-            _pipelineInnerBlocks.Add(checkPointChecker);
             var checkPointCheckBlock =
                 new TransformBlock<PipelineContext, PipelineContext>(context =>
                     checkPointChecker.ProcessAsync(context));
@@ -74,12 +68,10 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
             var mainBroadcastBlock = new BroadcastBlock<PipelineContext>(context => context);
 
             var pressureParamsProvider = new PatientPressureParamsProvider(monitorController, taskHelper);
-            _pipelineInnerBlocks.Add(pressureParamsProvider);
             var pressureParamsProviderBlock = new TransformBlock<PipelineContext, PipelineContext>(
                 context => pressureParamsProvider.ProcessAsync(context));
             
             var commonParamsProvider = new CommonPatientParamsProvider(monitorController, taskHelper);
-            _pipelineInnerBlocks.Add(commonParamsProvider);
             var commonParamsProviderBlock = new TransformBlock<PipelineContext, PipelineContext>(
                 context => commonParamsProvider.ProcessAsync(context));
             
@@ -153,6 +145,13 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
         private async Task CollectDataFromPipeline([NotNull] PipelineContext context)
         {
             await Task.Yield();
+
+            var exceptionParams = context.TryGetExceptionContextParams();
+            if (exceptionParams != null)
+            {
+                OnException?.Invoke(this, exceptionParams.Exception);
+            }
+            
             var timeParams = context.TryGetTimeParams();
             if (timeParams != null)
             {
@@ -205,13 +204,12 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
         public async Task EmergencyStopAsync()
         {
             await Task.Yield();
-            //throw new System.NotImplementedException();
         }
 
         public async Task PauseAsync()
         {
             await Task.Yield();
-            _cycleTimeController.Start();
+            _cycleTimeController.Puase();
         }
 
         public async Task ResetAsync()

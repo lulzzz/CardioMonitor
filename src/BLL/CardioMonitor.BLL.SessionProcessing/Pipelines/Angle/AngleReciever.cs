@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.ActionBlocks;
+using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Angle
 {
-    public class AngleReciever : IPipelineElement
+    internal class AngleReciever : IPipelineElement
     {
         private readonly IBedController _bedController;
         
@@ -20,12 +20,22 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Angle
         public async Task<PipelineContext> ProcessAsync([NotNull] PipelineContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+
+            try
+            {
+                var currentAngle = await _bedController
+                    .GetAngleXAsync()
+                    .ConfigureAwait(false);
             
-            var currentAngle = await _bedController
-                .GetAngleXAsync()
-                .ConfigureAwait(false);
-            
-            context.AddOrUpdate(new AngleContextParams(currentAngle));
+                context.AddOrUpdate(new AngleContextParams(currentAngle));
+            }
+            catch (Exception e)
+            {
+                context.AddOrUpdate(
+                    new ExceptionContextParams(
+                        new SessionProcessingException(SessionProcessingErrorCodes.UpdateAngleError, e.Message, e)));
+            }
+           
             return context;
         }
 

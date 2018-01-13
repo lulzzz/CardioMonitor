@@ -1,10 +1,9 @@
 ﻿using System;
-using CardioMonitor.BLL.SessionProcessing.Pipelines;
 using Enexure.MicroBus.Annotations;
 
-namespace CardioMonitor.SessionProcessing
+namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Time
 {
-    public class TimeContextParamses: IContextParams
+    internal class TimeContextParamses: IContextParams
     {
         public static readonly Guid TypeId = new Guid("91941aeb-69ea-4955-b533-13b717a4768d");
         
@@ -34,7 +33,7 @@ namespace CardioMonitor.SessionProcessing
         public TimeSpan RemainingTime => CycleDuration - ElapsedTime;
     }
 
-    public static class TimeParamContextExtensions
+    internal static class TimeParamContextExtensions
     {
         public static TimeContextParamses TryGetTimeParams([JetBrains.Annotations.NotNull] [NotNull] this PipelineContext context)
         {

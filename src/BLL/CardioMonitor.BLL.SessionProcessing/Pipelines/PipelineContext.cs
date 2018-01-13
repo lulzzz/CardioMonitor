@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 {
-    public class PipelineContext
+    internal class PipelineContext
     {
         private readonly ConcurrentDictionary<Guid, IContextParams> _context;
 

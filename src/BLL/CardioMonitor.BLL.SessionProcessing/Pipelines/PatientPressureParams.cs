@@ -1,6 +1,6 @@
 ﻿namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 {
-    public class PatientPressureParams
+    internal class PatientPressureParams
     {
         public PatientPressureParams(
             double inclinationAngle, 

@@ -2,7 +2,7 @@
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 {
-    public interface IPipeline
+    internal interface IPipeline
     {
         Task StartAsync();
 

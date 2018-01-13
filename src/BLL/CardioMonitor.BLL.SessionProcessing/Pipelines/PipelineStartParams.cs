@@ -5,7 +5,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
     /// <summary>
     /// Параметры старта pipeline
     /// </summary>
-    public class PipelineStartParams
+    internal class PipelineStartParams
     {
         public PipelineStartParams(TimeSpan cycleTickDuration, TimeSpan cycleDuration)
         {

@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.CoreContracts.Session;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.ActionBlocks;
+using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.Pipelines.Angle;
 using CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines
+namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
 {
-    public class CommonPatientParamsProvider : IPipelineElement
+    internal class CommonPatientParamsProvider : IPipelineElement
     {
         /// <summary>
         /// Точность для сравнение double величин
@@ -44,23 +43,45 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
             var angleParams = context.TryGetAngleParam();
             if (angleParams == null) return context;
             
-            PatientParams param;
+            PatientParams param = null;
+            
             try
             {
                 var gettingParamsTask = _monitorController.GetPatientParamsAsync();
                 param = await _taskHelper.StartWithTimeout(gettingParamsTask, _updatePatientParamTimeout);
             }
-            catch (TimeoutException)
+            catch (TimeoutException e)
             {
-                param = new PatientParams
+              
+                context.AddOrUpdate(
+                    new ExceptionContextParams(
+                        new SessionProcessingException(SessionProcessingErrorCodes.PatientCommonParamsRequestTimeout,
+                            e.Message,
+                            e)));
+            }
+            catch (Exception e)
+            {
+                context.AddOrUpdate(
+                    new ExceptionContextParams(
+                        new SessionProcessingException(SessionProcessingErrorCodes.PatientCommonParamsRequestError,
+                            e.Message,
+                            e)));
+
+            }
+            finally
+            {
+                if (param == null)
                 {
-                    RepsirationRate = -1,
-                    HeartRate = -1,
-                    Spo2 = -1,
-                    SystolicArterialPressure = -1,
-                    DiastolicArterialPressure = -1,
-                    AverageArterialPressure = -1
-                };
+                    param = new PatientParams
+                    {
+                        RepsirationRate = -1,
+                        HeartRate = -1,
+                        Spo2 = -1,
+                        SystolicArterialPressure = -1,
+                        DiastolicArterialPressure = -1,
+                        AverageArterialPressure = -1
+                    };
+                }
             }
             param.InclinationAngle = Math.Abs(angleParams.CurrentAngle) < Tolerance ? 0 : angleParams.CurrentAngle;
             

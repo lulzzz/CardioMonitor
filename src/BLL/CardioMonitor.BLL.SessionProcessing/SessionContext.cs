@@ -1,7 +1,7 @@
 ﻿using System;
 using CardioMonitor.BLL.CoreContracts.Session;
 
-namespace CardioMonitor.SessionProcessing
+namespace CardioMonitor.BLL.SessionProcessing
 {
     /// <summary>
     /// Контекст выполнения сеанса

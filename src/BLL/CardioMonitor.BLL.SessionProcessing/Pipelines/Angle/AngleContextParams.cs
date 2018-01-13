@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Angle
 {
-    public class AngleContextParams : IContextParams
+    internal class AngleContextParams : IContextParams
     {
         public static readonly Guid AngleContextParamId = new Guid("7f2ae094-ea77-407e-9611-9b14a3fc2bbd");
 
@@ -17,7 +17,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Angle
         public double CurrentAngle { get; }
     }
 
-    public static class AngleParamContextExtension
+    internal static class AngleParamContextExtension
     {
         public static AngleContextParams TryGetAngleParam([NotNull] this PipelineContext context)
         {

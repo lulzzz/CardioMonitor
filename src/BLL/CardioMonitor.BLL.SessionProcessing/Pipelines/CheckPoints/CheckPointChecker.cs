@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.ActionBlocks;
+using CardioMonitor.BLL.SessionProcessing.CheckPoints;
+using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.Pipelines.Angle;
-using CardioMonitor.SessionProcessing;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
@@ -24,14 +24,28 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
             var angleParams = context.TryGetAngleParam();
             if (angleParams == null) return context;
 
-            var isCheckPointReached = _checkPointResolver.IsCheckPointReached(angleParams.CurrentAngle);
-            if (!isCheckPointReached)
+            try
             {
-                context.AddOrUpdate(new CheckPointContextParams(false, false));
-                return context;
+                var isCheckPointReached = _checkPointResolver.IsCheckPointReached(angleParams.CurrentAngle);
+                if (!isCheckPointReached)
+                {
+                    context.AddOrUpdate(new CheckPointContextParams(false, false));
+                    return context;
+                }
+                var isMaxCheckPoint = _checkPointResolver.IsMaxCheckPointReached(angleParams.CurrentAngle);
+                context.AddOrUpdate(new CheckPointContextParams(true, isMaxCheckPoint));
             }
-            var isMaxCheckPoint = _checkPointResolver.IsMaxCheckPointReached(angleParams.CurrentAngle);
-            context.AddOrUpdate(new CheckPointContextParams(true, isMaxCheckPoint));
+            catch (Exception e)
+            {
+                context.AddOrUpdate(
+                    new ExceptionContextParams(
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.Unknown,
+                            e.Message,
+                            e)));
+            }
+            
+           
             
             return context;
         }
