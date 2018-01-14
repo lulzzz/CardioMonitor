@@ -51,10 +51,10 @@
     <Compile Include="Pipelines\CommonParams\CommonPatientParamsProvider.cs" />
     <Compile Include="Pipelines\ExceptionContextParams.cs" />
     <Compile Include="Pipelines\IContextParams.cs" />
-    <Compile Include="Pipelines\IPipeline.cs" />
+    <Compile Include="Pipelines\ISessionCyclePipeline.cs" />
     <Compile Include="Pipelines\IPipelineElement.cs" />
     <Compile Include="Pipelines\PatientPressureParams.cs" />
-    <Compile Include="Pipelines\Pipeline.cs" />
+    <Compile Include="Pipelines\SessionCyclePipeline.cs" />
     <Compile Include="Pipelines\PipelineContext.cs" />
     <Compile Include="Pipelines\PipelineStartParams.cs" />
     <Compile Include="Pipelines\PressureParams\PatientPressureParamsProvider.cs" />

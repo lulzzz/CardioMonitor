@@ -21,7 +21,7 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
         [Fact]
         public async Task TimeController_ElapsedTimeChanged_Ok()
         {
-            var pipeline = new Pipeline(_startParams,
+            var pipeline = new SessionCyclePipeline(_startParams,
                 Mock.Of<IBedController>(),
                 Mock.Of<ICheckPointResolver>(),
                 Mock.Of<IMonitorController>(),
@@ -31,7 +31,7 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             pipeline.OnElapsedTimeChanged += (sender, span) => elapsedTime = span;
             await pipeline.StartAsync().ConfigureAwait(false);
             await Task.Delay(TimeSpan.FromSeconds(1.5));
-            await pipeline.EmergencyStopAsync().ConfigureAwait(false);
+            await pipeline.StopAsync().ConfigureAwait(false);
             
             Assert.NotNull(elapsedTime);
             Assert.Equal(TimeSpan.FromSeconds(1), elapsedTime.Value);

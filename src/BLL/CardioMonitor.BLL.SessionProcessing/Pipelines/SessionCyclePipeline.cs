@@ -16,8 +16,8 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 {
-    internal class Pipeline : 
-        IPipeline,
+    internal class SessionCyclePipeline : 
+        ISessionCyclePipeline,
         IDisposable
     {
         [NotNull] private readonly ICheckPointResolver _checkPointResolver;
@@ -25,8 +25,8 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 
         private readonly PipelineStartParams _startParams;
 
-        private readonly BroadcastBlock<PipelineContext> _timeBroadcastBlock;
-        private readonly ActionBlock<PipelineContext> _collectorBlock;
+        private readonly BroadcastBlock<PipelineContext> _pipelineOnTimeStartBlock;
+        private readonly ActionBlock<PipelineContext> _pipelineFinishCollectorBlock;
         
         public event EventHandler<TimeSpan> OnElapsedTimeChanged;
         
@@ -38,7 +38,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 
         public event EventHandler<SessionProcessingException> OnException; 
         
-        public Pipeline(
+        public SessionCyclePipeline(
             [NotNull] PipelineStartParams startParams,
             [NotNull] IBedController bedController,
             [NotNull] ICheckPointResolver checkPointResolver,
@@ -52,9 +52,8 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
             
             _startParams = startParams ?? throw new ArgumentNullException(nameof(startParams));
 
-
-            _timeBroadcastBlock = new BroadcastBlock<PipelineContext>(context => context);
-            _collectorBlock = new ActionBlock<PipelineContext>(CollectDataFromPipeline);
+            _pipelineOnTimeStartBlock = new BroadcastBlock<PipelineContext>(context => context);
+            _pipelineFinishCollectorBlock = new ActionBlock<PipelineContext>(CollectDataFromPipeline);
 
             var angleReciever = new AngleReciever(bedController);
             var anlgeRecieveBlock =
@@ -75,14 +74,14 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
             var commonParamsProviderBlock = new TransformBlock<PipelineContext, PipelineContext>(
                 context => commonParamsProvider.ProcessAsync(context));
             
-            _timeBroadcastBlock.LinkTo(
-                _collectorBlock,
+            _pipelineOnTimeStartBlock.LinkTo(
+                _pipelineFinishCollectorBlock,
                 new DataflowLinkOptions
                 {
                     PropagateCompletion = true
                 });
 
-            _timeBroadcastBlock.LinkTo(
+            _pipelineOnTimeStartBlock.LinkTo(
                 anlgeRecieveBlock,
                 new DataflowLinkOptions
                 {
@@ -103,7 +102,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
                 });
 
             mainBroadcastBlock.LinkTo(
-                _collectorBlock,
+                _pipelineFinishCollectorBlock,
                 new DataflowLinkOptions
                 {
                     PropagateCompletion = true
@@ -124,7 +123,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
                 });
 
             commonParamsProviderBlock.LinkTo(
-                _collectorBlock,
+                _pipelineFinishCollectorBlock,
                 new DataflowLinkOptions
                 {
                     PropagateCompletion = true
@@ -132,14 +131,14 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
                 context => commonParamsProvider.CanProcess(context));
             
             pressureParamsProviderBlock.LinkTo(
-                _collectorBlock,
+                _pipelineFinishCollectorBlock,
                 new DataflowLinkOptions
                 {
                     PropagateCompletion = true
                 },
                 context => pressureParamsProvider.CanProcess(context));
             
-            _cycleTimeController = new CycleTimeController(_timeBroadcastBlock);
+            _cycleTimeController = new CycleTimeController(_pipelineOnTimeStartBlock);
         }
 
         private async Task CollectDataFromPipeline([NotNull] PipelineContext context)
@@ -201,9 +200,10 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
             }
         }
 
-        public async Task EmergencyStopAsync()
+        public async Task StopAsync()
         {
             await Task.Yield();
+            _cycleTimeController.Stop();
         }
 
         public async Task PauseAsync()
@@ -225,8 +225,8 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 
         public void Dispose()
         {
-            _timeBroadcastBlock.Complete();
-            _collectorBlock.Completion.ConfigureAwait(false).GetAwaiter().GetResult();
+            _pipelineOnTimeStartBlock.Complete();
+            _pipelineFinishCollectorBlock.Completion.ConfigureAwait(false).GetAwaiter().GetResult();
         }
     }
 }

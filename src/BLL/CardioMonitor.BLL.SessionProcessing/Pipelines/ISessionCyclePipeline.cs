@@ -2,11 +2,11 @@
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 {
-    internal interface IPipeline
+    internal interface ISessionCyclePipeline
     {
         Task StartAsync();
 
-        Task EmergencyStopAsync();
+        Task StopAsync();
 
         Task PauseAsync();
 

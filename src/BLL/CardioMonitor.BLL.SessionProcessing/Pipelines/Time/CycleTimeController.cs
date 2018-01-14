@@ -10,7 +10,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Time
     /// </summary>
     internal class CycleTimeController
     {
-        [NotNull] private readonly BroadcastBlock<PipelineContext> _broadcastBlock;
+        [NotNull] private readonly BroadcastBlock<PipelineContext> _pipelineStartBlock;
 
         [CanBeNull]
         private CardioTimer _timer;
@@ -31,9 +31,9 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Time
         private TimeSpan _elapsedTime;
 
 
-        public CycleTimeController([NotNull] BroadcastBlock<PipelineContext> broadcastBlock)
+        public CycleTimeController([NotNull] BroadcastBlock<PipelineContext> pipelineStartBlock)
         {
-            _broadcastBlock = broadcastBlock ?? throw new ArgumentNullException(nameof(broadcastBlock));
+            _pipelineStartBlock = pipelineStartBlock ?? throw new ArgumentNullException(nameof(pipelineStartBlock));
             IsPaused = false;
         }
         
@@ -58,7 +58,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Time
             var timeParams = new TimeContextParamses(_cycleDuration, _elapsedTime);
             context.AddOrUpdate(timeParams);
             
-            await _broadcastBlock
+            await _pipelineStartBlock
                 .SendAsync(context)
                 .ConfigureAwait(false);
         }
