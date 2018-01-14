@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Linq;
+using CardioMonitor.BLL.SessionProcessing.CheckPoints;
 
-namespace CardioMonitor.SessionProcessing
+namespace CardioMonitor.BLL.SessionProcessing.Processing
 {
     public class CycleDurationCalculator
     {

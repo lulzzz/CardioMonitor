@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.SessionProcessing
+﻿namespace CardioMonitor.BLL.SessionProcessing.CheckPoints
 {
     public class CheckPointAnglesFactory
     {

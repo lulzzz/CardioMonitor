@@ -3,15 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.SessionProcessing
+namespace CardioMonitor.BLL.SessionProcessing.CheckPoints
 {
+    public interface ICheckPointResolver
+    {
+        /// <summary>
+        /// Проверяет, есть ли необходимость запросить данные в данном угле
+        /// </summary>
+        /// <param name="currentAngle">Текущий угол</param>
+        /// <returns>Разрешение обновления</returns>
+        bool IsCheckPointReached(double currentAngle);
+
+        /// <summary>
+        /// Проверяет, достигнута ли максимальная контрольная точка
+        /// </summary>
+        /// <param name="currentAngle">Текущий угол</param>
+        /// <returns>Разрешение обновления</returns>
+        bool IsMaxCheckPointReached(double currentAngle);
+
+        /// <summary>
+        /// Учесть реверс
+        /// </summary>
+        void ConsiderReversing();
+    }
+
     /// <summary>
     /// Определитель контрольных точек и принятия решения о запросе данных, накачке и т.д.
     /// </summary>
     /// <remarks>
     /// Новый цикл - нужно сбросить состояния
     /// </remarks>
-    internal class CheckPointResolver
+    public class CheckPointResolver : ICheckPointResolver
     {
 
         /// <summary>
@@ -60,7 +82,7 @@ namespace CardioMonitor.SessionProcessing
         /// </summary>
         /// <param name="currentAngle">Текущий угол</param>
         /// <returns>Разрешение обновления</returns>
-        public bool IsNeedUpdateData(double currentAngle)
+        public bool IsCheckPointReached(double currentAngle)
         {
             lock (_passedCheckPointsAnglesLockObject)
             {
@@ -79,13 +101,23 @@ namespace CardioMonitor.SessionProcessing
                 return false;
             }
         }
+        
+        /// <summary>
+        /// Проверяет, достигнута ли максимальная контрольная точка
+        /// </summary>
+        /// <param name="currentAngle">Текущий угол</param>
+        /// <returns>Разрешение обновления</returns>
+        public bool IsMaxCheckPointReached(double currentAngle)
+        {
+            return Math.Abs(_checkPointsAngles.Max() - currentAngle) < _resolutionToleranceAngle;
+        }
 
         /// <summary>
         /// Учесть реверс
         /// </summary>
         public void ConsiderReversing()
         {
-            _previuosCheckPointAngle =_checkPointsAngles.Max();
+            _previuosCheckPointAngle = _checkPointsAngles.Max();
         }
     }
 }

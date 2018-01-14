@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Autofac;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Time;
+using CardioMonitor.BLL.SessionProcessing.CycleStateMachine;
+using CardioMonitor.BLL.SessionProcessing.Processing;
 using CardioMonitor.Devices.Bed.Infrastructure;
-using CardioMonitor.SessionProcessing;
-using CardioMonitor.SessionProcessing.CycleStateMachine;
-using CardioMonitor.SessionProcessing.Events.Control;
-using CardioMonitor.SessionProcessing.Events.Devices;
 using Enexure.MicroBus;
 using Enexure.MicroBus.Autofac;
 using Stateless;
@@ -70,7 +69,7 @@ namespace CardioMonitor.BLL.SessionProcessing
         private readonly SessionParams _sessionParams;
         private IMicroBus _bus;
         private readonly IBedController _bedController;
-        private TimeController _timeController;
+        private CycleProcessingSynchroniaztionController _cycleProcessingSynchroniaztionController;
         
         
         
@@ -157,7 +156,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             var container = builder.Build();
             _bus = container.Resolve<IMicroBus>();
             
-            _timeController = new TimeController(_bus);
+           // _timeController = new TimeController(_bus);
         }
 
         #region Методы
@@ -169,7 +168,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             // при старте мы должны узнать длительность сеанса, запустить обработку сеанса
 
             var cycleDuration = await _bedController.GetCycleDurationAsync().ConfigureAwait(false);
-            _timeController.Init(cycleDuration, _cycleTick);
+            _cycleProcessingSynchroniaztionController.Init(cycleDuration, _cycleTick);
             
             var cycleStateMachineBuilder = new CycleStateMachineBuilder();
             cycleStateMachineBuilder.SetOnPreparedAction(PrepareCycle);
@@ -184,15 +183,14 @@ namespace CardioMonitor.BLL.SessionProcessing
         {
             // накачка манжеты, измерение ЭКГ проводится внутри обработки сеанса
             SessionInitializeStarted?.Invoke(this, EventArgs.Empty);
-            _bus.PublishAsync(new PumpingRequestedEvent(PumpingRepeatsCountOnStart));
+            //_bus.(new PumpingRequestedEvent(PumpingRepeatsCountOnStart));
         }
 
         
         
         private void CompleteCyclePreparation()
         {
-            _bus.PublishAsync(new EcqRequestEvent());
-            SessionInitilizeCompleted?.Invoke(this, EventArgs.Empty);
+             SessionInitilizeCompleted?.Invoke(this, EventArgs.Empty);
             _stateMachine.Fire(CycleTriggers.PreparingCompleted);
         }
 
@@ -208,7 +206,7 @@ namespace CardioMonitor.BLL.SessionProcessing
 
         public void Reverse(CommandType commandType)
         {
-            _bus.PublishAsync(new ReverseCommand());
+          //  _bus.PublishAsync(new ReverseCommand());
         }
 
         public void EmergencyStop(CommandType commandType)

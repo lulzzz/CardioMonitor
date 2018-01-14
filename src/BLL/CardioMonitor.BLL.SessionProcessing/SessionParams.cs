@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.SessionProcessing
+﻿namespace CardioMonitor.BLL.SessionProcessing
 {
     /// <summary>
     /// Параметры сеанса
@@ -8,17 +8,17 @@
         /// <summary>
         /// Максимальный угол наклона кровати
         /// </summary>
-        public MaxAngle MaxAngle { get; private set; }
+        public MaxAngle MaxAngle { get; }
         
         /// <summary>
         /// Количество повторений (циклов)
         /// </summary>
-        public short CycleCount { get; private set; }
+        public short CycleCount { get; }
         
         /// <summary>
         /// Частота
         /// </summary>
-        public double Frequency { get; private set; }
+        public double Frequency { get; }
 
         public SessionParams(MaxAngle maxAngle, short cycleCount, double frequency)
         {

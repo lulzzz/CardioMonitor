@@ -58,8 +58,8 @@ namespace CardioMonitor.Devices.Monitor
             try
             {
                 var ns = _tcpClient.GetStream();
-                byte[] inputMessage = new byte[];
-                ns.BeginRead()
+//                byte[] inputMessage = new byte[];
+//                ns.BeginRead()
             }
             catch (Exception e)
             {
@@ -102,12 +102,12 @@ namespace CardioMonitor.Devices.Monitor
                 {
                     if (ex.SocketErrorCode == SocketError.TimedOut)
                     {
-                        MessageBox.Show("Разрыв соединения");
+//                        MessageBox.Show("Разрыв соединения");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+//                    MessageBox.Show(ex.Message);
                 }
             }
             /// <summary>
@@ -152,12 +152,12 @@ namespace CardioMonitor.Devices.Monitor
                 {
                     if (ex.SocketErrorCode == SocketError.TimedOut)
                     {
-                        MessageBox.Show("Разрыв соединения");
+//                        MessageBox.Show("Разрыв соединения");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+//                    MessageBox.Show(ex.Message);
                 }
 
 
@@ -185,7 +185,7 @@ namespace CardioMonitor.Devices.Monitor
                                 int valueLow = text[6] >> 4;
                                 int valueHigh = text[8] >> 4;
                                 var code = valueLow + (valueHigh << 4);
-                                label1.Text = code.ToString();
+//                                label1.Text = code.ToString();
                             }
 
                         }
@@ -195,12 +195,12 @@ namespace CardioMonitor.Devices.Monitor
                 {
                     if (ex.SocketErrorCode == SocketError.TimedOut)
                     {
-                        MessageBox.Show("Разрыв соединения");
+//                        MessageBox.Show("Разрыв соединения");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+//                    MessageBox.Show(ex.Message);
                 }
             }
 
@@ -214,7 +214,7 @@ namespace CardioMonitor.Devices.Monitor
                     {
                         byte[] forcrc = new byte[63];
                         Array.ConstrainedCopy(inputArray, iterator, forcrc, 0, 63);
-                        byte calccrc = CRC8.crc8Calculation(forcrc);
+//                        byte calccrc = CRC8.crc8Calculation(forcrc);
                         byte realcrc = inputArray[iterator + 63];
                         int a = inputArray[iterator + 2] >> 4;
                         int b = inputArray[iterator + 4] >> 4;
@@ -224,14 +224,14 @@ namespace CardioMonitor.Devices.Monitor
                             int valueLow = inputArray[iterator + 6] >> 4;
                             int valueHigh = inputArray[iterator + 8] >> 4;
                             int code = valueLow + (valueHigh << 4);
-                            richTextBox1.BeginInvoke(new InvokeDelegate(() => { richTextBox1.Text += code + "  - давление в манжете" + "\n"; }));
+//                            richTextBox1.BeginInvoke(new InvokeDelegate(() => { richTextBox1.Text += code + "  - давление в манжете" + "\n"; }));
                         }
                         if (c == 22)
                         {
                             int valueLow = inputArray[iterator + 6] >> 4;
                             int valueHigh = inputArray[iterator + 8] >> 4;
                             var code = valueLow + (valueHigh << 4);
-                            richTextBox1.BeginInvoke(new InvokeDelegate(() => { richTextBox1.Text += (CMStatus)code + "\n"; }));
+//                            richTextBox1.BeginInvoke(new InvokeDelegate(() => { richTextBox1.Text += (CMStatus)code + "\n"; }));
                         }
                         numbersList.Add(c);
                     }
@@ -261,8 +261,8 @@ namespace CardioMonitor.Devices.Monitor
             private void startTestButton_Click(object sender, EventArgs e)
             {
                 // TestTcpConnection(new IPEndPoint(IPAddress.Parse("192.168.0.204"),2860));
-                Thread newThread = new Thread(Receive);
-                newThread.Start();
+//                Thread newThread = new Thread(Receive);
+//                newThread.Start();
             }
 
             public int[] GetECGValue(byte[] inputArray)
@@ -276,7 +276,7 @@ namespace CardioMonitor.Devices.Monitor
                     {
                         byte[] forcrc = new byte[63];
                         Array.ConstrainedCopy(inputArray, iterator, forcrc, 0, 63);
-                        byte calccrc = CRC8.crc8Calculation(forcrc);
+//                        byte calccrc = CRC8.crc8Calculation(forcrc);
                         byte realcrc = inputArray[iterator + 63];
                         int a = inputArray[iterator + 2] >> 4;
                         int b = inputArray[iterator + 4] >> 4;
@@ -286,14 +286,14 @@ namespace CardioMonitor.Devices.Monitor
                             int valueLow = inputArray[iterator + 6] >> 4;
                             int valueHigh = inputArray[iterator + 8] >> 4;
                             var code = valueLow + (valueHigh << 4);
-                            richTextBox1.BeginInvoke(new InvokeDelegate(() => { richTextBox1.Text += code + "  - давление в манжете" + "\n"; }));
+//                            richTextBox1.BeginInvoke(new InvokeDelegate(() => { richTextBox1.Text += code + "  - давление в манжете" + "\n"; }));
                         }
                         if (c == 22)
                         {
                             int valueLow = inputArray[iterator + 6] >> 4;
                             int valueHigh = inputArray[iterator + 8] >> 4;
                             var code = valueLow + (valueHigh << 4);
-                            richTextBox1.BeginInvoke(new InvokeDelegate(() => { richTextBox1.Text += (CMStatus)code + "\n"; }));
+//                            richTextBox1.BeginInvoke(new InvokeDelegate(() => { richTextBox1.Text += (CMStatus)code + "\n"; }));
                         }
                         numbersList.Add(c);
                     }

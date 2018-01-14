@@ -113,5 +113,10 @@ namespace CardioMonitor.Devices.Monitor.Fake
         {
             return Task.Factory.StartNew(() => _patientParams[Index]);
         }
+
+        public Task<PatientPressureParams> GetPatientPressureParams()
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

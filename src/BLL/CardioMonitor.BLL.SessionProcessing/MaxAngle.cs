@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.SessionProcessing
+﻿namespace CardioMonitor.BLL.SessionProcessing
 {
     /// <summary>
     /// Максимальный угол

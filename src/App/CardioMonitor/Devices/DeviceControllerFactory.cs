@@ -68,7 +68,8 @@ namespace CardioMonitor.Devices
         }
         private IMonitorController _CreateMonitorController()
         {
-            return new OldMonitorController();
+            //todo fix
+            return null; //new OldMonitorController();
         }
     }
 }
