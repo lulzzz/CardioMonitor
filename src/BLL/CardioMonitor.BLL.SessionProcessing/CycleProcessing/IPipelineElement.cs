@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
 {
     internal interface IPipelineElement
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Angle
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle
 {
     internal class AngleContextParams : IContextParams
     {

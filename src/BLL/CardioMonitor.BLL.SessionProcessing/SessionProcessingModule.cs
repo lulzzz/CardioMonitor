@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Autofac;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Time;
 using CardioMonitor.BLL.SessionProcessing.CycleStateMachine;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.Time;
 using CardioMonitor.BLL.SessionProcessing.Processing;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using Enexure.MicroBus;

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.CheckPoints;
-using CardioMonitor.BLL.SessionProcessing.Pipelines;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Logs;

@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints
 {
     internal class CheckPointContextParams : IContextParams
     {

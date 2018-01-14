@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
 {
     internal class PipelineContext
     {

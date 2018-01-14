@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CommonParams
 {
     internal class CommonPatientContextParams : IContextParams
     {

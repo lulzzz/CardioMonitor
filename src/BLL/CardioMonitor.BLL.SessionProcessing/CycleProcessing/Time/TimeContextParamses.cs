@@ -1,7 +1,7 @@
 ﻿using System;
 using Enexure.MicroBus.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines.Time
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Time
 {
     internal class TimeContextParamses: IContextParams
     {

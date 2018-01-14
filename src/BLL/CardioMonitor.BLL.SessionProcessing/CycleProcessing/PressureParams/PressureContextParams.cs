@@ -1,8 +1,15 @@
-﻿namespace CardioMonitor.BLL.SessionProcessing.Pipelines
+﻿using System;
+using JetBrains.Annotations;
+
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams
 {
-    internal class PatientPressureParams
+    internal class PressureContextParams : IContextParams
     {
-        public PatientPressureParams(
+        public static readonly Guid PressureParamsId = new Guid("59c3d092-78d1-4e6e-b3d5-22a4ca3d298c");
+        
+        public Guid ParamsTypeId { get; }
+
+        public PressureContextParams(
             double inclinationAngle, 
             short systolicArterialPressure, 
             short diastolicArterialPressure, 
@@ -33,5 +40,15 @@
         /// Среднее артериальное давлние 
         /// </summary>
         public short AverageArterialPressure { get;  }
+    }
+
+    internal static class PressureParamsContextExntensions
+    {
+        public static PressureContextParams TryGetPressureParams([NotNull] this PipelineContext context)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            return context.TryGet(PressureContextParams.PressureParamsId) as PressureContextParams;
+        }
     }
 }
