@@ -4,6 +4,7 @@ using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.Pipelines.Angle;
 using CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints;
+using CardioMonitor.BLL.SessionProcessing.Pipelines.ForcedDataCollectionRequest;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
 using JetBrains.Annotations;
@@ -99,6 +100,12 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
+            var forcedRequest = context.TryGetForcedDataCollectionRequest();
+            if (forcedRequest != null && forcedRequest.IsRequested)
+            {
+                return true;
+            }
+            
             var checkPointReachedParams = context.TryGetCheckPointParams();
             return checkPointReachedParams != null && checkPointReachedParams.IsCheckPointReached;
         }

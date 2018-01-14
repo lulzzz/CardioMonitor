@@ -21,7 +21,7 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
         [Fact]
         public async Task TimeController_ElapsedTimeChanged_Ok()
         {
-            var pipeline = new SessionCyclePipeline(_startParams,
+            var pipeline = new CycleProcessor(_startParams,
                 Mock.Of<IBedController>(),
                 Mock.Of<ICheckPointResolver>(),
                 Mock.Of<IMonitorController>(),

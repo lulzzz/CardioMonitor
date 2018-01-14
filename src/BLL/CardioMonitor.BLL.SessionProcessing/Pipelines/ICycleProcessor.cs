@@ -2,7 +2,7 @@
 
 namespace CardioMonitor.BLL.SessionProcessing.Pipelines
 {
-    internal interface ISessionCyclePipeline
+    internal interface ICycleProcessor
     {
         Task StartAsync();
 
@@ -13,5 +13,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
         Task ResetAsync();
 
         void ProcessReverseRequest();
+
+        Task ForceDataCollectionRequestAsync();
     }
 }
