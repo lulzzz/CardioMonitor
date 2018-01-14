@@ -11,7 +11,6 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CommonParams
         public Guid ParamsTypeId { get; } = CommonPatientParamsId;
 
         public CommonPatientCycleProcessingContextParams(
-            double inclinationAngle,
             short heartRate, 
             short repsirationRate, 
             short spo2)
@@ -19,13 +18,8 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CommonParams
             HeartRate = heartRate;
             RepsirationRate = repsirationRate;
             Spo2 = spo2;
-            InclinationAngle = inclinationAngle;
         }
-        
-        /// <summary>
-        /// Угол наклона кровати
-        /// </summary>
-        public double InclinationAngle { get; }
+       
 
         /// <summary>
         /// Частота сердечных сокращений (ЧСС)

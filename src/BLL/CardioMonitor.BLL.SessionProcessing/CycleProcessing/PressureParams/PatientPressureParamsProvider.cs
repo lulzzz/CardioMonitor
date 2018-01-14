@@ -51,12 +51,13 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams
             var angleParams = context.TryGetAngleParam();
             if (angleParams == null) return context;
 
-            PatientParams param = null;
+            Devices.Monitor.Infrastructure.PatientPressureParams param = null;
             bool wasPumpingComleted;
             try
             {
                 var pumpingTask = _monitorController.PumpCuffAsync();
-                wasPumpingComleted = await _taskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
+                await _taskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
+                wasPumpingComleted = true;
             }
             catch (TimeoutException e)
             {
@@ -87,7 +88,7 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams
 
             try
             {
-                var gettingParamsTask = _monitorController.GetPatientParamsAsync();
+                var gettingParamsTask = _monitorController.GetPatientPressureParamsAsync();
                 param = await _taskHelper.StartWithTimeout(gettingParamsTask, _updatePatientParamTimeout);
             }
             catch (TimeoutException e)
@@ -115,34 +116,24 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams
                     param = GetDefaultParams();
                 }
             }
-            param.InclinationAngle = Math.Abs(angleParams.CurrentAngle) < Tolerance ? 0 : angleParams.CurrentAngle;
 
 
             UpdateContex(param, context);
             return context;
         }
 
-        private void UpdateContex(PatientParams param, CycleProcessingContext context)
+        private void UpdateContex(Devices.Monitor.Infrastructure.PatientPressureParams param, CycleProcessingContext context)
         {
             context.AddOrUpdate(
                 new PressureCycleProcessingContextParams(
-                    param.InclinationAngle,
                     param.SystolicArterialPressure,
                     param.DiastolicArterialPressure,
                     param.AverageArterialPressure));
         }
 
-        private PatientParams GetDefaultParams()
+        private Devices.Monitor.Infrastructure.PatientPressureParams GetDefaultParams()
         {
-            return  new PatientParams
-            {
-                RepsirationRate = -1,
-                HeartRate = -1,
-                Spo2 = -1,
-                SystolicArterialPressure = -1,
-                DiastolicArterialPressure = -1,
-                AverageArterialPressure = -1
-            };
+            return new Devices.Monitor.Infrastructure.PatientPressureParams(-1, -1, -1);
         }
 
         public bool CanProcess([NotNull] CycleProcessingContext context)

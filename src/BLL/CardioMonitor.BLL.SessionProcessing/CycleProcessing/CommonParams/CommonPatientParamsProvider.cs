@@ -45,7 +45,7 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CommonParams
             var angleParams = context.TryGetAngleParam();
             if (angleParams == null) return context;
             
-            PatientParams param = null;
+            PatientCommonParams param = null;
             
             try
             {
@@ -74,22 +74,12 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CommonParams
             {
                 if (param == null)
                 {
-                    param = new PatientParams
-                    {
-                        RepsirationRate = -1,
-                        HeartRate = -1,
-                        Spo2 = -1,
-                        SystolicArterialPressure = -1,
-                        DiastolicArterialPressure = -1,
-                        AverageArterialPressure = -1
-                    };
+                    param = new PatientCommonParams(-1, -1, -1);
                 }
             }
-            param.InclinationAngle = Math.Abs(angleParams.CurrentAngle) < Tolerance ? 0 : angleParams.CurrentAngle;
             
             context.AddOrUpdate(
                 new CommonPatientCycleProcessingContextParams(
-                    param.InclinationAngle,
                     param.HeartRate,
                     param.RepsirationRate,
                     param.Spo2));

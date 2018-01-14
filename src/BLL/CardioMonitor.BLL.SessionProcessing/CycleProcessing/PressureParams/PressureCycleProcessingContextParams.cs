@@ -11,21 +11,14 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams
         public Guid ParamsTypeId { get; }
 
         public PressureCycleProcessingContextParams(
-            double inclinationAngle, 
             short systolicArterialPressure, 
             short diastolicArterialPressure, 
             short averageArterialPressure)
         {
-            InclinationAngle = inclinationAngle;
             SystolicArterialPressure = systolicArterialPressure;
             DiastolicArterialPressure = diastolicArterialPressure;
             AverageArterialPressure = averageArterialPressure;
         }
-
-        /// <summary>
-        /// Угол наклона кровати
-        /// </summary>
-        public double InclinationAngle { get; }
         
         /// <summary>
         /// Систолическое артериальное давление

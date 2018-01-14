@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 
 namespace CardioMonitor.Devices.Monitor.Fake
 {
-    public class FakeMonitorRepository : IMonitorController
+    [Obsolete("Удалить позже")]
+    public class FakeMonitorRepository //: IMonitorController
     {
 
         private readonly List<PatientParams> _patientParams;
@@ -114,7 +116,7 @@ namespace CardioMonitor.Devices.Monitor.Fake
             return Task.Factory.StartNew(() => _patientParams[Index]);
         }
 
-        public Task<PatientPressureParams> GetPatientPressureParams()
+        public Task<PatientPressureParams> GetPatientPressureParamsAsync()
         {
             throw new System.NotImplementedException();
         }

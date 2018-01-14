@@ -181,7 +181,7 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
                 OnPatientPressureParamsRecieved?.Invoke(
                     this, 
                     new PatientPressureParams(
-                        pressureParams.InclinationAngle,
+                        angleParams?.CurrentAngle ?? 0,
                         pressureParams.SystolicArterialPressure,
                         pressureParams.DiastolicArterialPressure,
                         pressureParams.AverageArterialPressure));
@@ -192,7 +192,7 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
                 OnCommonPatientParamsRecieved?.Invoke(
                     this, 
                     new CommonPatientParams(
-                        commonParams.InclinationAngle,
+                        angleParams?.CurrentAngle ?? 0,
                         commonParams.HeartRate,
                         commonParams.RepsirationRate,
                         commonParams.Spo2));

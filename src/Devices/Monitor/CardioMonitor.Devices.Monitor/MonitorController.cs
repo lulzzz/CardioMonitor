@@ -29,31 +29,31 @@ namespace CardioMonitor.Devices.Monitor
         /// </summary>
         public bool IsMonitorConnected { get; set; } = false;
 
-        public Task<bool> PumpCuffAsync()
+        public Task PumpCuffAsync()
         {
             throw new NotImplementedException();
         }
 
-        public Task<PatientParams> GetPatientParamsAsync()
+        public Task<PatientCommonParams> GetPatientParamsAsync()
         {
             throw new NotImplementedException();
         }
 
-        public Task<PatientPressureParams> GetPatientPressureParams()
+        public Task<PatientPressureParams> GetPatientPressureParamsAsync()
         {
             throw new NotImplementedException();
         }
 
-        public Task<PatientECG> GetPatientECGAsync()
+        public Task<PatientEcgParams> GetPatientEcgParamsAsync(TimeSpan duration)
         {
             return Task.Factory.StartNew(() =>
             {
-
-                PatientECG patientECG = new PatientECG();
+                var  patientECG = new PatientEcgParams();
                 return patientECG;
             });
         }
-        
+
+    
         //черновой вариант - отрефачить после тестов с новым монитором
         public void Listner()
         {

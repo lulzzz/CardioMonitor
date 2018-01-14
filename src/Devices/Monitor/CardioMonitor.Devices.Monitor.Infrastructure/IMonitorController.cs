@@ -1,6 +1,5 @@
-﻿
+﻿using System;
 using System.Threading.Tasks;
-using CardioMonitor.BLL.CoreContracts.Session;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.Devices.Monitor.Infrastructure
@@ -13,21 +12,27 @@ namespace CardioMonitor.Devices.Monitor.Infrastructure
         /// <summary>
         /// Накачка манжеты рукава для измерения давления
         /// </summary>
-        /// <returns></returns>
-        //todo remove return value
-        Task<bool> PumpCuffAsync();
+        Task PumpCuffAsync();
 
         /// <summary>
         /// Возвращает показатели пациента, снятые с монитора
         /// </summary>
         /// <returns></returns>
         [NotNull]
-        Task<PatientParams> GetPatientParamsAsync();
+        Task<PatientCommonParams> GetPatientParamsAsync();
 
         /// <summary>
         /// Возвращает параметры пациента, связанные с давлением
         /// </summary>
         /// <returns></returns>
-        Task<PatientPressureParams> GetPatientPressureParams();
+        [NotNull]
+        Task<PatientPressureParams> GetPatientPressureParamsAsync();
+
+        /// <summary>
+        /// Возвращает ЭКГ
+        /// </summary>
+        /// <param name="duration">Длительность снятия ЭКГ (чтобы потом было легче изменять)</param>
+        /// <returns></returns>
+        Task<PatientEcgParams> GetPatientEcgParamsAsync(TimeSpan duration);
     }
 }

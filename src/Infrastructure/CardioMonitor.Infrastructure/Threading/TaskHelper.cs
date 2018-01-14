@@ -50,11 +50,53 @@ namespace CardioMonitor.Infrastructure.Threading
         }
 
         /// <summary>
+        /// Запускает задачу, которая должна выполниться за определенное время,
+        /// и в случае истечения таймаута генерирует TimeoutException
+        /// </summary>
+        /// <param name="task">Задача, которую следует запустить</param>
+        /// <param name="timeout">Значение таймаута</param>
+        /// <returns>Выполнившуюся задачу</returns>
+        /// <exception cref="TimeoutException">В случае невыполнения задачу за указанный временный промежуток</exception>
+        public async Task StartWithTimeout(Task task, TimeSpan timeout)
+        {
+            var delayTask = Task.Delay(timeout);
+            var firstToFinish = await Task.WhenAny(task, delayTask);
+
+            if (firstToFinish == delayTask)
+            {
+                // Если задачу ответить в течение указанного времени, значит она не зависла и можно
+                // обработать исключения, если они возникли, иначе бросаем исключение
+                var waitingTimeout = new TimeSpan(0, 0, 1);
+                if (task.Wait(waitingTimeout))
+                {
+                    await task.ContinueWith(LogException);
+                }
+                //TODO нужно придумать, как убивать задачу
+                throw new TimeoutException();
+            }
+
+            await task;
+        }
+        
+        /// <summary>
         /// Создает запись в лог об исключении
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="task">Задача, в которой, вероятно, могло быть исключение</param>
         private void LogException<T>(Task<T> task)
+        {
+            if (task.Exception != null)
+            {
+                _logger.LogError("TaskHelper", task.Exception);
+            }
+        }
+        
+        /// <summary>
+        /// Создает запись в лог об исключении
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="task">Задача, в которой, вероятно, могло быть исключение</param>
+        private void LogException(Task task)
         {
             if (task.Exception != null)
             {

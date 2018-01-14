@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CardioMonitor.BLL.CoreContracts.Session
+﻿namespace CardioMonitor.Devices.Monitor.Infrastructure
 {
     /// <summary>
     /// ЭКГ пациента
     /// </summary>
-    public class PatientEcg
+    public class PatientEcgParams
     {
         /// <summary>
         /// Массив значений ЭКГ пациента
@@ -17,5 +11,6 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         /// значения емнип 0 - 2047 (у координата)
         /// </summary>
         public int[] Data { get; set; }
+        
     }
 }
