@@ -68,6 +68,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.BLL.SessionPr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Bll.SessionProcessing.UnitTests", "..\tests\UnitTests\CardioMonitor.Bll.SessionProcessing.UnitTests\CardioMonitor.Bll.SessionProcessing.UnitTests.csproj", "{061B4A48-DA7E-41F8-98C5-450C66107D92}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Infrastructure.Workers", "Infrastructure\CardioMonitor.Infrastructure.Workers\CardioMonitor.Infrastructure.Workers.csproj", "{060DD75D-D142-47F9-A949-FDB171CDE123}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Monitor|Any CPU = Debug_Monitor|Any CPU
@@ -228,6 +230,14 @@ Global
 		{061B4A48-DA7E-41F8-98C5-450C66107D92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{061B4A48-DA7E-41F8-98C5-450C66107D92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{061B4A48-DA7E-41F8-98C5-450C66107D92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{060DD75D-D142-47F9-A949-FDB171CDE123}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{060DD75D-D142-47F9-A949-FDB171CDE123}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{060DD75D-D142-47F9-A949-FDB171CDE123}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{060DD75D-D142-47F9-A949-FDB171CDE123}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{060DD75D-D142-47F9-A949-FDB171CDE123}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{060DD75D-D142-47F9-A949-FDB171CDE123}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{060DD75D-D142-47F9-A949-FDB171CDE123}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{060DD75D-D142-47F9-A949-FDB171CDE123}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -261,5 +271,6 @@ Global
 		{30D57049-A4F5-4CA7-A5BD-DBD9FFAD5A64} = {5AA0AAFD-1B20-49A8-98FE-ED54808240D6}
 		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898} = {8F6753BC-36B1-4360-B3F2-8EE4506E78EE}
 		{061B4A48-DA7E-41F8-98C5-450C66107D92} = {A5037BBA-6297-4556-B2B9-F09E8989543C}
+		{060DD75D-D142-47F9-A949-FDB171CDE123} = {950B6A1C-CFA8-49B9-81A9-398402EA1D17}
 	EndGlobalSection
 EndGlobal
