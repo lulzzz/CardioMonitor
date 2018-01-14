@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.CheckPoints;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.Angle;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints
 {
-    internal class CheckPointChecker : IPipelineElement
+    internal class CheckPointChecker : ICycleProcessingPipelineElement
     {
         private readonly ICheckPointResolver _checkPointResolver;
 
@@ -16,7 +17,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
             _checkPointResolver = checkPointResolver ?? throw new ArgumentNullException(nameof(checkPointResolver));
         }
 
-        public async Task<PipelineContext> ProcessAsync([NotNull] PipelineContext context)
+        public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             
@@ -29,16 +30,16 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
                 var isCheckPointReached = _checkPointResolver.IsCheckPointReached(angleParams.CurrentAngle);
                 if (!isCheckPointReached)
                 {
-                    context.AddOrUpdate(new CheckPointContextParams(false, false));
+                    context.AddOrUpdate(new CheckPointCycleProcessingContextParams(false, false));
                     return context;
                 }
                 var isMaxCheckPoint = _checkPointResolver.IsMaxCheckPointReached(angleParams.CurrentAngle);
-                context.AddOrUpdate(new CheckPointContextParams(true, isMaxCheckPoint));
+                context.AddOrUpdate(new CheckPointCycleProcessingContextParams(true, isMaxCheckPoint));
             }
             catch (Exception e)
             {
                 context.AddOrUpdate(
-                    new ExceptionContextParams(
+                    new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.Unknown,
                             e.Message,
@@ -50,7 +51,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints
             return context;
         }
 
-        public bool CanProcess([NotNull] PipelineContext context)
+        public bool CanProcess([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             return true;

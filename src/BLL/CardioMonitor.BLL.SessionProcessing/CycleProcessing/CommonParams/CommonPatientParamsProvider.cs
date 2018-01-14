@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.CoreContracts.Session;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.ForcedDataCollectionRequest;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.Angle;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.ForcedDataCollectionRequest;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CommonParams
 {
-    internal class CommonPatientParamsProvider : IPipelineElement
+    internal class CommonPatientParamsProvider : ICycleProcessingPipelineElement
     {
         /// <summary>
         /// Точность для сравнение double величин
@@ -38,7 +39,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
             _updatePatientParamTimeout = new TimeSpan(0, 0, 8);
         }
 
-        public async Task<PipelineContext> ProcessAsync([NotNull] PipelineContext context)
+        public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             var angleParams = context.TryGetAngleParam();
@@ -55,7 +56,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
             {
               
                 context.AddOrUpdate(
-                    new ExceptionContextParams(
+                    new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(SessionProcessingErrorCodes.PatientCommonParamsRequestTimeout,
                             e.Message,
                             e)));
@@ -63,7 +64,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
             catch (Exception e)
             {
                 context.AddOrUpdate(
-                    new ExceptionContextParams(
+                    new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(SessionProcessingErrorCodes.PatientCommonParamsRequestError,
                             e.Message,
                             e)));
@@ -87,7 +88,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
             param.InclinationAngle = Math.Abs(angleParams.CurrentAngle) < Tolerance ? 0 : angleParams.CurrentAngle;
             
             context.AddOrUpdate(
-                new CommonPatientContextParams(
+                new CommonPatientCycleProcessingContextParams(
                     param.InclinationAngle,
                     param.HeartRate,
                     param.RepsirationRate,
@@ -96,7 +97,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams
             return context;
         }
 
-        public bool CanProcess([NotNull] PipelineContext context)
+        public bool CanProcess([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 

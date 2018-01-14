@@ -1,26 +1,27 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
 {
-    internal class PipelineContext
+    internal class CycleProcessingContext
     {
-        private readonly ConcurrentDictionary<Guid, IContextParams> _context;
+        private readonly ConcurrentDictionary<Guid, ICycleProcessingContextParams> _context;
 
-        public PipelineContext()
+        public CycleProcessingContext()
         {
-            _context = new ConcurrentDictionary<Guid, IContextParams>();
+            _context = new ConcurrentDictionary<Guid, ICycleProcessingContextParams>();
         }
 
-        public void AddOrUpdate([NotNull] IContextParams @params)
+        public void AddOrUpdate([NotNull] ICycleProcessingContextParams @params)
         {
             if (@params == null) throw new ArgumentNullException(nameof(@params));
             
             _context.AddOrUpdate(@params.ParamsTypeId, @params, (guid, o) => @params);
         }
 
-        public IContextParams TryGet(Guid id)
+        public ICycleProcessingContextParams TryGet(Guid id)
         {
             _context.TryGetValue(id, out var value);
             return value;

@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.CoreContracts.Session;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.ForcedDataCollectionRequest;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.Angle;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.ForcedDataCollectionRequest;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
 using Enexure.MicroBus.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams
 {
-    internal class PatientPressureParamsProvider : IPipelineElement
+    internal class PatientPressureParamsProvider : ICycleProcessingPipelineElement
     {
          /// <summary>
         /// Точность для сравнение double величин
@@ -44,7 +45,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams
             _pumpingTimeout = new TimeSpan(0, 0, 8);
         }
 
-        public async Task<PipelineContext> ProcessAsync([NotNull] PipelineContext context)
+        public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             var angleParams = context.TryGetAngleParam();
@@ -60,7 +61,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams
             catch (TimeoutException e)
             {
                 context.AddOrUpdate(
-                    new ExceptionContextParams(
+                    new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PumpingTimeout,
                             e.Message,
@@ -70,7 +71,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams
             catch (Exception e)
             {
                 context.AddOrUpdate(
-                    new ExceptionContextParams(
+                    new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PumpingError,
                             e.Message,
@@ -92,7 +93,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams
             catch (TimeoutException e)
             {
                 context.AddOrUpdate(
-                    new ExceptionContextParams(
+                    new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PatientPressureParamsRequestTimeout,
                             e.Message,
@@ -101,7 +102,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams
             catch (Exception e)
             {
                 context.AddOrUpdate(
-                    new ExceptionContextParams(
+                    new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PatientPressureParamsRequestError,
                             e.Message,
@@ -121,10 +122,10 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams
             return context;
         }
 
-        private void UpdateContex(PatientParams param, PipelineContext context)
+        private void UpdateContex(PatientParams param, CycleProcessingContext context)
         {
             context.AddOrUpdate(
-                new PressureContextParams(
+                new PressureCycleProcessingContextParams(
                     param.InclinationAngle,
                     param.SystolicArterialPressure,
                     param.DiastolicArterialPressure,
@@ -144,7 +145,7 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams
             };
         }
 
-        public bool CanProcess([NotNull] PipelineContext context)
+        public bool CanProcess([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 

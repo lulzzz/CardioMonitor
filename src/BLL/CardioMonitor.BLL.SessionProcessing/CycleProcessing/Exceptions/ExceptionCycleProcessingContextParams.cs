@@ -2,13 +2,13 @@
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions
 {
-    internal class ExceptionContextParams : IContextParams
+    internal class ExceptionCycleProcessingContextParams : ICycleProcessingContextParams
     {
         public static readonly Guid ExceptionContextParamsContextParamsId = new Guid("16aa0bb0-aa1b-47a1-a11c-af362f6bfa7b");
 
-        public ExceptionContextParams(SessionProcessingException exception)
+        public ExceptionCycleProcessingContextParams(SessionProcessingException exception)
         {
             Exception = exception;
         }
@@ -20,12 +20,12 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
 
     internal static class ExceptionContextParamsPipelineConextExtensions
     {
-        public static ExceptionContextParams TryGetExceptionContextParams([NotNull] this PipelineContext context)
+        public static ExceptionCycleProcessingContextParams TryGetExceptionContextParams([NotNull] this CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            return context.TryGet(ExceptionContextParams.ExceptionContextParamsContextParamsId) as
-                ExceptionContextParams;
+            return context.TryGet(ExceptionCycleProcessingContextParams.ExceptionContextParamsContextParamsId) as
+                ExceptionCycleProcessingContextParams;
         }
     }
 }

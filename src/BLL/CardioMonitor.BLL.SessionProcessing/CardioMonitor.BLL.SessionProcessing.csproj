@@ -33,7 +33,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CycleProcessing\ForcedDataCollectionRequest\ForcedDataCollectionRequestContextParams.cs" />
+    <Compile Include="CycleProcessing\Exceptions\ExceptionCycleProcessingContextParams.cs" />
+    <Compile Include="CycleProcessing\Exceptions\ICycleProcessingContextParams.cs" />
+    <Compile Include="CycleProcessing\ForcedDataCollectionRequest\ForcedDataCollectionRequestCycleProcessingContextParams.cs" />
+    <Compile Include="CycleProcessing\Iterations\IterationCycleProcessingContextParams.cs" />
+    <Compile Include="CycleProcessing\Iterations\IterationParamsProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CheckPoints\CheckPointAnglesFactory.cs" />
     <Compile Include="CheckPoints\CheckPointResolver.cs" />
@@ -43,25 +47,23 @@
     <Compile Include="Exceptions\SessionProcessingErrorCodes.cs" />
     <Compile Include="Exceptions\SessionProcessingException.cs" />
     <Compile Include="MaxAngle.cs" />
-    <Compile Include="CycleProcessing\Angle\AngleContextParams.cs" />
+    <Compile Include="CycleProcessing\Angle\AngleCycleProcessingContextParams.cs" />
     <Compile Include="CycleProcessing\Angle\AngleReciever.cs" />
     <Compile Include="CycleProcessing\CheckPoints\CheckPointChecker.cs" />
-    <Compile Include="CycleProcessing\CheckPoints\CheckPointContextParams.cs" />
+    <Compile Include="CycleProcessing\CheckPoints\CheckPointCycleProcessingContextParams.cs" />
     <Compile Include="CycleProcessing\CommonPatientParams.cs" />
-    <Compile Include="CycleProcessing\CommonParams\CommonPatientContextParams.cs" />
+    <Compile Include="CycleProcessing\CommonParams\CommonPatientCycleProcessingContextParams.cs" />
     <Compile Include="CycleProcessing\CommonParams\CommonPatientParamsProvider.cs" />
-    <Compile Include="CycleProcessing\ExceptionContextParams.cs" />
-    <Compile Include="CycleProcessing\IContextParams.cs" />
     <Compile Include="CycleProcessing\ICycleProcessor.cs" />
-    <Compile Include="CycleProcessing\IPipelineElement.cs" />
+    <Compile Include="CycleProcessing\ICycleProcessingPipelineElement.cs" />
     <Compile Include="CycleProcessing\PatientPressureParams.cs" />
     <Compile Include="CycleProcessing\CycleProcessor.cs" />
-    <Compile Include="CycleProcessing\PipelineContext.cs" />
+    <Compile Include="CycleProcessing\CycleProcessingContext.cs" />
     <Compile Include="CycleProcessing\PipelineStartParams.cs" />
     <Compile Include="CycleProcessing\PressureParams\PatientPressureParamsProvider.cs" />
-    <Compile Include="CycleProcessing\PressureParams\PressureContextParams.cs" />
-    <Compile Include="CycleProcessing\Time\TimeContextParamses.cs" />
-    <Compile Include="CycleProcessing\Time\CycleTimeController.cs" />
+    <Compile Include="CycleProcessing\PressureParams\PressureCycleProcessingContextParams.cs" />
+    <Compile Include="CycleProcessing\Time\TimeCycleProcessingContextParamses.cs" />
+    <Compile Include="CycleProcessing\Time\CycleProcessingSynchroniaztionController.cs" />
     <Compile Include="Processing\CycleDurationCalculator.cs" />
     <Compile Include="Processing\CycleStateMachineBuilder.cs" />
     <Compile Include="SessionContext.cs" />

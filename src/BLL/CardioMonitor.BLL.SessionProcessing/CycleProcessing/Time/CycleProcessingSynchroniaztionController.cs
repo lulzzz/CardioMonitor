@@ -6,11 +6,14 @@ using JetBrains.Annotations;
 namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Time
 {
     /// <summary>
-    /// Обработчик времени цикла
+    /// Контроллер, который управляет процессом обработки цикла. 
     /// </summary>
-    internal class CycleTimeController
+    /// <remarks>
+    /// По факту выступает в роле тактового генератора, чтобы запускать опрос устройст, сбор данных и уведомление подписчиков
+    /// </remarks>
+    internal class CycleProcessingSynchroniaztionController
     {
-        [NotNull] private readonly BroadcastBlock<PipelineContext> _pipelineStartBlock;
+        [NotNull] private readonly BroadcastBlock<CycleProcessingContext> _pipelineStartBlock;
 
         [CanBeNull]
         private CardioTimer _timer;
@@ -31,7 +34,7 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Time
         private TimeSpan _elapsedTime;
 
 
-        public CycleTimeController([NotNull] BroadcastBlock<PipelineContext> pipelineStartBlock)
+        public CycleProcessingSynchroniaztionController([NotNull] BroadcastBlock<CycleProcessingContext> pipelineStartBlock)
         {
             _pipelineStartBlock = pipelineStartBlock ?? throw new ArgumentNullException(nameof(pipelineStartBlock));
             IsPaused = false;
@@ -53,9 +56,9 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Time
         private async void TimerTick(object sender, EventArgs args)
         {
             _elapsedTime += _cycleTickDuration;
-            var context = new PipelineContext();
+            var context = new CycleProcessingContext();
             
-            var timeParams = new TimeContextParamses(_cycleDuration, _elapsedTime);
+            var timeParams = new TimeCycleProcessingContextParamses(_cycleDuration, _elapsedTime);
             context.AddOrUpdate(timeParams);
             
             await _pipelineStartBlock

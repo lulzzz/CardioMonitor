@@ -1,15 +1,16 @@
 ﻿using System;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams
 {
-    internal class PressureContextParams : IContextParams
+    internal class PressureCycleProcessingContextParams : ICycleProcessingContextParams
     {
         public static readonly Guid PressureParamsId = new Guid("59c3d092-78d1-4e6e-b3d5-22a4ca3d298c");
         
         public Guid ParamsTypeId { get; }
 
-        public PressureContextParams(
+        public PressureCycleProcessingContextParams(
             double inclinationAngle, 
             short systolicArterialPressure, 
             short diastolicArterialPressure, 
@@ -44,11 +45,11 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams
 
     internal static class PressureParamsContextExntensions
     {
-        public static PressureContextParams TryGetPressureParams([NotNull] this PipelineContext context)
+        public static PressureCycleProcessingContextParams TryGetPressureParams([NotNull] this CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            return context.TryGet(PressureContextParams.PressureParamsId) as PressureContextParams;
+            return context.TryGet(PressureCycleProcessingContextParams.PressureParamsId) as PressureCycleProcessingContextParams;
         }
     }
 }

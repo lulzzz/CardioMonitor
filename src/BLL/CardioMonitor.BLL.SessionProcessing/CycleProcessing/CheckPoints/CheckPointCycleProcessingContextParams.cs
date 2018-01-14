@@ -1,15 +1,16 @@
 ﻿using System;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints
 {
-    internal class CheckPointContextParams : IContextParams
+    internal class CheckPointCycleProcessingContextParams : ICycleProcessingContextParams
     {
         public static readonly Guid CheckPointContextParamsId = new Guid("19338674-ba21-45cd-8bcc-1e6a9dddac24");
         
         public Guid ParamsTypeId { get; }
 
-        public CheckPointContextParams(bool isCheckPointReached, bool isMaxCheckPoint)
+        public CheckPointCycleProcessingContextParams(bool isCheckPointReached, bool isMaxCheckPoint)
         {
             IsCheckPointReached = isCheckPointReached;
             IsMaxCheckPoint = isMaxCheckPoint;
@@ -22,11 +23,11 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints
 
     internal static class CheckPointParamsContextExnteions
     {
-        public static CheckPointContextParams TryGetCheckPointParams([NotNull] this PipelineContext context)
+        public static CheckPointCycleProcessingContextParams TryGetCheckPointParams([NotNull] this CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             
-            return context.TryGet(CheckPointContextParams.CheckPointContextParamsId) as CheckPointContextParams;
+            return context.TryGet(CheckPointCycleProcessingContextParams.CheckPointContextParamsId) as CheckPointCycleProcessingContextParams;
         }
     }
 }

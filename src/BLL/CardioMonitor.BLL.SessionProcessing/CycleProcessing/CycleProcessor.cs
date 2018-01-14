@@ -1,34 +1,34 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using CardioMonitor.BLL.SessionProcessing.CheckPoints;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.CommonParams;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.ForcedDataCollectionRequest;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Time;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.Angle;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.CheckPoints;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.CommonParams;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.ForcedDataCollectionRequest;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.PressureParams;
-using CardioMonitor.BLL.SessionProcessing.Pipelines.Time;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.Pipelines
+namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
 {
     internal class CycleProcessor : 
         ICycleProcessor,
         IDisposable
     {
         [NotNull] private readonly ICheckPointResolver _checkPointResolver;
-        [NotNull] private readonly CycleTimeController _cycleTimeController;
+        [NotNull] private readonly CycleProcessingSynchroniaztionController _cycleProcessingSynchroniaztionController;
 
         private readonly PipelineStartParams _startParams;
 
-        private readonly BroadcastBlock<PipelineContext> _pipelineOnTimeStartBlock;
-        private readonly ActionBlock<PipelineContext> _pipelineFinishCollectorBlock;
-        private readonly BroadcastBlock<PipelineContext> _forcedRequestBlock;
+        private readonly BroadcastBlock<CycleProcessingContext> _pipelineOnTimeStartBlock;
+        private readonly ActionBlock<CycleProcessingContext> _pipelineFinishCollectorBlock;
+        private readonly BroadcastBlock<CycleProcessingContext> _forcedRequestBlock;
 
         private bool _isStandartProcessingInProgress;
         
@@ -58,27 +58,27 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
             
             _startParams = startParams ?? throw new ArgumentNullException(nameof(startParams));
 
-            _pipelineOnTimeStartBlock = new BroadcastBlock<PipelineContext>(context => context);
-            _pipelineFinishCollectorBlock = new ActionBlock<PipelineContext>(CollectDataFromPipeline);
-            _forcedRequestBlock = new BroadcastBlock<PipelineContext>(context => context);
+            _pipelineOnTimeStartBlock = new BroadcastBlock<CycleProcessingContext>(context => context);
+            _pipelineFinishCollectorBlock = new ActionBlock<CycleProcessingContext>(CollectDataFromPipeline);
+            _forcedRequestBlock = new BroadcastBlock<CycleProcessingContext>(context => context);
 
             var angleReciever = new AngleReciever(bedController);
             var anlgeRecieveBlock =
-                new TransformBlock<PipelineContext, PipelineContext>(context => angleReciever.ProcessAsync(context));
+                new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context => angleReciever.ProcessAsync(context));
 
             var checkPointChecker = new CheckPointChecker(checkPointResolver);
             var checkPointCheckBlock =
-                new TransformBlock<PipelineContext, PipelineContext>(context =>
+                new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
                     checkPointChecker.ProcessAsync(context));
 
-            var mainBroadcastBlock = new BroadcastBlock<PipelineContext>(context => context);
+            var mainBroadcastBlock = new BroadcastBlock<CycleProcessingContext>(context => context);
 
             var pressureParamsProvider = new PatientPressureParamsProvider(monitorController, taskHelper);
-            var pressureParamsProviderBlock = new TransformBlock<PipelineContext, PipelineContext>(
+            var pressureParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pressureParamsProvider.ProcessAsync(context));
             
             var commonParamsProvider = new CommonPatientParamsProvider(monitorController, taskHelper);
-            var commonParamsProviderBlock = new TransformBlock<PipelineContext, PipelineContext>(
+            var commonParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => commonParamsProvider.ProcessAsync(context));
             
             _pipelineOnTimeStartBlock.LinkTo(
@@ -151,11 +151,11 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
                 },
                 context => pressureParamsProvider.CanProcess(context));
             
-            _cycleTimeController = new CycleTimeController(_pipelineOnTimeStartBlock);
+            _cycleProcessingSynchroniaztionController = new CycleProcessingSynchroniaztionController(_pipelineOnTimeStartBlock);
             _isStandartProcessingInProgress = false;
         }
 
-        private async Task CollectDataFromPipeline([NotNull] PipelineContext context)
+        private async Task CollectDataFromPipeline([NotNull] CycleProcessingContext context)
         {
             await Task.Yield();
 
@@ -203,14 +203,14 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
         {
             await Task.Yield();
             
-            if (_cycleTimeController.IsPaused)
+            if (_cycleProcessingSynchroniaztionController.IsPaused)
             {
-                _cycleTimeController.Resume();
+                _cycleProcessingSynchroniaztionController.Resume();
             }
             else
             {
-                _cycleTimeController.Init(_startParams.CycleDuration, _startParams.CycleTickDuration);
-                _cycleTimeController.Start();
+                _cycleProcessingSynchroniaztionController.Init(_startParams.CycleDuration, _startParams.CycleTickDuration);
+                _cycleProcessingSynchroniaztionController.Start();
                 _isStandartProcessingInProgress = true;
             }
         }
@@ -218,20 +218,20 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
         public async Task StopAsync()
         {
             await Task.Yield();
-            _cycleTimeController.Stop();
+            _cycleProcessingSynchroniaztionController.Stop();
             _isStandartProcessingInProgress = false;
         }
 
         public async Task PauseAsync()
         {
             await Task.Yield();
-            _cycleTimeController.Puase();
+            _cycleProcessingSynchroniaztionController.Puase();
         }
 
         public async Task ResetAsync()
         {
             await Task.Yield();
-            _cycleTimeController.Init(_startParams.CycleDuration, _startParams.CycleTickDuration);
+            _cycleProcessingSynchroniaztionController.Init(_startParams.CycleDuration, _startParams.CycleTickDuration);
             _isStandartProcessingInProgress = false; 
         }
 
@@ -253,8 +253,8 @@ namespace CardioMonitor.BLL.SessionProcessing.Pipelines
                 throw new InvalidOperationException("Can not execute force request while cycle on progress");
             }
             
-            var context = new PipelineContext();
-            context.AddOrUpdate(new ForcedDataCollectionRequestContextParams(true));
+            var context = new CycleProcessingContext();
+            context.AddOrUpdate(new ForcedDataCollectionRequestCycleProcessingContextParams(true));
             await _forcedRequestBlock
                 .SendAsync(context)
                 .ConfigureAwait(false);

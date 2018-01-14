@@ -1,15 +1,16 @@
 ﻿using System;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CommonParams
 {
-    internal class CommonPatientContextParams : IContextParams
+    internal class CommonPatientCycleProcessingContextParams : ICycleProcessingContextParams
     {
         public static readonly Guid CommonPatientParamsId = new Guid("c571aac1-4c5c-4def-9296-1aef33953ae4");
 
         public Guid ParamsTypeId { get; } = CommonPatientParamsId;
 
-        public CommonPatientContextParams(
+        public CommonPatientCycleProcessingContextParams(
             double inclinationAngle,
             short heartRate, 
             short repsirationRate, 
@@ -44,11 +45,11 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CommonParams
 
     internal static class CommonPatientParamsContextExtensions
     {
-        public static CommonPatientContextParams TryGetCommonPatientParams([NotNull] this PipelineContext context)
+        public static CommonPatientCycleProcessingContextParams TryGetCommonPatientParams([NotNull] this CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            return context.TryGet(CommonPatientContextParams.CommonPatientParamsId) as CommonPatientContextParams;
+            return context.TryGet(CommonPatientCycleProcessingContextParams.CommonPatientParamsId) as CommonPatientCycleProcessingContextParams;
         }
     }
 }

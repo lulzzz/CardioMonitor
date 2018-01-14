@@ -69,7 +69,7 @@ namespace CardioMonitor.BLL.SessionProcessing
         private readonly SessionParams _sessionParams;
         private IMicroBus _bus;
         private readonly IBedController _bedController;
-        private CycleTimeController _cycleTimeController;
+        private CycleProcessingSynchroniaztionController _cycleProcessingSynchroniaztionController;
         
         
         
@@ -168,7 +168,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             // при старте мы должны узнать длительность сеанса, запустить обработку сеанса
 
             var cycleDuration = await _bedController.GetCycleDurationAsync().ConfigureAwait(false);
-            _cycleTimeController.Init(cycleDuration, _cycleTick);
+            _cycleProcessingSynchroniaztionController.Init(cycleDuration, _cycleTick);
             
             var cycleStateMachineBuilder = new CycleStateMachineBuilder();
             cycleStateMachineBuilder.SetOnPreparedAction(PrepareCycle);

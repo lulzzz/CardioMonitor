@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Threading.Tasks;
+using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle
 {
-    internal class AngleReciever : IPipelineElement
+    internal class AngleReciever : ICycleProcessingPipelineElement
     {
         private readonly IBedController _bedController;
         
@@ -16,7 +17,7 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle
             _bedController = bedController ?? throw new ArgumentNullException(nameof(bedController));
         }
         
-        public async Task<PipelineContext> ProcessAsync([NotNull] PipelineContext context)
+        public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
@@ -26,19 +27,19 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle
                     .GetAngleXAsync()
                     .ConfigureAwait(false);
             
-                context.AddOrUpdate(new AngleContextParams(currentAngle));
+                context.AddOrUpdate(new AngleCycleProcessingContextParams(currentAngle));
             }
             catch (Exception e)
             {
                 context.AddOrUpdate(
-                    new ExceptionContextParams(
+                    new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(SessionProcessingErrorCodes.UpdateAngleError, e.Message, e)));
             }
            
             return context;
         }
 
-        public bool CanProcess([NotNull] PipelineContext context)
+        public bool CanProcess([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             return true;
