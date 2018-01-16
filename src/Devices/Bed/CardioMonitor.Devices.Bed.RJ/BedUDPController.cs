@@ -10,24 +10,48 @@ namespace CardioMonitor.Devices.Bed.UDP
     /// Работа с кроватью по сети
     /// протокол передачи посылок - UDP
     /// </summary>
-    public class BedUDPController : IBedController 
+    public class BedUDPController : IBedController
     {
+        private BedRegisterList _registerList;
         /// <summary>
         /// настройки подключения к кровати
         /// </summary>
-        private IPEndPoint _bedIpEndPoint = new IPEndPoint(IPAddress.Parse("192.168.56.3"), 7);
+        private IPEndPoint _bedIpEndPoint = new IPEndPoint(IPAddress.Parse("192.168.56.3"), 7777);
         private UdpClient _udpClient;
 
         /// <summary>
+        /// Подключена ли кровать
+        /// </summary>
+        public bool IsBedConnect { get; set; } = false;
+        
+        /// <summary>
         /// Метод для подключения к кровати
         /// </summary>
-        /// <param name="remoteIpEndPoint"> Ip и порт кровати </param>
-        public void BedConnection(IPEndPoint remoteIpEndPoint)
+        public void BedConnection()
         {
-            _udpClient.Connect(remoteIpEndPoint);
+            try
+            {
+                _udpClient.Connect(_bedIpEndPoint);
+                IsBedConnect = true;
+            }
+            catch (SocketException e)
+            {
+                IsBedConnect = false;
+               throw new SocketException();
+            }
+            
         }
 
-        private byte[] MessageConstructor()
+        /// <summary>
+        /// обновить значения регистров с кровати
+        /// </summary>
+        public void UpdateRegistersValue()
+        {
+            //todo здесь получение массива с регистрами и обновление результатов в _registerList
+        }
+
+
+        private byte[] MessageConstructor(/*todo registerType*/)
         {
             byte[] outputMessage = new byte[3];
 
@@ -36,12 +60,12 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         private void SendMessage(byte[] message)
         {
-            
+            _udpClient.Send(message, message.Length); //todo синхронная передача в блокирующем режиме - лучше через таску с таймаутом SendAsync
         }
 
         public BedStatus GetBedStatus()
         {
-            return BedStatus.Ready;
+           return (BedStatus)_registerList.BedStatus;
         }
 
         public BedMovingStatus GetBedMovingStatus()
@@ -49,7 +73,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             throw new NotImplementedException();
         }
 
-        public Task<TimeSpan> GetCycleDurationAsync()
+        public Task<TimeSpan> GetCycleDurationAsync() //здесь по идее тоже, ибо операция расчета выполняется при старте один раз
         {
             throw new NotImplementedException();
         }
@@ -69,9 +93,10 @@ namespace CardioMonitor.Devices.Bed.UDP
             throw new NotImplementedException();
         }
 
-        public Task<double> GetAngleXAsync()
+        public Task<double> GetAngleXAsync() //так как запрашивается просто из регистра - думаю таска тут не нужна
         {
-            throw new NotImplementedException();
+            return _registerList.BedTargetAngleX;
+           
         }
 
         public bool IsConnected()
