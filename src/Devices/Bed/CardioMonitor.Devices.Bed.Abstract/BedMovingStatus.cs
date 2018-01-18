@@ -1,7 +1,7 @@
 ﻿namespace CardioMonitor.Devices.Bed.Infrastructure
 {
     /// <summary>
-    /// Текущий статус кровати
+    /// Текущий статус движения кровати
     /// </summary>
     public enum BedMovingStatus
     {

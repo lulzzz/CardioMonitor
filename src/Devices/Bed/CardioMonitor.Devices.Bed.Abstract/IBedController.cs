@@ -3,58 +3,134 @@ using System.Threading.Tasks;
 
 namespace CardioMonitor.Devices.Bed.Infrastructure
 {
+    /// <summary>
+    /// Контроллер для взаимодействия с инверсионным столом
+    /// </summary>
     public interface IBedController : IDeviceController
     {
-        /// <summary>
-        /// Запрос текущего состояния устройства
-        /// </summary>
-        BedStatus GetBedStatus();
-
-        /// <summary>
-        /// Запрос текущего статуса движения кровати устройства 
-        /// </summary>
-        BedMovingStatus GetBedMovingStatus();
-
-        /// <summary>
-        /// Возвращает длительность одного цикла
-        /// </summary>
-        /// <returns></returns>
-        Task<TimeSpan> GetCycleDurationAsync();
-        
-        /// <summary>
-        /// Запрос флага старт/пауза (0 - пауза, 1- старт, -1 - изначальное состояние) и флага реверса (0 - реверс не вызван, 1 - вызван, -1 - изначальное состояние)
-        /// </summary>
-        //todo Мне не нравится этот метод в принципе, надо от него будет избавиться
-        void UpdateFlags();
-
-        /// <summary>
-        /// Возвращает признак начала работы кровати
-        /// </summary>
-        /// <returns></returns>
-        StartFlag GetStartFlag();
-
-        /// <summary>
-        /// Возвращает флаг реверсного движения кровати
-        /// </summary>
-        /// <returns></returns>
-        ReverseFlag GetReverseFlag();
-
-        /// <summary>
-        /// Возвращает угол наклона кровати по оси Х
-        /// </summary>
-        /// <returns></returns>
-        Task<double> GetAngleXAsync();
-
         /// <summary>
         /// Возвращает признак подключения устройство
         /// </summary>
         /// <returns></returns>
         bool IsConnected();
 
-        void ExecuteCommand(BedControlCommand command);
+        /// <summary>
+        /// Иницализурет контроллер
+        /// </summary>
+        /// <param name="initParams">Параметры инициализации</param>
+        /// <remarks>
+        /// Необходимо выполнять инициализацию перед всеми действиями
+        /// </remarks>
+        void Init(IBedControllerInitParams initParams);
+        
+        /// <summary>
+        /// Устанавливает подключение к инверсионному столу
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Перед подключением необходмо проинициализировать контроллер с помощью метода <see cref="Init"/>
+        /// </remarks>
+        Task ConnectAsync();
 
-        //так-с, что тут у нас, ага
+        /// <summary>
+        /// Отключает контроллер от инверсионного стола
+        /// </summary>
+        /// <returns></returns>
+        Task DisconnectAsync();
+        
+        /// <summary>
+        /// Отправляет инверсионному столу команду для выполнения
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        Task ExecuteCommandAsync(BedControlCommand command);
+        
+        /// <summary>
+        /// Запрос текущего состояния устройства
+        /// </summary>
+        Task<BedStatus> GetBedStatusAsync();
 
+        /// <summary>
+        /// Запрос текущего статуса движения кровати устройства 
+        /// </summary>
+        Task<BedMovingStatus> GetBedMovingStatusAsync();
 
+        /// <summary>
+        /// Возвращает длительность одного цикла
+        /// </summary>
+        /// <returns></returns>
+        Task<TimeSpan> GetCycleDurationAsync();
+
+        /// <summary>
+        /// Возвращает количество циклов в сеансе
+        /// </summary>
+        /// <returns></returns>
+        Task<short> GetCyclesCountAsync();
+        
+        /// <summary>
+        /// Возвращает номер текущего цикла в сеансе
+        /// </summary>
+        /// <returns></returns>
+        Task<short> GetCurrentCycleNumberAsync();
+
+        /// <summary>
+        /// Возвращает количество итераций в цикле
+        /// </summary>
+        /// <returns></returns>
+        Task<short> GetIterationsCountAsync();
+
+        /// <summary>
+        /// Возвращает номер текущей итерации
+        /// </summary>
+        /// <returns></returns>
+        Task<short> GetCurrentIterationAsync();
+
+        /// <summary>
+        /// Возвращает номер ближайшей итерации для снятия параметров давления
+        /// </summary>
+        /// <returns></returns>
+        Task<short> GetNextIterationNumberForPressureMeasuringAsync();
+        
+        /// <summary>
+        /// Возвращает номер ближейшей итерации для снятия общих параметров пациента
+        /// </summary>
+        /// <returns></returns>
+        Task<short> GetNextIterationNumberForCommonParamsMeasuringAsync();
+
+        /// <summary>
+        /// Возвращает номер ближайшей итерации для снятия ЭКГ
+        /// </summary>
+        /// <returns></returns>
+        Task<short> GetNextIterationNumberForEcgMeasuringAsync();
+
+        /// <summary>
+        /// Возвращает время, оставшеся до конца сеанса
+        /// </summary>
+        /// <returns></returns>
+        Task<TimeSpan> GetRemainingTimeAsync();
+
+        /// <summary>
+        /// Возвращает время, прошедшее с начала сеанса
+        /// </summary>
+        /// <returns></returns>
+        Task<TimeSpan> GetElapsedTimeAsync();
+        
+        /// <summary>
+        /// Возвращает признак начала работы кровати
+        /// </summary>
+        /// <returns></returns>
+        Task<StartFlag> GetStartFlagAsync();
+
+        /// <summary>
+        /// Возвращает флаг реверсного движения кровати
+        /// </summary>
+        /// <returns></returns>
+        Task<ReverseFlag> GetReverseFlagAsync();
+        
+        /// <summary>
+        /// Возвращает угол наклона кровати по оси Х
+        /// </summary>
+        /// <returns></returns>
+        Task<double> GetAngleXAsync();
     }
 }

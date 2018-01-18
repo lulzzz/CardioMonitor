@@ -45,6 +45,7 @@
     <Compile Include="BedMovingStatus.cs" />
     <Compile Include="BedStatus.cs" />
     <Compile Include="IBedController.cs" />
+    <Compile Include="IBedControllerInitParams.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReverseFlag.cs" />
     <Compile Include="StartFlag.cs" />

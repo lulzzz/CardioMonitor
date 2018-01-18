@@ -4,13 +4,13 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
 {
-    internal class AngleCycleProcessingContextParams : ICycleProcessingContextParams
+    internal class AngleXContextParams : ICycleProcessingContextParams
     {
         public static readonly Guid AngleContextParamId = new Guid("7f2ae094-ea77-407e-9611-9b14a3fc2bbd");
 
         public Guid ParamsTypeId { get; } = AngleContextParamId;
 
-        public AngleCycleProcessingContextParams(double currentAngle)
+        public AngleXContextParams(double currentAngle)
         {
             CurrentAngle = currentAngle;
         }
@@ -18,13 +18,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
         public double CurrentAngle { get; }
     }
 
-    internal static class AngleParamContextExtension
+    internal static class AngleXParamContextExtension
     {
-        public static AngleCycleProcessingContextParams TryGetAngleParam([NotNull] this CycleProcessingContext context)
+        public static AngleXContextParams TryGetAngleParam([NotNull] this CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             
-            return context.TryGet(AngleCycleProcessingContextParams.AngleContextParamId) as AngleCycleProcessingContextParams;
+            return context.TryGet(AngleXContextParams.AngleContextParamId) as AngleXContextParams;
         }
     }
 }

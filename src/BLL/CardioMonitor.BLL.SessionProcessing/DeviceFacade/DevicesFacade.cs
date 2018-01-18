@@ -24,7 +24,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         [NotNull] private readonly ICheckPointResolver _checkPointResolver;
         [NotNull] private readonly CycleProcessingSynchroniaztionController _cycleProcessingSynchroniaztionController;
 
-        private readonly PipelineStartParams _startParams;
+        private readonly SeansParams _startParams;
 
         private readonly BroadcastBlock<CycleProcessingContext> _pipelineOnTimeStartBlock;
         private readonly ActionBlock<CycleProcessingContext> _pipelineFinishCollectorBlock;
@@ -34,20 +34,30 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         
         public event EventHandler<TimeSpan> OnElapsedTimeChanged;
         
-        public event EventHandler<double> OnCurrentAngleRecieved;
+        public event EventHandler<double> OnCurrentAngleXRecieved;
         
         public event EventHandler<PatientPressureParams> OnPatientPressureParamsRecieved;
         
         public event EventHandler<CommonPatientParams> OnCommonPatientParamsRecieved;
 
         public event EventHandler<SessionProcessingException> OnException;
-
+        
         public event EventHandler<short> OnCycleCompleted;
 
-        public event EventHandler OnCompleted;
+        public event EventHandler OnSessionCompleted;
+
+        public event EventHandler OnStartedFromDevice;
+        
+        public event EventHandler OnPausedFromDevice;
+        
+        public event EventHandler OnResumedFromDevice;
+        
+        public event EventHandler OnEmeregencyStoppedFromDevice;
+        
+        public event EventHandler OnReversedFromDevice;
         
         public DevicesFacade(
-            [NotNull] PipelineStartParams startParams,
+            [NotNull] SeansParams startParams,
             [NotNull] IBedController bedController,
             [NotNull] ICheckPointResolver checkPointResolver,
             [NotNull] IMonitorController monitorController,
@@ -175,7 +185,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var angleParams = context.TryGetAngleParam();
             if (angleParams != null)
             {
-                OnCurrentAngleRecieved?.Invoke(this, angleParams.CurrentAngle);
+                OnCurrentAngleXRecieved?.Invoke(this, angleParams.CurrentAngle);
             }
             var pressureParams = context.TryGetPressureParams();
             if (pressureParams != null)

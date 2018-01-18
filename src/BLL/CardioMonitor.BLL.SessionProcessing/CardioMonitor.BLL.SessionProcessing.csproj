@@ -47,7 +47,7 @@
     <Compile Include="Exceptions\SessionProcessingErrorCodes.cs" />
     <Compile Include="Exceptions\SessionProcessingException.cs" />
     <Compile Include="MaxAngle.cs" />
-    <Compile Include="DeviceFacade\Angle\AngleCycleProcessingContextParams.cs" />
+    <Compile Include="DeviceFacade\Angle\AngleXContextParams.cs" />
     <Compile Include="DeviceFacade\Angle\AngleReciever.cs" />
     <Compile Include="DeviceFacade\CheckPoints\CheckPointChecker.cs" />
     <Compile Include="DeviceFacade\CheckPoints\CheckPointCycleProcessingContextParams.cs" />
@@ -59,7 +59,7 @@
     <Compile Include="DeviceFacade\PatientPressureParams.cs" />
     <Compile Include="DeviceFacade\DevicesFacade.cs" />
     <Compile Include="DeviceFacade\CycleProcessingContext.cs" />
-    <Compile Include="DeviceFacade\PipelineStartParams.cs" />
+    <Compile Include="DeviceFacade\SeansParams.cs" />
     <Compile Include="DeviceFacade\PressureParams\PatientPressureParamsProvider.cs" />
     <Compile Include="DeviceFacade\PressureParams\PressureCycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\Time\TimeCycleProcessingContextParamses.cs" />

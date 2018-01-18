@@ -13,8 +13,8 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
 {
     public class PipelineTests
     {
-        private readonly PipelineStartParams _startParams = 
-            new PipelineStartParams(
+        private readonly SeansParams _startParams = 
+            new SeansParams(
                 TimeSpan.FromSeconds(1),
                 TimeSpan.FromSeconds(1));
         

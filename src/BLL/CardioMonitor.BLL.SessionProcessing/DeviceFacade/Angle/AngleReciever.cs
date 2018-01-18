@@ -27,7 +27,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
                     .GetAngleXAsync()
                     .ConfigureAwait(false);
             
-                context.AddOrUpdate(new AngleCycleProcessingContextParams(currentAngle));
+                context.AddOrUpdate(new AngleXContextParams(currentAngle));
             }
             catch (Exception e)
             {
