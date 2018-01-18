@@ -14,17 +14,25 @@
         /// </summary>
         Disconnected,
         /// <summary>
-        /// Идет калибровка 
+        /// Подготовка к запуску
         /// </summary>
-        Calibrating,
+        Preparing = 1, 
         /// <summary>
         /// Устройство готово 
         /// </summary>
-        Ready,
+        Ready = 0,
         /// <summary>
         ///  Идет цикл
         /// </summary>
-        Loop,
+        Loop = 2,
+        /// <summary>
+        /// Ошибка на устройстве
+        /// </summary>
+        Error = 5,
+        /// <summary>
+        /// Блокировка при старте с ПК
+        /// </summary>
+        Block = 3,
         /// <summary>
         ///  Устройство не готово (ожидание завершения возвращения)
         /// </summary>
