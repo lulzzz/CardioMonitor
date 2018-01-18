@@ -9,6 +9,26 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
     public interface IBedController : IDeviceController
     {
         /// <summary>
+        /// Событие нажаттия на кнопку `Старт` на пульте управления инверсионным столом
+        /// </summary>
+        event EventHandler OnStartFromDeviceRequested;
+        
+        /// <summary>
+        /// Событие нажаттия на кнопку `Пауза` на пульте управления инверсионным столом
+        /// </summary>
+        event EventHandler OnPauseFromDeviceRequested;
+        
+        /// <summary>
+        /// Событие нажаттия на кнопку `Продолжение` на пульте управления инверсионным столом
+        /// </summary>
+        event EventHandler OnResumeFromDeviceRequested;
+        
+        /// <summary>
+        /// Событие нажаттия на кнопку `Экстренаня остановка` на пульте управления инверсионным столом
+        /// </summary>
+        event EventHandler OnEmeregencyStopFromDeviceRequested;
+        
+        /// <summary>
         /// Возвращает признак подключения устройство
         /// </summary>
         /// <returns></returns>
