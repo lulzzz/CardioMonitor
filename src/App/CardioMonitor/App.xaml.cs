@@ -14,6 +14,7 @@ using CardioMonitor.Devices;
 using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Infrastructure.Threading;
+using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Logs;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui.View;
@@ -49,6 +50,8 @@ namespace CardioMonitor
             container.Register<ITreatmentsService, TreatmentsService>(Lifestyle.Singleton);
             container.Register<ISessionsService, SessionsService>(Lifestyle.Singleton);
             container.Register<IFilesManager, FilesManager>(Lifestyle.Singleton);
+            
+            container.Register<IWorkerController, WorkerController>(Lifestyle.Singleton);
 
             container.Register<MainWindowViewModel, MainWindowViewModel>(Lifestyle.Transient);
 

@@ -2,8 +2,9 @@
 using System.Collections.Concurrent;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Bed.UDP;
-using CardioMonitor.Devices.Monitor;
 using CardioMonitor.Devices.Monitor.Infrastructure;
+using CardioMonitor.Infrastructure.Workers;
+using CardioMonitor.Properties;
 
 namespace CardioMonitor.Devices
 {
@@ -16,10 +17,15 @@ namespace CardioMonitor.Devices
     /// </remarks>
     public class DeviceControllerFactory : IDeviceControllerFactory
     {
+        [NotNull]
         private readonly ConcurrentDictionary<Type, IDeviceController> _controllers;
+        
+        [NotNull]
+        private readonly IWorkerController _workerController;
 
-        public DeviceControllerFactory()
+        public DeviceControllerFactory([NotNull] IWorkerController workerController)
         {
+            _workerController = workerController ?? throw new ArgumentNullException(nameof(workerController));
             _controllers = new ConcurrentDictionary<Type, IDeviceController>();
         }
 
@@ -47,7 +53,7 @@ namespace CardioMonitor.Devices
 
         private IBedController _CreateBedController()
         {
-            return new BedUDPController();
+            return new BedUDPController(_workerController);
         }
         
         public IMonitorController CreateMonitorController()

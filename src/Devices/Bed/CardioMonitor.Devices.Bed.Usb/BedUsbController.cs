@@ -13,7 +13,9 @@ namespace CardioMonitor.Devices.Bed.Usb
     /// Потокобезопасный. И должен оставаться таким. 
     /// Необходимо сделать все методы асинхронными.
     /// </remarks>
-    public class BedUsbController : IBedController
+    //todo надо бы и его в порядок привести
+    [Obsolete("Является устаревшим. Возможно, нужно будет поддерживать")]
+    public class BedUsbController //: IBedController
     {
         private readonly object _lockObject;
 
@@ -37,7 +39,7 @@ namespace CardioMonitor.Devices.Bed.Usb
                 lock (_lockObject)
                 {
                     var device = GetBedUsbDevice();
-                    if (device == null) { return BedStatus.Disconnected; }
+                    if (device == null) { return BedStatus.Unknown; }
 
                     var message = new byte[] {0x6e, 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff};
                     device.write(message);
@@ -48,7 +50,7 @@ namespace CardioMonitor.Devices.Bed.Usb
                     {
                         if (readData[3] == 0)
                         {
-                            status = BedStatus.Calibrating;
+                            status = BedStatus.Ready;
                         }
                         if (readData[3] == 1)
                         {
@@ -56,7 +58,7 @@ namespace CardioMonitor.Devices.Bed.Usb
                         }
                         if (readData[3] == 2)
                         {
-                            status = BedStatus.Loop;
+                            status = BedStatus.SessionStarted;
                         }
                         if (readData[3] == 3)
                         {

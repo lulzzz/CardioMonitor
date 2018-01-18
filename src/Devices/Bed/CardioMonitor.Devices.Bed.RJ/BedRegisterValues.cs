@@ -7,43 +7,53 @@ using System.Threading.Tasks;
 namespace CardioMonitor.Devices.Bed.UDP
 {
     /// <summary>
-    /// список регистров кровати
+    /// Значение регистров кровати
     /// </summary>
-   public class BedRegisterList
+    /// <remarks>
+    /// В классе присутствует только необходимые для приложения поля регистры, а не все возможные
+    /// </remarks>
+   public class BedRegisterValues
     {
         /// <summary>
         /// Уникальный номер кровати
         /// </summary>
+        //todo а нужно ли нам это сейчас?
         public int BedID { get; set; }
 
         /// <summary>
         /// Общий счетчик всех запущенных сеансов
         /// </summary>
+        //todo а нужно ли нам это сейчас?
         public int BedFullSessionsCount { get; set; }
 
         /// <summary>
         /// Период сеансов между сервисным обслуживанием
         /// </summary>
+        //todo а нужно ли нам это сейчас?
         public int BedSessionServicePeriod { get; set; }
 
         /// <summary>
         /// Общее время работы кровати
         /// </summary>
+        //todo а нужно ли нам это сейчас?
         public int BedFullWorkingTime { get; set; }
 
         /// <summary>
         /// Период времени между сервисным обслуживанием
         /// </summary>
+        //todo а нужно ли нам это сейчас?
         public int BedTimeServicePeriod { get; set; }
 
         /// <summary>
         /// Максимальная скорость мотора по X-оси, degree/sec
         /// </summary>
+        //todo а нужно ли нам это сейчас?
         public int BedMaxSpeedX { get; set; }
 
         /// <summary>
         /// Максимальная скорость мотора по Y-оси, degree/sec
         /// </summary>
+        //todo а нужно ли нам это сейчас?
         public int BedMaxSpeedY { get; set; }
 
         /// <summary>
@@ -68,7 +78,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         ///  Статус может снять только ПК или по таймауту через 5 мин
         /// режим стоит WO (только на запись?)
         /// </summary> 
-        public int BedBlock { get; set; } //todo важная херня, не забыть про нее
+        public int IsBedBlocked { get; set; } //todo важная херня, не забыть про нее
 
         /// <summary>
         /// Частота для алгоритма движения, 1/sec
@@ -78,63 +88,64 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <summary>
         /// Максимальный угол наклона
         /// </summary>
+        //todo значение не дробное ли?
         public int MaxAngle { get; set; }
 
         /// <summary>
         /// Количество циклов (повторений) в одном сеансе
         /// </summary>
-        public int CycleCount { get; set; }
+        public short CycleCount { get; set; }
 
         /// <summary>
         /// Текущий цикл в сессии
         /// </summary>
-        public int CurrentCycle { get; set; }
+        public short CurrentCycle { get; set; }
 
         /// <summary>
         /// Текущая итерация в цикле
         /// </summary>
-        public int CurrentIteration { get; set; }
+        public short CurrentIteration { get; set; }
 
         /// <summary>
         /// Текущий шаг в итерации алгоритма(от 1 до 6)
         /// </summary>
-        public int CurrentStep { get; set; }
+        public short CurrentStep { get; set; }
 
         /// <summary>
         /// Следующая итерация в которой требуется измерить давление, нужно рассчитать
         /// </summary>
-        public int NextIterationForPumping { get; set; }
+        //todo если рассчитываем, то имеет ли смысл хранить его здесь? Если не нужны, надо вынести в другое место
+        public short NextIterationForPressureMeasuring { get; set; }
 
         /// <summary>
         /// Следующая итерация, в которой требуется измерить ЭКГ
         /// </summary>
-        public int NextIterationForECG { get; set; }
+        //todo если рассчитываем, то имеет ли смысл хранить его здесь? Если не нужны, надо вынести в другое место
+        public short NextIterationForECG { get; set; }
         //todo NextIteration типа определены, но на деле не используются, ибо эти значения вычисляются на ПК
-        //добавил ради удобства хранения в одном месте
 
         /// <summary>
         /// Время до окончания сеанса
         /// </summary>
-        public int TimeToEnd { get; set; }
+        public TimeSpan RemainingTime { get; set; }
 
         /// <summary>
         /// Время от начала сеанса
         /// </summary>
-        public int TimeFromStart { get; set; }
+        public TimeSpan ElapsedTime { get; set; }
 
         /// <summary>
         /// Текущий желаемый угол по Х, для вывода на экран и в ПК
         /// </summary>
+        
+        //todo значение не дробное ли?
         public int BedTargetAngleX { get; set; }
 
         /// <summary>
         /// Текущий желаемый угол по Y, для вывода на экран и в ПК
         /// </summary>
-        public int BedTargetAngleY { get; set; }
-
-       //todo остальное вроде пока не нужно
-
-
-       
+        
+        //todo значение не дробное ли?
+        public int BedTargetAngleY { get; set; }      
     }
 }

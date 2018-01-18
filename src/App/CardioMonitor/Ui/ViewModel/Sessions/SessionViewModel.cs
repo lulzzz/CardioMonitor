@@ -480,7 +480,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 {
                    await MessageHelper.Instance.ShowMessageAsync("Кровать находится в состоянии калибровки. Дождитесь ее окончания и повторите попытку");
                 }
-                if (BedStatus == BedStatus.Loop)
+                if (BedStatus == BedStatus.SessionStarted)
                 {
                     await MessageHelper.Instance.ShowMessageAsync("Цикл уже запущен. Дождитесь его окончания или экстренно завершите");
                 }
@@ -723,7 +723,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 }
             }*/
 
-            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.GetStartFlag() == StartFlag.Pause) && (Session.Status == SessionStatus.InProgress))
+            if ((BedStatus == BedStatus.SessionStarted) && (_bedUsbController.GetStartFlag() == StartFlag.Pause) && (Session.Status == SessionStatus.InProgress))
             {
                 Session.Status = SessionStatus.Suspended;
                 _mainTimer.Suspend();
@@ -731,7 +731,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 ThreadAssistant.StartInUiThread(() => { MessageHelper.Instance.ShowMessageAsync("Нажата пауза"); });
             }
             //если запущен цикл, кровать была на паузе и была выведена из нее - продолжить работу
-            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.GetStartFlag() == StartFlag.Start) && (Session.Status == SessionStatus.Suspended))
+            if ((BedStatus == BedStatus.SessionStarted) && (_bedUsbController.GetStartFlag() == StartFlag.Start) && (Session.Status == SessionStatus.Suspended))
             {
                 Session.Status = SessionStatus.InProgress;
                 StartButtonText = Localisation.SessionViewModel_PauseButton_Text;
@@ -742,7 +742,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             
             //TODO исправить этом при первом случае
             // здесь вы найдете ебучий костыль 
-            if ((BedStatus == BedStatus.Loop) && (_bedUsbController.GetReverseFlag() == ReverseFlag.Reversed) && (Session.Status == SessionStatus.InProgress)
+            if ((BedStatus == BedStatus.SessionStarted) && (_bedUsbController.GetReverseFlag() == ReverseFlag.Reversed) && (Session.Status == SessionStatus.InProgress)
                 && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing) && (!_isNeedReversing))
             {
                 _isNeedReversing = true;

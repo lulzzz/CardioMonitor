@@ -1,8 +1,11 @@
-﻿namespace CardioMonitor.Devices.Bed.Infrastructure
+﻿using System;
+
+namespace CardioMonitor.Devices.Bed.Infrastructure
 {
     /// <summary>
     /// Флаг старт
     /// </summary>
+    [Obsolete("Вроде не нужно")]   
     public enum StartFlag
     {
         /// <summary>

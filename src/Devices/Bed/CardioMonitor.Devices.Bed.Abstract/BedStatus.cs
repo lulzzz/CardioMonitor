@@ -9,30 +9,31 @@
         /// Состояние неизвестно
         /// </summary>
         Unknown,
-        /// <summary>
-        /// Соединение не установлено или разорвано 
-        /// </summary>
-        Disconnected,
-        /// <summary>
-        /// Подготовка к запуску
-        /// </summary>
-        Preparing = 1, 
+        
         /// <summary>
         /// Устройство готово 
         /// </summary>
         Ready = 0,
+        
         /// <summary>
-        ///  Идет цикл
+        /// Подготовка к запуску
         /// </summary>
-        Loop = 2,
+        Preparing = 1, 
+        
+        /// <summary>
+        ///  Сеанс запущен
+        /// </summary>
+        SessionStarted = 2,
+        
+        /// <summary>
+        /// Блокировка при старте с ПК
+        /// </summary>
+        BlockedFromPC = 3,
+        
         /// <summary>
         /// Ошибка на устройстве
         /// </summary>
         Error = 5,
-        /// <summary>
-        /// Блокировка при старте с ПК
-        /// </summary>
-        Block = 3,
         /// <summary>
         ///  Устройство не готово (ожидание завершения возвращения)
         /// </summary>

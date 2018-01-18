@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JetBrains.Annotations, Version=10.4.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
+      <HintPath>..\..\..\packages\JetBrains.Annotations.10.4.0\lib\net\JetBrains.Annotations.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -45,14 +48,19 @@
     <Compile Include="BedMessageCRC16.cs" />
     <Compile Include="BedMessageDeviceNumber.cs" />
     <Compile Include="BedMessageEventType.cs" />
-    <Compile Include="BedRegisterList.cs" />
+    <Compile Include="BedRegisterValues.cs" />
     <Compile Include="BedUDPController.cs" />
+    <Compile Include="BedUdpControllerInitParams.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Readme.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Infrastructure\CardioMonitor.Infrastructure.Workers\CardioMonitor.Infrastructure.Workers.csproj">
+      <Project>{060dd75d-d142-47f9-a949-fdb171cde123}</Project>
+      <Name>CardioMonitor.Infrastructure.Workers</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
       <Project>{c8ee2e87-12dd-43e4-bab0-04e09de9a651}</Project>
       <Name>CardioMonitor.Devices</Name>
@@ -61,6 +69,9 @@
       <Project>{bae2b28a-93f6-40a9-852c-2badd360e4fd}</Project>
       <Name>CardioMonitor.Devices.Bed.Infrastructure</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

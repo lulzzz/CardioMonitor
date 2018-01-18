@@ -106,6 +106,12 @@ namespace CardioMonitor.Devices.Monitor
 
         }
 
-        
+
+        public void Dispose()
+        {
+            _udpClient?.Dispose();
+            _stream?.Dispose();
+            _tcpClient?.Dispose();
+        }
     }
 }

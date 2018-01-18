@@ -8,6 +8,8 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
     /// </summary>
     public interface IBedController : IDeviceController
     {
+        #region Управление взаимодействием и обработка событий
+        
         /// <summary>
         /// Событие нажаттия на кнопку `Старт` на пульте управления инверсионным столом
         /// </summary>
@@ -27,12 +29,17 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// Событие нажаттия на кнопку `Экстренаня остановка` на пульте управления инверсионным столом
         /// </summary>
         event EventHandler OnEmeregencyStopFromDeviceRequested;
+
+        /// <summary>
+        /// События нажатия на кнопку `Реверс` на пульте управления инверсионным столом
+        /// </summary>
+        event EventHandler OnReverseFromDeviceRequested;
         
         /// <summary>
         /// Возвращает признак подключения устройство
         /// </summary>
         /// <returns></returns>
-        bool IsConnected();
+        bool IsConnected { get; }
 
         /// <summary>
         /// Иницализурет контроллер
@@ -65,16 +72,10 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// <returns></returns>
         Task ExecuteCommandAsync(BedControlCommand command);
         
-        /// <summary>
-        /// Запрос текущего состояния устройства
-        /// </summary>
-        Task<BedStatus> GetBedStatusAsync();
-
-        /// <summary>
-        /// Запрос текущего статуса движения кровати устройства 
-        /// </summary>
-        Task<BedMovingStatus> GetBedMovingStatusAsync();
-
+        #endregion
+        
+        #region Получение данных
+        
         /// <summary>
         /// Возвращает длительность одного цикла
         /// </summary>
@@ -152,5 +153,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// </summary>
         /// <returns></returns>
         Task<double> GetAngleXAsync();
+        
+        #endregion
     }
 }

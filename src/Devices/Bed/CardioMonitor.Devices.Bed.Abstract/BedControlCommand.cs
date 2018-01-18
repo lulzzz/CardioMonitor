@@ -8,18 +8,23 @@
         /// <summary>
         /// Запуск кровати 
         /// </summary>
-        Start,
+        Start = 0,
         /// <summary>
         /// Остановка кровати
         /// </summary>
-        Pause,
+        Pause = 1,
         /// <summary>
         /// Обратное выполнение
         /// </summary>
-        Reverse, 
+        Reverse = 2, 
         /// <summary>
         /// Экстренная остановка
         /// </summary>
-        EmergencyStop
+        EmergencyStop = 3,
+        
+        /// <summary>
+        /// Выполнить калибровку (выравнивание кровати относительно горизонта)
+        /// </summary>
+        Callibrate = 4
     }
 }

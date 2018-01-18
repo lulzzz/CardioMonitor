@@ -1,8 +1,11 @@
-﻿namespace CardioMonitor.Devices.Bed.Infrastructure
+﻿using System;
+
+namespace CardioMonitor.Devices.Bed.Infrastructure
 {
     /// <summary>
     /// Текущий статус движения кровати
     /// </summary>
+    [Obsolete("Вроде нигде не используется")]
     public enum BedMovingStatus
     {
         /// <summary>
