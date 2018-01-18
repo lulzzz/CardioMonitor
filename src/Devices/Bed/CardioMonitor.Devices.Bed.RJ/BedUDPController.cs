@@ -82,11 +82,20 @@ namespace CardioMonitor.Devices.Bed.UDP
                     .ConfigureAwait(false);
                 _syncWorker = _workerController.StartWorker(_initParams.UpdateDataPeriod, async () =>
                 {
-                    //todo сюды бы токен синхронизации
-                    await UpdateRegistersValueAsync()
-                        .ConfigureAwait(false);
-                    await RiseEventOnCommandFromDeviceAsync()
-                        .ConfigureAwait(false);
+                    try
+                    {
+                        //todo сюды бы токен синхронизации
+                        await UpdateRegistersValueAsync()
+                            .ConfigureAwait(false);
+                        await RiseEventOnCommandFromDeviceAsync()
+                            .ConfigureAwait(false);
+                    }
+                    catch (Exception e)
+                    {
+                        IsConnected = false;
+                        //todo logging
+                    }
+                    
                 });
                 IsConnected = true;
             }
