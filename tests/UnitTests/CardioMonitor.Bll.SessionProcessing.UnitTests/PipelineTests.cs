@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.CheckPoints;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Logs;
@@ -21,7 +21,7 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
         [Fact]
         public async Task TimeController_ElapsedTimeChanged_Ok()
         {
-            var pipeline = new CycleProcessor(_startParams,
+            var pipeline = new DevicesFacade(_startParams,
                 Mock.Of<IBedController>(),
                 Mock.Of<ICheckPointResolver>(),
                 Mock.Of<IMonitorController>(),

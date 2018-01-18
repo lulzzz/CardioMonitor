@@ -2,7 +2,7 @@
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions
 {
     internal class ExceptionCycleProcessingContextParams : ICycleProcessingContextParams
     {

@@ -1,8 +1,8 @@
 ﻿using System;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.ForcedDataCollectionRequest
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionRequest
 {
     internal class ForcedDataCollectionRequestCycleProcessingContextParams : ICycleProcessingContextParams
     {

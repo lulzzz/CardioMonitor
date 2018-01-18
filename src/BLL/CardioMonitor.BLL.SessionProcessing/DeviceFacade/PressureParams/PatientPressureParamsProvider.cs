@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CardioMonitor.BLL.CoreContracts.Session;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.ForcedDataCollectionRequest;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionRequest;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
 using Enexure.MicroBus.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
 {
     internal class PatientPressureParamsProvider : ICycleProcessingPipelineElement
     {

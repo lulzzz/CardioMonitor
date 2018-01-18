@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Iterations
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
 {
     internal class IterationParamsProvider : ICycleProcessingPipelineElement
     {

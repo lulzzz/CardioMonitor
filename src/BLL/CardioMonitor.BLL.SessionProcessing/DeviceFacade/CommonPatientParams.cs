@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
+﻿namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 {
     internal class CommonPatientParams
     {

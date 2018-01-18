@@ -2,23 +2,23 @@
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
 using CardioMonitor.BLL.SessionProcessing.CheckPoints;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.CommonParams;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.ForcedDataCollectionRequest;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.PressureParams;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Time;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionRequest;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 {
-    internal class CycleProcessor : 
-        ICycleProcessor,
+    internal class DevicesFacade : 
+        IDevicesFacade,
         IDisposable
     {
         [NotNull] private readonly ICheckPointResolver _checkPointResolver;
@@ -32,7 +32,6 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
 
         private bool _isStandartProcessingInProgress;
         
-        
         public event EventHandler<TimeSpan> OnElapsedTimeChanged;
         
         public event EventHandler<double> OnCurrentAngleRecieved;
@@ -41,10 +40,13 @@ namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
         
         public event EventHandler<CommonPatientParams> OnCommonPatientParamsRecieved;
 
-        public event EventHandler<SessionProcessingException> OnException; 
+        public event EventHandler<SessionProcessingException> OnException;
+
+        public event EventHandler<short> OnCycleCompleted;
+
+        public event EventHandler OnCompleted;
         
-        
-        public CycleProcessor(
+        public DevicesFacade(
             [NotNull] PipelineStartParams startParams,
             [NotNull] IBedController bedController,
             [NotNull] ICheckPointResolver checkPointResolver,

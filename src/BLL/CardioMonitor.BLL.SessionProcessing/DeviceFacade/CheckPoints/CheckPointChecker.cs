@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.CheckPoints;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
 {
     internal class CheckPointChecker : ICycleProcessingPipelineElement
     {

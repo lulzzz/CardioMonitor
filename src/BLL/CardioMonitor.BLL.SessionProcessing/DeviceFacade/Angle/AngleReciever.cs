@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Angle
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
 {
     internal class AngleReciever : ICycleProcessingPipelineElement
     {

@@ -1,8 +1,8 @@
 ﻿using System;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using Enexure.MicroBus.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Time
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
 {
     internal class TimeCycleProcessingContextParamses: ICycleProcessingContextParams
     {

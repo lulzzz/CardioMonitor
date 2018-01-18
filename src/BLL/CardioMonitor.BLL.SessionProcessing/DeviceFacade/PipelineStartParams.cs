@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 {
     /// <summary>
     /// Параметры старта pipeline

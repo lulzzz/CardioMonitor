@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 {
     internal class CycleProcessingContext
     {

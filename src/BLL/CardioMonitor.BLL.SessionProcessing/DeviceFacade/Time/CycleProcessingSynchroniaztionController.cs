@@ -3,7 +3,7 @@ using System.Threading.Tasks.Dataflow;
 using CardioMonitor.Infrastructure.Threading;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.Time
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
 {
     /// <summary>
     /// Контроллер, который управляет процессом обработки цикла. 

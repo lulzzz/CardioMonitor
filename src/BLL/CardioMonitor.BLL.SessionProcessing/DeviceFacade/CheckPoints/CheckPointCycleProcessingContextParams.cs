@@ -1,8 +1,8 @@
 ﻿using System;
-using CardioMonitor.BLL.SessionProcessing.CycleProcessing.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CycleProcessing.CheckPoints
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
 {
     internal class CheckPointCycleProcessingContextParams : ICycleProcessingContextParams
     {
