@@ -36,7 +36,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         event EventHandler OnReverseFromDeviceRequested;
         
         /// <summary>
-        /// Возвращает признак подключения устройство
+        /// Возвращает признак подключения к устройству
         /// </summary>
         /// <returns></returns>
         bool IsConnected { get; }

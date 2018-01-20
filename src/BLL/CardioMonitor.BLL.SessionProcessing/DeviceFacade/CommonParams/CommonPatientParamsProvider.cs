@@ -48,7 +48,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             
             try
             {
-                var gettingParamsTask = _monitorController.GetPatientParamsAsync();
+                var gettingParamsTask = _monitorController.GetPatientCommonParamsAsync();
                 param = await _taskHelper.StartWithTimeout(gettingParamsTask, _updatePatientParamTimeout);
             }
             catch (TimeoutException e)

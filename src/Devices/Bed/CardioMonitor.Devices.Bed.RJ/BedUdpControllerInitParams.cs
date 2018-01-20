@@ -46,6 +46,9 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <inheritdoc />
         public double MovementFrequency { get; }
 
+        /// <summary>
+        /// Период обмена сообщениями с устройством
+        /// </summary>
         public TimeSpan UpdateDataPeriod { get; }
     }
 }

@@ -71,6 +71,8 @@ namespace CardioMonitor.Devices.Bed.UDP
         public async Task ConnectAsync()
         {
             AssertInitParams();
+            if (IsConnected) throw new InvalidOperationException($"{GetType().Name} уже подключен к устройству");
+            
             try
             {
                 await Task.Yield();
@@ -84,7 +86,7 @@ namespace CardioMonitor.Devices.Bed.UDP
                 {
                     try
                     {
-                        //todo сюды бы токен синхронизации
+                        //todo сюды бы токен отмены
                         await UpdateRegistersValueAsync()
                             .ConfigureAwait(false);
                         await RiseEventOnCommandFromDeviceAsync()
@@ -93,6 +95,9 @@ namespace CardioMonitor.Devices.Bed.UDP
                     catch (Exception e)
                     {
                         IsConnected = false;
+                        _workerController.CloseWorker(_syncWorker);
+                        
+                        //todo handle exceptions
                         //todo logging
                     }
                     

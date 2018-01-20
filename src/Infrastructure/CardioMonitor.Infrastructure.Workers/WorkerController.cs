@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Common.Logging;
+using Scout.Utils.Logging;
 
 namespace CardioMonitor.Infrastructure.Workers
 {
@@ -15,9 +15,9 @@ namespace CardioMonitor.Infrastructure.Workers
 
         private readonly Dictionary<Guid, Worker> _workers;
         private readonly object _locker;
-        private ILog _logger;
+        private ILogger _logger;
 
-        private Worker RegisterWorker(TimeSpan period, Action workMethod, ILog logger)
+        private Worker RegisterWorker(TimeSpan period, Action workMethod, ILogger logger)
         {
             var id = Guid.NewGuid();
             var worker = new Worker(id, period, workMethod, logger);
@@ -29,7 +29,7 @@ namespace CardioMonitor.Infrastructure.Workers
         }
 
 
-        public void SetDefaultLogger(ILog logger)
+        public void SetDefaultLogger(ILogger logger)
         {
             _logger = logger;
         }
@@ -41,7 +41,7 @@ namespace CardioMonitor.Infrastructure.Workers
             return worker;
         }
 
-        public Worker StartWorker(TimeSpan period, Action workMethod, ILog logger)
+        public Worker StartWorker(TimeSpan period, Action workMethod, ILogger logger)
         {
             var worker = RegisterWorker(period, workMethod, logger);
             worker?.Start();
@@ -55,7 +55,7 @@ namespace CardioMonitor.Infrastructure.Workers
             return worker;
         }
 
-        public Worker StartWorker(TimeSpan period, TimeSpan firstTimePeriod, Action workMethod, ILog logger)
+        public Worker StartWorker(TimeSpan period, TimeSpan firstTimePeriod, Action workMethod, ILogger logger)
         {
             var worker = RegisterWorker(period, workMethod, logger);
             worker?.Start(firstTimePeriod);
@@ -93,7 +93,7 @@ namespace CardioMonitor.Infrastructure.Workers
             UnregisterWorker(worker);
         }
         
-        private Worker<T> RegisterWorker<T>(TimeSpan period, Action<T> workMethod, T state, ILog logger)
+        private Worker<T> RegisterWorker<T>(TimeSpan period, Action<T> workMethod, T state, ILogger logger)
         {
             var id = Guid.NewGuid();
             var worker = new Worker<T>(id, period, workMethod, state, logger);
@@ -110,7 +110,7 @@ namespace CardioMonitor.Infrastructure.Workers
             worker?.Start();
             return worker;
         }
-        public Worker<T> StartWorker<T>(TimeSpan period, Action<T> workMethod, T state, ILog logger)
+        public Worker<T> StartWorker<T>(TimeSpan period, Action<T> workMethod, T state, ILogger logger)
         {
             var worker = RegisterWorker(period, workMethod, state, logger);
             worker?.Start();
@@ -123,7 +123,7 @@ namespace CardioMonitor.Infrastructure.Workers
             worker?.Start(firstTimePeriod);
             return worker;
         }
-        public Worker<T> StartWorker<T>(TimeSpan period, TimeSpan firstTimePeriod, Action<T> workMethod, T state, ILog logger)
+        public Worker<T> StartWorker<T>(TimeSpan period, TimeSpan firstTimePeriod, Action<T> workMethod, T state, ILogger logger)
         {
             var worker = RegisterWorker(period, workMethod, state, logger);
             worker?.Start(firstTimePeriod);

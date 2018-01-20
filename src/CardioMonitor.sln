@@ -70,6 +70,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Bll.SessionPr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Infrastructure.Workers", "Infrastructure\CardioMonitor.Infrastructure.Workers\CardioMonitor.Infrastructure.Workers.csproj", "{060DD75D-D142-47F9-A949-FDB171CDE123}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Logging", "Logging", "{B15704BA-0D6B-42F9-A0A3-ADA4EB809864}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scout.Utils.Logging", "Infrastructure\Logging\Scout.Utils.Logging\Scout.Utils.Logging.csproj", "{540C94CE-85AB-4B97-9FE7-9BAF8429B080}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scout.Utils.Logging.NLog", "Infrastructure\Logging\Scout.Utils.Logging.NLog\Scout.Utils.Logging.NLog.csproj", "{9370FDF4-0A95-4113-AC2B-93ED0C710A59}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Monitor|Any CPU = Debug_Monitor|Any CPU
@@ -238,6 +244,22 @@ Global
 		{060DD75D-D142-47F9-A949-FDB171CDE123}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{060DD75D-D142-47F9-A949-FDB171CDE123}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{060DD75D-D142-47F9-A949-FDB171CDE123}.Release|Any CPU.Build.0 = Release|Any CPU
+		{540C94CE-85AB-4B97-9FE7-9BAF8429B080}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{540C94CE-85AB-4B97-9FE7-9BAF8429B080}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{540C94CE-85AB-4B97-9FE7-9BAF8429B080}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{540C94CE-85AB-4B97-9FE7-9BAF8429B080}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{540C94CE-85AB-4B97-9FE7-9BAF8429B080}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{540C94CE-85AB-4B97-9FE7-9BAF8429B080}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{540C94CE-85AB-4B97-9FE7-9BAF8429B080}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{540C94CE-85AB-4B97-9FE7-9BAF8429B080}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9370FDF4-0A95-4113-AC2B-93ED0C710A59}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{9370FDF4-0A95-4113-AC2B-93ED0C710A59}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{9370FDF4-0A95-4113-AC2B-93ED0C710A59}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{9370FDF4-0A95-4113-AC2B-93ED0C710A59}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{9370FDF4-0A95-4113-AC2B-93ED0C710A59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9370FDF4-0A95-4113-AC2B-93ED0C710A59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9370FDF4-0A95-4113-AC2B-93ED0C710A59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9370FDF4-0A95-4113-AC2B-93ED0C710A59}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -272,5 +294,8 @@ Global
 		{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898} = {8F6753BC-36B1-4360-B3F2-8EE4506E78EE}
 		{061B4A48-DA7E-41F8-98C5-450C66107D92} = {A5037BBA-6297-4556-B2B9-F09E8989543C}
 		{060DD75D-D142-47F9-A949-FDB171CDE123} = {950B6A1C-CFA8-49B9-81A9-398402EA1D17}
+		{B15704BA-0D6B-42F9-A0A3-ADA4EB809864} = {950B6A1C-CFA8-49B9-81A9-398402EA1D17}
+		{540C94CE-85AB-4B97-9FE7-9BAF8429B080} = {B15704BA-0D6B-42F9-A0A3-ADA4EB809864}
+		{9370FDF4-0A95-4113-AC2B-93ED0C710A59} = {B15704BA-0D6B-42F9-A0A3-ADA4EB809864}
 	EndGlobalSection
 EndGlobal

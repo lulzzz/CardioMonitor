@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IMonitorController.cs" />
+    <Compile Include="IMonitorControllerInitParams.cs" />
     <Compile Include="PatientCommonParams.cs" />
     <Compile Include="PatientEcgParams.cs" />
     <Compile Include="PatientPressureParams.cs" />

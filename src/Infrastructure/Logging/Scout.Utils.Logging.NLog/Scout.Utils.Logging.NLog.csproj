@@ -4,14 +4,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{7B951BC1-B035-41AE-B43A-8DD69ADF51F3}</ProjectGuid>
+    <ProjectGuid>{9370FDF4-0A95-4113-AC2B-93ED0C710A59}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CardioMonitor.Devices.Bed.UDP</RootNamespace>
-    <AssemblyName>CardioMonitor.Devices.Bed.UDP</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>Scout.Utils.Logging.NLog</RootNamespace>
+    <AssemblyName>Scout.Utils.Logging.NLog</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,17 +24,24 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
+    <OutputPath>..\..\..\Artifacts\Scout.Utils.Logging.NLog\bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\..\Artifacts\Scout.Utils.Logging.NLog\bin\Release\Scout.Utils.Logging.NLog.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="JetBrains.Annotations, Version=10.4.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
-      <HintPath>..\..\..\packages\JetBrains.Annotations.10.4.0\lib\net\JetBrains.Annotations.dll</HintPath>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NLog.4.4.12\lib\net45\NLog.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -44,27 +50,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BedMessage.cs" />
-    <Compile Include="BedMessageCRC16.cs" />
-    <Compile Include="BedMessageDeviceNumber.cs" />
-    <Compile Include="BedMessageEventType.cs" />
-    <Compile Include="BedRegisterValues.cs" />
-    <Compile Include="BedUDPController.cs" />
-    <Compile Include="BedUdpControllerInitParams.cs" />
+    <Compile Include="NLogger.cs" />
+    <Compile Include="NLoggerFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Infrastructure\CardioMonitor.Infrastructure.Workers\CardioMonitor.Infrastructure.Workers.csproj">
-      <Project>{060dd75d-d142-47f9-a949-fdb171cde123}</Project>
-      <Name>CardioMonitor.Infrastructure.Workers</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
-      <Project>{c8ee2e87-12dd-43e4-bab0-04e09de9a651}</Project>
-      <Name>CardioMonitor.Devices</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CardioMonitor.Devices.Bed.Abstract\CardioMonitor.Devices.Bed.Infrastructure.csproj">
-      <Project>{bae2b28a-93f6-40a9-852c-2badd360e4fd}</Project>
-      <Name>CardioMonitor.Devices.Bed.Infrastructure</Name>
+    <ProjectReference Include="..\Scout.Utils.Logging\Scout.Utils.Logging.csproj">
+      <Project>{540c94ce-85ab-4b97-9fe7-9baf8429b080}</Project>
+      <Name>Scout.Utils.Logging</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
