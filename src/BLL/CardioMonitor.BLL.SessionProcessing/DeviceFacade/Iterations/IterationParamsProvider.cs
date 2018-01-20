@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
 
@@ -18,28 +20,39 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            var currentIteration = _bedController
-                .GetCurrentIterationAsync()
-                .ConfigureAwait(false);
-            
-            var nextIterationToMeasuringCommonParams = _bedController
-                .GetNextIterationNumberForCommonParamsMeasuringAsync()
-                .ConfigureAwait(false);
-            
-            var nextIterationToMeasuringPressureParams = _bedController
-                .GetNextIterationNumberForPressureMeasuringAsync()
-                .ConfigureAwait(false);
-            
-            var nextIterationToMeasuringEcg = _bedController
-                .GetNextIterationNumberForEcgMeasuringAsync()
-                .ConfigureAwait(false);
+            try
+            {
+                var currentIteration = await _bedController
+                    .GetCurrentIterationAsync()
+                    .ConfigureAwait(false);
 
-            context.AddOrUpdate(new IterationCycleProcessingContextParams(
-                iterationToGetEcg: 0,
-                currentIteration: 0,
-                iterationToGetCommonParams: 0,
-                iterationToGetPressureParams: 0));
-            
+                var nextIterationToMeasuringCommonParams = await _bedController
+                    .GetNextIterationNumberForCommonParamsMeasuringAsync()
+                    .ConfigureAwait(false);
+
+                var nextIterationToMeasuringPressureParams = await _bedController
+                    .GetNextIterationNumberForPressureMeasuringAsync()
+                    .ConfigureAwait(false);
+
+                var nextIterationToMeasuringEcg = await _bedController
+                    .GetNextIterationNumberForEcgMeasuringAsync()
+                    .ConfigureAwait(false);
+
+                context.AddOrUpdate(new IterationCycleProcessingContextParams(
+                    iterationToGetEcg: nextIterationToMeasuringEcg,
+                    currentIteration: currentIteration,
+                    iterationToGetCommonParams: nextIterationToMeasuringCommonParams,
+                    iterationToGetPressureParams: nextIterationToMeasuringPressureParams));
+            }
+            catch (Exception e)
+            {
+                context.AddOrUpdate(
+                    new ExceptionCycleProcessingContextParams(
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.InversionTableConnectionError,
+                            e.Message,
+                            e)));
+            }
             return context;
         }
 

@@ -152,7 +152,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// Возвращает угол наклона кровати по оси Х
         /// </summary>
         /// <returns></returns>
-        Task<double> GetAngleXAsync();
+        Task<float> GetAngleXAsync();
         
         #endregion
     }

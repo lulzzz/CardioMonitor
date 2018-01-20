@@ -14,9 +14,9 @@ namespace CardioMonitor.Devices.Bed.UDP
             [NotNull] IPEndPoint bedIpEndpoint,
             TimeSpan updateDataPeriod,
             TimeSpan timeout,
-            double maxAngleX, 
+            float maxAngleX, 
             int cyclesCount, 
-            double frequency)
+            float frequency)
         {
             BedIPEndpoint = bedIpEndpoint ?? throw new ArgumentNullException(nameof(bedIpEndpoint));
             MaxAngleX = maxAngleX;
@@ -44,7 +44,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         public int CyclesCount { get; }
 
         /// <inheritdoc />
-        public double MovementFrequency { get; }
+        public float MovementFrequency { get; }
 
         /// <summary>
         /// Период обмена сообщениями с устройством

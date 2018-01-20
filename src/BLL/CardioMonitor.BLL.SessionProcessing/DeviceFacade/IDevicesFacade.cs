@@ -13,9 +13,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         Task PauseAsync();
 
-        Task ResetAsync();
-
-        void ProcessReverseRequest();
+        Task ProcessReverseRequestAsync();
 
         Task ForceDataCollectionRequestAsync();
     }

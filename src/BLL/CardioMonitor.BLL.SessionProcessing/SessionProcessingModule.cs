@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Autofac;
 using CardioMonitor.BLL.SessionProcessing.CycleStateMachine;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
 using CardioMonitor.BLL.SessionProcessing.Processing;
 using CardioMonitor.Devices.Bed.Infrastructure;
@@ -69,7 +70,7 @@ namespace CardioMonitor.BLL.SessionProcessing
         private readonly SessionParams _sessionParams;
         private IMicroBus _bus;
         private readonly IBedController _bedController;
-        private CycleProcessingSynchroniaztionController _cycleProcessingSynchroniaztionController;
+        private CycleProcessingSynchronizer _cycleProcessingSynchronizer;
         
         
         

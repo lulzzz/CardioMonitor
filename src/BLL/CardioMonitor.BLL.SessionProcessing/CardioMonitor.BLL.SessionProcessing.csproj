@@ -35,11 +35,14 @@
   <ItemGroup>
     <Compile Include="CheckPointResolver.cs" />
     <Compile Include="CycleStateMachineBuilder.cs" />
+    <Compile Include="DeviceFacade\CycleProcessingSynchronizer.cs" />
     <Compile Include="DeviceFacade\Exceptions\ExceptionCycleProcessingContextParams.cs" />
-    <Compile Include="DeviceFacade\Exceptions\ICycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\ForcedDataCollectionRequest\ForcedDataCollectionRequestCycleProcessingContextParams.cs" />
+    <Compile Include="DeviceFacade\ICycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\Iterations\IterationCycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\Iterations\IterationParamsProvider.cs" />
+    <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoContextParamses.cs" />
+    <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CycleStateMachine\CycleStates.cs" />
     <Compile Include="CycleStateMachine\CycleTriggers.cs" />
@@ -47,7 +50,7 @@
     <Compile Include="Exceptions\SessionProcessingException.cs" />
     <Compile Include="DeviceFacade\Angle\AngleXContextParams.cs" />
     <Compile Include="DeviceFacade\Angle\AngleReciever.cs" />
-    <Compile Include="DeviceFacade\CheckPoints\CheckPointChecker.cs" />
+    <Compile Include="DeviceFacade\CheckPoints\IterationBasedCheckPointChecker.cs" />
     <Compile Include="DeviceFacade\CheckPoints\CheckPointCycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\CommonPatientParams.cs" />
     <Compile Include="DeviceFacade\CommonParams\CommonPatientCycleProcessingContextParams.cs" />
@@ -57,11 +60,8 @@
     <Compile Include="DeviceFacade\PatientPressureParams.cs" />
     <Compile Include="DeviceFacade\DevicesFacade.cs" />
     <Compile Include="DeviceFacade\CycleProcessingContext.cs" />
-    <Compile Include="DeviceFacade\SeansParams.cs" />
     <Compile Include="DeviceFacade\PressureParams\PatientPressureParamsProvider.cs" />
     <Compile Include="DeviceFacade\PressureParams\PressureCycleProcessingContextParams.cs" />
-    <Compile Include="DeviceFacade\Time\SessionProcessingContextParamses.cs" />
-    <Compile Include="DeviceFacade\Time\CycleProcessingSynchroniaztionController.cs" />
     <Compile Include="SessionContext.cs" />
     <Compile Include="SessionProcessingModule.cs" />
     <Compile Include="SessionParams.cs" />

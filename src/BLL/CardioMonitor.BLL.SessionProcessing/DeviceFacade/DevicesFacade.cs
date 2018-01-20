@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using CardioMonitor.BLL.SessionProcessing.CheckPoints;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams;
@@ -13,6 +12,7 @@ using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
+using CardioMonitor.Infrastructure.Workers;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
@@ -21,10 +21,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         IDevicesFacade,
         IDisposable
     {
+        [NotNull] private readonly IMonitorController _monitorController;
+        [NotNull] private readonly IBedController _bedController;
         [NotNull] private readonly ICheckPointResolver _checkPointResolver;
-        [NotNull] private readonly CycleProcessingSynchroniaztionController _cycleProcessingSynchroniaztionController;
+        [NotNull] private readonly CycleProcessingSynchronizer _cycleProcessingSynchronizer;
 
-        private readonly SeansParams _startParams;
+        private readonly SessionParams _startParams;
 
         private readonly BroadcastBlock<CycleProcessingContext> _pipelineOnTimeStartBlock;
         private readonly ActionBlock<CycleProcessingContext> _pipelineFinishCollectorBlock;
@@ -34,7 +36,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         
         public event EventHandler<TimeSpan> OnElapsedTimeChanged;
         
-        public event EventHandler<double> OnCurrentAngleXRecieved;
+        public event EventHandler<float> OnCurrentAngleXRecieved;
         
         public event EventHandler<PatientPressureParams> OnPatientPressureParamsRecieved;
         
@@ -57,17 +59,17 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         public event EventHandler OnReversedFromDevice;
         
         public DevicesFacade(
-            [NotNull] SeansParams startParams,
+            [NotNull] SessionParams startParams,
             [NotNull] IBedController bedController,
-            [NotNull] ICheckPointResolver checkPointResolver,
             [NotNull] IMonitorController monitorController,
-            [NotNull] TaskHelper taskHelper)
+            [NotNull] TaskHelper taskHelper,
+            [NotNull] IWorkerController workerController)
         {
-            if (bedController == null) throw new ArgumentNullException(nameof(bedController));
-            if (monitorController == null) throw new ArgumentNullException(nameof(monitorController));
             if (taskHelper == null) throw new ArgumentNullException(nameof(taskHelper));
-            _checkPointResolver = checkPointResolver ?? throw new ArgumentNullException(nameof(checkPointResolver));
-            
+            if (workerController == null) throw new ArgumentNullException(nameof(workerController));
+            _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
+            _bedController = bedController ?? throw new ArgumentNullException(nameof(bedController));
+
             _startParams = startParams ?? throw new ArgumentNullException(nameof(startParams));
 
             _pipelineOnTimeStartBlock = new BroadcastBlock<CycleProcessingContext>(context => context);
@@ -78,7 +80,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var anlgeRecieveBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context => angleReciever.ProcessAsync(context));
 
-            var checkPointChecker = new CheckPointChecker(checkPointResolver);
+            var checkPointChecker = new IterationBasedCheckPointChecker();
             var checkPointCheckBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
                     checkPointChecker.ProcessAsync(context));
@@ -163,7 +165,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 },
                 context => pressureParamsProvider.CanProcess(context));
             
-            _cycleProcessingSynchroniaztionController = new CycleProcessingSynchroniaztionController(_pipelineOnTimeStartBlock);
+            _cycleProcessingSynchronizer = new CycleProcessingSynchronizer(_pipelineOnTimeStartBlock, workerController);
             _isStandartProcessingInProgress = false;
         }
 
@@ -177,7 +179,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 OnException?.Invoke(this, exceptionParams.Exception);
             }
             
-            var timeParams = context.TryGetTimeParams();
+            var timeParams = context.TryGetSessionProcessingInfo();
             if (timeParams != null)
             {
                 OnElapsedTimeChanged?.Invoke(this, timeParams.ElapsedTime);
@@ -213,47 +215,77 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         public async Task StartAsync()
         {
-            await Task.Yield();
             
-            if (_cycleProcessingSynchroniaztionController.IsPaused)
+            if (_cycleProcessingSynchronizer.IsPaused)
             {
-                _cycleProcessingSynchroniaztionController.Resume();
+                _cycleProcessingSynchronizer.Resume();
+                await _bedController
+                    .ExecuteCommandAsync(BedControlCommand.Start)
+                    .ConfigureAwait(false);
             }
             else
             {
-                _cycleProcessingSynchroniaztionController.Init(_startParams.CycleDuration, _startParams.CycleTickDuration);
-                _cycleProcessingSynchroniaztionController.Start();
+                _bedController.Init(_startParams.BedControllerInitParams);
+                await _bedController
+                    .ConnectAsync()
+                    .ConfigureAwait(false);
+                // выполнить калиборвку относительно горизонта
+                await _bedController
+                    .ExecuteCommandAsync(BedControlCommand.Callibrate)
+                    .ConfigureAwait(false);
+                // запускаем кровать
+                await _bedController
+                    .ExecuteCommandAsync(BedControlCommand.Start)
+                    .ConfigureAwait(false);
+                // измерим перед стартом
+                await ForceDataCollectionRequestAsync()
+                    .ConfigureAwait(false);
+                // запускаем обработку
+                _cycleProcessingSynchronizer.Init(_startParams.UpdateDatePeriod);
+                _monitorController.Init(_startParams.MonitorControllerInitParams);
+                await _monitorController
+                    .ConnectAsync()
+                    .ConfigureAwait(false);
+                _cycleProcessingSynchronizer.Start();
                 _isStandartProcessingInProgress = true;
             }
         }
 
         public async Task StopAsync()
         {
-            await Task.Yield();
-            _cycleProcessingSynchroniaztionController.Stop();
+            _cycleProcessingSynchronizer.Stop();
             _isStandartProcessingInProgress = false;
+            await _bedController
+                .ExecuteCommandAsync(BedControlCommand.EmergencyStop)
+                .ConfigureAwait(false);
+            await _bedController
+                .DisconnectAsync()
+                .ConfigureAwait(false);
+            await _monitorController
+                .DisconnectAsync()
+                .ConfigureAwait(false);
         }
 
-        public async Task PauseAsync()
+        public Task PauseAsync()
         {
-            await Task.Yield();
-            _cycleProcessingSynchroniaztionController.Pause();
+            _cycleProcessingSynchronizer.Pause();
+            return _bedController
+                .ExecuteCommandAsync(BedControlCommand.Pause);
         }
 
-        public async Task ResetAsync()
-        {
-            await Task.Yield();
-            _cycleProcessingSynchroniaztionController.Init(_startParams.CycleDuration, _startParams.CycleTickDuration);
-            _isStandartProcessingInProgress = false; 
-        }
 
-        public void ProcessReverseRequest()
+        public Task ProcessReverseRequestAsync()
         {
-            _checkPointResolver.ConsiderReversing();
+            return _bedController
+                .ExecuteCommandAsync(BedControlCommand.Reverse);
         }
 
         public void Dispose()
         {
+            _cycleProcessingSynchronizer.Stop();
+            _cycleProcessingSynchronizer.Dispose();
+            _bedController.Dispose();
+            _monitorController.Dispose();
             _pipelineOnTimeStartBlock.Complete();
             _pipelineFinishCollectorBlock.Completion.ConfigureAwait(false).GetAwaiter().GetResult();
         }

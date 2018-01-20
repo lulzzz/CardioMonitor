@@ -4,21 +4,18 @@ using System.Threading.Tasks.Dataflow;
 using CardioMonitor.Infrastructure.Workers;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 {
     /// <summary>
-    /// Контроллер, который управляет процессом обработки цикла. 
+    /// Синхронизатор процесса обработки цикла. 
     /// </summary>
     /// <remarks>
-    /// По факту выступает в роле тактового генератора, чтобы запускать опрос устройст, сбор данных и уведомление подписчиков
+    /// По факту выступает в роле тактового генератора, чтобы запускать опрос устройств, сбор данных и уведомление подписчиков
     /// </remarks>
-    internal class CycleProcessingSynchroniaztionController : IDisposable
+    internal class CycleProcessingSynchronizer : IDisposable
     {
         [NotNull] private readonly BroadcastBlock<CycleProcessingContext> _pipelineStartBlock;
 
-        /// <summary>
-        /// Периодичность запуска всего процесса обработки
-        /// </summary>
         private TimeSpan? _processingPeriod;
 
         [NotNull] 
@@ -29,7 +26,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
 
         private bool _isProcessing;
 
-        public CycleProcessingSynchroniaztionController(
+        public CycleProcessingSynchronizer(
             [NotNull] BroadcastBlock<CycleProcessingContext> pipelineStartBlock,
             [NotNull] IWorkerController workerController)
         {
@@ -50,8 +47,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
         {
             _processingPeriod = processingPeriod;
         }
-
-       
 
         /// <summary>
         /// Запускает контроллера

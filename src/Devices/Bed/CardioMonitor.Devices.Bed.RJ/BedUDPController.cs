@@ -245,7 +245,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             throw new NotImplementedException();
         }
 
-        public async Task<double> GetAngleXAsync() //так как запрашивается просто из регистра - думаю таска тут не нужна
+        public async Task<float> GetAngleXAsync() //так как запрашивается просто из регистра - думаю таска тут не нужна
         {
             
             AssertRegisterIsNull();

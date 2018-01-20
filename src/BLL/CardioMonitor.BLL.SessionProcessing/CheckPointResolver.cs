@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.CheckPoints
+namespace CardioMonitor.BLL.SessionProcessing
 {
     [Obsolete("Возможно, понадобится для поддержки первой версии кровати")]
     public interface ICheckPointResolver

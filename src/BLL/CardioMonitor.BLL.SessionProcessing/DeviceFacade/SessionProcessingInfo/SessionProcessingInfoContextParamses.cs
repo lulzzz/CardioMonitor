@@ -4,16 +4,16 @@ using Enexure.MicroBus.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
 {
-    internal class SessionProcessingContextParamses: ICycleProcessingContextParams
+    internal class SessionProcessingInfoContextParamses: ICycleProcessingContextParams
     {
         public static readonly Guid TypeId = new Guid("91941aeb-69ea-4955-b533-13b717a4768d");
         
         public Guid ParamsTypeId { get; } = TypeId;
 
-        public SessionProcessingContextParamses(
-            TimeSpan cycleDuration, 
+        public SessionProcessingInfoContextParamses(
             TimeSpan elapsedTime, 
             TimeSpan remainingTime, 
+            TimeSpan cycleDuration, 
             short currentCycleNumber, 
             short cyclesCount)
         {
@@ -25,11 +25,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
         }
 
         /// <summary>
-        /// Длительность цикла
-        /// </summary>
-        public TimeSpan CycleDuration { get; }
-
-        /// <summary>
         /// Прошедшее время с начала сеанса
         /// </summary>
         public TimeSpan ElapsedTime { get; }
@@ -39,19 +34,32 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
         /// </summary>
         public TimeSpan RemainingTime { get; }
         
+        /// <summary>
+        /// Длительность цикла
+        /// </summary>
+        public TimeSpan CycleDuration { get; }
+        
+        /// <summary>
+        /// Номер текущего цикла
+        /// </summary>
         public short CurrentCycleNumber { get; }
         
+        /// <summary>
+        /// Общее количество циклов
+        /// </summary>
         public short CyclesCount { get; }
+        
+
         
     }
 
     internal static class TimeParamContextExtensions
     {
-        public static SessionProcessingContextParamses TryGetTimeParams([JetBrains.Annotations.NotNull] [NotNull] this CycleProcessingContext context)
+        public static SessionProcessingInfoContextParamses TryGetSessionProcessingInfo([JetBrains.Annotations.NotNull] [NotNull] this CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             
-            return context.TryGet(SessionProcessingContextParamses.TypeId) as SessionProcessingContextParamses;
+            return context.TryGet(SessionProcessingInfoContextParamses.TypeId) as SessionProcessingInfoContextParamses;
         }
     }
 }

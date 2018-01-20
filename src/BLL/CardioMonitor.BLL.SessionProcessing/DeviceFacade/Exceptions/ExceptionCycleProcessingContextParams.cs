@@ -13,7 +13,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions
             Exception = exception;
         }
 
-        public Guid ParamsTypeId { get; }
+        public Guid ParamsTypeId { get; } = ExceptionContextParamsContextParamsId;
         
         public SessionProcessingException Exception { get; }
     }
