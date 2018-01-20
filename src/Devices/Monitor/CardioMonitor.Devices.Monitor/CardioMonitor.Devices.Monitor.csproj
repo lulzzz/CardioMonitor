@@ -45,12 +45,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CRC8Calculator.cs" />
+    <Compile Include="MitarMonitorControlerInitParams.cs" />
     <Compile Include="MitarMonitorController.cs" />
     <Compile Include="MonitorTCPClient.cs" />
     <Compile Include="OldMonitorController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\Infrastructure\CardioMonitor.Infrastructure.Workers\CardioMonitor.Infrastructure.Workers.csproj">
+      <Project>{060dd75d-d142-47f9-a949-fdb171cde123}</Project>
+      <Name>CardioMonitor.Infrastructure.Workers</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
       <Project>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</Project>
       <Name>CardioMonitor.Devices</Name>
