@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams;
 using CardioMonitor.Infrastructure.Workers;
 using JetBrains.Annotations;
 
@@ -25,11 +26,14 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private Worker _worker;
 
         private bool _isProcessing;
+        private bool _isAutoPumpingEnabled;
 
         public CycleProcessingSynchronizer(
             [NotNull] BroadcastBlock<CycleProcessingContext> pipelineStartBlock,
-            [NotNull] IWorkerController workerController)
+            [NotNull] IWorkerController workerController,
+            bool isAutoPumpingEnabled)
         {
+            _isAutoPumpingEnabled = isAutoPumpingEnabled;
             _workerController = workerController ?? throw new ArgumentNullException(nameof(workerController));
             _pipelineStartBlock = pipelineStartBlock ?? throw new ArgumentNullException(nameof(pipelineStartBlock));
             IsPaused = false;
@@ -48,6 +52,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             _processingPeriod = processingPeriod;
         }
 
+        public void EnableAutoPumping()
+        {
+            _isAutoPumpingEnabled = true;
+        }
+        
+        public void DisableAutoPumping()
+        {
+            _isAutoPumpingEnabled = false;
+        }
+        
         /// <summary>
         /// Запускает контроллера
         /// </summary>
@@ -63,6 +77,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private async Task SyncAsync()
         {
             var context = new CycleProcessingContext();
+            
+            context.AddOrUpdate(new AutoPumpingContextParams(_isAutoPumpingEnabled));
             
             await _pipelineStartBlock
                 .SendAsync(context)

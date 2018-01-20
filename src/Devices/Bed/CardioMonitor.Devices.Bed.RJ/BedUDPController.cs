@@ -53,7 +53,6 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         #region Управление взаимодействием и обработка событий
 
-        public event EventHandler OnStartFromDeviceRequested;
         public event EventHandler OnPauseFromDeviceRequested;
         public event EventHandler OnResumeFromDeviceRequested;
         public event EventHandler OnEmeregencyStopFromDeviceRequested;

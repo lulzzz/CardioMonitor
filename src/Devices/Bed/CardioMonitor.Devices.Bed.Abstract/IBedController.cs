@@ -11,11 +11,6 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         #region Управление взаимодействием и обработка событий
         
         /// <summary>
-        /// Событие нажаттия на кнопку `Старт` на пульте управления инверсионным столом
-        /// </summary>
-        event EventHandler OnStartFromDeviceRequested;
-        
-        /// <summary>
         /// Событие нажаттия на кнопку `Пауза` на пульте управления инверсионным столом
         /// </summary>
         event EventHandler OnPauseFromDeviceRequested;
