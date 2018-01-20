@@ -9,20 +9,49 @@ namespace CardioMonitor.Devices.Monitor.Infrastructure
     /// </summary>
     public interface IMonitorController : IDeviceController
     {
+        #region Управление контроллером
+        
         /// <summary>
-        /// Накачка манжеты рукава для измерения давления
+        /// Флаг наличия соедения с устройством
         /// </summary>
-        Task PumpCuffAsync();
+        bool IsConnected { get; }
+        
+        /// <summary>
+        /// Выполняет инициализация контроллера
+        /// </summary>
+        /// <param name="initParams"></param>
+        void Init(IMonitorControllerInitParams initParams);
 
         /// <summary>
-        /// Возвращает показатели пациента, снятые с монитора
+        /// Асинхронно подключается к устройству
+        /// </summary>
+        /// <returns></returns>
+        Task ConnectAsync();
+
+        /// <summary>
+        /// Асинхронно отключается от устройства
+        /// </summary>
+        /// <returns></returns>
+        Task DisconnectAsync();
+        
+        /// <summary>
+        /// Отправляет команду накачки манжеты рукава для измерения давления
+        /// </summary>
+        Task PumpCuffAsync();
+      
+        #endregion
+
+        #region Получение данных
+
+        /// <summary>
+        /// Возвращает общие показатели пациента, снятые с монитора
         /// </summary>
         /// <returns></returns>
         [NotNull]
-        Task<PatientCommonParams> GetPatientParamsAsync();
+        Task<PatientCommonParams> GetPatientCommonParamsAsync();
 
         /// <summary>
-        /// Возвращает параметры пациента, связанные с давлением
+        /// Возвращает параметры давлением пациента, снятые с монитора
         /// </summary>
         /// <returns></returns>
         [NotNull]
@@ -33,6 +62,9 @@ namespace CardioMonitor.Devices.Monitor.Infrastructure
         /// </summary>
         /// <param name="duration">Длительность снятия ЭКГ (чтобы потом было легче изменять)</param>
         /// <returns></returns>
+        [NotNull]
         Task<PatientEcgParams> GetPatientEcgParamsAsync(TimeSpan duration);
+
+        #endregion
     }
 }

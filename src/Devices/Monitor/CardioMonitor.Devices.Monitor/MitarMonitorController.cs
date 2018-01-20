@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading.Tasks;
-using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 
 namespace CardioMonitor.Devices.Monitor
@@ -13,7 +9,7 @@ namespace CardioMonitor.Devices.Monitor
     /// <summary>
     /// класс для работы с кардиомонитором МИТАР - новая версия
     /// </summary>
-    public class MonitorController : IMonitorController
+    public class MitarMonitorController : IMonitorController
     {
         
         private UdpClient _udpClient;
@@ -24,17 +20,46 @@ namespace CardioMonitor.Devices.Monitor
         private NetworkStream _stream;
         private TcpClient _tcpClient;
 
+        #region Управление контроллером
+        
         /// <summary>
         /// наличие подключения к КардиоМонитору
         /// </summary>
-        public bool IsMonitorConnected { get; set; } = false;
+        public bool IsConnected { get; private set; }
+
+        public void Init(IMonitorControllerInitParams initParams)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ConnectAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DisconnectAsync()
+        {
+            throw new NotImplementedException();
+        }
+        
+        public void Dispose()
+        {
+            _udpClient?.Dispose();
+            _stream?.Dispose();
+            _tcpClient?.Dispose();
+        }
+
+        #endregion
+
+
+        #region Получение данных
 
         public Task PumpCuffAsync()
         {
             throw new NotImplementedException();
         }
 
-        public Task<PatientCommonParams> GetPatientParamsAsync()
+        public Task<PatientCommonParams> GetPatientCommonParamsAsync()
         {
             throw new NotImplementedException();
         }
@@ -52,6 +77,10 @@ namespace CardioMonitor.Devices.Monitor
                 return patientECG;
             });
         }
+
+        #endregion
+        
+      
 
     
         //черновой вариант - отрефачить после тестов с новым монитором
@@ -107,11 +136,6 @@ namespace CardioMonitor.Devices.Monitor
         }
 
 
-        public void Dispose()
-        {
-            _udpClient?.Dispose();
-            _stream?.Dispose();
-            _tcpClient?.Dispose();
-        }
+       
     }
 }
