@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using Common.Logging;
+using Scout.Utils.Logging;
 
 namespace CardioMonitor.Infrastructure.Workers
 {
@@ -9,13 +9,13 @@ namespace CardioMonitor.Infrastructure.Workers
         public Guid Id { get; }
         public TimeSpan Period { get; }
         private readonly Action _workMethod;
-        private readonly ILog _logger;
+        private readonly ILogger _logger;
         private readonly TimerCallback _timerMethod;
         private readonly int _periodMs;
         private Timer _timer;
         private readonly object _locker;
 
-        public Worker(Guid id, TimeSpan period, Action workMethod, ILog logger)
+        public Worker(Guid id, TimeSpan period, Action workMethod, ILogger logger)
         {
             Id = id;
             Period = period;
@@ -104,10 +104,10 @@ namespace CardioMonitor.Infrastructure.Workers
     public sealed class Worker<T> : Worker
     {
         private readonly Action<T> _workMethod;
-        private readonly ILog _logger;
+        private readonly ILogger _logger;
         public T State { get; set; }
 
-        public Worker(Guid id, TimeSpan period, Action<T> workMethod, T state, ILog logger)
+        public Worker(Guid id, TimeSpan period, Action<T> workMethod, T state, ILogger logger)
             : base(id, period)
         {
             State = state;

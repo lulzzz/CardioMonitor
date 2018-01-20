@@ -71,6 +71,8 @@ namespace CardioMonitor.Devices.Bed.UDP
         public async Task ConnectAsync()
         {
             AssertInitParams();
+            if (IsConnected) throw new InvalidOperationException($"{GetType().Name} уже подключен к устройству");
+            
             try
             {
                 await Task.Yield();

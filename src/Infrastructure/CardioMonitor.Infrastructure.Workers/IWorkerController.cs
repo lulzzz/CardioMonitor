@@ -1,5 +1,5 @@
 ﻿using System;
-using Common.Logging;
+using Scout.Utils.Logging;
 
 namespace CardioMonitor.Infrastructure.Workers
 {
@@ -7,16 +7,16 @@ namespace CardioMonitor.Infrastructure.Workers
     {
         
         
-        void SetDefaultLogger(ILog logger);
+        void SetDefaultLogger(ILogger logger);
         Worker StartWorker(TimeSpan period, Action workMethod);
-        Worker StartWorker(TimeSpan period, Action workMethod, ILog logger);
+        Worker StartWorker(TimeSpan period, Action workMethod, ILogger logger);
         Worker StartWorker(TimeSpan period, TimeSpan firstTimePeriod, Action workMethod);
-        Worker StartWorker(TimeSpan period, TimeSpan firstTimePeriod, Action workMethod, ILog logger);
+        Worker StartWorker(TimeSpan period, TimeSpan firstTimePeriod, Action workMethod, ILogger logger);
         void StopAllWorkers();
         void CloseWorker(Worker worker);
         Worker<T> StartWorker<T>(TimeSpan period, Action<T> workMethod, T state);
-        Worker<T> StartWorker<T>(TimeSpan period, Action<T> workMethod, T state, ILog logger);
+        Worker<T> StartWorker<T>(TimeSpan period, Action<T> workMethod, T state, ILogger logger);
         Worker<T> StartWorker<T>(TimeSpan period, TimeSpan firstTimePeriod, Action<T> workMethod, T state);
-        Worker<T> StartWorker<T>(TimeSpan period, TimeSpan firstTimePeriod, Action<T> workMethod, T state, ILog logger);
+        Worker<T> StartWorker<T>(TimeSpan period, TimeSpan firstTimePeriod, Action<T> workMethod, T state, ILogger logger);
     }
 }
