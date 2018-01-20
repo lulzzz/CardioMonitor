@@ -146,7 +146,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             }
             
             var checkPointReachedParams = context.TryGetCheckPointParams();
-            return checkPointReachedParams != null && checkPointReachedParams.IsCheckPointReached;
+            return checkPointReachedParams != null && checkPointReachedParams.NeedRequestEcg;
         }
     }
 }

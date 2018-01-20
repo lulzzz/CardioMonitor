@@ -53,7 +53,6 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         #region Управление взаимодействием и обработка событий
 
-        public event EventHandler OnStartFromDeviceRequested;
         public event EventHandler OnPauseFromDeviceRequested;
         public event EventHandler OnResumeFromDeviceRequested;
         public event EventHandler OnEmeregencyStopFromDeviceRequested;
@@ -245,7 +244,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             throw new NotImplementedException();
         }
 
-        public async Task<double> GetAngleXAsync() //так как запрашивается просто из регистра - думаю таска тут не нужна
+        public async Task<float> GetAngleXAsync() //так как запрашивается просто из регистра - думаю таска тут не нужна
         {
             
             AssertRegisterIsNull();

@@ -1,4 +1,8 @@
-﻿namespace CardioMonitor.BLL.SessionProcessing
+﻿using System;
+using CardioMonitor.Devices.Bed.Infrastructure;
+using CardioMonitor.Devices.Monitor.Infrastructure;
+
+namespace CardioMonitor.BLL.SessionProcessing
 {
     /// <summary>
     /// Параметры сеанса
@@ -8,7 +12,7 @@
         /// <summary>
         /// Максимальный угол наклона кровати
         /// </summary>
-        public MaxAngle MaxAngle { get; }
+        public float MaxAngle { get; }
         
         /// <summary>
         /// Количество повторений (циклов)
@@ -18,13 +22,31 @@
         /// <summary>
         /// Частота
         /// </summary>
-        public double Frequency { get; }
+        public float Frequency { get; }
+        
+        /// <summary>
+        /// Период обновления данных
+        /// </summary>
+        public TimeSpan UpdateDatePeriod { get; }
+        
+        /// <summary>
+        /// Параметры инициализации контроллера кровати
+        /// </summary>
+        public IBedControllerInitParams BedControllerInitParams { get; }
+        
+        /// <summary>
+        /// Параметры инициализации контроллера монитора
+        /// </summary>
+        public IMonitorControllerInitParams MonitorControllerInitParams { get; }
 
-        public SessionParams(MaxAngle maxAngle, short cycleCount, double frequency)
+        public SessionParams(float maxAngle, short cycleCount, float frequency, TimeSpan updateDatePeriod, IBedControllerInitParams bedControllerInitParams, IMonitorControllerInitParams monitorControllerInitParams)
         {
             MaxAngle = maxAngle;
             CycleCount = cycleCount;
             Frequency = frequency;
+            UpdateDatePeriod = updateDatePeriod;
+            BedControllerInitParams = bedControllerInitParams;
+            MonitorControllerInitParams = monitorControllerInitParams;
         }
     }
 }

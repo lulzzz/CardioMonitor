@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using CardioMonitor.BLL.SessionProcessing.CheckPoints;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;

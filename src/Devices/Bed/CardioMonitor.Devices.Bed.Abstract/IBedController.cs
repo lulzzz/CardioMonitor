@@ -11,11 +11,6 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         #region Управление взаимодействием и обработка событий
         
         /// <summary>
-        /// Событие нажаттия на кнопку `Старт` на пульте управления инверсионным столом
-        /// </summary>
-        event EventHandler OnStartFromDeviceRequested;
-        
-        /// <summary>
         /// Событие нажаттия на кнопку `Пауза` на пульте управления инверсионным столом
         /// </summary>
         event EventHandler OnPauseFromDeviceRequested;
@@ -152,7 +147,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// Возвращает угол наклона кровати по оси Х
         /// </summary>
         /// <returns></returns>
-        Task<double> GetAngleXAsync();
+        Task<float> GetAngleXAsync();
         
         #endregion
     }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 {
     internal interface ICycleProcessingContextParams
     {

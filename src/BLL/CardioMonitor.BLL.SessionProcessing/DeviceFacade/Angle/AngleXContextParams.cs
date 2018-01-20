@@ -10,12 +10,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
 
         public Guid ParamsTypeId { get; } = AngleContextParamId;
 
-        public AngleXContextParams(double currentAngle)
+        public AngleXContextParams(float currentAngle)
         {
             CurrentAngle = currentAngle;
         }
 
-        public double CurrentAngle { get; }
+        public float CurrentAngle { get; }
     }
 
     internal static class AngleXParamContextExtension

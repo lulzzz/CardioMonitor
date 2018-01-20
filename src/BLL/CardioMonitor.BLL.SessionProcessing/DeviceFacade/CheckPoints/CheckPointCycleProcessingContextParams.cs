@@ -7,18 +7,24 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
     internal class CheckPointCycleProcessingContextParams : ICycleProcessingContextParams
     {
         public static readonly Guid CheckPointContextParamsId = new Guid("19338674-ba21-45cd-8bcc-1e6a9dddac24");
-        
-        public Guid ParamsTypeId { get; }
 
-        public CheckPointCycleProcessingContextParams(bool isCheckPointReached, bool isMaxCheckPoint)
+        public Guid ParamsTypeId { get; } = CheckPointContextParamsId;
+
+        public CheckPointCycleProcessingContextParams(
+            bool needRequestEcg, 
+            bool needRequestCommonParams, 
+            bool needRequestPressureParams)
         {
-            IsCheckPointReached = isCheckPointReached;
-            IsMaxCheckPoint = isMaxCheckPoint;
+            NeedRequestEcg = needRequestEcg;
+            NeedRequestCommonParams = needRequestCommonParams;
+            NeedRequestPressureParams = needRequestPressureParams;
         }
 
-        public bool IsCheckPointReached { get; }
+        public bool NeedRequestEcg { get; }
         
-        public bool IsMaxCheckPoint { get; }
+        public bool NeedRequestCommonParams{ get; }
+        
+        public bool NeedRequestPressureParams { get; }
     }
 
     internal static class CheckPointParamsContextExnteions

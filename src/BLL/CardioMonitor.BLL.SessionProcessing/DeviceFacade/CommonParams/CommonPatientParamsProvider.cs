@@ -14,12 +14,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
     internal class CommonPatientParamsProvider : ICycleProcessingPipelineElement
     {
         /// <summary>
-        /// Точность для сравнение double величин
-        /// </summary>
-        private const double Tolerance = 0.1e-12;
-
-
-        /// <summary>
         /// Таймаут запроса параметром пациента
         /// </summary>
         private readonly TimeSpan _updatePatientParamTimeout;
@@ -97,7 +91,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             }
             
             var checkPointReachedParams = context.TryGetCheckPointParams();
-            return checkPointReachedParams != null && checkPointReachedParams.IsCheckPointReached;
+            return checkPointReachedParams != null && checkPointReachedParams.NeedRequestEcg;
         }
     }
 }

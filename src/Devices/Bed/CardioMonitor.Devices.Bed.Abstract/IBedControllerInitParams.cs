@@ -23,7 +23,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// <summary>
         /// Частота движения
         /// </summary>
-        double MovementFrequency { get; }
+        float MovementFrequency { get; }
         
         /// <summary>
         /// Период опроса устройства

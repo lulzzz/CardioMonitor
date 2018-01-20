@@ -33,23 +33,27 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CheckPointResolver.cs" />
+    <Compile Include="CycleStateMachineBuilder.cs" />
+    <Compile Include="DeviceFacade\CycleProcessingSynchronizer.cs" />
     <Compile Include="DeviceFacade\Exceptions\ExceptionCycleProcessingContextParams.cs" />
-    <Compile Include="DeviceFacade\Exceptions\ICycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\ForcedDataCollectionRequest\ForcedDataCollectionRequestCycleProcessingContextParams.cs" />
+    <Compile Include="DeviceFacade\ICycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\Iterations\IterationCycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\Iterations\IterationParamsProvider.cs" />
+    <Compile Include="DeviceFacade\PressureParams\AutoPumpingContextParams.cs" />
+    <Compile Include="DeviceFacade\PressureParams\AutoPumpingContextParamsExntensions.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PressureParamsContextExntensions.cs" />
+    <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoContextParamses.cs" />
+    <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="CheckPoints\CheckPointAnglesFactory.cs" />
-    <Compile Include="CheckPoints\CheckPointResolver.cs" />
-    <Compile Include="CommandType.cs" />
     <Compile Include="CycleStateMachine\CycleStates.cs" />
     <Compile Include="CycleStateMachine\CycleTriggers.cs" />
     <Compile Include="Exceptions\SessionProcessingErrorCodes.cs" />
     <Compile Include="Exceptions\SessionProcessingException.cs" />
-    <Compile Include="MaxAngle.cs" />
     <Compile Include="DeviceFacade\Angle\AngleXContextParams.cs" />
     <Compile Include="DeviceFacade\Angle\AngleReciever.cs" />
-    <Compile Include="DeviceFacade\CheckPoints\CheckPointChecker.cs" />
+    <Compile Include="DeviceFacade\CheckPoints\IterationBasedCheckPointChecker.cs" />
     <Compile Include="DeviceFacade\CheckPoints\CheckPointCycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\CommonPatientParams.cs" />
     <Compile Include="DeviceFacade\CommonParams\CommonPatientCycleProcessingContextParams.cs" />
@@ -59,13 +63,8 @@
     <Compile Include="DeviceFacade\PatientPressureParams.cs" />
     <Compile Include="DeviceFacade\DevicesFacade.cs" />
     <Compile Include="DeviceFacade\CycleProcessingContext.cs" />
-    <Compile Include="DeviceFacade\SeansParams.cs" />
     <Compile Include="DeviceFacade\PressureParams\PatientPressureParamsProvider.cs" />
     <Compile Include="DeviceFacade\PressureParams\PressureCycleProcessingContextParams.cs" />
-    <Compile Include="DeviceFacade\Time\TimeCycleProcessingContextParamses.cs" />
-    <Compile Include="DeviceFacade\Time\CycleProcessingSynchroniaztionController.cs" />
-    <Compile Include="Processing\CycleDurationCalculator.cs" />
-    <Compile Include="Processing\CycleStateMachineBuilder.cs" />
     <Compile Include="SessionContext.cs" />
     <Compile Include="SessionProcessingModule.cs" />
     <Compile Include="SessionParams.cs" />
@@ -128,6 +127,10 @@
       <Project>{e773219c-f1da-42a3-8e80-68bedac3e4f8}</Project>
       <Name>CardioMonitor.Devices.Monitor.Infrastructure</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure.Workers\CardioMonitor.Infrastructure.Workers.csproj">
+      <Project>{060dd75d-d142-47f9-a949-fdb171cde123}</Project>
+      <Name>CardioMonitor.Infrastructure.Workers</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj">
       <Project>{60422aeb-3748-4b0f-928e-689b1378a5ee}</Project>
       <Name>CardioMonitor.Infrastructure</Name>
@@ -136,6 +139,9 @@
       <Project>{33247b5d-3763-4034-a97c-4c7922b04f9f}</Project>
       <Name>CardioMonitor.BLL.CoreContracts</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Processing" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

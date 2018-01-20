@@ -10,10 +10,6 @@
         /// </summary>
         NotStarted,
         /// <summary>
-        /// Стадия подготовки (накачка манжета)
-        /// </summary>
-        Prepared,
-        /// <summary>
         /// Цикл выполняется
         /// </summary>
         InProgress,
