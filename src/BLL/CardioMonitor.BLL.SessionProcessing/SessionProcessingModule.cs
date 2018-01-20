@@ -49,11 +49,11 @@ namespace CardioMonitor.BLL.SessionProcessing
         event EventHandler SessionInitializeStarted;
         event EventHandler SessionInitilizeCompleted;
         void Init();
-        Task Start(CommandType commandType);
-        void Suspend(CommandType commandType);
-        void Resume(CommandType commandType);
-        void Reverse(CommandType commandType);
-        void EmergencyStop(CommandType commandType);
+//        Task Start(CommandType commandType);
+//        void Suspend(CommandType commandType);
+//        void Resume(CommandType commandType);
+//        void Reverse(CommandType commandType);
+//        void EmergencyStop(CommandType commandType);
     }
 
     /// <summary>
@@ -161,23 +161,23 @@ namespace CardioMonitor.BLL.SessionProcessing
 
         #region Методы
 
-        public async Task Start(CommandType commandType)
-        {
-            //todo сделать так, чтобы никто не мог вызвать повторно, если сеанс запущен или подготавливается
-            
-            // при старте мы должны узнать длительность сеанса, запустить обработку сеанса
-
-            var cycleDuration = await _bedController.GetCycleDurationAsync().ConfigureAwait(false);
-            _cycleProcessingSynchroniaztionController.Init(cycleDuration, _cycleTick);
-            
-            var cycleStateMachineBuilder = new CycleStateMachineBuilder();
-            cycleStateMachineBuilder.SetOnPreparedAction(PrepareCycle);
-            
-            _stateMachine = cycleStateMachineBuilder.Buid();
-            
-            
-            _stateMachine.Fire(CycleTriggers.Start); 
-        }
+//        public async Task Start(CommandType commandType)
+//        {
+//            //todo сделать так, чтобы никто не мог вызвать повторно, если сеанс запущен или подготавливается
+//            
+//            // при старте мы должны узнать длительность сеанса, запустить обработку сеанса
+//
+//            var cycleDuration = await _bedController.GetCycleDurationAsync().ConfigureAwait(false);
+//            _cycleProcessingSynchroniaztionController.Init(cycleDuration, _cycleTick);
+//            
+//            var cycleStateMachineBuilder = new CycleStateMachineBuilder();
+//            cycleStateMachineBuilder.SetOnPreparedAction(PrepareCycle);
+//            
+//            _stateMachine = cycleStateMachineBuilder.Buid();
+//            
+//            
+//            _stateMachine.Fire(CycleTriggers.Start); 
+//        }
 
         private void PrepareCycle(SessionContext context)
         {
@@ -194,25 +194,25 @@ namespace CardioMonitor.BLL.SessionProcessing
             _stateMachine.Fire(CycleTriggers.PreparingCompleted);
         }
 
-        public void Suspend(CommandType commandType)
-        {
-            _stateMachine.Fire(CycleTriggers.Suspend);
-        }
-
-        public void Resume(CommandType commandType)
-        {
-            _stateMachine.Fire(CycleTriggers.Resume);
-        }
-
-        public void Reverse(CommandType commandType)
-        {
-          //  _bus.PublishAsync(new ReverseCommand());
-        }
-
-        public void EmergencyStop(CommandType commandType)
-        {
-            _stateMachine.Fire(CycleTriggers.EmergencyStop);
-        }
+//        public void Suspend(CommandType commandType)
+//        {
+//            _stateMachine.Fire(CycleTriggers.Suspend);
+//        }
+//
+//        public void Resume(CommandType commandType)
+//        {
+//            _stateMachine.Fire(CycleTriggers.Resume);
+//        }
+//
+//        public void Reverse(CommandType commandType)
+//        {
+//          //  _bus.PublishAsync(new ReverseCommand());
+//        }
+//
+//        public void EmergencyStop(CommandType commandType)
+//        {
+//            _stateMachine.Fire(CycleTriggers.EmergencyStop);
+//        }
         
 
         #endregion

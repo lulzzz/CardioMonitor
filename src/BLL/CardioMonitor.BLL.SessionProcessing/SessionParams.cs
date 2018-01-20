@@ -8,7 +8,7 @@
         /// <summary>
         /// Максимальный угол наклона кровати
         /// </summary>
-        public MaxAngle MaxAngle { get; }
+        public float MaxAngle { get; }
         
         /// <summary>
         /// Количество повторений (циклов)
@@ -18,9 +18,12 @@
         /// <summary>
         /// Частота
         /// </summary>
-        public double Frequency { get; }
+        public float Frequency { get; }
 
-        public SessionParams(MaxAngle maxAngle, short cycleCount, double frequency)
+        public SessionParams(
+            float maxAngle, 
+            short cycleCount, 
+            float frequency)
         {
             MaxAngle = maxAngle;
             CycleCount = cycleCount;

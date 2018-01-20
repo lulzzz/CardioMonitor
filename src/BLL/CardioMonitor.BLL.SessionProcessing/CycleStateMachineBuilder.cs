@@ -44,17 +44,8 @@ namespace CardioMonitor.BLL.SessionProcessing.Processing
 
             stateMachine
                 .Configure(CycleStates.NotStarted)
-                .Permit(CycleTriggers.Start, CycleStates.Prepared);
-
-            stateMachine
-                .Configure(CycleStates.Prepared)
-                .Permit(CycleTriggers.PreparingCompleted, CycleStates.InProgress)
-                .Permit(CycleTriggers.EmergencyStop, CycleStates.EmergencyStopped)
-                .OnEntry(() =>
-                {
-                    _onPreparedAction?.Invoke(_sessionContext);
-                });
-
+                .Permit(CycleTriggers.Start, CycleStates.InProgress);
+          
             stateMachine
                 .Configure(CycleStates.InProgress)
                 .Permit(CycleTriggers.Suspend, CycleStates.Suspedned)

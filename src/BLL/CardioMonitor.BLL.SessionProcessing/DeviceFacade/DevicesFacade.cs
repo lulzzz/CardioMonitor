@@ -237,7 +237,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         public async Task PauseAsync()
         {
             await Task.Yield();
-            _cycleProcessingSynchroniaztionController.Puase();
+            _cycleProcessingSynchroniaztionController.Pause();
         }
 
         public async Task ResetAsync()

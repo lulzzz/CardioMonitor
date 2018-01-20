@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.CheckPoints
 {
+    [Obsolete("Возможно, понадобится для поддержки первой версии кровати")]
     public interface ICheckPointResolver
     {
         /// <summary>
@@ -33,6 +34,7 @@ namespace CardioMonitor.BLL.SessionProcessing.CheckPoints
     /// <remarks>
     /// Новый цикл - нужно сбросить состояния
     /// </remarks>
+    [Obsolete("Возможно, понадобится для поддержки первой версии кровати")]
     public class CheckPointResolver : ICheckPointResolver
     {
 

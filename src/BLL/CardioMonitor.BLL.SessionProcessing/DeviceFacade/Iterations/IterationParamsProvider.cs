@@ -18,10 +18,21 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
-            await Task.Yield();
+            var currentIteration = _bedController
+                .GetCurrentIterationAsync()
+                .ConfigureAwait(false);
             
-            //todo request of iteration params
-            //var _bedController.get
+            var nextIterationToMeasuringCommonParams = _bedController
+                .GetNextIterationNumberForCommonParamsMeasuringAsync()
+                .ConfigureAwait(false);
+            
+            var nextIterationToMeasuringPressureParams = _bedController
+                .GetNextIterationNumberForPressureMeasuringAsync()
+                .ConfigureAwait(false);
+            
+            var nextIterationToMeasuringEcg = _bedController
+                .GetNextIterationNumberForEcgMeasuringAsync()
+                .ConfigureAwait(false);
 
             context.AddOrUpdate(new IterationCycleProcessingContextParams(
                 iterationToGetEcg: 0,

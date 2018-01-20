@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Threading.Tasks.Dataflow;
-using CardioMonitor.Infrastructure.Threading;
+using CardioMonitor.Infrastructure.Workers;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
@@ -11,91 +12,89 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
     /// <remarks>
     /// По факту выступает в роле тактового генератора, чтобы запускать опрос устройст, сбор данных и уведомление подписчиков
     /// </remarks>
-    internal class CycleProcessingSynchroniaztionController
+    internal class CycleProcessingSynchroniaztionController : IDisposable
     {
         [NotNull] private readonly BroadcastBlock<CycleProcessingContext> _pipelineStartBlock;
 
+        /// <summary>
+        /// Периодичность запуска всего процесса обработки
+        /// </summary>
+        private TimeSpan? _processingPeriod;
+
+        [NotNull] 
+        private readonly IWorkerController _workerController;
+
         [CanBeNull]
-        private CardioTimer _timer;
+        private Worker _worker;
 
-        /// <summary>
-        /// Длительность тика таймера
-        /// </summary>
-        private TimeSpan _cycleTickDuration;
+        private bool _isProcessing;
 
-        /// <summary>
-        /// Длительность одного цикла
-        /// </summary>
-        private TimeSpan _cycleDuration;
-
-        /// <summary>
-        /// Прошедшее время цикла
-        /// </summary>
-        private TimeSpan _elapsedTime;
-
-
-        public CycleProcessingSynchroniaztionController([NotNull] BroadcastBlock<CycleProcessingContext> pipelineStartBlock)
+        public CycleProcessingSynchroniaztionController(
+            [NotNull] BroadcastBlock<CycleProcessingContext> pipelineStartBlock,
+            [NotNull] IWorkerController workerController)
         {
+            _workerController = workerController ?? throw new ArgumentNullException(nameof(workerController));
             _pipelineStartBlock = pipelineStartBlock ?? throw new ArgumentNullException(nameof(pipelineStartBlock));
             IsPaused = false;
+            _isProcessing = false;
+            _processingPeriod = null;
         }
+        
+        public bool IsPaused { get; private set; }
         
         /// <summary>
         /// Инициализирует контроллера
         /// </summary>
-        /// <param name="cycleDuration">Длитнльность цикла</param>
-        /// <param name="cycleTick">Длительность тика цикла</param>
-        public void Init(TimeSpan cycleDuration, TimeSpan cycleTick)
+        /// <param name="processingPeriod">Периодичность запуска всего процесса обработки</param>
+        public void Init(TimeSpan processingPeriod)
         {
-            _timer?.Stop();
-            _timer = new CardioTimer(TimerTick, cycleDuration, cycleTick);
-            _cycleDuration = cycleDuration;
-            _cycleTickDuration = cycleTick;
+            _processingPeriod = processingPeriod;
         }
 
-        private async void TimerTick(object sender, EventArgs args)
-        {
-            _elapsedTime += _cycleTickDuration;
-            var context = new CycleProcessingContext();
-            
-            var timeParams = new TimeCycleProcessingContextParamses(_cycleDuration, _elapsedTime);
-            context.AddOrUpdate(timeParams);
-            
-            await _pipelineStartBlock
-                .SendAsync(context)
-                .ConfigureAwait(false);
-        }
+       
 
         /// <summary>
         /// Запускает контроллера
         /// </summary>
         public void Start()
         {
-            if (_timer == null) throw new InvalidOperationException("Timer not initialised");
-            _timer.Start();
-            _elapsedTime = TimeSpan.Zero;
+            if (!_processingPeriod.HasValue) 
+                throw new InvalidOperationException($"Необходимо сначала инициализировать контроллер методом {nameof(Init)}");
+            _worker = _workerController.StartWorker(_processingPeriod.Value, async () => await SyncAsync().ConfigureAwait(false));
+            _isProcessing = true;
             IsPaused = false;
         }
+        
+        private async Task SyncAsync()
+        {
+            var context = new CycleProcessingContext();
+            
+            await _pipelineStartBlock
+                .SendAsync(context)
+                .ConfigureAwait(false);
+        }
 
-        public bool IsPaused { get; private set; }
 
         /// <summary>
         /// Остановливает контроллер
         /// </summary>
         public void Stop()
         {
-            if (_timer == null) throw new InvalidOperationException("Timer not initialised");
-            _timer.Stop();
+            if (!_isProcessing) throw new InvalidOperationException($"Необходимо сначала запустить контроллер методом {nameof(Start)}");
+                
             IsPaused = false;
+            _isProcessing = false;
+            _workerController.CloseWorker(_worker);
         }
 
         /// <summary>
-        /// Приостанавливается контроллер
+        /// Приостанавливает контроллер
         /// </summary>
-        public void Puase()
+        public void Pause()
         {
-            if (_timer == null) throw new InvalidOperationException("Timer not initialised");
-            _timer.Suspend();
+            if (_worker == null) throw new InvalidOperationException($"Необходимо сначала запустить обработку методом {nameof(Start)}");
+            
+            _worker.Stop();
             IsPaused = true;
         }
 
@@ -104,11 +103,15 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
         /// </summary>
         public void Resume()
         {
-            if (_timer == null) throw new InvalidOperationException("Timer not initialised");
+            if (_worker == null) throw new InvalidOperationException($"Необходимо сначала запустить обработку методом {nameof(Start)}");
 
-            _timer.Resume();
+            _worker.Start();
             IsPaused = false;
         }
 
+        public void Dispose()
+        {
+            _workerController.CloseWorker(_worker);
+        }
     }
 }
