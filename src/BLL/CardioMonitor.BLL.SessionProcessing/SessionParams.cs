@@ -39,7 +39,13 @@ namespace CardioMonitor.BLL.SessionProcessing
         /// </summary>
         public IMonitorControllerInitParams MonitorControllerInitParams { get; }
 
-        public SessionParams(float maxAngle, short cycleCount, float frequency, TimeSpan updateDatePeriod, IBedControllerInitParams bedControllerInitParams, IMonitorControllerInitParams monitorControllerInitParams)
+        public SessionParams(
+            float maxAngle, 
+            short cycleCount, 
+            float frequency, 
+            TimeSpan updateDatePeriod, 
+            IBedControllerInitParams bedControllerInitParams, 
+            IMonitorControllerInitParams monitorControllerInitParams)
         {
             MaxAngle = maxAngle;
             CycleCount = cycleCount;

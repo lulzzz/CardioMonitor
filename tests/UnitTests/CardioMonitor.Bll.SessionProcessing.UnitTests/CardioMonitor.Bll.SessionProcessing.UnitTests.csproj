@@ -63,7 +63,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PipelineTests.cs" />
+    <Compile Include="DevicaFacadeTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +86,10 @@
     <ProjectReference Include="..\..\..\src\Devices\Monitor\CardioMonitor.Devices.Monitor.Infrastructure\CardioMonitor.Devices.Monitor.Infrastructure.csproj">
       <Project>{e773219c-f1da-42a3-8e80-68bedac3e4f8}</Project>
       <Name>CardioMonitor.Devices.Monitor.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\src\Infrastructure\CardioMonitor.Infrastructure.Workers\CardioMonitor.Infrastructure.Workers.csproj">
+      <Project>{060dd75d-d142-47f9-a949-fdb171cde123}</Project>
+      <Name>CardioMonitor.Infrastructure.Workers</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\src\Infrastructure\CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj">
       <Project>{60422aeb-3748-4b0f-928e-689b1378a5ee}</Project>

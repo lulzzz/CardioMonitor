@@ -91,8 +91,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         /// </summary>
         public void Stop()
         {
-            if (!_isProcessing) throw new InvalidOperationException($"Необходимо сначала запустить контроллер методом {nameof(Start)}");
-                
             IsPaused = false;
             _isProcessing = false;
             _workerController.CloseWorker(_worker);
@@ -103,9 +101,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         /// </summary>
         public void Pause()
         {
-            if (_worker == null) throw new InvalidOperationException($"Необходимо сначала запустить обработку методом {nameof(Start)}");
-            
-            _worker.Stop();
+            _worker?.Stop();
             IsPaused = true;
         }
 

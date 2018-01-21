@@ -3,7 +3,7 @@
     public enum SessionProcessingErrorCodes
     {
         Unknown=0,
-        UnhandlerException=1,
+        UnhandledException=1,
         PumpingTimeout=2,
         PumpingError=3,
         PatientPressureParamsRequestError=4,

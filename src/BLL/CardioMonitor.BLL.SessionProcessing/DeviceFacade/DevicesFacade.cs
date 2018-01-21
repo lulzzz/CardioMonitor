@@ -24,6 +24,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         IDevicesFacade,
         IDisposable
     {
+        private const short StartCycleNumber = 1;
+        private readonly TimeSpan _cachedEventLifetime = TimeSpan.FromMinutes(1);
+        
         [NotNull] private readonly IMonitorController _monitorController;
         [NotNull] private readonly IBedController _bedController;
         [NotNull] private readonly CycleProcessingSynchronizer _cycleProcessingSynchronizer;
@@ -89,7 +92,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 workerController,
                 _isAutoPumpingEnabled);
             _isStandartProcessingInProgress = false;
-            _previouslyKnownCycleNumber = 1;
+            _previouslyKnownCycleNumber = StartCycleNumber;
             
             _bedController.OnPauseFromDeviceRequested += BedControllerOnPauseFromDeviceRequested;
             _bedController.OnResumeFromDeviceRequested += BedControllerOnResumeFromDeviceRequested;
@@ -187,102 +190,122 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 new DataflowLinkOptions
                 {
                     PropagateCompletion = true
-                });
+                },
+                context => commonParamsProvider.CanProcess(context));
 
             mainBroadcastBlock.LinkTo(
                 pressureParamsProviderBlock,
                 new DataflowLinkOptions
                 {
                     PropagateCompletion = true
-                });
+                },
+                context => pressureParamsProvider.CanProcess(context));
 
             commonParamsProviderBlock.LinkTo(
                 _pipelineFinishCollectorBlock,
                 new DataflowLinkOptions
                 {
                     PropagateCompletion = true
-                },
-                context => commonParamsProvider.CanProcess(context));
+                });
 
             pressureParamsProviderBlock.LinkTo(
                 _pipelineFinishCollectorBlock,
                 new DataflowLinkOptions
                 {
                     PropagateCompletion = true
-                },
-                context => pressureParamsProvider.CanProcess(context));
+                });
         }
 
-        
+
         private Task CollectDataFromPipeline([NotNull] CycleProcessingContext context)
         {
-            var exceptionParams = context.TryGetExceptionContextParams();
-            if (exceptionParams != null)
+            try
             {
-                RiseOnce(exceptionParams, () => OnException?.Invoke(this, exceptionParams.Exception));
-            }
-            
-            var sessionProcessingInfo = context.TryGetSessionProcessingInfo();
-            if (sessionProcessingInfo == null)
-            {
-                return Task.CompletedTask;
-            }
-            var iterationsInfo = context.TryGetIterationParams();
-            if (iterationsInfo == null)
-            {
-                return Task.CompletedTask;
-            }
-            
-            var angleParams = context.TryGetAngleParam();
-            if (angleParams != null)
-            {
-                RiseOnce(angleParams, () => OnCurrentAngleXRecieved?.Invoke(this, angleParams.CurrentAngle));
-            }
-            
-            var pressureParams = context.TryGetPressureParams();
-            if (pressureParams != null)
-            {
-                RiseOnce(pressureParams, () => OnPatientPressureParamsRecieved?.Invoke(
-                    this, 
-                    new PatientPressureParams(
-                        angleParams?.CurrentAngle ?? 0,
-                        pressureParams.SystolicArterialPressure,
-                        pressureParams.DiastolicArterialPressure,
-                        pressureParams.AverageArterialPressure)));
-            }
-            var commonParams = context.TryGetCommonPatientParams();
-            if (commonParams != null)
-            {
-                RiseOnce(commonParams, () => OnCommonPatientParamsRecieved?.Invoke(
-                    this, 
-                    new CommonPatientParams(
-                        angleParams?.CurrentAngle ?? 0,
-                        commonParams.HeartRate,
-                        commonParams.RepsirationRate,
-                        commonParams.Spo2)));
-            }
-            
-            RiseOnce(sessionProcessingInfo, async () =>
-            {
-                OnElapsedTimeChanged?.Invoke(this, sessionProcessingInfo.ElapsedTime);
-                OnRemainingTimeChanged?.Invoke(this, sessionProcessingInfo.RemainingTime);
+                var exceptionParams = context.TryGetExceptionContextParams();
+                if (exceptionParams != null)
+                {
+                    RiseOnce(exceptionParams, () => OnException?.Invoke(this, exceptionParams.Exception));
+                }
                 
-                // считаем, что сессия завершилась, когда оставшееся время равно 0
-                var isSessionCompleted = sessionProcessingInfo.RemainingTime <= TimeSpan.Zero;
-         
-                //todo придумать, как определять, что закончился цикл, что надо снять показатели в последнем 0
-                if (_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber || isSessionCompleted)
+                var sessionProcessingInfo = context.TryGetSessionProcessingInfo();
+                if (sessionProcessingInfo == null)
                 {
-                    _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber;// по идеи, 
-                    await ForceDataCollectionRequestAsync();
-                    OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
+                    return Task.CompletedTask;
                 }
-                if (isSessionCompleted)
+                var iterationsInfo = context.TryGetIterationParams();
+                if (iterationsInfo == null)
                 {
-                    _cycleProcessingSynchronizer.Stop();
-                    OnSessionCompleted?.Invoke(this, EventArgs.Empty);
+                    return Task.CompletedTask;
                 }
-            });
+
+                var angleParams = context.TryGetAngleParam();
+
+
+                var pressureParams = context.TryGetPressureParams();
+                if (pressureParams != null)
+                {
+                    RiseOnce(pressureParams, () => OnPatientPressureParamsRecieved?.Invoke(
+                        this,
+                        new PatientPressureParams(
+                            angleParams?.CurrentAngle ?? 0,
+                            pressureParams.SystolicArterialPressure,
+                            pressureParams.DiastolicArterialPressure,
+                            pressureParams.AverageArterialPressure)));
+                }
+                var commonParams = context.TryGetCommonPatientParams();
+                if (commonParams != null)
+                {
+                    RiseOnce(commonParams, () => OnCommonPatientParamsRecieved?.Invoke(
+                        this,
+                        new CommonPatientParams(
+                            angleParams?.CurrentAngle ?? 0,
+                            commonParams.HeartRate,
+                            commonParams.RepsirationRate,
+                            commonParams.Spo2)));
+                }
+                var isForceRequested = context.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
+                // чтобы не было рекурсии
+                if (isForceRequested) return Task.CompletedTask;
+
+                if (angleParams != null)
+                {
+                    RiseOnce(angleParams, () => OnCurrentAngleXRecieved?.Invoke(this, angleParams.CurrentAngle));
+                }
+               
+
+                RiseOnce(sessionProcessingInfo, async () =>
+                {
+
+                    OnElapsedTimeChanged?.Invoke(this, sessionProcessingInfo.ElapsedTime);
+                    OnRemainingTimeChanged?.Invoke(this, sessionProcessingInfo.RemainingTime);
+
+                    // считаем, что сессия завершилась, когда оставшееся время равно 0
+                    var isSessionCompleted = sessionProcessingInfo.RemainingTime <= TimeSpan.Zero;
+
+                    //todo придумать, как определять, что закончился цикл, что надо снять показатели в последнем 0
+                    if (_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber || isSessionCompleted)
+                    {
+                        _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber; // по идеи, 
+                        await InnerForceDataCollectionRequestAsync();
+                        OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
+                    }
+                    if (isSessionCompleted)
+                    {
+                        _cycleProcessingSynchronizer.Stop();
+                        OnSessionCompleted?.Invoke(this, EventArgs.Empty);
+                    }
+                });
+
+            }
+            catch (Exception e)
+            {
+                OnException?.Invoke(
+                    this,
+                    new SessionProcessingException(
+                        SessionProcessingErrorCodes.UnhandledException,
+                        "Необработанная ошибка в процессе выполнения сеанса",
+                        e));
+            }
 
             return Task.CompletedTask;
         }
@@ -299,7 +322,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         {
             if (_processedEventsCached.ContainsEvent(contextParams)) return;
             
-            _processedEventsCached.AddEventToCache(contextParams, TimeSpan.FromMinutes(1));
+            _processedEventsCached.AddEventToCache(contextParams, _cachedEventLifetime);
             
             action.Invoke();
             
@@ -320,7 +343,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     OnException?.Invoke(
                         this, 
                         new SessionProcessingException(
-                            SessionProcessingErrorCodes.UnhandlerException, 
+                            SessionProcessingErrorCodes.UnhandledException, 
                             "Ошибка обработки команды экстренной остановки кровати, запрошенной с пульта", 
                             e));
                 }
@@ -342,7 +365,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     OnException?.Invoke(
                         this,
                         new SessionProcessingException(
-                            SessionProcessingErrorCodes.UnhandlerException,
+                            SessionProcessingErrorCodes.UnhandledException,
                             "Ошибка обработки команды реверса, запрошенной с пульта",
                             e));
                 }
@@ -364,7 +387,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     OnException?.Invoke(
                         this,
                         new SessionProcessingException(
-                            SessionProcessingErrorCodes.UnhandlerException,
+                            SessionProcessingErrorCodes.UnhandledException,
                             "Ошибка обработки команды продолжения сеанса, запрошенной с пульта",
                             e));
                 }
@@ -386,7 +409,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     OnException?.Invoke(
                         this,
                         new SessionProcessingException(
-                            SessionProcessingErrorCodes.UnhandlerException,
+                            SessionProcessingErrorCodes.UnhandledException,
                             "Ошибка обработки команды паузы сеанса, запрошенной с пульта",
                             e));
                 }
@@ -407,7 +430,26 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         public Task StartAsync()
         {
-            return InnerStartAsync(false);
+            try
+            {
+                return InnerStartAsync(false);
+            }
+            catch (SessionProcessingException e)
+            {
+                OnException?.Invoke(
+                    this, 
+                    e);
+            }
+            catch (Exception e)
+            {
+                OnException?.Invoke(
+                    this,
+                    new SessionProcessingException(
+                        SessionProcessingErrorCodes.UnhandledException,
+                        e.Message, 
+                        e));
+            }
+            return Task.CompletedTask;
         }
 
         private async Task InnerStartAsync(bool isCalledFromDevice)
@@ -433,7 +475,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     .ExecuteCommandAsync(BedControlCommand.Callibrate)
                     .ConfigureAwait(false);
                 // измерим перед стартом
-                await ForceDataCollectionRequestAsync()
+                await InnerForceDataCollectionRequestAsync()
                     .ConfigureAwait(false);
                 // запускаем кровать
                 await _bedController
@@ -452,7 +494,26 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         public Task EmergencyStopAsync()
         {
-            return InnerEmeregencyStopAsync(false);
+            try
+            {
+                return InnerEmeregencyStopAsync(false);
+            }
+            catch (SessionProcessingException e)
+            {
+                OnException?.Invoke(
+                    this, 
+                    e);
+            }
+            catch (Exception e)
+            {
+                OnException?.Invoke(
+                    this,
+                    new SessionProcessingException(
+                        SessionProcessingErrorCodes.UnhandledException,
+                        e.Message, 
+                        e));
+            }
+            return Task.CompletedTask;
         }
 
         private async Task InnerEmeregencyStopAsync(bool isCalledFromDevice)
@@ -475,7 +536,26 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         public Task PauseAsync()
         {
-            return InnerPauseAsync(false);
+            try
+            {
+                return InnerPauseAsync(false);
+            }
+            catch (SessionProcessingException e)
+            {
+                OnException?.Invoke(
+                    this, 
+                    e);
+            }
+            catch (Exception e)
+            {
+                OnException?.Invoke(
+                    this,
+                    new SessionProcessingException(
+                        SessionProcessingErrorCodes.UnhandledException,
+                        e.Message, 
+                        e));
+            }
+            return Task.CompletedTask;
         }
 
         private async Task InnerPauseAsync(bool isCalledFromDevice)
@@ -492,7 +572,26 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         public Task ProcessReverseRequestAsync()
         {
-            return InnerProcessReverseRequestAsync(false);
+            try
+            {
+                return InnerProcessReverseRequestAsync(false);
+            }
+            catch (SessionProcessingException e)
+            {
+                OnException?.Invoke(
+                    this,
+                    e);
+            }
+            catch (Exception e)
+            {
+                OnException?.Invoke(
+                    this,
+                    new SessionProcessingException(
+                        SessionProcessingErrorCodes.UnhandledException,
+                        e.Message,
+                        e));
+            }
+            return Task.CompletedTask;
         }
 
         private Task InnerProcessReverseRequestAsync(bool isCalledFromDevice)
@@ -505,13 +604,37 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             return Task.CompletedTask;
         }
         
-        public async Task ForceDataCollectionRequestAsync()
+        public Task ForceDataCollectionRequestAsync()
         {
             if (_isStandartProcessingInProgress)
             {
-                throw new InvalidOperationException("Can not execute force request while cycle on progress");
+                throw new InvalidOperationException("Нельзя вызывать перезамер показателей во время выполнения сеанса");
             }
-     
+            
+            try
+            {
+                return InnerForceDataCollectionRequestAsync();
+            }
+            catch (SessionProcessingException e)
+            {
+                OnException?.Invoke(
+                    this,
+                    e);
+            }
+            catch (Exception e)
+            {
+                OnException?.Invoke(
+                    this,
+                    new SessionProcessingException(
+                        SessionProcessingErrorCodes.UnhandledException,
+                        e.Message,
+                        e));
+            }
+            return Task.CompletedTask;
+        }
+
+        private async Task InnerForceDataCollectionRequestAsync()
+        {
             //todo может, вручную задавать номер итерации и цикла?
             var context = new CycleProcessingContext();
             context.AddOrUpdate(new ForcedDataCollectionRequestCycleProcessingContextParams(true));
