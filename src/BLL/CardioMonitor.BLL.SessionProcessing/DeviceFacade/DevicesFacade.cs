@@ -34,9 +34,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private readonly BroadcastBlock<CycleProcessingContext> _forcedRequestBlock;
 
         private bool _isStandartProcessingInProgress;
-        private short _previosKnownCycleNumber;
+        private short _previouslyKnownCycleNumber;
         private bool _isAutoPumpingEnabled;
-        
         
         public event EventHandler<TimeSpan> OnElapsedTimeChanged;
         public event EventHandler<TimeSpan> OnRemainingTimeChanged;
@@ -87,7 +86,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 workerController,
                 _isAutoPumpingEnabled);
             _isStandartProcessingInProgress = false;
-            _previosKnownCycleNumber = 1;
+            _previouslyKnownCycleNumber = 1;
             
             _bedController.OnPauseFromDeviceRequested += BedControllerOnPauseFromDeviceRequested;
             _bedController.OnResumeFromDeviceRequested += BedControllerOnResumeFromDeviceRequested;
@@ -282,14 +281,15 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var isSessionCompleted = sessionProcessingInfo.RemainingTime <= TimeSpan.Zero;
          
             //todo придумать, как определять, что закончился цикл, что надо снять показатели в последнем 0
-            if (_previosKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber || isSessionCompleted)
+            if (_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber || isSessionCompleted)
             {
-                _previosKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber;// по идеи, 
+                _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber;// по идеи, 
                 await ForceDataCollectionRequestAsync();
-                OnCycleCompleted?.Invoke(this, _previosKnownCycleNumber);
+                OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
             }
             if (isSessionCompleted)
             {
+                _cycleProcessingSynchronizer.Stop();
                 OnSessionCompleted?.Invoke(this, EventArgs.Empty);
             }
         }
@@ -421,12 +421,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 await _bedController
                     .ExecuteCommandAsync(BedControlCommand.Callibrate)
                     .ConfigureAwait(false);
+                // измерим перед стартом
+                await ForceDataCollectionRequestAsync()
+                    .ConfigureAwait(false);
                 // запускаем кровать
                 await _bedController
                     .ExecuteCommandAsync(BedControlCommand.Start)
-                    .ConfigureAwait(false);
-                // измерим перед стартом
-                await ForceDataCollectionRequestAsync()
                     .ConfigureAwait(false);
                 // запускаем обработку
                 _cycleProcessingSynchronizer.Init(_startParams.UpdateDatePeriod);

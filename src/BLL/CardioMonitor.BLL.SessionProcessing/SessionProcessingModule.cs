@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Threading.Tasks;
-using Autofac;
 using CardioMonitor.BLL.SessionProcessing.CycleStateMachine;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade;
-using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
-using CardioMonitor.BLL.SessionProcessing.Processing;
 using CardioMonitor.Devices.Bed.Infrastructure;
-using Enexure.MicroBus;
-using Enexure.MicroBus.Autofac;
 using Stateless;
 
 namespace CardioMonitor.BLL.SessionProcessing
@@ -68,7 +62,6 @@ namespace CardioMonitor.BLL.SessionProcessing
 
     {
         private readonly SessionParams _sessionParams;
-        private IMicroBus _bus;
         private readonly IBedController _bedController;
         private CycleProcessingSynchronizer _cycleProcessingSynchronizer;
         
@@ -148,14 +141,7 @@ namespace CardioMonitor.BLL.SessionProcessing
         public void Init()
         {
             
-            var builder = new ContainerBuilder();
-            var busBuilder = new BusBuilder();
-            //todo init busBuilder
-            
-            builder.RegisterMicroBus(busBuilder, new BusSettings { HandlerSynchronization = Synchronization.Syncronous });
-
-            var container = builder.Build();
-            _bus = container.Resolve<IMicroBus>();
+          
             
            // _timeController = new TimeController(_bus);
         }

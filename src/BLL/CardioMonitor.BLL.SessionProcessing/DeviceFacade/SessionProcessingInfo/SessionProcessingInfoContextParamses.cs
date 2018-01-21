@@ -1,6 +1,5 @@
 ﻿using System;
-using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
-using Enexure.MicroBus.Annotations;
+using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
 {
@@ -55,7 +54,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
 
     internal static class TimeParamContextExtensions
     {
-        public static SessionProcessingInfoContextParamses TryGetSessionProcessingInfo([JetBrains.Annotations.NotNull] [NotNull] this CycleProcessingContext context)
+        public static SessionProcessingInfoContextParamses TryGetSessionProcessingInfo([NotNull] this CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             

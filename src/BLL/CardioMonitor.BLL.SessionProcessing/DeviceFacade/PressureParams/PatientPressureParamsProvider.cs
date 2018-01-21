@@ -7,7 +7,7 @@ using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionReque
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
-using Enexure.MicroBus.Annotations;
+using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
 {
