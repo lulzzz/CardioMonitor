@@ -9,10 +9,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionR
         public static readonly Guid ForcedDataCollectionRequestId = new Guid("e580965d-3f1f-4f68-a35f-ad2447394327");
 
         public Guid ParamsTypeId { get; } = ForcedDataCollectionRequestId;
+        public Guid UniqObjectId { get; }
 
         public ForcedDataCollectionRequestCycleProcessingContextParams(bool isRequested)
         {
             IsRequested = isRequested;
+            UniqObjectId = Guid.NewGuid();
         }
 
         public bool IsRequested { get; }

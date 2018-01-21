@@ -8,6 +8,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         public static readonly Guid PressureParamsId = new Guid("59c3d092-78d1-4e6e-b3d5-22a4ca3d298c");
 
         public Guid ParamsTypeId { get; } = PressureParamsId;
+        public Guid UniqObjectId { get; }
 
         public PressureCycleProcessingContextParams(
             short systolicArterialPressure, 
@@ -17,6 +18,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             SystolicArterialPressure = systolicArterialPressure;
             DiastolicArterialPressure = diastolicArterialPressure;
             AverageArterialPressure = averageArterialPressure;
+            UniqObjectId = Guid.NewGuid();
         }
         
         /// <summary>

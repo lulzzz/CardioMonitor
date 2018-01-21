@@ -8,6 +8,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
         public static readonly Guid TypeId = new Guid("91941aeb-69ea-4955-b533-13b717a4768d");
         
         public Guid ParamsTypeId { get; } = TypeId;
+        public Guid UniqObjectId { get; }
 
         public SessionProcessingInfoContextParamses(
             TimeSpan elapsedTime, 
@@ -21,6 +22,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
             RemainingTime = remainingTime;
             CurrentCycleNumber = currentCycleNumber;
             CyclesCount = cyclesCount;
+            UniqObjectId = Guid.NewGuid();
         }
 
         /// <summary>

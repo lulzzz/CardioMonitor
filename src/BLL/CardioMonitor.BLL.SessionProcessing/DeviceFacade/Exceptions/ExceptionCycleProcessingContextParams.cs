@@ -11,10 +11,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions
         public ExceptionCycleProcessingContextParams(SessionProcessingException exception)
         {
             Exception = exception;
+            UniqObjectId = Guid.NewGuid();
         }
 
         public Guid ParamsTypeId { get; } = ExceptionContextParamsContextParamsId;
-        
+        public Guid UniqObjectId { get; }
+
         public SessionProcessingException Exception { get; }
     }
 

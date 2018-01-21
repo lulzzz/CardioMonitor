@@ -9,6 +9,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
         public static readonly Guid IterationCycleProcessingParamsId = new Guid("c5f4b1d5-e564-4ead-8189-2d841e1319d5");
 
         public Guid ParamsTypeId { get; } = IterationCycleProcessingParamsId;
+        public Guid UniqObjectId { get; }
 
         public IterationCycleProcessingContextParams(
             short currentIteration, 
@@ -20,6 +21,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
             IterationToGetCommonParams = iterationToGetCommonParams;
             IterationToGetPressureParams = iterationToGetPressureParams;
             IterationToGetEcg = iterationToGetEcg;
+            UniqObjectId = Guid.NewGuid();
         }
 
         public short CurrentIteration { get; }

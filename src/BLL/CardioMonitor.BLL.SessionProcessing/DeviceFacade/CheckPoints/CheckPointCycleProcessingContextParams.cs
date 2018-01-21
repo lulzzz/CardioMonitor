@@ -9,6 +9,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
         public static readonly Guid CheckPointContextParamsId = new Guid("19338674-ba21-45cd-8bcc-1e6a9dddac24");
 
         public Guid ParamsTypeId { get; } = CheckPointContextParamsId;
+        
+        public Guid UniqObjectId { get; }
 
         public CheckPointCycleProcessingContextParams(
             bool needRequestEcg, 
@@ -18,6 +20,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
             NeedRequestEcg = needRequestEcg;
             NeedRequestCommonParams = needRequestCommonParams;
             NeedRequestPressureParams = needRequestPressureParams;
+            UniqObjectId = Guid.NewGuid();
         }
 
         public bool NeedRequestEcg { get; }

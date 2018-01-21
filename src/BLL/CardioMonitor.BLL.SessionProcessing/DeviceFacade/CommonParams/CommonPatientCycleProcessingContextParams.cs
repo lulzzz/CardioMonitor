@@ -9,6 +9,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
         public static readonly Guid CommonPatientParamsId = new Guid("c571aac1-4c5c-4def-9296-1aef33953ae4");
 
         public Guid ParamsTypeId { get; } = CommonPatientParamsId;
+        public Guid UniqObjectId { get; }
 
         public CommonPatientCycleProcessingContextParams(
             short heartRate, 
@@ -18,6 +19,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             HeartRate = heartRate;
             RepsirationRate = repsirationRate;
             Spo2 = spo2;
+            UniqObjectId = Guid.NewGuid();
         }
        
 

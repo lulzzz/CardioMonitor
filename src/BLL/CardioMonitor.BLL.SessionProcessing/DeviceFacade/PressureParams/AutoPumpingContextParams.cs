@@ -7,10 +7,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         public static readonly Guid AutoPumpingParamsId = new Guid("82c3d092-71d1-7e6e-b3d2-21a4ca9d248c");
         
         public Guid ParamsTypeId { get; } = AutoPumpingParamsId;
+        public Guid UniqObjectId { get; }
 
         public AutoPumpingContextParams(bool isAutoPumpingEnabled)
         {
             IsAutoPumpingEnabled = isAutoPumpingEnabled;
+            UniqObjectId = Guid.NewGuid();
         }
 
         /// <summary>

@@ -9,10 +9,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
         public static readonly Guid AngleContextParamId = new Guid("7f2ae094-ea77-407e-9611-9b14a3fc2bbd");
 
         public Guid ParamsTypeId { get; } = AngleContextParamId;
+        
+        public Guid UniqObjectId { get; }
 
         public AngleXContextParams(float currentAngle)
         {
             CurrentAngle = currentAngle;
+            UniqObjectId = Guid.NewGuid();
         }
 
         public float CurrentAngle { get; }
