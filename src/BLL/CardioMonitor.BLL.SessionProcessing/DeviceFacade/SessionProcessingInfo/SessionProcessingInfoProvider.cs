@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
+using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
 
@@ -22,7 +23,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
         }
 
         public async Task<CycleProcessingContext> ProcessAsync(CycleProcessingContext context)
-        { 
+        {
             try
             {
                 var elapsedTime = await _bedController
@@ -44,24 +45,32 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
                 var currentCycleNumber = await _bedController
                     .GetCurrentCycleNumberAsync()
                     .ConfigureAwait(false);
-                
+
                 var sessionProcessingInfo = new SessionProcessingInfoContextParamses(
                     elapsedTime,
                     remainingTime,
                     cycleDuration,
                     currentCycleNumber,
                     cyclesCount);
-                
+
                 context.AddOrUpdate(sessionProcessingInfo);
             }
-            catch (Exception e)
+            catch (DeviceConnectionException ex)
             {
-              
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(SessionProcessingErrorCodes.InversionTableConnectionError,
-                            e.Message,
-                            e)));
+                            ex.Message,
+                            ex)));
+            }
+            catch (DeviceProcessingException ex)
+            {
+                context.AddOrUpdate(
+                    new ExceptionCycleProcessingContextParams(
+                        new SessionProcessingException(SessionProcessingErrorCodes.,
+                            ex.Message,
+                            ex)));
+               
             }
 
             return context;

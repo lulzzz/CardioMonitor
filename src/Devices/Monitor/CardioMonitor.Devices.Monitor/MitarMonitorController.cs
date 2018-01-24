@@ -110,10 +110,16 @@ namespace CardioMonitor.Devices.Monitor
 
             try
             {
+                // очистим перед подключением все накопленные ошибки
+                while (_lastExceptions.TryDequeue(out var _))
+                {
+                }
+
                 var monitorIpAddress = await DiscoverMonitorIpAddressAsync()
                     .ConfigureAwait(false);
 
                 _tcpClient = new TcpClient();
+                
                 await _tcpClient.ConnectAsync(monitorIpAddress, _initParams.MonitorTcpPort)
                     .ConfigureAwait(false);
                 _stream = _tcpClient.GetStream();
@@ -177,44 +183,64 @@ namespace CardioMonitor.Devices.Monitor
             var isCommonParamsRequested = _isCommonParamsRequested == IsRequestedValue;
             var isPressureParamsRequested = _isPressureParamsRequested == IsRequestedValue;
             var isEcgParamsRequested = _isEcgParamsRequested == IsRequestedValue;
-            
+
             if (!isCommonParamsRequested && !isPressureParamsRequested && !isEcgParamsRequested) return;
             AssertConnection();
 
-            byte[] message = null;
-            const int MessageSize = 100;
-            //todo вот тут как-то получить даныне и скастовать их к нужному виду
-            await _stream.ReadAsync(message,0, MessageSize )
-                .ConfigureAwait(false);
 
             PatientPressureParams pressureParams = null;
             PatientCommonParams commonParams = null;
 
             short ecgValue = 0;
-            
-            if (isCommonParamsRequested)
+            try
             {
-                _lastCommonParams = commonParams;
-                _commonParamsReady.Set();
-            }
-            if (isPressureParamsRequested)
-            {
-                _lastPressureParams = pressureParams;
-                _commonParamsReady.Set();
-            }
-            if (isEcgParamsRequested)
-            {
-                _ecgValues.Enqueue(ecgValue);
-                var currentTime = DateTime.UtcNow;
-                
-                if (currentTime > _startedEcgCollectingTime && currentTime - _startedEcgCollectingTime >= _ecgCollectionDuration)
+                byte[] message = null;
+                const int MessageSize = 100;
+                //todo вот тут как-то получить даныне и скастовать их к нужному виду
+                await _stream.ReadAsync(message, 0, MessageSize)
+                    .ConfigureAwait(false);
+                if (isCommonParamsRequested)
                 {
-                    _lastEcgParams = new PatientEcgParams(_ecgValues.ToArray());
-                    while (_ecgValues.TryDequeue(out var _))
+                    _lastCommonParams = commonParams;
+                    _commonParamsReady.Set();
+                }
+                if (isPressureParamsRequested)
+                {
+                    _lastPressureParams = pressureParams;
+                    _commonParamsReady.Set();
+                }
+                if (isEcgParamsRequested)
+                {
+                    _ecgValues.Enqueue(ecgValue);
+                    var currentTime = DateTime.UtcNow;
+
+                    if (currentTime > _startedEcgCollectingTime &&
+                        currentTime - _startedEcgCollectingTime >= _ecgCollectionDuration)
                     {
+                        _lastEcgParams = new PatientEcgParams(_ecgValues.ToArray());
+                        while (_ecgValues.TryDequeue(out var _))
+                        {
+                        }
+                        _ecgParamsReady.Set();
                     }
+                }
+            }
+            catch (Exception)
+            {
+                // чтобы не было deadlock'ов
+                if (isCommonParamsRequested)
+                {
+                    _commonParamsReady.Set();
+                }
+                if (isPressureParamsRequested)
+                {
+                    _commonParamsReady.Set();
+                }
+                if (isEcgParamsRequested)
+                {
                     _ecgParamsReady.Set();
                 }
+                throw;
             }
         }
 
@@ -272,7 +298,7 @@ namespace CardioMonitor.Devices.Monitor
         private void RiseExceptions()
         {
             var exceptions = new List<Exception>(0);
-            while (_lastExceptions.TryDequeue(out var temp))
+            while (_lastExceptions.TryPeek(out var temp))
             {
                 exceptions.Add(temp);
             }

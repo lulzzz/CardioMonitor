@@ -82,6 +82,10 @@ namespace CardioMonitor.Devices.Bed.UDP
             try
             {
                 await Task.Yield();
+                // очистим перед подключением все накопленные ошибки
+                while (_lastExceptions.TryDequeue(out var _))
+                {
+                }
                 _udpClient = new UdpClient();
                 _udpClient.Connect(_initParams.BedIPEndpoint);
                 await UpdateRegistersValueAsync()
@@ -195,7 +199,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         private void RiseExceptions()
         {
             var exceptions = new List<Exception>(0);
-            while (_lastExceptions.TryDequeue(out var temp))
+            while (_lastExceptions.TryPeek(out var temp))
             {
                 exceptions.Add(temp);
             }
