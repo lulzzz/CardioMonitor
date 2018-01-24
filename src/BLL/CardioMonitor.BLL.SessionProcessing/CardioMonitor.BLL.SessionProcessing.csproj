@@ -66,7 +66,6 @@
     <Compile Include="DeviceFacade\PressureParams\PatientPressureParamsProvider.cs" />
     <Compile Include="DeviceFacade\PressureParams\PressureCycleProcessingContextParams.cs" />
     <Compile Include="SessionContext.cs" />
-    <Compile Include="SessionProcessingModule.cs" />
     <Compile Include="SessionParams.cs" />
   </ItemGroup>
   <ItemGroup>

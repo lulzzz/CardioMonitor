@@ -3,21 +3,35 @@
     internal class PatientPressureParams
     {
         public PatientPressureParams(
-            double inclinationAngle, 
+            float inclinationAngle, 
             short systolicArterialPressure, 
             short diastolicArterialPressure, 
-            short averageArterialPressure)
+            short averageArterialPressure,
+            short iterationNumber, 
+            short cycleNumber)
         {
             InclinationAngle = inclinationAngle;
             SystolicArterialPressure = systolicArterialPressure;
             DiastolicArterialPressure = diastolicArterialPressure;
             AverageArterialPressure = averageArterialPressure;
+            IterationNumber = iterationNumber;
+            CycleNumber = cycleNumber;
         }
 
         /// <summary>
+        /// Номер итерации
+        /// </summary>
+        public short IterationNumber { get; }
+        
+        /// <summary>
+        /// Номер цикла
+        /// </summary>
+        public short CycleNumber { get; }
+        
+        /// <summary>
         /// Угол наклона кровати
         /// </summary>
-        public double InclinationAngle { get; }
+        public float InclinationAngle { get; }
         
         /// <summary>
         /// Систолическое артериальное давление

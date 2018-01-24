@@ -41,6 +41,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DeviceConnectionException.cs" />
+    <Compile Include="DeviceProcessingException.cs" />
     <Compile Include="IDeviceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

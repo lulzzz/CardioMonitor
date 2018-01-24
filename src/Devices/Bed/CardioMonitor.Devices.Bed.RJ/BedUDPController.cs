@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Bed.Infrastructure;
@@ -41,10 +44,14 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         private Worker _syncWorker;
 
+        [NotNull]
+        private readonly ConcurrentQueue<Exception> _lastExceptions;
+
         public BedUDPController([NotNull] IWorkerController workerController)
         {
             _workerController = workerController ?? throw new ArgumentNullException(nameof(workerController));
             IsConnected = false;
+            _lastExceptions = new ConcurrentQueue<Exception>();
         }
        
 
@@ -71,7 +78,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         {
             AssertInitParams();
             if (IsConnected) throw new InvalidOperationException($"{GetType().Name} уже подключен к устройству");
-            
+
             try
             {
                 await Task.Yield();
@@ -95,18 +102,26 @@ namespace CardioMonitor.Devices.Bed.UDP
                     {
                         IsConnected = false;
                         _workerController.CloseWorker(_syncWorker);
-                        
-                        //todo handle exceptions
-                        //todo logging
+                        _lastExceptions.Enqueue(e);
                     }
-                    
+
                 });
                 IsConnected = true;
             }
-            catch (Exception)
+            catch (SocketException e)
             {
                 IsConnected = false;
-                throw;
+                throw new DeviceConnectionException("Ошибка подключения к инверсионному столу", e);
+            }
+            catch (ObjectDisposedException e)
+            {
+                IsConnected = false;
+                throw new DeviceConnectionException("Ошибка подключения к инверсионному столу", e);
+            }
+            catch (Exception e)
+            {
+                IsConnected = false;
+                throw new DeviceProcessingException("Ошибка в ходе обработки данных от инверсионного стола", e);
             }
         }
         
@@ -122,6 +137,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         private async Task UpdateRegistersValueAsync()
         {
             //todo здесь получение массива с регистрами и обновление результатов в _registerList
+            //todo никакой обработки ошибок делать не надо
             await Task.Yield();
             
             
@@ -139,9 +155,28 @@ namespace CardioMonitor.Devices.Bed.UDP
         public async Task DisconnectAsync()
         {
             AssertConnection();
-            await Task.Yield();
-            _workerController.CloseWorker(_syncWorker);
-            _udpClient?.Dispose();
+            try
+            {
+                await Task.Yield();
+                _workerController.CloseWorker(_syncWorker);
+                _udpClient?.Dispose();
+
+            }
+            catch (SocketException e)
+            {
+                IsConnected = false;
+                throw new DeviceConnectionException("Ошибка отключения от инверсионного стола", e);
+            }
+            catch (ObjectDisposedException e)
+            {
+                IsConnected = false;
+                throw new DeviceConnectionException("Ошибка отключения от инверсионного стола", e);
+            }
+            catch (Exception e)
+            {
+                IsConnected = false;
+                throw new DeviceProcessingException("Ошибка отключения от инверсионного стола", e);
+            }
         }
 
         private void AssertConnection()
@@ -151,17 +186,38 @@ namespace CardioMonitor.Devices.Bed.UDP
         
         public async Task ExecuteCommandAsync(BedControlCommand command)
         {
+            RiseExceptions();
             AssertConnection();
 
             await Task.Yield();
         }
 
+        private void RiseExceptions()
+        {
+            var exceptions = new List<Exception>(0);
+            while (_lastExceptions.TryDequeue(out var temp))
+            {
+                exceptions.Add(temp);
+            }
+            if (exceptions.Count == 0) return;
+            var hasConnectionExceptions = exceptions.Any(x =>
+                x.GetType() == typeof(SocketException) || x.GetType() == typeof(ObjectDisposedException));
+            var agregatedException = new AggregateException(exceptions);
+
+            if (hasConnectionExceptions)
+            {
+                throw new DeviceConnectionException("Ошибка во взаимодействии с инверсионным столом", agregatedException);
+            }
+            throw new DeviceProcessingException("Ошибка обработки данных от инверсионного стола", agregatedException);
+        }
+        
         #endregion
 
         #region Получение данных
 
         public Task<BedMovingStatus> GetBedMovingStatusAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
@@ -174,72 +230,84 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         public Task<TimeSpan> GetCycleDurationAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<short> GetCyclesCountAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<short> GetCurrentCycleNumberAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<short> GetIterationsCountAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<short> GetCurrentIterationAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<short> GetNextIterationNumberForPressureMeasuringAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<short> GetNextIterationNumberForCommonParamsMeasuringAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<short> GetNextIterationNumberForEcgMeasuringAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<TimeSpan> GetRemainingTimeAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<TimeSpan> GetElapsedTimeAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<StartFlag> GetStartFlagAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
 
         public Task<ReverseFlag> GetReverseFlagAsync()
         {
+            RiseExceptions();
             AssertRegisterIsNull();
             throw new NotImplementedException();
         }
@@ -247,6 +315,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         public async Task<float> GetAngleXAsync() //так как запрашивается просто из регистра - думаю таска тут не нужна
         {
             
+            RiseExceptions();
             AssertRegisterIsNull();
             await Task.Yield();
             return _registerValues.BedTargetAngleX;
