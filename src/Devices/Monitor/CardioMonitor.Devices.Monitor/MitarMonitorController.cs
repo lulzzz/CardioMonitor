@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -56,6 +58,9 @@ namespace CardioMonitor.Devices.Monitor
 
         private DateTime _startedEcgCollectingTime;
         private TimeSpan _ecgCollectionDuration;
+        
+        [NotNull]
+        private readonly ConcurrentQueue<Exception> _lastExceptions;
 
         // ReSharper disable once NotNullMemberIsNotInitialized
         public MitarMonitorController([NotNull] IWorkerController workerController)
@@ -78,6 +83,7 @@ namespace CardioMonitor.Devices.Monitor
             _ecgParamsReady = new ManualResetEventSlim(false);
             
             _ecgValues = new ConcurrentQueue<short>();
+            _lastExceptions = new ConcurrentQueue<Exception>();
         }
 
         #region Управление контроллером
@@ -120,21 +126,30 @@ namespace CardioMonitor.Devices.Monitor
                         await UpdateDataAsync()
                             .ConfigureAwait(false);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
                         IsConnected = false;
                         _workerController.CloseWorker(_syncWorker);
-                        //todo logging
-                        //todo handle exceptions
+                        _lastExceptions.Enqueue(ex);
                     }
 
                 });
                 IsConnected = true;
             }
-            catch (Exception)
+            catch (SocketException e)
             {
                 IsConnected = false;
-                throw;
+                throw new DeviceConnectionException("Ошибка подключения к кардиомонитору", e);
+            }
+            catch (ObjectDisposedException e)
+            {
+                IsConnected = false;
+                throw new DeviceConnectionException("Ошибка подключения к кардиомонитору", e);
+            }
+            catch (Exception e)
+            {
+                IsConnected = false;
+                throw new DeviceProcessingException("Ошибка подключения к кардиомонитору", e);
             }
         }
 
@@ -202,16 +217,35 @@ namespace CardioMonitor.Devices.Monitor
                 }
             }
         }
-        
+
 
         public async Task DisconnectAsync()
         {
-            await Task.Yield();
             AssertConnection();
-            _stream.Dispose();
-            _stream = null;
-            _tcpClient.Dispose();
-            _tcpClient = null;
+            try
+            {
+
+                await Task.Yield();
+                _stream.Dispose();
+                _stream = null;
+                _tcpClient.Dispose();
+                _tcpClient = null;
+            }
+            catch (SocketException e)
+            {
+                IsConnected = false;
+                throw new DeviceConnectionException("Ошибка отключения от кардиомонитора", e);
+            }
+            catch (ObjectDisposedException e)
+            {
+                IsConnected = false;
+                throw new DeviceConnectionException("Ошибка отключения от кардиомонитора", e);
+            }
+            catch (Exception e)
+            {
+                IsConnected = false;
+                throw new DeviceProcessingException("Ошибка отключения от кардиомонитора", e);
+            }
         }
 
 
@@ -234,6 +268,26 @@ namespace CardioMonitor.Devices.Monitor
                 throw new NotImplementedException();
             }
         }
+        
+        private void RiseExceptions()
+        {
+            var exceptions = new List<Exception>(0);
+            while (_lastExceptions.TryDequeue(out var temp))
+            {
+                exceptions.Add(temp);
+            }
+            if (exceptions.Count == 0) return;
+            var hasConnectionExceptions = exceptions.Any(x =>
+                x.GetType() == typeof(SocketException) || x.GetType() == typeof(ObjectDisposedException));
+            var agregatedException = new AggregateException(exceptions);
+
+            if (hasConnectionExceptions)
+            {
+                throw new DeviceConnectionException("Ошибка во взаимодействии с кардиомонитором", agregatedException);
+            }
+            throw new DeviceProcessingException("Ошибка обработки данных от кардиомонитора", agregatedException);
+        }
+        
 
         private void AssertConnection()
         {
@@ -256,9 +310,15 @@ namespace CardioMonitor.Devices.Monitor
                         _commonParamsReady.Reset();
                         return _lastCommonParams;
                     }
+                    // тут могут быть только наши ошибки, сетевые генерятся в цикле
+                    catch (Exception ex)
+                    {
+                        throw new DeviceProcessingException("Программная ошибка в получении параметров пациента с кардиомонитора", ex);
+                    }
                     finally
                     {
                         Interlocked.Decrement(ref _isCommonParamsRequested);
+                        RiseExceptions();
                     }
                 });
             }
@@ -278,9 +338,15 @@ namespace CardioMonitor.Devices.Monitor
                         _pressureParamsReady.Reset();
                         return _lastPressureParams;
                     }
+                    // тут могут быть только наши ошибки, сетевые генерятся в цикле
+                    catch (Exception ex)
+                    {
+                        throw new DeviceProcessingException("Программная ошибка в получении параметров давления пациента с кардиомонитора", ex);
+                    }
                     finally
                     {
                         Interlocked.Decrement(ref _isPressureParamsRequested);
+                        RiseExceptions();
                     }
                 });
             }
@@ -302,9 +368,15 @@ namespace CardioMonitor.Devices.Monitor
                         _ecgParamsReady.Reset();
                         return _lastEcgParams;
                     }
+                    // тут могут быть только наши ошибки, сетевые генерятся в цикле
+                    catch (Exception ex)
+                    {
+                        throw new DeviceProcessingException("Программная ошибка в получении параметров ЭКГ с кардиомонитора", ex);
+                    }
                     finally
                     {
                         Interlocked.Decrement(ref _isEcgParamsRequested);
+                        RiseExceptions();
                     }
                 });
             }
