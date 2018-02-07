@@ -5,6 +5,7 @@ using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionRequest;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
+using CardioMonitor.Devices;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Threading;
 using JetBrains.Annotations;
@@ -58,6 +59,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                 await _taskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
                 wasPumpingComleted = true;
             }
+            catch (DeviceConnectionException e)
+            {
+                context.AddOrUpdate(
+                    new ExceptionCycleProcessingContextParams(
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.MonitorConnectionError,
+                            e.Message,
+                            e)));
+                wasPumpingComleted = false;
+            }
             catch (TimeoutException e)
             {
                 context.AddOrUpdate(
@@ -89,6 +100,15 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             {
                 var gettingParamsTask = _monitorController.GetPatientPressureParamsAsync();
                 param = await _taskHelper.StartWithTimeout(gettingParamsTask, _updatePatientParamTimeout);
+            }
+            catch (DeviceConnectionException e)
+            {
+                context.AddOrUpdate(
+                    new ExceptionCycleProcessingContextParams(
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.MonitorConnectionError,
+                            e.Message,
+                            e)));
             }
             catch (TimeoutException e)
             {

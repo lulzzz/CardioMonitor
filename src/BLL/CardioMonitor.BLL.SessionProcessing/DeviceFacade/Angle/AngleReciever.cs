@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
+using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
 
@@ -28,6 +29,15 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
                     .ConfigureAwait(false);
             
                 context.AddOrUpdate(new AngleXContextParams(currentAngle));
+            }
+            catch (DeviceConnectionException e)
+            {
+                context.AddOrUpdate(
+                    new ExceptionCycleProcessingContextParams(
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.InversionTableConnectionError,
+                            e.Message,
+                            e)));
             }
             catch (Exception e)
             {

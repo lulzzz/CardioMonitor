@@ -11,7 +11,9 @@
         PatientCommonParamsRequestError=6,
         PatientCommonParamsRequestTimeout=7,
         MonitorConnectionError =8,
-        InversionTableConnectionError=9,
-        UpdateAngleError = 10
+        MonitorProcessingError =9,
+        InversionTableConnectionError=10,
+        InversionTableProcessingError=11,
+        UpdateAngleError = 11
     }
 }

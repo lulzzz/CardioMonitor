@@ -226,12 +226,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 {
                     RiseOnce(exceptionParams, () => OnException?.Invoke(this, exceptionParams.Exception));
                 }
-                
+
                 var sessionProcessingInfo = context.TryGetSessionProcessingInfo();
                 if (sessionProcessingInfo == null)
                 {
                     return Task.CompletedTask;
                 }
+
                 var iterationsInfo = context.TryGetIterationParams();
                 if (iterationsInfo == null)
                 {
@@ -250,8 +251,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                             angleParams?.CurrentAngle ?? 0,
                             pressureParams.SystolicArterialPressure,
                             pressureParams.DiastolicArterialPressure,
-                            pressureParams.AverageArterialPressure)));
+                            pressureParams.AverageArterialPressure,
+                            iterationsInfo.CurrentIteration,
+                            sessionProcessingInfo.CurrentCycleNumber)));
                 }
+
                 var commonParams = context.TryGetCommonPatientParams();
                 if (commonParams != null)
                 {
@@ -261,8 +265,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                             angleParams?.CurrentAngle ?? 0,
                             commonParams.HeartRate,
                             commonParams.RepsirationRate,
-                            commonParams.Spo2)));
+                            commonParams.Spo2,
+                            iterationsInfo.CurrentIteration,
+                            sessionProcessingInfo.CurrentCycleNumber)));
                 }
+
                 var isForceRequested = context.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
                 // чтобы не было рекурсии
                 if (isForceRequested) return Task.CompletedTask;
@@ -271,11 +278,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 {
                     RiseOnce(angleParams, () => OnCurrentAngleXRecieved?.Invoke(this, angleParams.CurrentAngle));
                 }
-               
+
 
                 RiseOnce(sessionProcessingInfo, async () =>
                 {
-
                     OnElapsedTimeChanged?.Invoke(this, sessionProcessingInfo.ElapsedTime);
                     OnRemainingTimeChanged?.Invoke(this, sessionProcessingInfo.RemainingTime);
 
@@ -289,6 +295,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         await InnerForceDataCollectionRequestAsync();
                         OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
                     }
+
                     if (isSessionCompleted)
                     {
                         _cycleProcessingSynchronizer.Stop();
@@ -318,7 +325,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         /// <remarks>
         /// Крайне ползено, т.к. в Pipeline есть пара параллельных участков, параметры будут дублирвоаться
         /// </remarks>
-        private void RiseOnce(ICycleProcessingContextParams contextParams, Action action)
+        private void RiseOnce([NotNull] ICycleProcessingContextParams contextParams, [NotNull] Action action)
         {
             if (_processedEventsCached.ContainsEvent(contextParams)) return;
             

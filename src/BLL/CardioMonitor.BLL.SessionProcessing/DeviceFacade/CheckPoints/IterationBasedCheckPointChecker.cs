@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
