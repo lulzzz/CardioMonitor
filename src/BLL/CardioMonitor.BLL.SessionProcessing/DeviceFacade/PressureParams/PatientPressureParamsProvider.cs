@@ -9,6 +9,7 @@ using CardioMonitor.Devices;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using JetBrains.Annotations;
 using Polly;
+using Polly.Timeout;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
 {
@@ -42,7 +43,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             try
             {
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
-                await timeoutPolicy.ExecuteAsync(
+                param = await timeoutPolicy.ExecuteAsync(
                         _monitorController
                             .GetPatientPressureParamsAsync)
                     .ConfigureAwait(false);
@@ -56,7 +57,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                             e.Message,
                             e)));
             }
-            catch (TimeoutException e)
+            catch (TimeoutRejectedException e)
             {
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(

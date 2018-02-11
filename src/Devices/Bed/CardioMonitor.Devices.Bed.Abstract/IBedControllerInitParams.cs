@@ -29,5 +29,10 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// Период опроса устройства
         /// </summary>
         TimeSpan UpdateDataPeriod { get; }
+        
+        /// <summary>
+        /// Таймаут операций
+        /// </summary>
+        TimeSpan Timeout { get; }
     }
 }

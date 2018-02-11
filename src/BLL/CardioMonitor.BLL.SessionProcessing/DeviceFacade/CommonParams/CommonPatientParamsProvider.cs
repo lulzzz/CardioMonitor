@@ -7,8 +7,9 @@ using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionReque
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Monitor.Infrastructure;
-using CardioMonitor.Infrastructure.Threading;
 using JetBrains.Annotations;
+using Polly;
+using Polly.Timeout;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
 {
@@ -20,17 +21,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
         private readonly TimeSpan _updatePatientParamTimeout;
         [NotNull]
         private readonly IMonitorController _monitorController;
-        [NotNull]
-        private readonly TaskHelper _taskHelper;
 
         public CommonPatientParamsProvider(
-            [NotNull] IMonitorController monitorController, 
-            [NotNull] TaskHelper taskHelper)
+            [NotNull] IMonitorController monitorController,
+            TimeSpan updatePatientParamTimeout)
         {
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
-            _taskHelper = taskHelper ?? throw new ArgumentNullException(nameof(taskHelper));
-            
-            _updatePatientParamTimeout = new TimeSpan(0, 0, 8);
+            _updatePatientParamTimeout = updatePatientParamTimeout;
         }
 
         public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
@@ -43,8 +40,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             
             try
             {
-                var gettingParamsTask = _monitorController.GetPatientCommonParamsAsync();
-                param = await _taskHelper.StartWithTimeout(gettingParamsTask, _updatePatientParamTimeout);
+                var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
+                param = await timeoutPolicy
+                    .ExecuteAsync(_monitorController.GetPatientCommonParamsAsync)
+                    .ConfigureAwait(false);
             }
             catch (DeviceConnectionException e)
             {
@@ -55,7 +54,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
                             e.Message,
                             e)));
             }
-            catch (TimeoutException e)
+            catch (TimeoutRejectedException e)
             {
               
                 context.AddOrUpdate(

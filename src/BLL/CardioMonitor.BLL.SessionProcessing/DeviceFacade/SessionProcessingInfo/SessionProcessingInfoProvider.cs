@@ -6,6 +6,7 @@ using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
+using Polly;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
 {
@@ -17,33 +18,43 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
         [NotNull]
         private readonly IBedController _bedController;
 
-        public SessionProcessingInfoProvider(IBedController bedController)
+        private readonly TimeSpan _bedControllerTimeout;
+        
+        
+        public SessionProcessingInfoProvider([NotNull] IBedController bedController, TimeSpan bedControllerTimeout)
         {
-            _bedController = bedController;
+            _bedController = bedController ?? throw new ArgumentNullException(nameof(bedController));
+            _bedControllerTimeout = bedControllerTimeout;
         }
 
         public async Task<CycleProcessingContext> ProcessAsync(CycleProcessingContext context)
         {
             try
             {
-                var elapsedTime = await _bedController
-                    .GetElapsedTimeAsync()
+                var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
+                var elapsedTime = await timeoutPolicy
+                    .ExecuteAsync(
+                        _bedController.GetElapsedTimeAsync)
                     .ConfigureAwait(false);
 
-                var remainingTime = await _bedController
-                    .GetRemainingTimeAsync()
+                var remainingTime = await timeoutPolicy
+                    .ExecuteAsync(
+                        _bedController .GetRemainingTimeAsync)
                     .ConfigureAwait(false);
 
-                var cycleDuration = await _bedController
-                    .GetCycleDurationAsync()
+                var cycleDuration = await timeoutPolicy
+                    .ExecuteAsync(
+                        _bedController.GetCycleDurationAsync)
                     .ConfigureAwait(false);
 
-                var cyclesCount = await _bedController
-                    .GetCyclesCountAsync()
+                var cyclesCount = await timeoutPolicy
+                    .ExecuteAsync(
+                        _bedController.GetCyclesCountAsync)
                     .ConfigureAwait(false);
 
-                var currentCycleNumber = await _bedController
-                    .GetCurrentCycleNumberAsync()
+                var currentCycleNumber = await timeoutPolicy
+                    .ExecuteAsync(
+                        _bedController.GetCurrentCycleNumberAsync)
                     .ConfigureAwait(false);
 
                 var sessionProcessingInfo = new SessionProcessingInfoContextParamses(

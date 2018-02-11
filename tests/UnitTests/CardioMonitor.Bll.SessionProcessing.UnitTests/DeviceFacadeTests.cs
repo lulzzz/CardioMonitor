@@ -13,18 +13,27 @@ using Xunit;
 
 namespace CardioMonitor.Bll.SessionProcessing.UnitTests
 {
-    public class DevicaFacadeTests
+    public class DeviceFacadeTests
     {
-        private readonly SessionParams _startParams = 
-            new SessionParams(
-                30,
-                2,
-                30,
-                TimeSpan.FromMilliseconds(300),
-                new Mock<IBedControllerInitParams>().Object,
-                new Mock<IMonitorControllerInitParams>().Object,
-                3,
-                2);
+        private readonly SessionParams _startParams;
+
+        public DeviceFacadeTests()
+        {
+            var bedInitParams = new Mock<IBedControllerInitParams>();
+            bedInitParams.Setup(x => x.Timeout).Returns(TimeSpan.FromSeconds(30));
+            var monitorInitParams = new Mock<IMonitorControllerInitParams>();
+            bedInitParams.Setup(x => x.Timeout).Returns(TimeSpan.FromSeconds(30));
+            _startParams = 
+                new SessionParams(
+                    30,
+                    2,
+                    30,
+                    TimeSpan.FromMilliseconds(500),
+                    bedInitParams.Object,
+                    monitorInitParams.Object,
+                    3,
+                    2);
+        }
         
         [Fact]
         public async Task DeviceFacade_TimeChanged_Ok()
@@ -53,7 +62,6 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             var facade = new DevicesFacade(_startParams,
                 bedController.Object,
                 monitorController,
-                new TaskHelper(Mock.Of<ILogger>()),
                 new WorkerController());
 
             TimeSpan? elapsedTime = null;
@@ -129,7 +137,6 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             var facade = new DevicesFacade(_startParams,
                 bedController.Object,
                 monitorController,
-                new TaskHelper(Mock.Of<ILogger>()),
                 new WorkerController());
 
             var timeEventRiseCalls = 0;
@@ -162,7 +169,6 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             var facade = new DevicesFacade(_startParams,
                 bedController.Object,
                 monitorController,
-                new TaskHelper(Mock.Of<ILogger>()),
                 new WorkerController());
 
             var isSessionCompleted = false;
@@ -192,7 +198,6 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             var facade = new DevicesFacade(_startParams,
                 bedController.Object,
                 monitorController,
-                new TaskHelper(Mock.Of<ILogger>()),
                 new WorkerController());
 
             var isCycleCompleted = false;
@@ -226,7 +231,6 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             var facade = new DevicesFacade(_startParams,
                 bedController.Object,
                 monitorController,
-                new TaskHelper(Mock.Of<ILogger>()),
                 new WorkerController());
 
             var isCycleCompleted = false;
@@ -264,7 +268,6 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             var facade = new DevicesFacade(_startParams,
                 bedController.Object,
                 monitorController,
-                new TaskHelper(Mock.Of<ILogger>()),
                 new WorkerController());
 
             var isPatientParamsRecieved = false;
@@ -274,6 +277,46 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             await facade.EmergencyStopAsync();
             
             Assert.True(isPatientParamsRecieved);
+        }
+        
+        [Fact]
+        public async Task DeviceFacade_CollectCommonParams_OnForcedRequest_Ok()
+        {
+            var remainingTime = TimeSpan.FromMinutes(1);
+            var bedController =
+                new Mock<IBedController>();
+            bedController
+                .Setup(x => x.GetRemainingTimeAsync())
+                .Returns(async () =>
+                {
+                    await Task.Yield();
+                    return remainingTime;
+                });
+            bedController
+                .Setup(x => x.GetCurrentIterationAsync())
+                .Returns(Task.FromResult((short) 1));
+            
+            bedController
+                .Setup(x => x.GetNextIterationNumberForPressureMeasuringAsync())
+                .Returns(Task.FromResult((short) 1));
+            
+            var monitorController =
+                Mock.Of<IMonitorController>();
+            
+            var facade = new DevicesFacade(_startParams,
+                bedController.Object,
+                monitorController,
+                new WorkerController());
+
+            var patientCommonCallsCount = 0;
+            facade.OnCommonPatientParamsRecieved += (sender, span) => patientCommonCallsCount++;
+            await facade.StartAsync().ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            remainingTime = TimeSpan.Zero;
+            await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+            await facade.ForceDataCollectionRequestAsync().ConfigureAwait(false);
+            
+            Assert.Equal(3, patientCommonCallsCount);
         }
         
         [Fact]
@@ -305,7 +348,6 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             var facade = new DevicesFacade(_startParams,
                 bedController.Object,
                 monitorController,
-                new TaskHelper(Mock.Of<ILogger>()),
                 new WorkerController());
 
             var patientParamsRecievedCount = 0;
@@ -317,6 +359,7 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             // 1 запрос всегда при старте работает
             Assert.Equal(1, patientParamsRecievedCount);
         }
+        
         [Fact]
         public async Task DeviceFacade_CollectPressureParams_OnDesiredIteration_Ok()
         {
@@ -343,7 +386,6 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             var facade = new DevicesFacade(_startParams,
                 bedController.Object,
                 monitorController,
-                new TaskHelper(Mock.Of<ILogger>()),
                 new WorkerController());
 
             var isPatientPressureParamsRecieved = false;
@@ -353,6 +395,46 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             await facade.EmergencyStopAsync();
             
             Assert.True(isPatientPressureParamsRecieved);
+        }
+        
+        [Fact]
+        public async Task DeviceFacade_CollectPressureParams_OnForcedRequest_Ok()
+        {
+            var remainingTime = TimeSpan.FromMinutes(1);
+            var bedController =
+                new Mock<IBedController>();
+            bedController
+                .Setup(x => x.GetRemainingTimeAsync())
+                .Returns(async () =>
+                {
+                    await Task.Yield();
+                    return remainingTime;
+                });
+            bedController
+                .Setup(x => x.GetCurrentIterationAsync())
+                .Returns(Task.FromResult((short) 1));
+            
+            bedController
+                .Setup(x => x.GetNextIterationNumberForPressureMeasuringAsync())
+                .Returns(Task.FromResult((short) 1));
+            
+            var monitorController =
+                Mock.Of<IMonitorController>();
+            
+            var facade = new DevicesFacade(_startParams,
+                bedController.Object,
+                monitorController,
+                new WorkerController());
+
+            var patientParamsCallsCount = 0;
+            facade.OnPatientPressureParamsRecieved += (sender, span) => patientParamsCallsCount++;
+            await facade.StartAsync().ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            remainingTime = TimeSpan.Zero;
+            await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+            await facade.ForceDataCollectionRequestAsync().ConfigureAwait(false);
+            
+            Assert.Equal(3, patientParamsCallsCount);
         }
         
         [Fact]
@@ -384,7 +466,6 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             var facade = new DevicesFacade(_startParams,
                 bedController.Object,
                 monitorController,
-                new TaskHelper(Mock.Of<ILogger>()),
                 new WorkerController());
 
             var patientPressureParamsRecievedCount = 0;
@@ -427,7 +508,6 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             var facade = new DevicesFacade(_startParams,
                 bedController.Object,
                 monitorController,
-                new TaskHelper(Mock.Of<ILogger>()),
                 new WorkerController());
 
             Exception handledException = null;

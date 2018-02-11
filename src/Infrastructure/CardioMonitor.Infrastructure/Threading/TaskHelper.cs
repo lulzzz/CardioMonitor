@@ -8,6 +8,7 @@ namespace CardioMonitor.Infrastructure.Threading
     /// <summary>
     /// Вспомогательный класс для работы с Task
     /// </summary>
+    [Obsolete]
     public class TaskHelper
     {
         private readonly ILogger _logger;

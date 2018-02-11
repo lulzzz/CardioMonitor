@@ -1,4 +1,6 @@
-﻿namespace CardioMonitor.Devices.Monitor.Infrastructure
+﻿using System;
+
+namespace CardioMonitor.Devices.Monitor.Infrastructure
 {
     /// <summary>
     /// Параметры инициализации контроллера взаимодействия с монитором
@@ -6,5 +8,14 @@
     public interface IMonitorControllerInitParams
     {
         
+        /// <summary>
+        /// Период обмена сообщениями с устройством
+        /// </summary>
+        TimeSpan UpdateDataPeriod { get; }
+
+        /// <summary>
+        /// Таймаут операций
+        /// </summary>
+        TimeSpan Timeout { get; }
     }
 }

@@ -5,16 +5,21 @@ using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
+using Polly;
+using Polly.Timeout;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
 {
     internal class IterationParamsProvider : ICycleProcessingPipelineElement
     {
         [NotNull] private readonly IBedController _bedController;
+        private readonly TimeSpan _bedControllerTimeout;
 
-        public IterationParamsProvider([NotNull] IBedController bedController)
+        public IterationParamsProvider([NotNull] IBedController bedController, 
+            TimeSpan bedControllerTimeout)
         {
             _bedController = bedController;
+            _bedControllerTimeout = bedControllerTimeout;
         }
 
         public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
@@ -23,20 +28,25 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
 
             try
             {
-                var currentIteration = await _bedController
-                    .GetCurrentIterationAsync()
+                var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
+                var currentIteration = await timeoutPolicy
+                    .ExecuteAsync(_bedController
+                        .GetCurrentIterationAsync)
                     .ConfigureAwait(false);
 
-                var nextIterationToMeasuringCommonParams = await _bedController
-                    .GetNextIterationNumberForCommonParamsMeasuringAsync()
+                var nextIterationToMeasuringCommonParams = await timeoutPolicy
+                    .ExecuteAsync(_bedController
+                        .GetNextIterationNumberForCommonParamsMeasuringAsync)
                     .ConfigureAwait(false);
 
-                var nextIterationToMeasuringPressureParams = await _bedController
-                    .GetNextIterationNumberForPressureMeasuringAsync()
+                var nextIterationToMeasuringPressureParams = await timeoutPolicy
+                    .ExecuteAsync(_bedController
+                        .GetNextIterationNumberForPressureMeasuringAsync)
                     .ConfigureAwait(false);
 
-                var nextIterationToMeasuringEcg = await _bedController
-                    .GetNextIterationNumberForEcgMeasuringAsync()
+                var nextIterationToMeasuringEcg = await timeoutPolicy
+                    .ExecuteAsync(_bedController
+                        .GetNextIterationNumberForEcgMeasuringAsync)
                     .ConfigureAwait(false);
 
                 context.AddOrUpdate(new IterationCycleProcessingContextParams(
@@ -51,6 +61,15 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.InversionTableConnectionError,
+                            e.Message,
+                            e)));
+            }
+            catch (TimeoutRejectedException e)
+            {
+                context.AddOrUpdate(
+                    new ExceptionCycleProcessingContextParams(
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.InversionTableProcessingError,
                             e.Message,
                             e)));
             }

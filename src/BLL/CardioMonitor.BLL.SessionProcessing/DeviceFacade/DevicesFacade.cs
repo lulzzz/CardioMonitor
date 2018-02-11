@@ -74,10 +74,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             [NotNull] SessionParams startParams,
             [NotNull] IBedController bedController,
             [NotNull] IMonitorController monitorController,
-            [NotNull] TaskHelper taskHelper,
             [NotNull] IWorkerController workerController)
         {
-            if (taskHelper == null) throw new ArgumentNullException(nameof(taskHelper));
             if (workerController == null) throw new ArgumentNullException(nameof(workerController));
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
             _bedController = bedController ?? throw new ArgumentNullException(nameof(bedController));
@@ -89,7 +87,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             _pipelineFinishCollectorBlock = new ActionBlock<CycleProcessingContext>(CollectDataFromPipeline);
             _forcedRequestBlock = new BroadcastBlock<CycleProcessingContext>(context => context);
 
-            CreatePipeline(bedController, monitorController, taskHelper);
+            CreatePipeline(bedController, monitorController);
             
             _cycleProcessingSynchronizer = new CycleProcessingSynchronizer(
                 _pipelineOnTimeStartBlock, 
@@ -109,20 +107,25 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         private void CreatePipeline(
             [NotNull] IBedController bedController,
-            [NotNull] IMonitorController monitorController,
-            [NotNull] TaskHelper taskHelper)
+            [NotNull] IMonitorController monitorController)
         {
-            var sessionInfoProvider = new SessionProcessingInfoProvider(_bedController);
+            var sessionInfoProvider = new SessionProcessingInfoProvider(
+                _bedController, 
+                _startParams.BedControllerInitParams.Timeout);
             var sessionInfoProvidingBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
                     sessionInfoProvider.ProcessAsync(context));
 
-            var iterationProvider = new IterationParamsProvider(_bedController);
+            var iterationProvider = new IterationParamsProvider(
+                _bedController,
+                _startParams.BedControllerInitParams.Timeout);
             var iterationProvidingBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
                     iterationProvider.ProcessAsync(context));
 
-            var angleReciever = new AngleReciever(bedController);
+            var angleReciever = new AngleReciever(
+                bedController,
+                _startParams.BedControllerInitParams.Timeout);
             var anlgeRecieveBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
                     angleReciever.ProcessAsync(context));
@@ -144,7 +147,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var pressureParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pressureParamsProvider.ProcessAsync(context));
 
-            var commonParamsProvider = new CommonPatientParamsProvider(monitorController, taskHelper);
+            var commonParamsProvider = new CommonPatientParamsProvider(monitorController, _startParams.MonitorControllerInitParams.Timeout);
             var commonParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => commonParamsProvider.ProcessAsync(context));
 
@@ -356,11 +359,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         await InnerForceDataCollectionRequestAsync().ConfigureAwait(false);
                         _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber; // по идеи, 
                         OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
-                        
                     }
 
                     if (isSessionCompleted)
                     {
+                        _isStandartProcessingInProgress = false;
                         OnSessionCompleted?.Invoke(this, EventArgs.Empty);
                     }
                 });
