@@ -21,6 +21,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
         public float CurrentAngle { get; }
     }
 
+    [CanBeNull]
     internal static class AngleXParamContextExtension
     {
         public static AngleXContextParams TryGetAngleParam([NotNull] this CycleProcessingContext context)

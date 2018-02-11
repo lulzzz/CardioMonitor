@@ -30,6 +30,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
         public bool NeedRequestPressureParams { get; }
     }
 
+    [CanBeNull]
     internal static class CheckPointParamsContextExnteions
     {
         public static CheckPointCycleProcessingContextParams TryGetCheckPointParams([NotNull] this CycleProcessingContext context)

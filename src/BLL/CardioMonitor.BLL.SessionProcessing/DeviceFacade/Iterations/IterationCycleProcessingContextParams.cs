@@ -33,6 +33,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
         public short IterationToGetEcg { get; }
     }
 
+    [CanBeNull]
     internal static class IterationCycleProcessingContextParamsExtensions
     {
         public static IterationCycleProcessingContextParams TryGetIterationParams([NotNull] this CycleProcessingContext context)

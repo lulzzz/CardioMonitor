@@ -67,7 +67,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
             {
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
-                        new SessionProcessingException(SessionProcessingErrorCodes.InversionTableConnectionError,
+                        new SessionProcessingException(SessionProcessingErrorCodes.InversionTableProcessingError,
+                            ex.Message,
+                            ex)));
+               
+            }
+            catch (Exception ex)
+            {
+                context.AddOrUpdate(
+                    new ExceptionCycleProcessingContextParams(
+                        new SessionProcessingException(SessionProcessingErrorCodes.InversionTableProcessingError,
                             ex.Message,
                             ex)));
                

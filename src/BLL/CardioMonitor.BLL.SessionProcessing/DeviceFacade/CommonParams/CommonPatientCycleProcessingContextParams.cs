@@ -39,6 +39,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
         public short Spo2 { get;  }
     }
 
+    [CanBeNull]
     internal static class CommonPatientParamsContextExtensions
     {
         public static CommonPatientCycleProcessingContextParams TryGetCommonPatientParams([NotNull] this CycleProcessingContext context)

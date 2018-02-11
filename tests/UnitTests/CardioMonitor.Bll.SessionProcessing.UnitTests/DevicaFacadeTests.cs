@@ -20,7 +20,7 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
                 30,
                 2,
                 30,
-                TimeSpan.FromSeconds(1),
+                TimeSpan.FromMilliseconds(300),
                 new Mock<IBedControllerInitParams>().Object,
                 new Mock<IMonitorControllerInitParams>().Object,
                 3,
@@ -31,10 +31,12 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
         {
             var bedController =
                 new Mock<IBedController>();
+            var elapsedTimeRequestsCount = 0;
             bedController
                 .Setup(x => x.GetElapsedTimeAsync())
                 .Returns(async () =>
                 {
+                    elapsedTimeRequestsCount++;
                     await Task.Yield();
                     return TimeSpan.FromSeconds(1);
                 });
@@ -59,9 +61,10 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             facade.OnElapsedTimeChanged += (sender, span) => elapsedTime = span;
             facade.OnRemainingTimeChanged += (sender, span) => remainingTime = span;
             await facade.StartAsync().ConfigureAwait(false);
-            await Task.Delay(TimeSpan.FromSeconds(1.5));
-            await facade.EmergencyStopAsync();
+            await Task.Delay(TimeSpan.FromSeconds(1.5)).ConfigureAwait(false);
+            await facade.EmergencyStopAsync().ConfigureAwait(false);
             
+            Assert.True(elapsedTimeRequestsCount > 1);
             Assert.NotNull(elapsedTime);
             Assert.Equal(TimeSpan.FromSeconds(1), elapsedTime.Value);
             

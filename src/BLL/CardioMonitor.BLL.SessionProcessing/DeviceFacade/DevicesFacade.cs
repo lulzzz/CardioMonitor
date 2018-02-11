@@ -106,7 +106,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             
             _processedEventsCached = new MemoryCache(GetType().Name);
         }
-       
+
         private void CreatePipeline(
             [NotNull] IBedController bedController,
             [NotNull] IMonitorController monitorController,
@@ -133,6 +133,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     checkPointChecker.ProcessAsync(context));
 
             var mainBroadcastBlock = new BroadcastBlock<CycleProcessingContext>(context => context);
+
+            var pumpingManager = new PumpingManager(_monitorController);
+            var pupmingManagerBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
+                context => pumpingManager.ProcessAsync(context));
+            var forcedCommandPupmingManagerBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
+                context => pumpingManager.ProcessAsync(context));
 
             var pressureParamsProvider = new PatientPressureParamsProvider(monitorController);
             var pressureParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
@@ -177,6 +183,27 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     PropagateCompletion = true
                 });
             checkPointCheckBlock.LinkTo(
+                forcedCommandPupmingManagerBlock,
+                new DataflowLinkOptions
+                {
+                    PropagateCompletion = true
+                }, context =>
+                {
+                    var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
+                    return pumpingManager.CanProcess(context) && forcedRequested;
+                });
+            checkPointCheckBlock.LinkTo(
+                mainBroadcastBlock,
+                new DataflowLinkOptions
+                {
+                    PropagateCompletion = true
+                }, context =>
+                {
+                    var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
+                    return !forcedRequested;
+                });
+
+            forcedCommandPupmingManagerBlock.LinkTo(
                 mainBroadcastBlock,
                 new DataflowLinkOptions
                 {
@@ -198,7 +225,32 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 },
                 context => commonParamsProvider.CanProcess(context));
 
+
             mainBroadcastBlock.LinkTo(
+                pupmingManagerBlock,
+                new DataflowLinkOptions
+                {
+                    PropagateCompletion = true
+                },
+                context =>
+                {
+                    var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
+                    return pumpingManager.CanProcess(context) && !forcedRequested;
+                });
+            mainBroadcastBlock.LinkTo(
+                pressureParamsProviderBlock,
+                new DataflowLinkOptions
+                {
+                    PropagateCompletion = true
+                },
+                context =>
+                {
+                    var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
+                    var wasPumpingCompleted = context?.TryGetAutoPumpingResultParams()?.WasPumpingCompleted ?? false;
+                    return forcedRequested && wasPumpingCompleted;
+                });
+
+            pupmingManagerBlock.LinkTo(
                 pressureParamsProviderBlock,
                 new DataflowLinkOptions
                 {
@@ -275,15 +327,14 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                             sessionProcessingInfo.CurrentCycleNumber)));
                 }
 
-                var isForceRequested = context.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
-                // чтобы не было рекурсии
-                if (isForceRequested) return Task.CompletedTask;
-
+                // чтобы не было рекурсии: форсированный сбор нужен для получения параметров, а не обновления данных о сеансе
+                var isForcedCollectionRequested = context.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
+                if (isForcedCollectionRequested) return Task.CompletedTask;
+                
                 if (angleParams != null)
                 {
                     RiseOnce(angleParams, () => OnCurrentAngleXRecieved?.Invoke(this, angleParams.CurrentAngle));
                 }
-
 
                 RiseOnce(sessionProcessingInfo, async () =>
                 {
@@ -292,18 +343,24 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
                     // считаем, что сессия завершилась, когда оставшееся время равно 0
                     var isSessionCompleted = sessionProcessingInfo.RemainingTime <= TimeSpan.Zero;
-
-                    //todo придумать, как определять, что закончился цикл, что надо снять показатели в последнем 0
-                    if (_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber || isSessionCompleted)
+                    // чтобы не было лишних вызовов в случае долгого обновления в последней фазе
+                    if (isSessionCompleted)
                     {
+                        _cycleProcessingSynchronizer.Stop();
+                    }
+                    //todo придумать, как определять, что закончился цикл, что надо снять показатели в последнем 0
+                    
+                    if (_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber ||
+                          isSessionCompleted)
+                    {
+                        await InnerForceDataCollectionRequestAsync().ConfigureAwait(false);
                         _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber; // по идеи, 
-                        await InnerForceDataCollectionRequestAsync();
                         OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
+                        
                     }
 
                     if (isSessionCompleted)
                     {
-                        _cycleProcessingSynchronizer.Stop();
                         OnSessionCompleted?.Invoke(this, EventArgs.Empty);
                     }
                 });
@@ -651,7 +708,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var context = new CycleProcessingContext();
             context.AddOrUpdate(new ForcedDataCollectionRequestCycleProcessingContextParams(true));
             context.AddOrUpdate(
-                new PumpingContextParams(
+                new PumpingRequestContextParams(
                     _isAutoPumpingEnabled, 
                     _startParams.PumpingNumberOfAttemptsOnStartAndFinish));
             await _forcedRequestBlock

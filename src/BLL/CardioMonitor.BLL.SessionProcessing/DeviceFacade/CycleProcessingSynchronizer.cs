@@ -83,7 +83,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var context = new CycleProcessingContext();
             
             context.AddOrUpdate(
-                new PumpingContextParams(
+                new PumpingRequestContextParams(
                     _isAutoPumpingEnabled, 
                     _pumpingNumberOfAttempts));
             

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionRequest;
@@ -12,40 +11,49 @@ using Polly;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
 {
-    internal class PatientPressureParamsProvider : ICycleProcessingPipelineElement
+    internal class PumpingManager : ICycleProcessingPipelineElement
     {
-
         /// <summary>
-        /// Таймаут запроса параметром пациента
+        /// Таймаут операции накачки
         /// </summary>
-        private readonly TimeSpan _updatePatientParamTimeout;
+        private readonly TimeSpan _pumpingTimeout;
+        
         [NotNull]
         private readonly IMonitorController _monitorController;
 
-        public PatientPressureParamsProvider(
-            [NotNull] IMonitorController monitorController)
+        public PumpingManager([NotNull] IMonitorController monitorController)
         {
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
             
-            _updatePatientParamTimeout = new TimeSpan(0, 0, 8);
-            
+            _pumpingTimeout = new TimeSpan(0, 0, 8);
         }
 
-        public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
+        public async Task<CycleProcessingContext> ProcessAsync(CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            var pumpingResult = context.TryGetAutoPumpingResultParams();
-            if (!(pumpingResult?.WasPumpingCompleted ?? false)) return context;
+            var needPumping = context.TryGetAutoPumpingRequestParams()?.IsAutoPumpingEnabled ?? false;
 
-            Devices.Monitor.Infrastructure.PatientPressureParams param = null;
-           
+            if (!needPumping)
+            {
+                context.AddOrUpdate(new PumpingResultContextParams(true));
+                return context;
+            }
+
+            var retryCounts = context.TryGetAutoPumpingRequestParams()?.PumpingNumberOfAttempts ?? 0;
+
+            bool wasPumpingComleted;
             try
             {
-                var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
-                await timeoutPolicy.ExecuteAsync(
-                        _monitorController
-                            .GetPatientPressureParamsAsync)
+                var timeoutPolicy = Policy
+                    .TimeoutAsync(_pumpingTimeout);
+                var recilencePolicy = Policy
+                    .Handle<Exception>()
+                    .RetryAsync(retryCounts);
+                var policyWrap = Policy.WrapAsync(timeoutPolicy, recilencePolicy);
+                await policyWrap
+                    .ExecuteAsync(_monitorController.PumpCuffAsync)
                     .ConfigureAwait(false);
+                wasPumpingComleted = true;
             }
             catch (DeviceConnectionException e)
             {
@@ -55,53 +63,35 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                             SessionProcessingErrorCodes.MonitorConnectionError,
                             e.Message,
                             e)));
+                wasPumpingComleted = false;
             }
             catch (TimeoutException e)
             {
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
-                            SessionProcessingErrorCodes.PatientPressureParamsRequestTimeout,
+                            SessionProcessingErrorCodes.PumpingTimeout,
                             e.Message,
                             e)));
+                wasPumpingComleted = false;
             }
             catch (Exception e)
             {
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
-                            SessionProcessingErrorCodes.PatientPressureParamsRequestError,
+                            SessionProcessingErrorCodes.PumpingError,
                             e.Message,
                             e)));
-            }
-            finally
-            {
-                if (param == null)
-                {
-                    param = GetDefaultParams();
-                }
+                wasPumpingComleted = false;
             }
 
+            context.AddOrUpdate(new PumpingResultContextParams(wasPumpingComleted));
 
-            UpdateContex(param, context);
             return context;
         }
 
-        private void UpdateContex(Devices.Monitor.Infrastructure.PatientPressureParams param, CycleProcessingContext context)
-        {
-            context.AddOrUpdate(
-                new PressureCycleProcessingContextParams(
-                    param.SystolicArterialPressure,
-                    param.DiastolicArterialPressure,
-                    param.AverageArterialPressure));
-        }
-
-        private Devices.Monitor.Infrastructure.PatientPressureParams GetDefaultParams()
-        {
-            return new Devices.Monitor.Infrastructure.PatientPressureParams(-1, -1, -1);
-        }
-
-        public bool CanProcess([NotNull] CycleProcessingContext context)
+        public bool CanProcess(CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 

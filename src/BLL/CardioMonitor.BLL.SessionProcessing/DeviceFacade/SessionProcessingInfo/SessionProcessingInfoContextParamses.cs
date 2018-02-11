@@ -56,6 +56,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
 
     internal static class TimeParamContextExtensions
     {
+        [CanBeNull]
         public static SessionProcessingInfoContextParamses TryGetSessionProcessingInfo([NotNull] this CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));

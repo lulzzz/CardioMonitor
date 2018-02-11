@@ -41,9 +41,12 @@
     <Compile Include="DeviceFacade\ICycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\Iterations\IterationCycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\Iterations\IterationParamsProvider.cs" />
-    <Compile Include="DeviceFacade\PressureParams\PumpingContextParams.cs" />
-    <Compile Include="DeviceFacade\PressureParams\PumpingContextParamsExntensions.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PumpingManager.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PumpingRequestContextParams.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PumpingRequestContextParamsExntensions.cs" />
     <Compile Include="DeviceFacade\PressureParams\PressureParamsContextExntensions.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PumpingResultContextParams.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PumpingResultContextParamsExtensions.cs" />
     <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoContextParamses.cs" />
     <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

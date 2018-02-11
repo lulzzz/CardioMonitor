@@ -11,7 +11,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionR
         public Guid ParamsTypeId { get; } = ForcedDataCollectionRequestId;
         public Guid UniqObjectId { get; }
 
-        public ForcedDataCollectionRequestCycleProcessingContextParams(bool isRequested)
+        public ForcedDataCollectionRequestCycleProcessingContextParams(
+            bool isRequested)
         {
             IsRequested = isRequested;
             UniqObjectId = Guid.NewGuid();
@@ -20,6 +21,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionR
         public bool IsRequested { get; }
     }
 
+    [CanBeNull]
     internal static class ForcedDataCollectionRequestContextParamsExntensions
     {
         public static ForcedDataCollectionRequestCycleProcessingContextParams TryGetForcedDataCollectionRequest(
