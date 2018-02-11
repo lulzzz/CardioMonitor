@@ -28,10 +28,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private bool _isProcessing;
         private bool _isAutoPumpingEnabled;
 
+        private readonly short _pumpingNumberOfAttempts;
+        
         public CycleProcessingSynchronizer(
             [NotNull] BroadcastBlock<CycleProcessingContext> pipelineStartBlock,
             [NotNull] IWorkerController workerController,
-            bool isAutoPumpingEnabled)
+            bool isAutoPumpingEnabled,
+            short pumpingNumberOfAttempts)
         {
             _isAutoPumpingEnabled = isAutoPumpingEnabled;
             _workerController = workerController ?? throw new ArgumentNullException(nameof(workerController));
@@ -39,6 +42,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             IsPaused = false;
             _isProcessing = false;
             _processingPeriod = null;
+            _pumpingNumberOfAttempts = pumpingNumberOfAttempts;
         }
         
         public bool IsPaused { get; private set; }
@@ -78,7 +82,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         {
             var context = new CycleProcessingContext();
             
-            context.AddOrUpdate(new AutoPumpingContextParams(_isAutoPumpingEnabled));
+            context.AddOrUpdate(
+                new PumpingContextParams(
+                    _isAutoPumpingEnabled, 
+                    _pumpingNumberOfAttempts));
             
             await _pipelineStartBlock
                 .SendAsync(context)

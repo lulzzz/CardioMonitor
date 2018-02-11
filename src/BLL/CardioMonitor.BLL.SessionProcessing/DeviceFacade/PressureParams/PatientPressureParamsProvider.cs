@@ -7,18 +7,13 @@ using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionReque
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Monitor.Infrastructure;
-using CardioMonitor.Infrastructure.Threading;
 using JetBrains.Annotations;
+using Polly;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
 {
     internal class PatientPressureParamsProvider : ICycleProcessingPipelineElement
     {
-         /// <summary>
-        /// Точность для сравнение double величин
-        /// </summary>
-        private const double Tolerance = 0.1e-12;
-
         /// <summary>
         /// Таймаут операции накачки
         /// </summary>
@@ -30,15 +25,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         private readonly TimeSpan _updatePatientParamTimeout;
         [NotNull]
         private readonly IMonitorController _monitorController;
-        [NotNull]
-        private readonly TaskHelper _taskHelper;
 
         public PatientPressureParamsProvider(
-            [NotNull] IMonitorController monitorController, 
-            [NotNull] TaskHelper taskHelper)
+            [NotNull] IMonitorController monitorController)
         {
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
-            _taskHelper = taskHelper ?? throw new ArgumentNullException(nameof(taskHelper));
             
             _updatePatientParamTimeout = new TimeSpan(0, 0, 8);
             
@@ -52,54 +43,70 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             if (angleParams == null) return context;
 
             Devices.Monitor.Infrastructure.PatientPressureParams param = null;
-            bool wasPumpingComleted;
-            try
+            var needPumping = context.TryGetAutoPumpingParams()?.IsAutoPumpingEnabled ?? false;
+            var retryCounts = context.TryGetAutoPumpingParams()?.PumpingNumberOfAttempts ?? 0;
+            if (needPumping)
             {
-                var pumpingTask = _monitorController.PumpCuffAsync();
-                await _taskHelper.StartWithTimeout(pumpingTask, _pumpingTimeout);
-                wasPumpingComleted = true;
-            }
-            catch (DeviceConnectionException e)
-            {
-                context.AddOrUpdate(
-                    new ExceptionCycleProcessingContextParams(
-                        new SessionProcessingException(
-                            SessionProcessingErrorCodes.MonitorConnectionError,
-                            e.Message,
-                            e)));
-                wasPumpingComleted = false;
-            }
-            catch (TimeoutException e)
-            {
-                context.AddOrUpdate(
-                    new ExceptionCycleProcessingContextParams(
-                        new SessionProcessingException(
-                            SessionProcessingErrorCodes.PumpingTimeout,
-                            e.Message,
-                            e)));
-                wasPumpingComleted = false;
-            }
-            catch (Exception e)
-            {
-                context.AddOrUpdate(
-                    new ExceptionCycleProcessingContextParams(
-                        new SessionProcessingException(
-                            SessionProcessingErrorCodes.PumpingError,
-                            e.Message,
-                            e)));
-                wasPumpingComleted = false;
-            }
-            if (!wasPumpingComleted)
-            {
-                param = GetDefaultParams();
-                UpdateContex(param, context);
-                return context;
+                bool wasPumpingComleted;
+                try
+                {
+                    var timeoutPolicy = Policy
+                        .TimeoutAsync(_pumpingTimeout);
+                    var recilencePolicy = Policy
+                        .Handle<Exception>()
+                        .RetryAsync(retryCounts);
+                    var policyWrap = Policy.WrapAsync(timeoutPolicy, recilencePolicy);
+                    await policyWrap
+                        .ExecuteAsync(_monitorController.PumpCuffAsync)
+                        .ConfigureAwait(false);
+                    wasPumpingComleted = true;
+                }
+                catch (DeviceConnectionException e)
+                {
+                    context.AddOrUpdate(
+                        new ExceptionCycleProcessingContextParams(
+                            new SessionProcessingException(
+                                SessionProcessingErrorCodes.MonitorConnectionError,
+                                e.Message,
+                                e)));
+                    wasPumpingComleted = false;
+                }
+                catch (TimeoutException e)
+                {
+                    context.AddOrUpdate(
+                        new ExceptionCycleProcessingContextParams(
+                            new SessionProcessingException(
+                                SessionProcessingErrorCodes.PumpingTimeout,
+                                e.Message,
+                                e)));
+                    wasPumpingComleted = false;
+                }
+                catch (Exception e)
+                {
+                    context.AddOrUpdate(
+                        new ExceptionCycleProcessingContextParams(
+                            new SessionProcessingException(
+                                SessionProcessingErrorCodes.PumpingError,
+                                e.Message,
+                                e)));
+                    wasPumpingComleted = false;
+                }
+
+                if (!wasPumpingComleted)
+                {
+                    param = GetDefaultParams();
+                    UpdateContex(param, context);
+                    return context;
+                }
             }
 
             try
             {
-                var gettingParamsTask = _monitorController.GetPatientPressureParamsAsync();
-                param = await _taskHelper.StartWithTimeout(gettingParamsTask, _updatePatientParamTimeout);
+                var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
+                await timeoutPolicy.ExecuteAsync(
+                        _monitorController
+                            .GetPatientPressureParamsAsync)
+                    .ConfigureAwait(false);
             }
             catch (DeviceConnectionException e)
             {

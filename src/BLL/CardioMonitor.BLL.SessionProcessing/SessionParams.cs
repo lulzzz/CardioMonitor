@@ -38,14 +38,35 @@ namespace CardioMonitor.BLL.SessionProcessing
         /// Параметры инициализации контроллера монитора
         /// </summary>
         public IMonitorControllerInitParams MonitorControllerInitParams { get; }
+        
+        /// <summary>
+        /// Количество попыток накачки при старте
+        /// </summary>
+        public short PumpingNumberOfAttemptsOnStartAndFinish { get; }
+        
+        /// <summary>
+        /// Количество попыток накачики в процессе выполнения сеанса
+        /// </summary>
+        public short PumpingNumberOfAttemptsOnProcessing { get; }
 
+        /// <summary>
+        /// Время, через которое будет осуществляться попытка переподключения к устройству
+        /// </summary>
+        /// <remarks>
+        /// Если null, то переподключения не будет
+        /// </remarks>
+        public TimeSpan? DeviceReconnectionTimeout { get; }
+        
         public SessionParams(
             float maxAngle, 
             short cycleCount, 
             float frequency, 
             TimeSpan updateDatePeriod, 
             IBedControllerInitParams bedControllerInitParams, 
-            IMonitorControllerInitParams monitorControllerInitParams)
+            IMonitorControllerInitParams monitorControllerInitParams,
+            short pumpingNumberOfAttemptsOnStartAndFinish, 
+            short pumpingNumberOfAttemptsOnProcessing, 
+            TimeSpan? deviceReconnectionTimeout = null)
         {
             MaxAngle = maxAngle;
             CycleCount = cycleCount;
@@ -53,6 +74,9 @@ namespace CardioMonitor.BLL.SessionProcessing
             UpdateDatePeriod = updateDatePeriod;
             BedControllerInitParams = bedControllerInitParams;
             MonitorControllerInitParams = monitorControllerInitParams;
+            PumpingNumberOfAttemptsOnStartAndFinish = pumpingNumberOfAttemptsOnStartAndFinish;
+            PumpingNumberOfAttemptsOnProcessing = pumpingNumberOfAttemptsOnProcessing;
+            DeviceReconnectionTimeout = deviceReconnectionTimeout;
         }
     }
 }

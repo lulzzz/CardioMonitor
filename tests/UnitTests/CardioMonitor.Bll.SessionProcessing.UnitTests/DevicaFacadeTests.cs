@@ -22,7 +22,9 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
                 30,
                 TimeSpan.FromSeconds(1),
                 new Mock<IBedControllerInitParams>().Object,
-                new Mock<IMonitorControllerInitParams>().Object);
+                new Mock<IMonitorControllerInitParams>().Object,
+                3,
+                2);
         
         [Fact]
         public async Task DeviceFacade_TimeChanged_Ok()

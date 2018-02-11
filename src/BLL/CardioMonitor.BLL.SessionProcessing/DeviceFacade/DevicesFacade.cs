@@ -31,10 +31,14 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         [NotNull] private readonly IBedController _bedController;
         [NotNull] private readonly CycleProcessingSynchronizer _cycleProcessingSynchronizer;
 
+        [NotNull]
         private readonly SessionParams _startParams;
 
+        [NotNull]
         private readonly BroadcastBlock<CycleProcessingContext> _pipelineOnTimeStartBlock;
+        [NotNull]
         private readonly ActionBlock<CycleProcessingContext> _pipelineFinishCollectorBlock;
+        [NotNull]
         private readonly BroadcastBlock<CycleProcessingContext> _forcedRequestBlock;
 
         private bool _isStandartProcessingInProgress;
@@ -90,7 +94,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             _cycleProcessingSynchronizer = new CycleProcessingSynchronizer(
                 _pipelineOnTimeStartBlock, 
                 workerController,
-                _isAutoPumpingEnabled);
+                _isAutoPumpingEnabled,
+                startParams.PumpingNumberOfAttemptsOnProcessing);
             _isStandartProcessingInProgress = false;
             _previouslyKnownCycleNumber = StartCycleNumber;
             
@@ -129,7 +134,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
             var mainBroadcastBlock = new BroadcastBlock<CycleProcessingContext>(context => context);
 
-            var pressureParamsProvider = new PatientPressureParamsProvider(monitorController, taskHelper);
+            var pressureParamsProvider = new PatientPressureParamsProvider(monitorController);
             var pressureParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pressureParamsProvider.ProcessAsync(context));
 
@@ -645,7 +650,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             //todo может, вручную задавать номер итерации и цикла?
             var context = new CycleProcessingContext();
             context.AddOrUpdate(new ForcedDataCollectionRequestCycleProcessingContextParams(true));
-            context.AddOrUpdate(new AutoPumpingContextParams(_isAutoPumpingEnabled));
+            context.AddOrUpdate(
+                new PumpingContextParams(
+                    _isAutoPumpingEnabled, 
+                    _startParams.PumpingNumberOfAttemptsOnStartAndFinish));
             await _forcedRequestBlock
                 .SendAsync(context)
                 .ConfigureAwait(false);
@@ -655,6 +663,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         {
             _cycleProcessingSynchronizer.Stop();
             _cycleProcessingSynchronizer.Dispose();
+            
+            _bedController.OnPauseFromDeviceRequested -= BedControllerOnPauseFromDeviceRequested;
+            _bedController.OnResumeFromDeviceRequested -= BedControllerOnResumeFromDeviceRequested;
+            _bedController.OnReverseFromDeviceRequested -= BedControllerOnReverseFromDeviceRequested;
+            _bedController.OnEmeregencyStopFromDeviceRequested -= BedControllerOnEmeregencyStopFromDeviceRequested;
+            
             _bedController.Dispose();
             _monitorController.Dispose();
             _pipelineOnTimeStartBlock.Complete();
