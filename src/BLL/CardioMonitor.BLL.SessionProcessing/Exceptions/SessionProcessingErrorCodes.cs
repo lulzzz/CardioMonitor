@@ -14,6 +14,7 @@
         MonitorProcessingError =9,
         InversionTableConnectionError=10,
         InversionTableProcessingError=11,
-        UpdateAngleError = 11
+        UpdateAngleError = 11,
+        StartFailed=12
     }
 }

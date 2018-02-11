@@ -8,15 +8,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions
     {
         public static readonly Guid ExceptionContextParamsContextParamsId = new Guid("16aa0bb0-aa1b-47a1-a11c-af362f6bfa7b");
 
-        public ExceptionCycleProcessingContextParams(SessionProcessingException exception)
+        public ExceptionCycleProcessingContextParams([NotNull] SessionProcessingException exception)
         {
-            Exception = exception;
+            Exception = exception ?? throw new ArgumentNullException(nameof(exception));
             UniqObjectId = Guid.NewGuid();
         }
 
         public Guid ParamsTypeId { get; } = ExceptionContextParamsContextParamsId;
         public Guid UniqObjectId { get; }
 
+        [NotNull]
         public SessionProcessingException Exception { get; }
     }
 
