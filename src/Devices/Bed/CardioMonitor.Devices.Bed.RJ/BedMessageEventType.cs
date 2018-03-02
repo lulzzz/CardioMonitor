@@ -12,6 +12,8 @@ namespace CardioMonitor.Devices.Bed.UDP
     public enum BedMessageEventType
     {
         Read = 3, //запрос на чтение данных
-        Write = 6 //запрос на запись данных
+        Write = 6, //запрос на запись данных
+        ReadAll = 13,
+        WriteAll = 16
     }
 }

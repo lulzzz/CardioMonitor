@@ -191,14 +191,16 @@ namespace CardioMonitor.Devices.Monitor
             PatientPressureParams pressureParams = null;
             PatientCommonParams commonParams = null;
 
-            short ecgValue = 0;
+            short[] ecgValue =  new short[2];
             try
             {
-                byte[] message = null;
-                const int MessageSize = 100;
-                //todo вот тут как-то получить даныне и скастовать их к нужному виду
-                await _stream.ReadAsync(message, 0, MessageSize)
+                MitarMonitorDataParser monitorDataParser = new MitarMonitorDataParser();
+                const int messageSize = 100;
+                byte[] message = new byte[messageSize];
+                //todo вот тут как-то получить данные и скастовать их к нужному виду
+                await _stream.ReadAsync(message, 0, messageSize)
                     .ConfigureAwait(false);
+                commonParams = monitorDataParser.GetPatientCommonParams(message);
                 if (isCommonParamsRequested)
                 {
                     _lastCommonParams = commonParams;
@@ -211,7 +213,8 @@ namespace CardioMonitor.Devices.Monitor
                 }
                 if (isEcgParamsRequested)
                 {
-                    _ecgValues.Enqueue(ecgValue);
+                    _ecgValues.Enqueue(ecgValue[0]);
+                    _ecgValues.Enqueue(ecgValue[1]);
                     var currentTime = DateTime.UtcNow;
 
                     if (currentTime > _startedEcgCollectingTime &&

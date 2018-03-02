@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="BedControlCommand.cs" />
     <Compile Include="BedMovingStatus.cs" />
+    <Compile Include="BedSessionInfo.cs" />
     <Compile Include="BedStatus.cs" />
     <Compile Include="IBedController.cs" />
     <Compile Include="IBedControllerInitParams.cs" />

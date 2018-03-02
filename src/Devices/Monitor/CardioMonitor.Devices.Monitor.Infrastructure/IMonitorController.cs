@@ -17,7 +17,7 @@ namespace CardioMonitor.Devices.Monitor.Infrastructure
         bool IsConnected { get; }
         
         /// <summary>
-        /// Выполняет инициализация контроллера
+        /// Выполняет инициализацию контроллера
         /// </summary>
         /// <param name="initParams"></param>
         void Init([NotNull] IMonitorControllerInitParams initParams);

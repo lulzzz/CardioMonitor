@@ -11,17 +11,17 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <summary>
         /// Маркер - идентификатор начала пакета
         /// </summary>
-        private char startMessageMarker = '$';
+        private  char _startMessageMarker = '$';
 
         /// <summary>
         /// устройство, с которого пришла информация 
         /// </summary>
-        private BedMessageDeviceNumber idDevice;  //todo на текущий момент малофункционально, ибо работаем только с одной кроватью
+        private BedMessageDeviceNumber _idDevice;  //todo на текущий момент малофункционально, ибо работаем только с одной кроватью
 
         /// <summary>
         /// тип события: информация читается или записывается
         /// </summary>
-        private BedMessageEventType eventType;
+        private BedMessageEventType _eventType;
 
         /// <summary>
         /// размер пакета данных
@@ -38,24 +38,39 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// </summary>
         private byte[] messageData;
 
-
+        public BedMessage(){}
+        
         public BedMessage(BedMessageEventType eventType, int registerAddress, byte[] messageData)
         {
-            this.eventType = eventType;
+            _eventType = eventType;
             this.messageLength = (byte)messageData.Length; //todo нуждается в уточнении, что это за размер пакета, по протоколу он всегда равен 2 байта
             this.registerAddress = registerAddress;
             this.messageData = messageData;
         }
 
+
+        public  byte[] GetAllRegisterMessage()
+        {
+            return PackageMessage(BedMessageEventType.ReadAll);
+        }
+
+        public BedRegisterValues SettAllRegisterValues(byte[] receiveMessage)
+        {
+            var values = new BedRegisterValues();
+            //todo здесь распаковываем пакет и заносим полученные значения
+
+            return values;
+        }
+        
         /// <summary>
         /// создание пакета в виде массива байт
         /// </summary>
         /// <returns></returns>
-        public byte[] PackageMessage()
+        public  byte[] PackageMessage(BedMessageEventType eventType)
         {
             byte[] message = new byte[10];
-            message[0] = (byte)startMessageMarker;
-            message[1] = (byte) idDevice;
+            message[0] = (byte)_startMessageMarker;
+            message[1] = (byte) _idDevice;
             message[2] = (byte)eventType;
             message[3] = messageLength;
             message[4] = (byte)registerAddress; //регистр по спецификации 2 байтный, уточнить тип нотации при записи
@@ -78,8 +93,8 @@ namespace CardioMonitor.Devices.Bed.UDP
             {
                 throw new ArgumentException("Формат пакета неверен - не найден маркер начала пакета");
             }
-            idDevice = (BedMessageDeviceNumber)inputMessage[1];
-            eventType = (BedMessageEventType) inputMessage[2];
+            _idDevice = (BedMessageDeviceNumber)inputMessage[1];
+            _eventType = (BedMessageEventType) inputMessage[2];
             messageLength = inputMessage[3];
             registerAddress = inputMessage[4];
             messageData[0] = inputMessage[6];

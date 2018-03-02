@@ -47,6 +47,7 @@
     <Compile Include="CRC8Calculator.cs" />
     <Compile Include="MitarMonitorControlerInitParams.cs" />
     <Compile Include="MitarMonitorController.cs" />
+    <Compile Include="MitarMonitorDataParser.cs" />
     <Compile Include="MonitorTCPClient.cs" />
     <Compile Include="OldMonitorController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

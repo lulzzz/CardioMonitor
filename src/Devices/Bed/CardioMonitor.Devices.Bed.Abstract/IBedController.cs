@@ -11,17 +11,17 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         #region Управление взаимодействием и обработка событий
         
         /// <summary>
-        /// Событие нажаттия на кнопку `Пауза` на пульте управления инверсионным столом
+        /// Событие нажатия на кнопку `Пауза` на пульте управления инверсионным столом
         /// </summary>
         event EventHandler OnPauseFromDeviceRequested;
         
         /// <summary>
-        /// Событие нажаттия на кнопку `Продолжение` на пульте управления инверсионным столом
+        /// Событие нажатия на кнопку `Продолжение` на пульте управления инверсионным столом
         /// </summary>
         event EventHandler OnResumeFromDeviceRequested;
         
         /// <summary>
-        /// Событие нажаттия на кнопку `Экстренаня остановка` на пульте управления инверсионным столом
+        /// Событие нажатия на кнопку `Экстренная остановка` на пульте управления инверсионным столом
         /// </summary>
         event EventHandler OnEmeregencyStopFromDeviceRequested;
 
@@ -37,7 +37,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         bool IsConnected { get; }
 
         /// <summary>
-        /// Иницализурет контроллер
+        /// Инициализирует контроллер
         /// </summary>
         /// <param name="initParams">Параметры инициализации</param>
         /// <remarks>

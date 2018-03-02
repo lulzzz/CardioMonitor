@@ -44,6 +44,8 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         private Worker _syncWorker;
 
+        private BedSessionInfo _sessionInfo;
+
         [NotNull]
         private readonly ConcurrentQueue<Exception> _lastExceptions;
 
@@ -140,12 +142,16 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// </summary>
         private async Task UpdateRegistersValueAsync()
         {
+            AssertConnection();
+            if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу"); //todo 
             //todo здесь получение массива с регистрами и обновление результатов в _registerList
             //todo никакой обработки ошибок делать не надо
             await Task.Yield();
-            
-            
-            _registerValues = new BedRegisterValues();
+            //здесь короче запрос данных и их парсинг - todo сделать сейчас!
+            var message = new BedMessage(); // todo мб сделать static ?
+            await _udpClient.SendAsync(message.GetAllRegisterMessage(), message.GetAllRegisterMessage().Length);
+            var receiveMessage = await _udpClient.ReceiveAsync();
+            _registerValues = message.SettAllRegisterValues(receiveMessage.Buffer);
         }
         
         /// <summary>
@@ -232,74 +238,84 @@ namespace CardioMonitor.Devices.Bed.UDP
                 throw new InvalidOperationException($"Не было получено данных от кровати. Необходмо выполнить подключение методом {nameof(ConnectAsync)} или дождаться получения данных");
         }
 
-        public Task<TimeSpan> GetCycleDurationAsync()
+        public async Task<TimeSpan> GetCycleDurationAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            await Task.Yield();
+            return   _sessionInfo.GetCycleDuration();
         }
 
-        public Task<short> GetCyclesCountAsync()
+        public async Task<short> GetCyclesCountAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            await Task.Yield();
+            return  (short)_initParams.CyclesCount;
         }
 
-        public Task<short> GetCurrentCycleNumberAsync()
+        public async Task<short> GetCurrentCycleNumberAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            await Task.Yield();
+            return  _registerValues.CurrentCycle;
         }
 
-        public Task<short> GetIterationsCountAsync()
+        public async Task<short> GetIterationsCountAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            await Task.Yield();
+            return _sessionInfo.GetIterationsCount();
         }
 
-        public Task<short> GetCurrentIterationAsync()
+        public async Task<short> GetCurrentIterationAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            await Task.Yield();
+            return  _registerValues.CurrentIteration;
         }
 
-        public Task<short> GetNextIterationNumberForPressureMeasuringAsync()
+        public async Task<short> GetNextIterationNumberForPressureMeasuringAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            await Task.Yield();
+            return  _sessionInfo.GetNextIterationNumberForPressureMeasuring();
         }
 
-        public Task<short> GetNextIterationNumberForCommonParamsMeasuringAsync()
+        public async Task<short> GetNextIterationNumberForCommonParamsMeasuringAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            await Task.Yield();
+            return _sessionInfo.GetNextIterationNumberForCommonParamsMeasuring();
         }
 
-        public Task<short> GetNextIterationNumberForEcgMeasuringAsync()
+        public async Task<short> GetNextIterationNumberForEcgMeasuringAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            await Task.Yield();
+            return  _sessionInfo.GetNextIterationNumberForEcgMeasuring();
         }
 
-        public Task<TimeSpan> GetRemainingTimeAsync()
+        public async Task<TimeSpan> GetRemainingTimeAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            await Task.Yield();
+            return  _registerValues.RemainingTime;
         }
 
-        public Task<TimeSpan> GetElapsedTimeAsync()
+        public async Task<TimeSpan> GetElapsedTimeAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            await Task.Yield();
+            return  _registerValues.ElapsedTime;
         }
 
         public Task<StartFlag> GetStartFlagAsync()
@@ -313,10 +329,10 @@ namespace CardioMonitor.Devices.Bed.UDP
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            throw new NotImplementedException();
+            throw new NotImplementedException(); //todo не помню где лежит
         }
 
-        public async Task<float> GetAngleXAsync() //так как запрашивается просто из регистра - думаю таска тут не нужна
+        public async Task<float> GetAngleXAsync() 
         {
             
             RiseExceptions();

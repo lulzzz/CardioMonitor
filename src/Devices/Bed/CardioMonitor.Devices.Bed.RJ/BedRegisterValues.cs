@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CardioMonitor.Devices.Bed.Infrastructure;
 
 namespace CardioMonitor.Devices.Bed.UDP
 {
@@ -17,7 +18,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <summary>
         /// Уникальный номер кровати
         /// </summary>
-        //todo а нужно ли нам это сейчас?
+        //todo а нужно ли нам это сейчас? - конкретно сейчас нет, но может пригодится чуть позже 
         public int BedID { get; set; }
 
         /// <summary>
@@ -60,16 +61,18 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// Статус сеанса. 0x0001 - подготовка к сеансу; 0x0000 - готов к запуску сеанса;
         ///  0x0002 - работа (сеанс запущен); 0x0005 -  неисправность (ошибка); 0x0003 - блокировка при старте с ПК
         /// </summary>
-        public int BedStatus { get; set; }
+        public BedStatus BedStatus { get; set; }
 
         /// <summary>
         /// Код ошибки
         /// </summary>
+        /// todo напомнить уточнить необходимость отображения и списка ошибок
         public int BedError { get; set; }
 
         /// <summary>
         /// Код предупреждения
         /// </summary>
+        /// todo по варнингам - вроде как пофиг, особо не используются
         public int BedWarning { get; set; }
 
         /// <summary>
@@ -78,18 +81,17 @@ namespace CardioMonitor.Devices.Bed.UDP
         ///  Статус может снять только ПК или по таймауту через 5 мин
         /// режим стоит WO (только на запись?)
         /// </summary> 
-        public int IsBedBlocked { get; set; } //todo важная херня, не забыть про нее
+        public bool IsBedBlocked { get; set; } //todo важная херня, не забыть про нее
 
         /// <summary>
         /// Частота для алгоритма движения, 1/sec
         /// </summary>
-        public int Frequency { get; set; }
+        public float Frequency { get; set; } //16 bit float
 
         /// <summary>
         /// Максимальный угол наклона
         /// </summary>
-        //todo значение не дробное ли?
-        public int MaxAngle { get; set; }
+        public float MaxAngle { get; set; }  //16 bit float
 
         /// <summary>
         /// Количество циклов (повторений) в одном сеансе
@@ -115,6 +117,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// Следующая итерация в которой требуется измерить давление, нужно рассчитать
         /// </summary>
         //todo если рассчитываем, то имеет ли смысл хранить его здесь? Если не нужны, надо вынести в другое место
+        //todo если будет убрано из возвращаемых значений с кровати - уберу
         public short NextIterationForPressureMeasuring { get; set; }
 
         /// <summary>
@@ -137,15 +140,12 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <summary>
         /// Текущий желаемый угол по Х, для вывода на экран и в ПК
         /// </summary>
-        
-        //todo значение не дробное ли?
-        public int BedTargetAngleX { get; set; }
+        public float BedTargetAngleX { get; set; }
 
         /// <summary>
         /// Текущий желаемый угол по Y, для вывода на экран и в ПК
         /// </summary>
-        
-        //todo значение не дробное ли?
-        public int BedTargetAngleY { get; set; }      
+        //todo не факт что будет использоваться за пределами сервисной программы
+        public float BedTargetAngleY { get; set; }      
     }
 }
