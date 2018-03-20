@@ -33,7 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CycleStateMachineBuilder.cs" />
     <Compile Include="DeviceFacade\CycleProcessingSynchronizer.cs" />
     <Compile Include="DeviceFacade\DeviceFacadeMemoryCacheExtensions.cs" />
     <Compile Include="DeviceFacade\Exceptions\ExceptionCycleProcessingContextParams.cs" />
@@ -70,6 +69,7 @@
     <Compile Include="DeviceFacade\PressureParams\PressureCycleProcessingContextParams.cs" />
     <Compile Include="SessionContext.cs" />
     <Compile Include="SessionParams.cs" />
+    <Compile Include="SessionProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="JetBrains.Annotations, Version=11.0.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325">
@@ -101,6 +101,7 @@
     <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
       <HintPath>..\..\packages\System.Threading.Tasks.Dataflow.4.8.0\lib\netstandard2.0\System.Threading.Tasks.Dataflow.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
