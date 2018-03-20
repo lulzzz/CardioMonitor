@@ -200,7 +200,7 @@ namespace CardioMonitor.Devices.Monitor
                 //todo вот тут как-то получить данные и скастовать их к нужному виду
                 await _stream.ReadAsync(message, 0, messageSize)
                     .ConfigureAwait(false);
-                commonParams = monitorDataParser.GetPatientCommonParams(message);
+                //commonParams = monitorDataParser.GetPatientCommonParams(message);
                 if (isCommonParamsRequested)
                 {
                     _lastCommonParams = commonParams;
