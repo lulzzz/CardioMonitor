@@ -20,6 +20,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         event EventHandler<SessionProcessingException> OnException;
         
+        event EventHandler<Exception> OnSessionErrorStop;
+        
         event EventHandler<short> OnCycleCompleted;
 
         event EventHandler OnSessionCompleted;

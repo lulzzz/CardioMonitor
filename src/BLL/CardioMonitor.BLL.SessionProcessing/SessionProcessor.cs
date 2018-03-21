@@ -54,6 +54,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             PatientParamsPerCycles = new ObservableCollection<CheckPointParams>[startParams.CycleCount];
             _devicesFacade.OnException += OnException;
             _devicesFacade.OnException += HandleOnException;
+            _devicesFacade.OnSessionErrorStop += OnSessionErrorStop;
             _devicesFacade.OnCycleCompleted += HandleOnCycleCompleted;
             _devicesFacade.OnElapsedTimeChanged += HandleOnElapsedTimeChanged;
             _devicesFacade.OnRemainingTimeChanged += HandleOnRemainingTimeChanged;
@@ -140,6 +141,8 @@ namespace CardioMonitor.BLL.SessionProcessing
         #region Events
 
         public event EventHandler<SessionProcessingException> OnException;
+        
+        public event EventHandler<Exception> OnSessionErrorStop;
        
         public event EventHandler OnSessionCompleted;
         
@@ -211,6 +214,7 @@ namespace CardioMonitor.BLL.SessionProcessing
         {
             _devicesFacade.OnException -= OnException;
             _devicesFacade.OnException -= HandleOnException;
+            _devicesFacade.OnSessionErrorStop -= OnSessionErrorStop;
             _devicesFacade.OnCycleCompleted -= HandleOnCycleCompleted;
             _devicesFacade.OnElapsedTimeChanged -= HandleOnElapsedTimeChanged;
             _devicesFacade.OnRemainingTimeChanged -= HandleOnRemainingTimeChanged;

@@ -21,11 +21,20 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 {
+    /// <summary>
+    /// Фасад взаимодействия с внешними устройствами
+    /// </summary>
+    /// <remarks>
+    /// Управляет и запрашивает данные с устроств согласно бизнес-логике
+    /// </remarks>
     internal class DevicesFacade : 
         IDevicesFacade,
         IDisposable
     {
         private const short StartCycleNumber = 1;
+        
+        #region Private fields
+ 
         private readonly TimeSpan _cachedEventLifetime = TimeSpan.FromSeconds(30);
 
         private bool _isFailedOnPumping;
@@ -49,29 +58,77 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private bool _isAutoPumpingEnabled;
 
         private readonly MemoryCache _processedEventsCached;
+
+        #endregion
+
+        #region Events
         
+        /// <summary>
+        /// Событие обновления времени, прошедшего с начала сеанса
+        /// </summary>
         public event EventHandler<TimeSpan> OnElapsedTimeChanged;
+        
+        /// <summary>
+        /// Событие обновления времени, оставшегося до конца сеанса
+        /// </summary>
         public event EventHandler<TimeSpan> OnRemainingTimeChanged;
         
+        /// <summary>
+        /// Событие изменения текущего угла наклона кровати по оси Х
+        /// </summary>
         public event EventHandler<float> OnCurrentAngleXRecieved;
         
+        /// <summary>
+        /// Событие получения новых данных давления пациента
+        /// </summary>
         public event EventHandler<PatientPressureParams> OnPatientPressureParamsRecieved;
         
+        /// <summary>
+        /// Событие получения новых общих данных пациента
+        /// </summary>
         public event EventHandler<CommonPatientParams> OnCommonPatientParamsRecieved;
 
+        /// <summary>
+        /// Событие возникновения исключения в ходе выполнения сеанса 
+        /// </summary>
         public event EventHandler<SessionProcessingException> OnException;
         
+        /// <summary>
+        /// Событие возникновения критической ошибки, не позволяющей продолжить сенас
+        /// </summary>
+        public event EventHandler<Exception> OnSessionErrorStop;
+        
+        /// <summary>
+        /// Событие заврешения цикла
+        /// </summary>
         public event EventHandler<short> OnCycleCompleted;
 
+        /// <summary>
+        /// Событие завершения сеанса
+        /// </summary>
         public event EventHandler OnSessionCompleted;
         
+        /// <summary>
+        /// Событие постановки сеанса на паузу, выполненное с кровати
+        /// </summary>
         public event EventHandler OnPausedFromDevice;
         
+        /// <summary>
+        /// Событие продолжения сеанса после паузы, выполненное с кровати
+        /// </summary>
         public event EventHandler OnResumedFromDevice;
         
+        /// <summary>
+        /// Событие экстренной, выполненное с кровати
+        /// </summary>
         public event EventHandler OnEmeregencyStoppedFromDevice;
         
+        /// <summary>
+        /// Событие реверса, выполненное с кровати
+        /// </summary>
         public event EventHandler OnReversedFromDevice;
+        
+        #endregion
         
         private readonly object _inversionTableRecconectionSyncObject = new object();
         private readonly object _monitorRecconectionSyncObject = new object();
@@ -437,7 +494,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 }
                 catch (Exception ex)
                 {
-                    //todo надо что-то делать
+                    OnSessionErrorStop?.Invoke(this, ex);
                 }
                 finally
                 {
@@ -467,7 +524,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 }
                 catch (Exception ex)
                 {
-                    //todo надо что-то делать
+                    OnSessionErrorStop?.Invoke(this, ex);
                 }
                 finally
                 {
