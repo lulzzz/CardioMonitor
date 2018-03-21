@@ -16,7 +16,7 @@
         /// <summary>
         /// Прерван
         /// </summary>
-        Terminated,
+        TerminatedOnError,
         /// <summary>
         /// В процессе
         /// </summary>
@@ -24,6 +24,11 @@
         /// <summary>
         /// Приостановлен
         /// </summary>
-        Suspended
+        Suspended,
+        
+        /// <summary>
+        /// Экстренно остановлен
+        /// </summary>
+        EmergencyStopped,
     }
 }

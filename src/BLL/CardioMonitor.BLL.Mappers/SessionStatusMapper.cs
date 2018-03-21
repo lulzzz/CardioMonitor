@@ -12,7 +12,7 @@ namespace CardioMonitor.BLL.Mappers
                 case SessionCompletionStatus.Completed:
                     return SessionStatus.Completed;
                 case SessionCompletionStatus.Terminated:
-                    return SessionStatus.Terminated;
+                    return SessionStatus.TerminatedOnError;
                 default:
                     return SessionStatus.Unknown;
             }
@@ -25,7 +25,7 @@ namespace CardioMonitor.BLL.Mappers
             {
                 case SessionStatus.Completed:
                     return SessionCompletionStatus.Completed;
-                case SessionStatus.Terminated:
+                case SessionStatus.TerminatedOnError:
                     return SessionCompletionStatus.Terminated;
                 default:
                     return SessionCompletionStatus.Unknown;

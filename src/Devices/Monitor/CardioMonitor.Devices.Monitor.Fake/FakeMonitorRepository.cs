@@ -48,7 +48,7 @@ namespace CardioMonitor.Devices.Monitor.Fake
                     AverageArterialPressure = 100,
                     DiastolicArterialPressure = 80,
                     HeartRate = 70,
-                    InclinationAngle = 10.5,
+                    InclinationAngle = (float)10.5,
                     RepsirationRate = 40,
                     Spo2 = 40,
                     SystolicArterialPressure = 120
@@ -88,7 +88,7 @@ namespace CardioMonitor.Devices.Monitor.Fake
                     AverageArterialPressure = 100,
                     DiastolicArterialPressure = 80,
                     HeartRate = 70,
-                    InclinationAngle = 10.5,
+                    InclinationAngle = (float)10.5,
                     RepsirationRate = 40,
                     Spo2 = 40,
                     SystolicArterialPressure = 120

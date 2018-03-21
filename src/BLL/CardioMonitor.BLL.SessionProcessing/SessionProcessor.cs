@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices.Bed.Infrastructure;
@@ -55,18 +56,24 @@ namespace CardioMonitor.BLL.SessionProcessing
             _devicesFacade.OnException += OnException;
             _devicesFacade.OnException += HandleOnException;
             _devicesFacade.OnSessionErrorStop += OnSessionErrorStop;
+            _devicesFacade.OnSessionErrorStop += HandleOnSessionErrorStop;
             _devicesFacade.OnCycleCompleted += HandleOnCycleCompleted;
             _devicesFacade.OnElapsedTimeChanged += HandleOnElapsedTimeChanged;
             _devicesFacade.OnRemainingTimeChanged += HandleOnRemainingTimeChanged;
             _devicesFacade.OnSessionCompleted += OnSessionCompleted;
+            _devicesFacade.OnSessionCompleted += HandleOnSessionCompleted;
             _devicesFacade.OnPausedFromDevice += OnPausedFromDevice;
+            _devicesFacade.OnPausedFromDevice += HandleOnPausedFromDevice;
             _devicesFacade.OnResumedFromDevice += OnResumedFromDevice;
+            _devicesFacade.OnResumedFromDevice += HandleOnResumedFromDevice;
             _devicesFacade.OnEmeregencyStoppedFromDevice += OnEmeregencyStoppedFromDevice;
+            _devicesFacade.OnEmeregencyStoppedFromDevice += HandleOnEmeregencyStoppedFromDevice;
             _devicesFacade.OnReversedFromDevice += OnReversedFromDevice;
             _devicesFacade.OnCurrentAngleXRecieved += HandleOnCurrentAngleXRecieved;
             _devicesFacade.OnCommonPatientParamsRecieved += HandleOnCommonPatientParamsRecieved;
             _devicesFacade.OnPatientPressureParamsRecieved += HandleOnPatientPressureParamsRecieved;
             CurrentCycleNumber = 0;
+            SessionStatus = SessionStatus.Unknown;
         }
 
         /// <summary>
@@ -138,6 +145,22 @@ namespace CardioMonitor.BLL.SessionProcessing
         }
         private TimeSpan _remainingTime;
 
+        /// <summary>
+        /// Статус сеанса
+        /// </summary>
+        public SessionStatus SessionStatus
+        {
+            get => _sessionStatus;
+            set
+            {
+                _sessionStatus = value;
+                RisePropertyChanged(nameof(SessionStatus));
+            }
+        }
+
+        private SessionStatus _sessionStatus;
+
+
         #region Events
 
         public event EventHandler<SessionProcessingException> OnException;
@@ -177,21 +200,25 @@ namespace CardioMonitor.BLL.SessionProcessing
         
         public Task StartAsync()
         {
+            SessionStatus = SessionStatus.InProgress;
             return _devicesFacade.StartAsync();
         }
 
         public Task EmeregencyStopAsync()
         {
+            SessionStatus = SessionStatus.EmergencyStopped;
             return _devicesFacade.EmergencyStopAsync();
         }
 
         public Task PauseAsync()
         {
+            SessionStatus = SessionStatus.Suspended;
             return _devicesFacade.PauseAsync();
         }
 
         public Task ResumeAsync()
         {
+            SessionStatus = SessionStatus.InProgress;
             return _devicesFacade.StartAsync();
         }
 
@@ -215,13 +242,18 @@ namespace CardioMonitor.BLL.SessionProcessing
             _devicesFacade.OnException -= OnException;
             _devicesFacade.OnException -= HandleOnException;
             _devicesFacade.OnSessionErrorStop -= OnSessionErrorStop;
+            _devicesFacade.OnSessionErrorStop -= HandleOnSessionErrorStop;
             _devicesFacade.OnCycleCompleted -= HandleOnCycleCompleted;
             _devicesFacade.OnElapsedTimeChanged -= HandleOnElapsedTimeChanged;
             _devicesFacade.OnRemainingTimeChanged -= HandleOnRemainingTimeChanged;
             _devicesFacade.OnSessionCompleted -= OnSessionCompleted;
+            _devicesFacade.OnSessionCompleted -= HandleOnSessionCompleted;
             _devicesFacade.OnPausedFromDevice -= OnPausedFromDevice;
+            _devicesFacade.OnPausedFromDevice -= HandleOnPausedFromDevice;
             _devicesFacade.OnResumedFromDevice -= OnResumedFromDevice;
+            _devicesFacade.OnResumedFromDevice -= HandleOnResumedFromDevice;
             _devicesFacade.OnEmeregencyStoppedFromDevice -= OnEmeregencyStoppedFromDevice;
+            _devicesFacade.OnEmeregencyStoppedFromDevice -= HandleOnEmeregencyStoppedFromDevice;
             _devicesFacade.OnReversedFromDevice -= OnReversedFromDevice;
             _devicesFacade.OnCurrentAngleXRecieved -= HandleOnCurrentAngleXRecieved;
             _devicesFacade.OnCommonPatientParamsRecieved -= HandleOnCommonPatientParamsRecieved;
@@ -334,7 +366,31 @@ namespace CardioMonitor.BLL.SessionProcessing
         {
             ElapsedTime = timeSpan;
         }
+        
+        private void HandleOnPausedFromDevice(object sender, EventArgs eventArgs)
+        {
+            SessionStatus = SessionStatus.Suspended;
+        }
 
+        private void HandleOnEmeregencyStoppedFromDevice(object sender, EventArgs eventArgs)
+        {
+            SessionStatus = SessionStatus.EmergencyStopped;
+        }
+
+        private void HandleOnResumedFromDevice(object sender, EventArgs eventArgs)
+        {
+            SessionStatus = SessionStatus.InProgress;
+        }
+
+        private void HandleOnSessionCompleted(object sender, EventArgs eventArgs)
+        {
+            SessionStatus = SessionStatus.Completed;
+        }
+
+        private void HandleOnSessionErrorStop(object sender, Exception exception)
+        {
+            SessionStatus = SessionStatus.TerminatedOnError;
+        }
         #endregion
     }
 }

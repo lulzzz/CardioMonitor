@@ -18,7 +18,7 @@
         /// <summary>
         /// Угол наклона кровати
         /// </summary>
-        public double InclinationAngle { get; set; }
+        public float InclinationAngle { get; set; }
 
         /// <summary>
         /// Частота сердечных сокращений (ЧСС)
