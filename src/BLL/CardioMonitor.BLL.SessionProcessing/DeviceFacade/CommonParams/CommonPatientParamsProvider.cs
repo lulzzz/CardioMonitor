@@ -4,6 +4,8 @@ using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionRequest;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Monitor.Infrastructure;
@@ -38,6 +40,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             
             PatientCommonParams param = null;
             
+            var sessionInfo = context.TryGetSessionProcessingInfo();
+            var cycleNumber = sessionInfo?.CurrentCycleNumber;
+            var iterationInfo = context.TryGetIterationParams();
+            var iterationNumber = iterationInfo?.CurrentIteration;
+            
             try
             {
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
@@ -52,24 +59,32 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.InversionTableConnectionError,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber,
+                            iterationNumber)));
             }
             catch (TimeoutRejectedException e)
             {
               
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
-                        new SessionProcessingException(SessionProcessingErrorCodes.PatientCommonParamsRequestTimeout,
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.PatientCommonParamsRequestTimeout,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber,
+                            iterationNumber)));
             }
             catch (Exception e)
             {
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
-                        new SessionProcessingException(SessionProcessingErrorCodes.PatientCommonParamsRequestError,
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.PatientCommonParamsRequestError,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber,
+                            iterationNumber)));
 
             }
             finally

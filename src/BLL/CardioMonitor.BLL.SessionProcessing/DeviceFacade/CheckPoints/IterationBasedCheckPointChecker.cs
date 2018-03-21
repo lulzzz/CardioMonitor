@@ -33,6 +33,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
             
             var iterationParams = context.TryGetIterationParams();
             if (iterationParams == null) return context;
+            
+            
+            var cycleNumber = sessionProcessingInfo.CurrentCycleNumber;
+            var iterationNumber = iterationParams.CurrentIteration;
 
             try
             {
@@ -87,7 +91,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.Unknown,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber,
+                            iterationNumber)));
             }
             
             return context;

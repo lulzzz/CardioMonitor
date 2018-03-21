@@ -4,6 +4,8 @@ using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionRequest;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Monitor.Infrastructure;
@@ -39,6 +41,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             if (!(pumpingResult?.WasPumpingCompleted ?? false)) return context;
 
             Devices.Monitor.Infrastructure.PatientPressureParams param = null;
+            
+            var sessionInfo = context.TryGetSessionProcessingInfo();
+            var cycleNumber = sessionInfo?.CurrentCycleNumber;
+            var iterationInfo = context.TryGetIterationParams();
+            var iterationNumber = iterationInfo?.CurrentIteration;
            
             try
             {
@@ -55,7 +62,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.MonitorConnectionError,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber,
+                            iterationNumber)));
             }
             catch (TimeoutRejectedException e)
             {
@@ -64,7 +73,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PatientPressureParamsRequestTimeout,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber,
+                            iterationNumber)));
             }
             catch (Exception e)
             {
@@ -73,7 +84,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PatientPressureParamsRequestError,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber,
+                            iterationNumber)));
             }
             finally
             {

@@ -14,6 +14,13 @@ using PatientPressureParams = CardioMonitor.BLL.SessionProcessing.DeviceFacade.P
 
 namespace CardioMonitor.BLL.SessionProcessing
 {
+    /// <summary>
+    /// Класс для обработки сеанаса: данных, команд
+    /// </summary>
+    /// <remarks>
+    /// По факты высокоуровнеая обертка над всем процессом получения данных. Аргегируют данные в удобный для конечного потребителя вид.
+    /// Сделан для того, чтобы потом могли легко портироваться на другой UI, чтобы не было жесткой завязки на WPF
+    /// </remarks>
     public class SessionProcessor :  INotifyPropertyChanged, IDisposable
     {
         private const double Tolerance = 1e-9;
@@ -32,11 +39,11 @@ namespace CardioMonitor.BLL.SessionProcessing
             [NotNull] IMonitorController monitorController,
             [NotNull] IWorkerController workerController)
         {
-            if (startParams == null) throw new ArgumentNullException(nameof(startParams));
             if (bedController == null) throw new ArgumentNullException(nameof(bedController));
             if (monitorController == null) throw new ArgumentNullException(nameof(monitorController));
             if (workerController == null) throw new ArgumentNullException(nameof(workerController));
-            _startParams = startParams;
+            
+            _startParams = startParams ?? throw new ArgumentNullException(nameof(startParams));
 
             _devicesFacade = new DevicesFacade(
                 startParams,
@@ -44,22 +51,34 @@ namespace CardioMonitor.BLL.SessionProcessing
                 monitorController,
                 workerController);
             
-            CycleData = new ObservableCollection<CheckPointParams>[startParams.CycleCount];
+            PatientParamsPerCycles = new ObservableCollection<CheckPointParams>[startParams.CycleCount];
             _devicesFacade.OnException += OnException;
-            _devicesFacade.OnCycleCompleted += OnCycleCompletedHandler;
+            _devicesFacade.OnException += HandleOnException;
+            _devicesFacade.OnCycleCompleted += HandleOnCycleCompleted;
+            _devicesFacade.OnElapsedTimeChanged += HandleOnElapsedTimeChanged;
+            _devicesFacade.OnRemainingTimeChanged += HandleOnRemainingTimeChanged;
             _devicesFacade.OnSessionCompleted += OnSessionCompleted;
             _devicesFacade.OnPausedFromDevice += OnPausedFromDevice;
             _devicesFacade.OnResumedFromDevice += OnResumedFromDevice;
             _devicesFacade.OnEmeregencyStoppedFromDevice += OnEmeregencyStoppedFromDevice;
             _devicesFacade.OnReversedFromDevice += OnReversedFromDevice;
-            _devicesFacade.OnCurrentAngleXRecieved += DevicesFacadeOnOnCurrentAngleXRecieved;
-            _devicesFacade.OnCommonPatientParamsRecieved += DevicesFacadeOnOnCommonPatientParamsRecieved;
-            _devicesFacade.OnPatientPressureParamsRecieved += DevicesFacadeOnOnPatientPressureParamsRecieved;
+            _devicesFacade.OnCurrentAngleXRecieved += HandleOnCurrentAngleXRecieved;
+            _devicesFacade.OnCommonPatientParamsRecieved += HandleOnCommonPatientParamsRecieved;
+            _devicesFacade.OnPatientPressureParamsRecieved += HandleOnPatientPressureParamsRecieved;
             CurrentCycleNumber = 0;
         }
-    
-        private IReadOnlyList<ObservableCollection<CheckPointParams>> CycleData { get; }
 
+        /// <summary>
+        /// Показатели пациента с разделением по циклам
+        /// </summary>
+        /// <remarks>
+        /// Обновляются в порядке поступления данных от устройства
+        /// </remarks>
+        public IReadOnlyList<ObservableCollection<CheckPointParams>> PatientParamsPerCycles { get; }
+
+        /// <summary>
+        /// Текущий номер цикла
+        /// </summary>
         public short CurrentCycleNumber
         {
             get => _currentCycleNumber;
@@ -75,8 +94,9 @@ namespace CardioMonitor.BLL.SessionProcessing
         }
         private short _currentCycleNumber;
 
-        private float _currentXAngle;
-
+        /// <summary>
+        /// Текущий угол наклона кровати по оси X
+        /// </summary>
         public float CurrentXAngle
         {
             get => _currentXAngle;
@@ -90,12 +110,37 @@ namespace CardioMonitor.BLL.SessionProcessing
                 }
             }
         }
+        private float _currentXAngle;
+
+        /// <summary>
+        /// Прошедшее время с начала сеанса
+        /// </summary>
+        public TimeSpan ElapsedTime
+        {
+            get => _elapsedTime;
+            set { _elapsedTime = value;
+                RisePropertyChanged(nameof(ElapsedTime)); }
+        }
+        private TimeSpan _elapsedTime;
+
+        /// <summary>
+        /// Оставшееся время до конца сеанса
+        /// </summary>
+        public TimeSpan RemainingTime
+        {
+            get => _remainingTime;
+            set
+            {
+                _remainingTime = value; 
+                RisePropertyChanged(nameof(RemainingTime));
+            }
+        }
+        private TimeSpan _remainingTime;
 
         #region Events
 
         public event EventHandler<SessionProcessingException> OnException;
        
-        
         public event EventHandler OnSessionCompleted;
         
         public event EventHandler OnPausedFromDevice;
@@ -165,27 +210,65 @@ namespace CardioMonitor.BLL.SessionProcessing
         public void Dispose()
         {
             _devicesFacade.OnException -= OnException;
-            _devicesFacade.OnCycleCompleted -= OnCycleCompletedHandler;
+            _devicesFacade.OnException -= HandleOnException;
+            _devicesFacade.OnCycleCompleted -= HandleOnCycleCompleted;
+            _devicesFacade.OnElapsedTimeChanged -= HandleOnElapsedTimeChanged;
+            _devicesFacade.OnRemainingTimeChanged -= HandleOnRemainingTimeChanged;
             _devicesFacade.OnSessionCompleted -= OnSessionCompleted;
             _devicesFacade.OnPausedFromDevice -= OnPausedFromDevice;
             _devicesFacade.OnResumedFromDevice -= OnResumedFromDevice;
             _devicesFacade.OnEmeregencyStoppedFromDevice -= OnEmeregencyStoppedFromDevice;
             _devicesFacade.OnReversedFromDevice -= OnReversedFromDevice;
-            _devicesFacade.OnCurrentAngleXRecieved -= DevicesFacadeOnOnCurrentAngleXRecieved;
-            _devicesFacade.OnCommonPatientParamsRecieved -= DevicesFacadeOnOnCommonPatientParamsRecieved;
-            _devicesFacade.OnPatientPressureParamsRecieved -= DevicesFacadeOnOnPatientPressureParamsRecieved;
+            _devicesFacade.OnCurrentAngleXRecieved -= HandleOnCurrentAngleXRecieved;
+            _devicesFacade.OnCommonPatientParamsRecieved -= HandleOnCommonPatientParamsRecieved;
+            _devicesFacade.OnPatientPressureParamsRecieved -= HandleOnPatientPressureParamsRecieved;
         }
 
         #endregion
 
-        private void OnCycleCompletedHandler(object sender, short completedCycleNumber)
+        #region private methods
+
+        private void HandleOnCycleCompleted(object sender, short completedCycleNumber)
         {
             CurrentCycleNumber = completedCycleNumber == _startParams.CycleCount
                 ? completedCycleNumber
                 : (short)(completedCycleNumber + 1);
         }
-        
-        private void DevicesFacadeOnOnPatientPressureParamsRecieved(
+
+        private void HandleOnException(object sender, SessionProcessingException exception)
+        {
+            switch (exception.ErrorCode)
+            {
+                case SessionProcessingErrorCodes.PatientCommonParamsRequestError:
+                case SessionProcessingErrorCodes.PatientCommonParamsRequestTimeout:
+                {
+                    var cycleNumber = exception.CycleNumber;
+                    var iterationNumber = exception.IterationNumber;
+                    if (iterationNumber == null || cycleNumber == null) return;
+
+                    var checkPoint = PatientParamsPerCycles[cycleNumber.Value]
+                        .FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
+                    if (checkPoint == null) return;
+                    checkPoint.HandleErrorOnCommoParamsProcessing();
+                    break;
+                }
+                case SessionProcessingErrorCodes.PatientPressureParamsRequestError:
+                case SessionProcessingErrorCodes.PatientPressureParamsRequestTimeout:
+                {
+                    var cycleNumber = exception.CycleNumber;
+                    var iterationNumber = exception.IterationNumber;
+                    if (iterationNumber == null || cycleNumber == null) return;
+
+                    var checkPoint = PatientParamsPerCycles[cycleNumber.Value]
+                        .FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
+                    if (checkPoint == null) return;
+                    checkPoint.HandleErrorOnPressureParamsProcessing();
+                    break;
+                }
+            }
+        }
+
+        private void HandleOnPatientPressureParamsRecieved(
             object sender,
             PatientPressureParams patientPressureParams)
         {
@@ -193,19 +276,23 @@ namespace CardioMonitor.BLL.SessionProcessing
             {
                 var cycleNumber = patientPressureParams.CycleNumber;
                 var iterationNumber = patientPressureParams.IterationNumber;
-
-                var checkPoint = CycleData[cycleNumber].FirstOrDefault(x => x.IterationNumber == iterationNumber);
+                var inclinationAngle = patientPressureParams.InclinationAngle;
+                
+                var checkPoint = PatientParamsPerCycles[cycleNumber].FirstOrDefault(x => x.IterationNumber == iterationNumber);
                 if (checkPoint == null)
                 {
-                    checkPoint = new CheckPointParams(cycleNumber, iterationNumber);
-                    CycleData[cycleNumber].Add(checkPoint);
+                    checkPoint = new CheckPointParams(
+                        cycleNumber, 
+                        iterationNumber,
+                        inclinationAngle);
+                    PatientParamsPerCycles[cycleNumber].Add(checkPoint);
                 }
 
-                checkPoint.SetPressureParams();
+                checkPoint.SetPressureParams(patientPressureParams);
             }
         }
 
-        private void DevicesFacadeOnOnCommonPatientParamsRecieved(
+        private void HandleOnCommonPatientParamsRecieved(
             object sender, 
             CommonPatientParams commonPatientParams)
         {
@@ -214,73 +301,36 @@ namespace CardioMonitor.BLL.SessionProcessing
                 var cycleNumber = commonPatientParams.CycleNumber;
                 var iterationNumber = commonPatientParams.IterationNumber;
 
-                var checkPoint = CycleData[cycleNumber].FirstOrDefault(x => x.IterationNumber == iterationNumber);
+                var inclinationAngle = commonPatientParams.InclinationAngle;
+                
+                var checkPoint = PatientParamsPerCycles[cycleNumber].FirstOrDefault(x => x.IterationNumber == iterationNumber);
                 if (checkPoint == null)
                 {
-                    checkPoint = new CheckPointParams(cycleNumber, iterationNumber);
-                    CycleData[cycleNumber].Add(checkPoint);
+                    checkPoint = new CheckPointParams(
+                        cycleNumber, 
+                        iterationNumber, 
+                        inclinationAngle);
+                    PatientParamsPerCycles[cycleNumber].Add(checkPoint);
                 }
-                checkPoint.SetCommonParams();
+                checkPoint.SetCommonParams(commonPatientParams);
             }
         }
 
-        private void DevicesFacadeOnOnCurrentAngleXRecieved(object sender, float value)
+        private void HandleOnCurrentAngleXRecieved(object sender, float value)
         {
             CurrentXAngle = value;
         }
-    }
-
-    public class CheckPointParams
-    {
-        public short CycleNumber { get; }
         
-        public short IterationNumber { get; }
-        
-        public bool IsAnyValueObtained { get; private set; }
-
-        public CheckPointParams(short cycleNumber, short iterationNumber)
+        private void HandleOnRemainingTimeChanged(object sender, TimeSpan timeSpan)
         {
-            CycleNumber = cycleNumber;
-            IterationNumber = iterationNumber;
+            RemainingTime = timeSpan;
         }
 
-        public void SetCommonParams()
+        private void HandleOnElapsedTimeChanged(object sender, TimeSpan timeSpan)
         {
-            IsAnyValueObtained = true;
+            ElapsedTime = timeSpan;
         }
 
-        public void SetPressureParams()
-        {
-            IsAnyValueObtained = true;
-        }
-    }
-
-    public class DeviceValue<T>
-    {
-        public bool IsValueObtained { get; }
-        
-        public bool IsErrorOccured { get; }
-        
-        public T Value { get; set; }
-
-        public DeviceValue()
-        {
-            IsValueObtained = false;
-            IsErrorOccured = false;
-            Value = default(T);
-        }
-        
-        public DeviceValue(T value)
-        {
-            Value = value;
-            IsValueObtained = true;
-            IsErrorOccured = false;
-        }
-
-        public DeviceValue(bool isValueObtained, bool isErrorOccured)
-        {
-            IsValueObtained = isValueObtained;
-            IsErrorOccured = isErrorOccured;
-        }
+        #endregion
     }
 }

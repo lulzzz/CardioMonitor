@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
@@ -27,6 +29,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
+            var sessionInfo = context.TryGetSessionProcessingInfo();
+            var cycleNumber = sessionInfo?.CurrentCycleNumber;
+            var iterationInfo = context.TryGetIterationParams();
+            var iterationNumber = iterationInfo?.CurrentIteration;
+            
             try
             {
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
@@ -44,19 +51,31 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.InversionTableConnectionError,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber,
+                            iterationNumber)));
             }
             catch (TimeoutRejectedException e)
             {
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
-                        new SessionProcessingException(SessionProcessingErrorCodes.UpdateAngleError, e.Message, e)));
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.UpdateAngleError, 
+                            e.Message, 
+                            e,
+                            cycleNumber,
+                            iterationNumber)));
             }
             catch (Exception e)
             {
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
-                        new SessionProcessingException(SessionProcessingErrorCodes.UpdateAngleError, e.Message, e)));
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.UpdateAngleError, 
+                            e.Message, 
+                            e,
+                            cycleNumber,
+                            iterationNumber)));
             }
            
             return context;

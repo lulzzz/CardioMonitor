@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
@@ -26,6 +27,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
 
+            
+            var sessionInfo = context.TryGetSessionProcessingInfo();
+            var cycleNumber = sessionInfo?.CurrentCycleNumber;
+            
             try
             {
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
@@ -62,7 +67,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.InversionTableConnectionError,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber)));
             }
             catch (TimeoutRejectedException e)
             {
@@ -71,7 +77,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.InversionTableProcessingError,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber)));
             }
             catch (Exception e)
             {
@@ -80,7 +87,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.InversionTableProcessingError,
                             e.Message,
-                            e)));
+                            e,
+                            cycleNumber)));
             }
             return context;
         }

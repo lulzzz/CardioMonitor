@@ -5,13 +5,13 @@
         public CommonPatientParams(
             float inclinationAngle,
             short heartRate, 
-            short repsirationRate, 
+            short respirationRate, 
             short spo2,
             short iterationNumber, 
             short cycleNumber)
         {
             HeartRate = heartRate;
-            RepsirationRate = repsirationRate;
+            RespirationRate = respirationRate;
             Spo2 = spo2;
             IterationNumber = iterationNumber;
             CycleNumber = cycleNumber;
@@ -41,7 +41,7 @@
         /// <summary>
         /// Частотат дыхания (ЧД)
         /// </summary>
-        public short RepsirationRate { get;  }
+        public short RespirationRate { get;  }
 
         /// <summary>
         /// SPO2
