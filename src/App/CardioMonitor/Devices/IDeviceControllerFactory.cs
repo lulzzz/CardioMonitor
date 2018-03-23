@@ -1,4 +1,5 @@
-﻿using CardioMonitor.Devices.Bed.Infrastructure;
+﻿using System;
+using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 
 namespace CardioMonitor.Devices
@@ -18,6 +19,18 @@ namespace CardioMonitor.Devices
         /// <returns></returns>
         IBedController CreateBedController();
 
+        IBedControllerInitParams CreateBedControllerInitParams(float maxAngleX, short cyclesCount, float movementFrequency);
+
         IMonitorController CreateMonitorController();
+        
+        IMonitorControllerInitParams CreateMonitorControllerInitParams();
+
+        /// <summary>
+        /// Возвращает время, через которое будет осуществляться попытка переподключения к устройству
+        /// </summary>
+        /// <remarks>
+        /// Если null, то переподключения не будет
+        /// </remarks>
+        TimeSpan? GetDeviceReconnectionTimeout();
     }
 }

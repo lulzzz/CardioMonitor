@@ -25,9 +25,7 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
             bedInitParams.Setup(x => x.Timeout).Returns(TimeSpan.FromSeconds(30));
             _startParams = 
                 new SessionParams(
-                    30,
                     2,
-                    30,
                     TimeSpan.FromMilliseconds(500),
                     bedInitParams.Object,
                     monitorInitParams.Object,

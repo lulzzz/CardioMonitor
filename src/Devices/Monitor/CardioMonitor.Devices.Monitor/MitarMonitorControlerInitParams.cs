@@ -19,6 +19,7 @@ namespace CardioMonitor.Devices.Monitor
             Timeout = timeout;
             MonitorBroadcastUdpPort = monitorBroadcastUdpPort;
             MonitorTcpPort = monitorTcpPort;
+            //todo нужно еще задавать IP
         }
 
         /// <summary>

@@ -185,6 +185,7 @@
     <Compile Include="Ui\Communication\TreatmentEventArgs.cs" />
     <Compile Include="Ui\ViewModel\MainWindowViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionCycleViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionViewModel.cs" />
     <Compile Include="Ui\View\Patients\PatientsView.xaml.cs">
       <DependentUpon>PatientsView.xaml</DependentUpon>
     </Compile>
@@ -207,7 +208,7 @@
     <Compile Include="Ui\View\Sessions\SessionDataView.xaml.cs">
       <DependentUpon>SessionDataView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Ui\ViewModel\Sessions\SessionViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\OldSessionViewModel.cs" />
     <Compile Include="Ui\ViewModel\Treatments\TreatmentDataViewModel.cs" />
     <Compile Include="Statistics\TreatmentStatisticBuilder.cs" />
     <Compile Include="Ui\View\Treatments\TreatmentsView.xaml.cs">

@@ -8,7 +8,7 @@
         /// <summary>
         /// Неизвестно
         /// </summary>
-        Unknown,
+        NotStarted,
         /// <summary>
         /// Заврешен
         /// </summary>

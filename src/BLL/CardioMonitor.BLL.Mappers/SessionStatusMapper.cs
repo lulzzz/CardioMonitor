@@ -14,7 +14,7 @@ namespace CardioMonitor.BLL.Mappers
                 case SessionCompletionStatus.Terminated:
                     return SessionStatus.TerminatedOnError;
                 default:
-                    return SessionStatus.Unknown;
+                    return SessionStatus.NotStarted;
             }
         }
 

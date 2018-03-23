@@ -36,7 +36,7 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         public Session()
         {
             DateTime = new DateTime();
-            Status = SessionStatus.Unknown;
+            Status = SessionStatus.NotStarted;
         }
     }
 }

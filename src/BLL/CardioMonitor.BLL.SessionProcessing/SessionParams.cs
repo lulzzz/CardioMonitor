@@ -10,24 +10,14 @@ namespace CardioMonitor.BLL.SessionProcessing
     public class SessionParams
     {
         /// <summary>
-        /// Максимальный угол наклона кровати
-        /// </summary>
-        public float MaxAngle { get; }
-        
-        /// <summary>
         /// Количество повторений (циклов)
         /// </summary>
         public short CycleCount { get; }
         
         /// <summary>
-        /// Частота
-        /// </summary>
-        public float Frequency { get; }
-        
-        /// <summary>
         /// Период обновления данных
         /// </summary>
-        public TimeSpan UpdateDatePeriod { get; }
+        public TimeSpan UpdateDataPeriod { get; }
         
         /// <summary>
         /// Параметры инициализации контроллера кровати
@@ -58,20 +48,16 @@ namespace CardioMonitor.BLL.SessionProcessing
         public TimeSpan? DeviceReconnectionTimeout { get; }
         
         public SessionParams(
-            float maxAngle, 
             short cycleCount, 
-            float frequency, 
-            TimeSpan updateDatePeriod, 
+            TimeSpan updateDataPeriod, 
             IBedControllerInitParams bedControllerInitParams, 
             IMonitorControllerInitParams monitorControllerInitParams,
             short pumpingNumberOfAttemptsOnStartAndFinish, 
             short pumpingNumberOfAttemptsOnProcessing, 
             TimeSpan? deviceReconnectionTimeout = null)
         {
-            MaxAngle = maxAngle;
             CycleCount = cycleCount;
-            Frequency = frequency;
-            UpdateDatePeriod = updateDatePeriod;
+            UpdateDataPeriod = updateDataPeriod;
             BedControllerInitParams = bedControllerInitParams;
             MonitorControllerInitParams = monitorControllerInitParams;
             PumpingNumberOfAttemptsOnStartAndFinish = pumpingNumberOfAttemptsOnStartAndFinish;

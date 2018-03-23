@@ -723,7 +723,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     .ExecuteCommandAsync(BedControlCommand.Start)
                     .ConfigureAwait(false);
                 // запускаем обработку
-                _cycleProcessingSynchronizer.Init(_startParams.UpdateDatePeriod);
+                _cycleProcessingSynchronizer.Init(_startParams.UpdateDataPeriod);
                 _cycleProcessingSynchronizer.Start();
                 _isStandartProcessingInProgress = true;
             }

@@ -18,7 +18,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// <summary>
         /// Количество циклов (повторений)
         /// </summary>
-        int CyclesCount { get; }
+        short CyclesCount { get; }
         
         /// <summary>
         /// Частота движения

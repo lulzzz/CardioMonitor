@@ -138,7 +138,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public SessionModel()
         {
             DateTime = new DateTime();
-            Status = SessionStatus.Unknown;
+            Status = SessionStatus.NotStarted;
             Cycles = new ObservableCollection<SessionCycleViewModel>();
         }
     }

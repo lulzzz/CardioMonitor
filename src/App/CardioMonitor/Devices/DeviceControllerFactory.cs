@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Net;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Bed.UDP;
+using CardioMonitor.Devices.Monitor;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Properties;
@@ -35,10 +37,8 @@ namespace CardioMonitor.Devices
         /// <returns></returns>
         public IBedController CreateBedController()
         {
-            IDeviceController controller;
-            _controllers.TryGetValue(typeof(IBedController), out controller);
-            var badController = controller as IBedController;
-            if (badController == null)
+            _controllers.TryGetValue(typeof(IBedController), out var controller);
+            if (!(controller is IBedController badController))
             {
                 badController = _CreateBedController();
                 if (!_controllers.TryAdd(typeof(IBedController), badController))
@@ -50,6 +50,17 @@ namespace CardioMonitor.Devices
             return badController;
         }
 
+        public IBedControllerInitParams CreateBedControllerInitParams(float maxAngleX, short cyclesCount, float movementFrequency)
+        {
+            return new BedUdpControllerInitParams(new IPEndPoint(new IPAddress(1),1 ),
+                //todo fix this
+                TimeSpan.FromMilliseconds(500),
+                TimeSpan.FromSeconds(2),
+                maxAngleX,
+                cyclesCount, 
+                movementFrequency);
+        }
+
 
         private IBedController _CreateBedController()
         {
@@ -58,10 +69,8 @@ namespace CardioMonitor.Devices
         
         public IMonitorController CreateMonitorController()
         {
-            IDeviceController controller;
-            _controllers.TryGetValue(typeof(IMonitorController), out controller);
-            var badController = controller as IMonitorController;
-            if (badController == null)
+            _controllers.TryGetValue(typeof(IMonitorController), out var controller);
+            if (!(controller is IMonitorController badController))
             {
                 badController = _CreateMonitorController();
                 if (!_controllers.TryAdd(typeof(IMonitorController), badController))
@@ -72,6 +81,21 @@ namespace CardioMonitor.Devices
 
             return badController;
         }
+
+        public IMonitorControllerInitParams CreateMonitorControllerInitParams()
+        {
+            return new MitarMonitorControlerInitParams(
+                TimeSpan.FromMilliseconds(500),
+                TimeSpan.FromSeconds(2),
+                20,
+                20);
+        }
+
+        public TimeSpan? GetDeviceReconnectionTimeout()
+        {
+            throw new NotImplementedException();
+        }
+
         private IMonitorController _CreateMonitorController()
         {
             //todo fix
