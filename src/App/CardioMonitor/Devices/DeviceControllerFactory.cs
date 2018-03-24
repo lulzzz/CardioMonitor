@@ -18,17 +18,13 @@ namespace CardioMonitor.Devices
     /// Создана для того, чтобы иметь единую точку доступа ко всем устройствам, с которым придется работать. 
     /// </remarks>
     public class DeviceControllerFactory : IDeviceControllerFactory
-    {
-        [NotNull]
-        private readonly ConcurrentDictionary<Type, IDeviceController> _controllers;
-        
+    {        
         [NotNull]
         private readonly IWorkerController _workerController;
 
         public DeviceControllerFactory([NotNull] IWorkerController workerController)
         {
             _workerController = workerController ?? throw new ArgumentNullException(nameof(workerController));
-            _controllers = new ConcurrentDictionary<Type, IDeviceController>();
         }
 
         /// <summary>
@@ -37,17 +33,8 @@ namespace CardioMonitor.Devices
         /// <returns></returns>
         public IBedController CreateBedController()
         {
-            _controllers.TryGetValue(typeof(IBedController), out var controller);
-            if (!(controller is IBedController badController))
-            {
-                badController = _CreateBedController();
-                if (!_controllers.TryAdd(typeof(IBedController), badController))
-                {
-                    return null;
-                }
-            }
 
-            return badController;
+            return new BedUDPController(_workerController);
         }
 
         public IBedControllerInitParams CreateBedControllerInitParams(float maxAngleX, short cyclesCount, float movementFrequency)
@@ -61,25 +48,12 @@ namespace CardioMonitor.Devices
                 movementFrequency);
         }
 
-
-        private IBedController _CreateBedController()
-        {
-            return new BedUDPController(_workerController);
-        }
+        
         
         public IMonitorController CreateMonitorController()
         {
-            _controllers.TryGetValue(typeof(IMonitorController), out var controller);
-            if (!(controller is IMonitorController badController))
-            {
-                badController = _CreateMonitorController();
-                if (!_controllers.TryAdd(typeof(IMonitorController), badController))
-                {
-                    return null;
-                }
-            }
-
-            return badController;
+            //todo fix
+            return null; //new OldMonitorController();
         }
 
         public IMonitorControllerInitParams CreateMonitorControllerInitParams()
@@ -93,13 +67,8 @@ namespace CardioMonitor.Devices
 
         public TimeSpan? GetDeviceReconnectionTimeout()
         {
-            throw new NotImplementedException();
-        }
-
-        private IMonitorController _CreateMonitorController()
-        {
-            //todo fix
-            return null; //new OldMonitorController();
-        }
+            //todo get value from settings
+            return null;
+        }        
     }
 }
