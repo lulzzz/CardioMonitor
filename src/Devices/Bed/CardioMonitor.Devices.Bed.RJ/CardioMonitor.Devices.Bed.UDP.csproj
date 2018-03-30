@@ -46,7 +46,6 @@
   <ItemGroup>
     <Compile Include="BedMessage.cs" />
     <Compile Include="BedMessageCRC16.cs" />
-    <Compile Include="BedMessageDeviceNumber.cs" />
     <Compile Include="BedMessageEventType.cs" />
     <Compile Include="BedRegisterValues.cs" />
     <Compile Include="BedUDPController.cs" />

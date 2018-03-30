@@ -14,9 +14,9 @@ namespace CardioMonitor.Devices.Bed.UDP
         private  char _startMessageMarker = '$';
 
         /// <summary>
-        /// устройство, с которого пришла информация 
+        /// ID устройства - на текущий момент всегда == 1
         /// </summary>
-        private BedMessageDeviceNumber _idDevice;  //todo на текущий момент малофункционально, ибо работаем только с одной кроватью
+        private byte _idDevice;  
 
         /// <summary>
         /// тип события: информация читается или записывается
@@ -24,12 +24,12 @@ namespace CardioMonitor.Devices.Bed.UDP
         private BedMessageEventType _eventType;
 
         /// <summary>
-        /// размер пакета данных
+        /// размер пакета данных - в словах (байты * 2)
         /// </summary>
         private byte messageLength;
 
         /// <summary>
-        /// Адрес регистра, из которого/в который производится чтение/запись
+        /// Адрес регистра, из которого/ с которого/ в который производится чтение/запись
         /// </summary>
         private int registerAddress;
 
@@ -93,7 +93,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             {
                 throw new ArgumentException("Формат пакета неверен - не найден маркер начала пакета");
             }
-            _idDevice = (BedMessageDeviceNumber)inputMessage[1];
+            _idDevice = inputMessage[1];
             _eventType = (BedMessageEventType) inputMessage[2];
             messageLength = inputMessage[3];
             registerAddress = inputMessage[4];

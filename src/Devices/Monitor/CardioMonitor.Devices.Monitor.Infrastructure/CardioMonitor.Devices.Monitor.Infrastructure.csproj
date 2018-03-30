@@ -44,10 +44,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ECGIterationNumber.cs" />
     <Compile Include="IMonitorController.cs" />
     <Compile Include="IMonitorControllerInitParams.cs" />
     <Compile Include="PatientCommonParams.cs" />
     <Compile Include="PatientEcgParams.cs" />
+    <Compile Include="PatientParamsIterationNumber.cs" />
     <Compile Include="PatientPressureParams.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

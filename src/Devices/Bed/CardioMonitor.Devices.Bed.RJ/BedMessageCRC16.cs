@@ -15,5 +15,21 @@ namespace CardioMonitor.Devices.Bed.UDP
         {
             return null; //todo заглушка 
         }
+
+        private ushort CRC16_Compute(byte data, ushort seed)
+        {
+            for (byte bitsLeft = 8; bitsLeft > 0; bitsLeft--) {
+               byte temp = (byte)((seed ^ data) & 0x01);
+                if (temp == 0) {
+                    seed >>= 1;
+                } else {
+                    seed ^= 0x4002;
+                    seed >>= 1;
+                    seed |= 0x8000;
+                }
+                data >>= 1;
+            }
+            return seed;  
+        }
     }
 }
