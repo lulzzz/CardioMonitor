@@ -26,7 +26,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/Icons.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.buttons.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Themes/HamburgerMenuTemplate.xaml" />
+
+</ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="btv" />
 
             <!--  This is the template for the menu items.  -->
@@ -170,28 +172,6 @@
 
         </ResourceDictionary>
     </controls:MetroWindow.Resources>
-    
-    <controls:MetroWindow.RightWindowCommands>
-        <controls:WindowCommands>
-            <Button x:Name="SettingsB"
-                    Click="SettingsB_OnClick">
-                <StackPanel Orientation="Horizontal">
-                    <Rectangle Width="15" Height="15"
-                       Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
-                        <Rectangle.OpacityMask>
-                            <VisualBrush Stretch="Fill"
-                             Visual="{DynamicResource appbar_cog}" />
-                        </Rectangle.OpacityMask>
-                    </Rectangle>
-                    <TextBlock Margin="4 0 0 0"
-                               VerticalAlignment="Center"
-                               Text="Настройки" />
-                </StackPanel>
-            </Button>
-        </controls:WindowCommands>
-    </controls:MetroWindow.RightWindowCommands>
-
-  
 
     <controls:HamburgerMenu x:Name="HamburgerMenuControl"
                                     HamburgerWidth="48"
@@ -201,14 +181,15 @@
                                     SelectedIndex="0"
                                     Style="{StaticResource HamburgerMenuCreatorsStyle}"
                                     VerticalScrollBarOnLeftSide="False">
+        <controls:HamburgerMenu.HamburgerMenuHeaderTemplate>
+            <DataTemplate></DataTemplate>
+        </controls:HamburgerMenu.HamburgerMenuHeaderTemplate>
         <!--  Items  -->
         <controls:HamburgerMenu.ItemsSource>
             <controls:HamburgerMenuItemCollection>
-                <controls:HamburgerMenuIconItem Icon="{iconPacks1:Material Kind=Home}" Label="Home">
+                <controls:HamburgerMenuIconItem Icon="{iconPacks1:Material Kind=AccountCircle}" Label="Пациенты">
                 </controls:HamburgerMenuIconItem>
-                <controls:HamburgerMenuIconItem Icon="{iconPacks1:Material Kind=AccountCircle}" Label="Private">
-                </controls:HamburgerMenuIconItem>
-                <controls:HamburgerMenuIconItem Icon="{iconPacks1:Octicons Kind=Briefcase}" Label="Briefcase">
+                <controls:HamburgerMenuIconItem Icon="{iconPacks1:Octicons Kind=Checklist}" Label="Сеансы">
                     <controls:HamburgerMenuIconItem.Tag>
                         <UserControl>
                             <StackPanel Orientation="Vertical">
@@ -227,7 +208,7 @@
         <!--  Options  -->
         <controls:HamburgerMenu.OptionsItemsSource>
             <controls:HamburgerMenuItemCollection>
-                <controls:HamburgerMenuIconItem Icon="{iconPacks1:Material Kind=Settings}" Label="Settings">
+                <controls:HamburgerMenuIconItem Icon="{iconPacks1:Material Kind=Settings}" Label="Настройки">
                     
                 </controls:HamburgerMenuIconItem>
             </controls:HamburgerMenuItemCollection>
