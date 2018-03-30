@@ -23,7 +23,7 @@ namespace CardioMonitor.Ui.View
             _viewModel.SessionViewModel.ThreadAssistant = new ThreadAssistant(this);
             DataContext = _viewModel;
             InitializeComponent();
-            SettingsView.ViewModel = _viewModel.SettingsViewModel;
+            //SettingsView.ViewModel = _viewModel.SettingsViewModel;
 
             /*try
             {
@@ -85,5 +85,9 @@ namespace CardioMonitor.Ui.View
             }
         }
 
+        private void HamburgerMenu_OnItemClick(object sender, ItemClickEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
