@@ -48,6 +48,12 @@ namespace Markeli.Storyboards
 
             if (_registeredPages.ContainsKey(pageId)) throw new InvalidOperationException("Page with same ID have been already registered");
 
+            if (!viewModel.GetInterfaces().Contains(typeof(IStoryboardPageViewModel)))
+                throw new InvalidOperationException($"ViewModel must implement {nameof(IStoryboardPageViewModel)}");
+            
+            if (!view.GetInterfaces().Contains(typeof(IStoryboardPageView)))
+                throw new InvalidOperationException($"View must implement {nameof(IStoryboardPageView)}");
+
             _registeredPages[pageId] = new StoryboardPageInfo(
                 pageId,
                 isStartPage,
