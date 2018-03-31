@@ -33,25 +33,6 @@ ALTER TABLE public."Patients"
   OWNER TO postgres;
 
 
--- Table: public."Treatments"
-
--- DROP TABLE public."Treatments";
-
-CREATE TABLE public."Treatments"
-(
-  "Id" serial  NOT NULL,
-  "PatientId" integer,
-  "StartDate" date,
-  CONSTRAINT "Treatmens_PK" PRIMARY KEY ("Id"),
-  CONSTRAINT "Treatment_Patieint_FK" FOREIGN KEY ("PatientId")
-      REFERENCES public."Patients" ("Id") MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE public."Treatments"
-  OWNER TO postgres;
 
 -- Table: public."Sessions"
 
@@ -62,10 +43,10 @@ CREATE TABLE public."Sessions"
   "Id" serial  NOT NULL,
   "DateTime" date,
   "Status" smallint,
-  "TreatmentId" integer,
+  "PatientId" integer,
   CONSTRAINT "Session_PK" PRIMARY KEY ("Id"),
-  CONSTRAINT "Session_Treatment_FK" FOREIGN KEY ("TreatmentId")
-      REFERENCES public."Treatments" ("Id") MATCH SIMPLE
+  CONSTRAINT "Session_Patient_FK" FOREIGN KEY ("PatientId")
+      REFERENCES public."Patients" ("Id") MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (

@@ -42,20 +42,20 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
         }
 
 
-        public List<Session> GetAll(int treatmentId)
+        public List<Session> GetAll(int patientId)
         {
             using (var uow = _factory.Create())
             {
-                return uow.Sessions.GetSessions(treatmentId)?.Select(x => x.ToDomain()).ToList();
+                return uow.Sessions.GetSessions(patientId)?.Select(x => x.ToDomain()).ToList();
             }
         }
 
 
-        public List<SessionInfo> GetInfos(int treatmentId)
+        public List<SessionInfo> GetInfos(int patientId)
         {
             using (var uow = _factory.Create())
             {
-                return uow.Sessions.GetSessions(treatmentId)?.Select(x => x.ToInfoDomain()).ToList();
+                return uow.Sessions.GetSessions(patientId)?.Select(x => x.ToInfoDomain()).ToList();
             }
         }
 

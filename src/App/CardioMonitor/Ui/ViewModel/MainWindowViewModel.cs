@@ -345,40 +345,7 @@ namespace CardioMonitor.Ui.ViewModel{
                     break;
             }
         }
-
-        public void OpetPatientTreatmentsHanlder(object sender, EventArgs eventArgs)
-        {
-            var cardioEventArgs = eventArgs as CardioEventArgs;
-            if (null == cardioEventArgs) { return;}
-            var patient = PatientsViewModel.SelectedPatient;
-            TreatmentsViewModel.PatientName = new PatientFullName
-            {
-                FirstName = patient.FirstName,
-                LastName = patient.LastName,
-                PatronymicName = patient.PatronymicName
-            };
-            //some magic
-            MainTCSelectedIndex = (int) ViewIndex.TreatmentsView;
-        }
-
-        public void AddEditPatientHanlder(object sender, EventArgs args)
-        {
-            try
-            {
-                var patientEventArgs = args as PatientEventArgs;
-                if (null == patientEventArgs)
-                {
-                    return;
-                }
-                PatientViewModel.Patient = patientEventArgs.Patient;
-                PatientViewModel.AccessMode = patientEventArgs.Mode;
-                MainTCSelectedIndex = (int)ViewIndex.PatientView;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("MainWindowViewModel",ex);
-            }
-        }
+        
 
         public async void StartOrContinueTreatmentSession(object sender, EventArgs args)
         {

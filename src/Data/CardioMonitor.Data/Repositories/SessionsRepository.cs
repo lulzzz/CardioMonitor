@@ -32,9 +32,9 @@ namespace CardioMonitor.Data.Ef.Repositories
                 select session).FirstOrDefault();
         }
 
-        public List<SessionEntity> GetSessions(int treatmentId)
+        public List<SessionEntity> GetSessions(int patientId)
         {
-            return new List<SessionEntity>(_context.Sessions);
+            return new List<SessionEntity>(_context.Sessions.Where(x => x.PatientId == patientId));
         }
 
         public void DeleteSession(int sessionId)

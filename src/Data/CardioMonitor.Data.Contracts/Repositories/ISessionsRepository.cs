@@ -11,6 +11,6 @@ namespace CardioMonitor.Data.Contracts.Repositories
 
         SessionEntity GetSession(int sessionId);
 
-        List<SessionEntity> GetSessions(int treatmentId);
+        List<SessionEntity> GetSessions(int patientId);
     }
 }

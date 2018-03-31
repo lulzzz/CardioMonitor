@@ -7,7 +7,7 @@ namespace Markeli.Storyboards
     {
         public TransitionRequest(
             Guid destinationPageId, 
-            [CanBeNull] IPageContext destinationPageContext)
+            [CanBeNull] IStoryboardPageContext destinationPageContext)
         {
             DestinationPageId = destinationPageId;
             DestinationPageContext = destinationPageContext;
@@ -16,6 +16,6 @@ namespace Markeli.Storyboards
         public Guid DestinationPageId { get; }
 
         [CanBeNull]
-        public IPageContext DestinationPageContext { get;  }
+        public IStoryboardPageContext DestinationPageContext { get;  }
     }
 }

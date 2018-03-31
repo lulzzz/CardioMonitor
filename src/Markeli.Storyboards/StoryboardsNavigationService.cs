@@ -212,7 +212,7 @@ namespace Markeli.Storyboards
                 }
                 else
                 {
-                    page.ViewModel.Open(pageContext);
+                    page.ViewModel.Open(pageContext ?? restoredPageContext);
                     _startPagesOpenningStat[pageInfo.PageUniqueId] = true;
                 }
 

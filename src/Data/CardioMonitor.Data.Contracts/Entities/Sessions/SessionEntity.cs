@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CardioMonitor.Data.Contracts.Entities.Patients;
 using CardioMonitor.Data.Contracts.Entities.Treatments;
 
 namespace CardioMonitor.Data.Contracts.Entities.Sessions
@@ -25,14 +26,14 @@ namespace CardioMonitor.Data.Contracts.Entities.Sessions
         public SessionCompletionStatus Status { get; set; }
         
         /// <summary>
-        /// Идентификатор курса лечения
+        /// Идентификатор пациента
         /// </summary>
-        public int TreatmentId { get; set; }
+        public int PatientId { get; set; }
 
         /// <summary>
-        /// Курс лечения
+        /// Пациент
         /// </summary>
-        public virtual TreatmentEntity TreatmentEntity { get; set; }
+        public virtual PatientEntity PatientEntity { get; set; }
         
         /// <summary>
         /// Циклы сеанса

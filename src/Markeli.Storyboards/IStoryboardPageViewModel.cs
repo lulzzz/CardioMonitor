@@ -9,13 +9,13 @@ namespace Markeli.Storyboards
 
         Guid StoryboardId { get; set; }
 
-        void Open([CanBeNull] IPageContext context);
+        void Open([CanBeNull] IStoryboardPageContext context);
 
         bool CanLeave();
 
         void Leave();
         
-        void Return([CanBeNull] IPageContext context);
+        void Return([CanBeNull] IStoryboardPageContext context);
 
         bool CanClose();
 

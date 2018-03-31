@@ -14,9 +14,9 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         public int Id { get; set; }
 
         /// <summary>
-        /// Идентификатор курса лечения
+        /// Идентификатор паицента
         /// </summary>
-        public int TreatmentId { get; set; }
+        public int PatientId { get; set; }
 
         /// <summary>
         /// Дата и время

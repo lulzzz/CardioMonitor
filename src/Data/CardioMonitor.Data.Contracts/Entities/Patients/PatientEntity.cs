@@ -34,6 +34,6 @@ namespace CardioMonitor.Data.Contracts.Entities.Patients
         /// </summary>
         public DateTime? BirthDate { get; set; }
 
-        public virtual ICollection<TreatmentEntity> Treatments { get; set; }
+        public virtual ICollection<PatientEntity> Patients { get; set; }
     }
 }
