@@ -6,7 +6,6 @@ using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreContracts.Treatment;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
-using CardioMonitor.Ui.Storyboards;
 using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions

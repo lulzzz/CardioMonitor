@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.Ui.Storyboards
+namespace Markeli.Storyboards
 {
     public class TransitionRequest
     {

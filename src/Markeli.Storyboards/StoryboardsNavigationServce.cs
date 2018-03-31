@@ -1,16 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.Ui.Storyboards
+namespace Markeli.Storyboards
 {
     public class StoryboardsNavigationServce : IDisposable
     {
         private IStroryboardPageCreator _pageCreator;
         private readonly Dictionary<InnerStoryboardPageInfo, PageCreationInfo> _registeredPages;
-        private readonly Dictionary<Guid, StoryboardPageView> _cachedPages;
+        private readonly Dictionary<Guid, IStoryboardPageView> _cachedPages;
         private readonly LinkedList<InnerStoryboardPageInfo> _journal;
         private readonly Dictionary<Guid, Storyboard> _storyboards;
         private readonly Dictionary<Guid, IPageContext> _pageContexts;
@@ -26,7 +25,7 @@ namespace CardioMonitor.Ui.Storyboards
         public StoryboardsNavigationServce()
         {
             _registeredPages = new Dictionary<InnerStoryboardPageInfo, PageCreationInfo>();
-            _cachedPages = new Dictionary<Guid, StoryboardPageView>();
+            _cachedPages = new Dictionary<Guid, IStoryboardPageView>();
             _journal = new LinkedList<InnerStoryboardPageInfo>();
             _storyboards = new Dictionary<Guid, Storyboard>();
             _pageContexts = new Dictionary<Guid, IPageContext>();
@@ -92,7 +91,7 @@ namespace CardioMonitor.Ui.Storyboards
         }
 
         [NotNull]
-        private StoryboardPageView CreatePageView([NotNull] InnerStoryboardPageInfo pageInfo)
+        private IStoryboardPageView CreatePageView([NotNull] InnerStoryboardPageInfo pageInfo)
         {
             if (!_registeredPages.ContainsKey(pageInfo))
             {
@@ -117,7 +116,7 @@ namespace CardioMonitor.Ui.Storyboards
         {
             if (transitionRequest == null) throw new ArgumentNullException(nameof(transitionRequest));
 
-            var viewModel = sender as IStoryboardViewModel;
+            var viewModel = sender as IStoryboardPageViewModel;
             if (viewModel == null) throw new InvalidOperationException("Incorrect request of transition");
 
 
@@ -131,7 +130,7 @@ namespace CardioMonitor.Ui.Storyboards
 
         private void HandleViewModelTransitions(object sender, PageTransitionTrigger trigger)
         {
-            var viewModel = sender as IStoryboardViewModel;
+            var viewModel = sender as IStoryboardPageViewModel;
             if (viewModel == null) throw new InvalidOperationException("Incorrect request of transition");
 
             var storyboard = _storyboards.Values.FirstOrDefault(x => x.StoryboardId == viewModel.StoryboardId);
@@ -317,29 +316,4 @@ namespace CardioMonitor.Ui.Storyboards
             public bool IsStartPage { get; set; }
         }
     }
-
-
-    public interface IStroryboardPageCreator
-    {
-        StoryboardPageView CreateView(Type type);
-
-        IStoryboardViewModel CreateViewModel(Type type);
-    }
-
-    public class StoryboardPageView : UIElement
-    {
-        private IStoryboardViewModel _viewModel;
-
-        public IStoryboardViewModel ViewModel
-        {
-            get => _viewModel;
-            set => _viewModel = value;
-        }
-    }
-
-    public interface IPageContext
-    {
-
-    }
-
 }

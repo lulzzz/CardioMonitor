@@ -1,30 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using CardioMonitor.Ui.Base;
+using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.Ui.Storyboards
+namespace Markeli.Storyboards
 {
-    public class Storyboard : Notifier
+    public class Storyboard : INotifyPropertyChanged
     {
 
         private readonly Dictionary<Guid, StoryboardPageInfo> _registeredPages;
         private readonly Dictionary<Guid, List<TransitionInfo>> _transitions;
 
-        public StoryboardPageView ActivePage
+        public IStoryboardPageView ActivePage
         {
             get => _activePage;
             set
             {
                 if (Equals(_activePage, value)) return;
 
-                RisePropertyChanged(nameof(ActivePage));
+                OnPropertyChanged(nameof(ActivePage));
                 _activePage = value; 
 
             }
         }
-        private StoryboardPageView _activePage;
+        private IStoryboardPageView _activePage;
 
 
         public Guid StoryboardId { get; }
@@ -97,6 +98,14 @@ namespace CardioMonitor.Ui.Storyboards
             public Guid DestinationId { get; set; }
 
             public PageTransitionTrigger Trigger { get; set; }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        [NotifyPropertyChangedInvocator]
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

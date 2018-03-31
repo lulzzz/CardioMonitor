@@ -5,7 +5,6 @@ using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Treatment;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
-using CardioMonitor.Ui.Storyboards;
 using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.Ui.ViewModel.Treatments

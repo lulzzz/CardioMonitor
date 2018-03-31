@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.Ui.Storyboards
+﻿namespace Markeli.Storyboards
 {
     public enum PageTransitionTrigger
     {

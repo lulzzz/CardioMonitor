@@ -1,9 +1,9 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.Ui.Storyboards
+namespace Markeli.Storyboards
 {
-    public interface IStoryboardViewModel : IDisposable
+    public interface IStoryboardPageViewModel : IDisposable
     {
         Guid PageId { get; set; }
 

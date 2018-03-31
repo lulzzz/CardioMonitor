@@ -7,7 +7,6 @@ using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
-using CardioMonitor.Ui.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {

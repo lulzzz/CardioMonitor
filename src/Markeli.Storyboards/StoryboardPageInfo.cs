@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CardioMonitor.Ui.Storyboards
+namespace Markeli.Storyboards
 {
     public class StoryboardPageInfo
     {

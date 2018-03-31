@@ -188,18 +188,12 @@
     <Compile Include="Ui\Communication\AccessMode.cs" />
     <Compile Include="Ui\Communication\CardioEventArgs.cs" />
     <Compile Include="Files\FilesManager.cs" />
-    <Compile Include="Ui\Storyboards\IStoryboardViewModel.cs" />
-    <Compile Include="Ui\Storyboards\PageTransitionTrigger.cs" />
-    <Compile Include="Ui\Storyboards\StoryboardPageInfo.cs" />
-    <Compile Include="Ui\Storyboards\StoryboardsNavigationServce.cs" />
-    <Compile Include="Ui\Storyboards\Storyboard.cs" />
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\Base\Notifier.cs" />
     <Compile Include="Ui\Communication\PatientEventArgs.cs" />
     <Compile Include="Ui\Base\SimpleCommand.cs" />
     <Compile Include="Ui\Communication\TreatmentAction.cs" />
     <Compile Include="Ui\Communication\TreatmentEventArgs.cs" />
-    <Compile Include="Ui\Storyboards\TransitionRequest.cs" />
     <Compile Include="Ui\ViewModel\MainWindowViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionCycleViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionViewModel.cs" />
@@ -401,6 +395,10 @@
     <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj">
       <Project>{60422AEB-3748-4B0F-928E-689B1378A5EE}</Project>
       <Name>CardioMonitor.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Markeli.Storyboards\Markeli.Storyboards.csproj">
+      <Project>{cd647696-9249-416a-a116-7a4f86c0542d}</Project>
+      <Name>Markeli.Storyboards</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

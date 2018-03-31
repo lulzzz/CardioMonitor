@@ -18,7 +18,6 @@ using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Resources;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
-using CardioMonitor.Ui.Storyboards;
 using JetBrains.Annotations;
 
 
