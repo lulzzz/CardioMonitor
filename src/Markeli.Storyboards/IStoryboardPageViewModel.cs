@@ -28,5 +28,9 @@ namespace Markeli.Storyboards
         event EventHandler PageBackRequested;
 
         event EventHandler<TransitionRequest> PageTransitionRequested;
+        
+        event EventHandler CanCloseChanged;
+
+        event EventHandler CanLeaveChanged;
     }
 }

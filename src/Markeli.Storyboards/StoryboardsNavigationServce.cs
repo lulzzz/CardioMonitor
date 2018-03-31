@@ -22,6 +22,8 @@ namespace Markeli.Storyboards
 
         public event EventHandler<Guid> ActiveStoryboardChanged;
 
+        public event EventHandler CanBackChanged;
+
         public StoryboardsNavigationServce()
         {
             _registeredPages = new Dictionary<InnerStoryboardPageInfo, PageCreationInfo>();
@@ -231,8 +233,15 @@ namespace Markeli.Storyboards
             }
             _activeInnerStoryboardPageInfo = pageInfo;
             _activeStoryboard = storyboard;
+            _activeStoryboard.ActivePage.ViewModel.CanCloseChanged += RiseCanBackChanged;
+            _activeStoryboard.ActivePage.ViewModel.CanLeaveChanged += RiseCanBackChanged;
+            RiseCanBackChanged(this, EventArgs.Empty);
         }
 
+        private void RiseCanBackChanged(object sender, EventArgs args)
+        {
+            CanBackChanged?.Invoke(this, EventArgs.Empty);
+        }
        
         public void GoToStoryboard(Guid storyboardId)
         {
@@ -283,6 +292,8 @@ namespace Markeli.Storyboards
                     viewModel.PageCompleted -= ViewModelOnPageCompleted;
                     viewModel.PageTransitionRequested -= ViewModelOnPageTransitionRequested;
 
+                    viewModel.CanCloseChanged -= RiseCanBackChanged;
+                    viewModel.CanLeaveChanged -= RiseCanBackChanged;
                     viewModel.Close();
                 }
             }
@@ -306,9 +317,7 @@ namespace Markeli.Storyboards
                 var viewModel = previousPage.ViewModel;
                 if (!viewModel.CanClose()) return false;
             }
-
-
-            //todo add support of changing CanGoBack
+            
             return true;
         }
         
