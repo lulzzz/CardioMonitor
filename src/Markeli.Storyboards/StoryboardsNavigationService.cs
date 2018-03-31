@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace Markeli.Storyboards
 {
-    public class StoryboardsNavigationServce : IDisposable
+    public class StoryboardsNavigationService : IDisposable
     {
         private readonly Dictionary<InnerStoryboardPageInfo, PageCreationInfo> _registeredPages;
         private readonly Dictionary<Guid, IStoryboardPageView> _cachedPages;
@@ -24,7 +24,7 @@ namespace Markeli.Storyboards
 
         public event EventHandler CanBackChanged;
 
-        public StoryboardsNavigationServce()
+        public StoryboardsNavigationService()
         {
             _registeredPages = new Dictionary<InnerStoryboardPageInfo, PageCreationInfo>();
             _cachedPages = new Dictionary<Guid, IStoryboardPageView>();
@@ -77,7 +77,7 @@ namespace Markeli.Storyboards
             _registeredPages[pageInstanceInfo] = creationInfo;
         }
 
-        public void CreateStartPages()
+        public void CreateStartPages(Dictionary<Guid, IPageContext> startPageContexts = null)
         {
             if (_isStartPagesCreated) throw new InvalidOperationException("Start pages have been alread created");
 
@@ -90,6 +90,9 @@ namespace Markeli.Storyboards
                 var view = CreatePageView(startPageInfo);
                 storyboard.Value.ActivePage = view;
                 _startPagesOpenningStat[startPageInfo.PageUniqueId] = false;
+                IPageContext context = null;
+                startPageContexts?.TryGetValue(startPageInfo.PageUniqueId, out context);
+                _pageContexts[startPageInfo.PageUniqueId] = context;
             }
 
             _isStartPagesCreated = true;
@@ -194,8 +197,7 @@ namespace Markeli.Storyboards
 
                 viewModel.Leave();
             }
-
-            //todo support types
+            
             if (_cachedPages.ContainsKey(pageInfo.PageUniqueId))
             {
                 var page = _cachedPages[pageInfo.PageUniqueId];
@@ -324,7 +326,11 @@ namespace Markeli.Storyboards
 
         public void Dispose()
         {
-            //todo
+            foreach (var page in _cachedPages)
+            {
+                var viewModel = page.Value?.ViewModel;
+                viewModel?.Dispose();
+            }
         }
 
         //todo add can close app support
