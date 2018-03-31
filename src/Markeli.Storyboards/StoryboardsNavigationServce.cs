@@ -7,7 +7,6 @@ namespace Markeli.Storyboards
 {
     public class StoryboardsNavigationServce : IDisposable
     {
-        private IStroryboardPageCreator _pageCreator;
         private readonly Dictionary<InnerStoryboardPageInfo, PageCreationInfo> _registeredPages;
         private readonly Dictionary<Guid, IStoryboardPageView> _cachedPages;
         private readonly LinkedList<InnerStoryboardPageInfo> _journal;
@@ -15,12 +14,13 @@ namespace Markeli.Storyboards
         private readonly Dictionary<Guid, IPageContext> _pageContexts;
         private bool _isStartPagesCreated;
 
+        private readonly Dictionary<Guid, bool> _startPagesOpenningStat;
         
         private Storyboard _activeStoryboard;
-
         private InnerStoryboardPageInfo _activeInnerStoryboardPageInfo;
+        private IStroryboardPageCreator _pageCreator;
 
-        public event EventHandler<Guid> ActiveStoryboardChanged; 
+        public event EventHandler<Guid> ActiveStoryboardChanged;
 
         public StoryboardsNavigationServce()
         {
@@ -30,6 +30,8 @@ namespace Markeli.Storyboards
             _storyboards = new Dictionary<Guid, Storyboard>();
             _pageContexts = new Dictionary<Guid, IPageContext>();
             _isStartPagesCreated = false;
+            _pageCreator = new DefaultStoryboardCreator();
+            _startPagesOpenningStat = new Dictionary<Guid, bool>();
         }
 
         public void SetStoryboardPageCreator([NotNull] IStroryboardPageCreator pageCreator)
@@ -85,6 +87,7 @@ namespace Markeli.Storyboards
                 
                 var view = CreatePageView(startPageInfo);
                 storyboard.Value.ActivePage = view;
+                _startPagesOpenningStat[startPageInfo.PageUniqueId] = false;
             }
 
             _isStartPagesCreated = true;
@@ -161,12 +164,19 @@ namespace Markeli.Storyboards
                 ? _registeredPages.Keys.FirstOrDefault(x =>
                     x.PageId == pageId && x.StoryboardId == storyBoard.StoryboardId)
                 : _registeredPages.Keys.FirstOrDefault(x => x.PageId == pageId);
-            if (pageInfo == null) throw new InvalidOperationException("Page not found");
+            if (pageInfo == null)
+            {
+                pageInfo = _registeredPages.Keys.FirstOrDefault(x => x.PageId == pageId);
+                if (pageInfo == null)
+                {
+                    throw new InvalidOperationException("Page not found");
+                }
+            }
 
             OpenPage(pageInfo, pageContext);
         }
 
-        private void OpenPage([NotNull] InnerStoryboardPageInfo pageInfo, IPageContext pageContext = null)
+        private void OpenPage([NotNull] InnerStoryboardPageInfo pageInfo, IPageContext pageContext = null, bool addToJournal = true)
         {
             if (!_storyboards.ContainsKey(pageInfo.StoryboardId))
             {
@@ -190,7 +200,18 @@ namespace Markeli.Storyboards
                
                 storyboard.ActivePage = page;
                 _pageContexts.TryGetValue(pageInfo.PageUniqueId, out var restoredPageContext);
-                page.ViewModel.Return(restoredPageContext);
+
+                _startPagesOpenningStat.TryGetValue(pageInfo.PageUniqueId, out var wasPageOpenned);
+                if (wasPageOpenned)
+                {
+                    page.ViewModel.Return(restoredPageContext);
+                }
+                else
+                {
+                    page.ViewModel.Open(pageContext);
+                    _startPagesOpenningStat[pageInfo.PageUniqueId] = true;
+                }
+
             }
             else
             {
@@ -204,7 +225,10 @@ namespace Markeli.Storyboards
                 ActiveStoryboardChanged?.Invoke(this, pageInfo.StoryboardId);
             }
 
-            _journal.AddLast(pageInfo);
+            if (addToJournal)
+            {
+                _journal.AddLast(pageInfo);
+            }
             _activeInnerStoryboardPageInfo = pageInfo;
             _activeStoryboard = storyboard;
         }
@@ -263,7 +287,8 @@ namespace Markeli.Storyboards
                 }
             }
 
-            OpenPage(lastPageFromStoryboard);
+            // already have been added
+            OpenPage(lastPageFromStoryboard, addToJournal: false);
         }
 
         public bool CanGoBack()
