@@ -6,11 +6,12 @@ using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreContracts.Treatment;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
+using CardioMonitor.Ui.Storyboards;
 using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
-    public class SessionsViewModel : Notifier, IViewModel
+    public class SessionsViewModel : Notifier//, IStoryboardViewModel
     {
         private readonly ISessionsService _sessionsService;
         private PatientFullName _patientName;

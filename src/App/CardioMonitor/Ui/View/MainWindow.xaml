@@ -212,7 +212,10 @@
         <!--  Items  -->
         <controls:HamburgerMenu.ItemsSource>
             <controls:HamburgerMenuItemCollection>
-                <controls:HamburgerMenuIconItem Icon="{iconPacks1:Material Kind=AccountCircle}" Label="Пациенты">
+                <controls:HamburgerMenuIconItem 
+                    Icon="{iconPacks1:Material Kind=AccountCircle}" 
+                    Label="Пациенты">
+
                 </controls:HamburgerMenuIconItem>
                 <controls:HamburgerMenuIconItem Icon="{iconPacks1:Octicons Kind=Checklist}" Label="Сеансы">
           

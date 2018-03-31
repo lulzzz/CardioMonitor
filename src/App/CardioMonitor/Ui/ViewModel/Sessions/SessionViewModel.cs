@@ -18,6 +18,7 @@ using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Resources;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
+using CardioMonitor.Ui.Storyboards;
 using JetBrains.Annotations;
 
 
@@ -31,7 +32,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     /// <summary>
     /// ViewModel для сеанса
     /// </summary>
-    public class SessionViewModel : BaseSessionViewModel, IViewModel
+    public class SessionViewModel : BaseSessionViewModel//, IStoryboardViewModel
     {
         #region Поля
 

@@ -7,10 +7,11 @@ using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
+using CardioMonitor.Ui.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
-    public class SessionDataViewModel : Notifier, IViewModel
+    public class SessionDataViewModel : Notifier//, IStoryboardViewModel
     {
         private readonly ILogger _logger;
         private readonly IFilesManager _filesRepository;

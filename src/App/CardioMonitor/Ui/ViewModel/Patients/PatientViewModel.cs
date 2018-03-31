@@ -8,7 +8,7 @@ using CardioMonitor.Ui.Communication;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
 {
-    public class PatientViewModel : Notifier, IViewModel
+    public class PatientViewModel : Notifier//, IStoryboardViewModel
     {
         private readonly ILogger _logger;
         private readonly IPatientsService _patientsService;

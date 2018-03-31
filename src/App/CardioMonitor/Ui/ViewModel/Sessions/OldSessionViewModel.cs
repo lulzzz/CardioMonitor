@@ -24,7 +24,7 @@
 //    /// <summary>
 //    /// ViewModel для сеанса
 //    /// </summary>
-//    public class OldSessionViewModel : Notifier, IViewModel
+//    public class OldSessionViewModel : Notifier, IStoryboardViewModel
 //    {
 //        #region Константы
 //

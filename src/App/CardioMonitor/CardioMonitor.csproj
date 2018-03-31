@@ -147,6 +147,7 @@
       <HintPath>..\..\packages\System.Data.SqlClient.4.3.0\lib\net46\System.Data.SqlClient.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\ControlzEx.3.0.2.4\lib\net45\System.Windows.Interactivity.dll</HintPath>
@@ -187,13 +188,18 @@
     <Compile Include="Ui\Communication\AccessMode.cs" />
     <Compile Include="Ui\Communication\CardioEventArgs.cs" />
     <Compile Include="Files\FilesManager.cs" />
-    <Compile Include="Ui\Base\IViewModel.cs" />
+    <Compile Include="Ui\Storyboards\IStoryboardViewModel.cs" />
+    <Compile Include="Ui\Storyboards\PageTransitionTrigger.cs" />
+    <Compile Include="Ui\Storyboards\StoryboardPageInfo.cs" />
+    <Compile Include="Ui\Storyboards\StoryboardsNavigationServce.cs" />
+    <Compile Include="Ui\Storyboards\Storyboard.cs" />
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\Base\Notifier.cs" />
     <Compile Include="Ui\Communication\PatientEventArgs.cs" />
     <Compile Include="Ui\Base\SimpleCommand.cs" />
     <Compile Include="Ui\Communication\TreatmentAction.cs" />
     <Compile Include="Ui\Communication\TreatmentEventArgs.cs" />
+    <Compile Include="Ui\Storyboards\TransitionRequest.cs" />
     <Compile Include="Ui\ViewModel\MainWindowViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionCycleViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionViewModel.cs" />
