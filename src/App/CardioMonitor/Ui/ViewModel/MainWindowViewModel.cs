@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
-using CardioMonitor.BLL.CoreContracts.Treatment;
 using CardioMonitor.Devices;
 using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
@@ -14,13 +13,11 @@ using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
-using CardioMonitor.Statistics;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
 using CardioMonitor.Ui.ViewModel.Patients;
 using CardioMonitor.Ui.ViewModel.Sessions;
 using CardioMonitor.Ui.ViewModel.Settings;
-using CardioMonitor.Ui.ViewModel.Treatments;
 using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 
@@ -52,7 +49,7 @@ namespace CardioMonitor.Ui.ViewModel{
         private PatientViewModel _patientViewModel;
         private TreatmentsViewModel _treatmentsViewModel;
         private SessionsViewModel _sessionsViewModel;
-        private SessionViewModel _sessionViewModel;
+        private SessionProcessingViewModel _sessionViewModel;
         private SessionDataViewModel _sessionDataViewModel;
         private TreatmentDataViewModel _treatmentDataViewModel;
         private SettingsViewModel _settingsViewModel;
@@ -139,7 +136,7 @@ namespace CardioMonitor.Ui.ViewModel{
             }
         }
 
-        public SessionViewModel SessionViewModel
+        public SessionProcessingViewModel SessionViewModel
         {
             get { return _sessionViewModel; }
             set
@@ -242,7 +239,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 StartSessionEvent = StartSession,
                 ShowResultsEvent = ShowSessionResults
             };
-            SessionViewModel = new SessionViewModel(logger, filesRepository, sessionsService, taskHelper, deviceControllerFactory, workerController);
+            SessionViewModel = new SessionProcessingViewModel(logger, filesRepository, sessionsService, taskHelper, deviceControllerFactory, workerController);
             //SessionViewModel.StartStatusTimer();
             SessionDataViewModel = new SessionDataViewModel(logger, filesRepository);
             
@@ -250,33 +247,7 @@ namespace CardioMonitor.Ui.ViewModel{
             SettingsViewModel = new SettingsViewModel(settings);
         }
 
-        public async void UpdatePatiens()
-        {
-            var message = String.Empty;
-            var a = await MessageHelper.Instance.ShowProgressDialogAsync("Загрузка списка пациентов...")
-                .ConfigureAwait(true);
-            try
-            {
-                var patients = await Task.Factory.StartNew(() => _patientsService.GetAll()).ConfigureAwait(true);
-                PatientsViewModel.Patients = patients != null
-                    ? new ObservableCollection<Patient>(patients)
-                    : new ObservableCollection<Patient>();
-
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            finally
-            {
-                await a.CloseAsync().ConfigureAwait(true);
-            }
-            if (!String.IsNullOrEmpty(message))
-            {
-
-                await MessageHelper.Instance.ShowMessageAsync(message);
-            }
-        }
+       
 
         private void MoveBackwardPatient(object sender, EventArgs args)
         {

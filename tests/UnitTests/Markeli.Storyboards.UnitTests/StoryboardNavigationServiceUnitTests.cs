@@ -118,16 +118,16 @@ namespace Markeli.Storyboards.UnitTests
             service.RegisterStoryboard(_settingsStoryboard);
             service.CreateStartPages();
 
-            service.GoToStoryboard(_patientStoryboard.StoryboardId);
+            service.GoToStoryboardAsync(_patientStoryboard.StoryboardId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
 
-            service.GoToStoryboard(_sessionsStoryboard.StoryboardId);
+            service.GoToStoryboardAsync(_sessionsStoryboard.StoryboardId);
             Assert.Equal(_sessionsStoryboard.StoryboardId, currentStoryboardId);
 
-            service.GoToStoryboard(_settingsStoryboard.StoryboardId);
+            service.GoToStoryboardAsync(_settingsStoryboard.StoryboardId);
             Assert.Equal(_settingsStoryboard.StoryboardId, currentStoryboardId);
 
-            service.GoToStoryboard(_patientStoryboard.StoryboardId);
+            service.GoToStoryboardAsync(_patientStoryboard.StoryboardId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
         }
 
@@ -162,27 +162,27 @@ namespace Markeli.Storyboards.UnitTests
             service.RegisterStoryboard(_settingsStoryboard);
             service.CreateStartPages();
 
-            service.GoToPage(_firstPageId);
+            service.GoToPageAsync(_firstPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _firstPageId);
             
-            service.GoToPage(_foruthPageId);
+            service.GoToPageAsync(_foruthPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _foruthPageId);
             Assert.True(service.CanGoBack());
 
 
-            service.GoToPage(_fifthPageId);
+            service.GoToPageAsync(_fifthPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _fifthPageId);
 
             Assert.True(service.CanGoBack());
-            service.GoBack();
+            service.GoBackAsync();
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _foruthPageId);
 
             Assert.True(service.CanGoBack());
-            service.GoBack();
+            service.GoBackAsync();
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _firstPageId);
 
@@ -221,57 +221,57 @@ namespace Markeli.Storyboards.UnitTests
             service.RegisterStoryboard(_settingsStoryboard);
             service.CreateStartPages();
 
-            service.GoToPage(_firstPageId);
+            service.GoToPageAsync(_firstPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _firstPageId);
 
-            service.GoToPage(_foruthPageId);
+            service.GoToPageAsync(_foruthPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _foruthPageId);
             Assert.True(service.CanGoBack());
 
 
-            service.GoToPage(_secondPageId);
+            service.GoToPageAsync(_secondPageId);
             Assert.Equal(_sessionsStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, _secondPageId);
 
 
-            service.GoToPage(_sixthPageId);
+            service.GoToPageAsync(_sixthPageId);
             Assert.Equal(_sessionsStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, _sixthPageId);
 
-            service.GoToPage(_thirdPageId);
+            service.GoToPageAsync(_thirdPageId);
             Assert.Equal(_settingsStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_settingsStoryboard.ActivePage.ViewModel.PageId, _thirdPageId);
 
             
-            service.GoToPage(_fifthPageId);
+            service.GoToPageAsync(_fifthPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _fifthPageId);
             
             Assert.True(service.CanGoBack());
-            service.GoBack();
+            service.GoBackAsync();
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _foruthPageId);
 
             Assert.True(service.CanGoBack());
-            service.GoBack();
+            service.GoBackAsync();
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _firstPageId);
 
             Assert.True(service.CanGoBack());
-            service.GoBack();
+            service.GoBackAsync();
             Assert.Equal(_settingsStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_settingsStoryboard.ActivePage.ViewModel.PageId, _thirdPageId);
 
 
             Assert.True(service.CanGoBack());
-            service.GoBack();
+            service.GoBackAsync();
             Assert.Equal(_sessionsStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, _sixthPageId);
             
             Assert.True(service.CanGoBack());
-            service.GoBack();
+            service.GoBackAsync();
             Assert.Equal(_sessionsStoryboard.StoryboardId, currentStoryboardId);
             Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, _secondPageId);
 

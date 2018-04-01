@@ -199,7 +199,8 @@
     <Compile Include="Ui\PageIds.cs" />
     <Compile Include="Ui\ViewModel\Patients\PatientPageContext.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionCycleViewModel.cs" />
-    <Compile Include="Ui\ViewModel\Sessions\SessionViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionsPageContext.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionProcessingViewModel.cs" />
     <Compile Include="Ui\View\Patients\PatientsView.xaml.cs">
       <DependentUpon>PatientsView.xaml</DependentUpon>
     </Compile>

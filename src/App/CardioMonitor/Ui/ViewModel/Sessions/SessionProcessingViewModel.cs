@@ -27,11 +27,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     public abstract class BaseSessionViewModel : SessionProcessor
     {
     }
-    
+
     /// <summary>
     /// ViewModel для сеанса
     /// </summary>
-    public class SessionViewModel : BaseSessionViewModel//, IStoryboardViewModel
+    //todo last
+    public class SessionProcessingViewModel : BaseSessionViewModel//, IStoryboardViewModel
     {
         #region Поля
 
@@ -286,7 +287,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// <summary>
         /// ViewModel для сеанса
         /// </summary>
-        public SessionViewModel(
+        public SessionProcessingViewModel(
             ILogger logger,
             IFilesManager filesRepository,
             ISessionsService sessionsService,

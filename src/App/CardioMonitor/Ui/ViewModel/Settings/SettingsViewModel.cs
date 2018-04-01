@@ -1,15 +1,18 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui.Base;
+using Markeli.Storyboards;
+using Task = System.Threading.Tasks.Task;
 
 namespace CardioMonitor.Ui.ViewModel.Settings
 {
-    public class SettingsViewModel : Notifier, IDataErrorInfo
+    public class SettingsViewModel : Notifier, IDataErrorInfo, IStoryboardPageViewModel
     {
         private readonly ICardioSettings _settings;
         private string _sessionsFilesDirectoryPath;
@@ -79,6 +82,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                     _sessionsFilesDirectoryPath = value;
                     RisePropertyChanged(nameof(SessionsFilesDirectoryPath));
                     _isSettingsChanged = true;
+                    CanCloseChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -220,8 +224,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             AppThemes = ThemeManager.AppThemes
                                            .Select(a => new AppAppearanceSettings { Name = a.Name, BorderColorBrush = a.Resources["BlackColorBrush"] as Brush, ColorBrush = a.Resources["WhiteColorBrush"] as Brush })
                                            .ToList();*/
-            InitializeSettings();
-            _isSettingsChanged = false;
+            
         }
 
         private void InitializeSettings()
@@ -336,5 +339,57 @@ namespace CardioMonitor.Ui.ViewModel.Settings
         {
             InitializeSettings();
         }
+
+        public void Dispose()
+        {
+        }
+
+        #region StoryboardPageViewModel
+
+
+        public Guid PageId { get; set; }
+        public Guid StoryboardId { get; set; }
+
+        public Task OpenAsync(IStoryboardPageContext context)
+        {
+            InitializeSettings();
+            _isSettingsChanged = false;
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> CanLeaveAsync()
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task LeaveAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task ReturnAsync(IStoryboardPageContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> CanCloseAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CloseAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public event EventHandler PageCanceled;
+        public event EventHandler PageCompleted;
+        public event EventHandler PageBackRequested;
+        public event EventHandler<TransitionRequest> PageTransitionRequested;
+        public event EventHandler CanCloseChanged;
+        public event EventHandler CanLeaveChanged;
+
+        #endregion
+
     }
 }
