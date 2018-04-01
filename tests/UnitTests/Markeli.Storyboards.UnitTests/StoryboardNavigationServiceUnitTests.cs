@@ -19,6 +19,14 @@ namespace Markeli.Storyboards.UnitTests
         private static readonly Guid SixthPageId = Guid.Parse("ea5a0e35-6a67-4d91-8242-1c5e04b47f4d");
 
 
+        private class TestInvoker : IUiInvoker
+        {
+            public void Invoke(Action action)
+            {
+                action.Invoke();
+            }
+        }
+
         public StoryboardNavigationServiceUnitTests()
         {
             _patientStoryboard = new Storyboard(Guid.Parse("1a5a0e35-1a67-4d91-8242-1c5e04b47f4d"));
@@ -63,6 +71,7 @@ namespace Markeli.Storyboards.UnitTests
         public void RegisterStoryboards_Ok()
         {
             var service = new StoryboardsNavigationService();
+            service.SetUiInvoker(new TestInvoker());
             service.RegisterStoryboard(_patientStoryboard);
             service.RegisterStoryboard(_sessionsStoryboard);
             service.RegisterStoryboard(_settingsStoryboard);
@@ -81,6 +90,7 @@ namespace Markeli.Storyboards.UnitTests
                 .Returns(new TestViewModel());
 
             var service = new StoryboardsNavigationService();
+            service.SetUiInvoker(new TestInvoker());
             service.SetStoryboardPageCreator(pageCreator.Object);
             service.RegisterStoryboard(_patientStoryboard);
             service.RegisterStoryboard(_sessionsStoryboard);
@@ -101,6 +111,7 @@ namespace Markeli.Storyboards.UnitTests
                 .Returns(new TestViewModel());
 
             var service = new StoryboardsNavigationService();
+            service.SetUiInvoker(new TestInvoker());
             var currentStoryboardId = Guid.Empty;
             service.ActiveStoryboardChanged += (sender, guid) => currentStoryboardId = guid;
 
@@ -145,6 +156,7 @@ namespace Markeli.Storyboards.UnitTests
                 .Returns(new TestViewModel());
 
             var service = new StoryboardsNavigationService();
+            service.SetUiInvoker(new TestInvoker());
             var currentStoryboardId = Guid.Empty;
             service.ActiveStoryboardChanged += (sender, guid) => currentStoryboardId = guid;
 
@@ -204,6 +216,7 @@ namespace Markeli.Storyboards.UnitTests
                 .Returns(new TestViewModel());
 
             var service = new StoryboardsNavigationService();
+            service.SetUiInvoker(new TestInvoker());
             var currentStoryboardId = Guid.Empty;
             service.ActiveStoryboardChanged += (sender, guid) => currentStoryboardId = guid;
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using System.Windows;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
@@ -132,7 +132,8 @@ namespace CardioMonitor.Ui.ViewModel{
             TaskHelper taskHelper,
             [NotNull] IWorkerController workerController, 
             [NotNull] StoryboardsNavigationService storyboardsNavigationService,
-            IStoryboardPageCreator pageCreator)
+            IStoryboardPageCreator pageCreator,
+            IUiInvoker invoker)
         {
             if (deviceControllerFactory == null) throw new ArgumentNullException(nameof(deviceControllerFactory));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
@@ -143,8 +144,10 @@ namespace CardioMonitor.Ui.ViewModel{
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
+
             _storyboardsNavigationService = storyboardsNavigationService ?? throw new ArgumentNullException(nameof(storyboardsNavigationService));
             _storyboardsNavigationService.CanBackChanged += RiseCanGoBackChaned;
+            _storyboardsNavigationService.SetUiInvoker(invoker);
 
             PatientsStoryboard = new Storyboard(StoryboardIds.PatientsStoryboardId);
 
@@ -249,6 +252,7 @@ namespace CardioMonitor.Ui.ViewModel{
 
         private async void LoadSession(object sender, EventArgs args)
         {
+            /*
             var loadDialog = new OpenFileDialog {CheckFileExists = true, Filter = Localisation.FileRepository_SeansFileFilter};
             var result = loadDialog.ShowDialog();
             if (result == DialogResult.OK)
@@ -270,7 +274,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 {
                     await MessageHelper.Instance.ShowMessageAsync(message);
                 }
-            }
+            }*/
         }
     }
 

@@ -1,4 +1,5 @@
-﻿using CardioMonitor.BLL.CoreContracts.Patients;
+﻿using System.Windows;
+using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreServices.Patients;
 using CardioMonitor.BLL.CoreServices.Sessions;
@@ -63,9 +64,9 @@ namespace CardioMonitor
             container.Register<SettingsViewModel>(Lifestyle.Transient);
             container.Register<IStoryboardPageCreator, SimpleInjectorPageCreator>(Lifestyle.Transient);
             container.Register<StoryboardsNavigationService>(Lifestyle.Singleton);
+            container.Register<IUiInvoker, WpfUiInvoker>(Lifestyle.Singleton);
 
-           // container.Verify();
-
+            // container.Verify();
             return container;
         }
 

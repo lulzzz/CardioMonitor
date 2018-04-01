@@ -6,6 +6,7 @@ namespace Markeli.Storyboards
 {
     internal class DefaultStoryboardCreator : IStoryboardPageCreator
     {
+        
         public IStoryboardPageView CreateView([NotNull] Type type)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
