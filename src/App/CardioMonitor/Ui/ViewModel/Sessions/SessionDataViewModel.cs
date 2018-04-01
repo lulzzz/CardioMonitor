@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
+using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
-    public class SessionDataViewModel : Notifier//, IStoryboardViewModel
+    //todo view later
+    public class SessionDataViewModel : Notifier, IStoryboardPageViewModel
     {
         private readonly ILogger _logger;
         private readonly IFilesManager _filesRepository;
@@ -18,7 +22,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private Patient _patient;
         private SessionModel _session;
         private ICommand _saveCommand;
-        
+        private readonly ISessionsService _sessionsService;
+        private readonly IPatientsService _patientsService;
+
+        public SessionDataViewModel(SessionModel session)
+        {
+            _session = session;
+        }
+
         public PatientFullName PatientName
         {
             get { return _patientName; }
@@ -143,6 +154,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public async void LoadFromFile()
         {
+            //todo what?
             await MessageHelper.Instance.ShowMessageAsync("Opened!");
         }
 
@@ -152,5 +164,78 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             Session = null;
             Patient = null;
         }
+
+        public void Dispose()
+        {
+            throw new NotImplementedException();
+        }
+
+        private async Task LoadSessionInfoAsync(int sessionId, int patientId)
+        {
+            try
+            {
+
+                var session = await Task.Factory.StartNew(() => _sessionsService.Get(sessionId));
+                Session = new SessionModel { Session = session };
+                var patient = await Task.Factory.StartNew(() =>_patientsService.GetPatient(patientId));
+                Patient = patient;
+            }
+            catch (Exception ex)
+            {
+                await MessageHelper.Instance.ShowMessageAsync(ex.Message);
+            }
+        }
+
+        #region IStoryboardViewModel
+
+
+        public Guid PageId { get; set; }
+        public Guid StoryboardId { get; set; }
+
+        public Task OpenAsync(IStoryboardPageContext context)
+        {
+            if (!(context is SessionDataViewingPageContext pageContext)) throw new ArgumentException("Incorrect type of arguments");
+
+            if (String.IsNullOrEmpty(pageContext.FileFullPath))
+            {
+                Task.Factory.StartNew(
+                    async () => await LoadSessionInfoAsync(pageContext.SessionId, pageContext.PatientId));
+            }
+
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> CanLeaveAsync()
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task LeaveAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task ReturnAsync(IStoryboardPageContext context)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> CanCloseAsync()
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task CloseAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public event Func<object, Task> PageCanceled;
+        public event Func<object, Task> PageCompleted;
+        public event Func<object, Task> PageBackRequested;
+        public event Func<object, TransitionRequest, Task> PageTransitionRequested;
+
+        #endregion
+
     }
 }

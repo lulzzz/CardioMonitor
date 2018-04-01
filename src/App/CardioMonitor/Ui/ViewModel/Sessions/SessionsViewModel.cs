@@ -159,7 +159,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         PageIds.SessionDataViewingPageId,
                         new SessionDataViewingPageContext
                         {
-                            Patient = patient,
+                            PatientId = patient.Id,
                             SessionId = SelectedSessionInfo.Id
                         }))
                 .ConfigureAwait(true);

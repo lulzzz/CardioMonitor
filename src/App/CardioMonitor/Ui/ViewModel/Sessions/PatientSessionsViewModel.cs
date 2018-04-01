@@ -117,7 +117,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     PageIds.SessionProcessingInitPageId, 
                     new SessionProcessingInitPageContext
                     {
-                        Patient = _patient
+                        PatientId = _patient.Id
                     }))
                 .ConfigureAwait(true);
         }
@@ -159,7 +159,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         PageIds.SessionDataViewingPageId,
                         new SessionDataViewingPageContext
                         {
-                            Patient = _patient,
+                            PatientId = _patient.Id,
                             SessionId = SelectedSessionInfo.Id
                         }))
                 .ConfigureAwait(true);

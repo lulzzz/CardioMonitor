@@ -5,8 +5,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class SessionDataViewingPageContext : IStoryboardPageContext
     {
-        public Patient Patient { get; set; }
+        public int PatientId { get; set; }
 
         public int SessionId { get; set; }
+
+        /// <summary>
+        /// Полный путь к сеансу, сохраненному на диске
+        /// </summary>
+        public string FileFullPath { get; set; }
     }
 }
