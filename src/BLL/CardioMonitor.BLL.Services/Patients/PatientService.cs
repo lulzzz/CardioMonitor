@@ -15,8 +15,7 @@ namespace CardioMonitor.BLL.CoreServices.Patients
 
         public PatientService(ICardioMonitorUnitOfWorkFactory factory)
         {
-            if (factory == null) throw new ArgumentNullException(nameof(factory));
-            _factory = factory;
+            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
 
         public void Add([NotNull] Patient patient)
@@ -43,6 +42,14 @@ namespace CardioMonitor.BLL.CoreServices.Patients
                     PatronymicName = x.PatronymicName
                 });
                 return new List<PatientFullName>(result);
+            }
+        }
+
+        public Patient GetPatient(int patientId)
+        {
+            using (var uow = _factory.Create())
+            {
+                return uow.Patients.GetPatient(patientId)?.ToDomain();
             }
         }
 

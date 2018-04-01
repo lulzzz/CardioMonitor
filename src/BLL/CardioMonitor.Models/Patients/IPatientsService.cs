@@ -8,6 +8,7 @@ namespace CardioMonitor.BLL.CoreContracts.Patients
 
         List<PatientFullName> GetPatientNames(ICollection<int> patientIds);
 
+        Patient GetPatient(int patientId);
 
         List<Patient> GetAll();
 

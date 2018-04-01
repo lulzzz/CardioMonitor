@@ -19,6 +19,11 @@ namespace CardioMonitor.Data.Ef.Repositories
             _context = context;
         }
 
+        public PatientEntity GetPatient(int patientId)
+        {
+            return _context.Patients.Find(patientId);
+        }
+
         public List<PatientEntity> GetPatients()
         {
             return _context.Patients.ToList();
