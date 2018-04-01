@@ -37,6 +37,7 @@ namespace CardioMonitor.Ui.ViewModel{
 
     public class MainWindowViewModel : Notifier
     {
+        /*
         private readonly ILogger _logger;
         private readonly IPatientsService _patientsService;
         private readonly ITreatmentsService _treatmentsService;
@@ -399,6 +400,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 }
             }
         }
+        */
     }
 
   

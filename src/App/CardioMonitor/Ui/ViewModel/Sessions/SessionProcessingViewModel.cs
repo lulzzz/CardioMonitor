@@ -1,24 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
-using CardioMonitor.BLL.CoreContracts.Treatment;
 using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.Devices;
-using CardioMonitor.Devices.Bed.Infrastructure;
-using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Files;
-using CardioMonitor.Infrastructure;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Infrastructure.Workers;
-using CardioMonitor.Resources;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
+using Markeli.Storyboards;
 
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
@@ -32,7 +27,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     /// ViewModel для сеанса
     /// </summary>
     //todo last
-    public class SessionProcessingViewModel : BaseSessionViewModel//, IStoryboardViewModel
+    public class SessionProcessingViewModel : BaseSessionViewModel, IStoryboardPageViewModel
     {
         #region Поля
 
@@ -255,12 +250,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 });
             }
         }
-
-        /// <summary>
-        /// Курс лечения
-        /// </summary>
-        public Treatment Treatment { get; set; }
-
+        
         
         /// <summary>
         /// Помощник потоков для выполнения фунциий в потоке GUI
@@ -414,6 +404,46 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             ElapsedTime = TimeSpan.Zero;
             //Session = new SessionModel();
         }
-        
+
+        #region IStoryboardPageViewModel
+
+        public Guid PageId { get; set; }
+        public Guid StoryboardId { get; set; }
+        public Task OpenAsync(IStoryboardPageContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> CanLeaveAsync()
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task LeaveAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task ReturnAsync(IStoryboardPageContext context)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> CanCloseAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task CloseAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        public event Func<object, Task> PageCanceled;
+        public event Func<object, Task> PageCompleted;
+        public event Func<object, Task> PageBackRequested;
+        public event Func<object, TransitionRequest, Task> PageTransitionRequested;
     }
+
+    #endregion
 }

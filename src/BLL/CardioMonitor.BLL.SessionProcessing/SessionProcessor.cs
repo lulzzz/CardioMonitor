@@ -52,7 +52,7 @@ namespace CardioMonitor.BLL.SessionProcessing
         /// <remarks>
         /// Обновляются в порядке поступления данных от устройства
         /// </remarks>
-        public IReadOnlyList<ObservableCollection<CheckPointParams>> PatientParamsPerCycles
+        public IReadOnlyList<CycleData> PatientParamsPerCycles
         {
             get => _patientParamsPerCycles;
             set
@@ -62,7 +62,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             }
         }
 
-        private IReadOnlyList<ObservableCollection<CheckPointParams>> _patientParamsPerCycles;
+        private IReadOnlyList<CycleData> _patientParamsPerCycles;
         /// <summary>
         /// Текущий номер цикла
         /// </summary>
@@ -210,7 +210,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             _devicesFacade.OnCommonPatientParamsRecieved += HandleOnCommonPatientParamsRecieved;
             _devicesFacade.OnPatientPressureParamsRecieved += HandleOnPatientPressureParamsRecieved;
             
-            PatientParamsPerCycles = new ObservableCollection<CheckPointParams>[startParams.CycleCount];
+            PatientParamsPerCycles = new List<CycleData>(startParams.CycleCount);
             _isInitialized = true;
         }
         
@@ -326,7 +326,7 @@ namespace CardioMonitor.BLL.SessionProcessing
                     if (iterationNumber == null || cycleNumber == null) return;
 
                     var checkPoint = PatientParamsPerCycles[cycleNumber.Value]
-                        .FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
+                        .CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
                     if (checkPoint == null) return;
                     checkPoint.HandleErrorOnCommoParamsProcessing();
                     break;
@@ -339,7 +339,7 @@ namespace CardioMonitor.BLL.SessionProcessing
                     if (iterationNumber == null || cycleNumber == null) return;
 
                     var checkPoint = PatientParamsPerCycles[cycleNumber.Value]
-                        .FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
+                        .CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
                     if (checkPoint == null) return;
                     checkPoint.HandleErrorOnPressureParamsProcessing();
                     break;
@@ -357,14 +357,14 @@ namespace CardioMonitor.BLL.SessionProcessing
                 var iterationNumber = patientPressureParams.IterationNumber;
                 var inclinationAngle = patientPressureParams.InclinationAngle;
                 
-                var checkPoint = PatientParamsPerCycles[cycleNumber].FirstOrDefault(x => x.IterationNumber == iterationNumber);
+                var checkPoint = PatientParamsPerCycles[cycleNumber].CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber);
                 if (checkPoint == null)
                 {
                     checkPoint = new CheckPointParams(
                         cycleNumber, 
                         iterationNumber,
                         inclinationAngle);
-                    PatientParamsPerCycles[cycleNumber].Add(checkPoint);
+                    PatientParamsPerCycles[cycleNumber].CycleParams.Add(checkPoint);
                 }
 
                 checkPoint.SetPressureParams(patientPressureParams);
@@ -382,14 +382,14 @@ namespace CardioMonitor.BLL.SessionProcessing
 
                 var inclinationAngle = commonPatientParams.InclinationAngle;
                 
-                var checkPoint = PatientParamsPerCycles[cycleNumber].FirstOrDefault(x => x.IterationNumber == iterationNumber);
+                var checkPoint = PatientParamsPerCycles[cycleNumber].CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber);
                 if (checkPoint == null)
                 {
                     checkPoint = new CheckPointParams(
                         cycleNumber, 
                         iterationNumber, 
                         inclinationAngle);
-                    PatientParamsPerCycles[cycleNumber].Add(checkPoint);
+                    PatientParamsPerCycles[cycleNumber].CycleParams.Add(checkPoint);
                 }
                 checkPoint.SetCommonParams(commonPatientParams);
             }
@@ -435,5 +435,12 @@ namespace CardioMonitor.BLL.SessionProcessing
             SessionStatus = SessionStatus.TerminatedOnError;
         }
         #endregion
+    }
+
+    public class CycleData
+    {
+        public short CycleNumber { get; set; }
+
+        public ObservableCollection<CheckPointParams> CycleParams { get; set; }
     }
 }

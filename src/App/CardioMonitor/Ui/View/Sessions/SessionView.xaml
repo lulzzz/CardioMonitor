@@ -9,7 +9,7 @@
              xmlns:sessions1="clr-namespace:CardioMonitor.Ui.View.Sessions"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance Type=sessions:SessionProcessingViewModel}">
+             d:DataContext="{d:DesignInstance  Type=sessions:SessionProcessingViewModel}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -72,28 +72,24 @@
                        Grid.Column="3"
                        FontSize="14"/>
         </Grid>
-        <TabControl
-            Grid.Row="2"
-            DataContext="{Binding Session}"
-            ItemsSource="{Binding Cycles}">
-            <TabControl.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding CycleNumber}"></TextBlock>
-                </DataTemplate>
-            </TabControl.ItemTemplate>
-            <TabControl.ContentTemplate>
-                <DataTemplate>
-                    <sessions1:SessionCycleView/>
-                </DataTemplate>
-            </TabControl.ContentTemplate>
-        </TabControl>
-        <TextBlock
-            Grid.Row="2"
-            Text="Задайте требуемое количество циклов и нажмите старт"
-            VerticalAlignment="Center"
-            HorizontalAlignment="Center">
-            
-        </TextBlock>
+        <Grid
+            Grid.Row="2">
+            <Grid.Resources>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
+            </Grid.Resources>
+            <TabControl
+                ItemsSource="{Binding PatientParamsPerCycles}"
+                TabStripPlacement="Left"
+                controls:TabControlHelper.Underlined="TabItems"
+                DisplayMemberPath="{Binding CycleNumber}">
+
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <sessions1:SessionCycleView/>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+        </Grid>
         <!--Блок управления и текущие показатели  -->
         <Grid Grid.Row="3"
               Margin="10">
@@ -141,33 +137,7 @@
                                    TextAlignment="Center"></TextBlock>
                     </Button.Content>
                 </Button>
-                <!--Количество циклов-->
-                <Border
-                        BorderBrush="{DynamicResource AccentColorBrush}"
-                        BorderThickness="2"
-                        Width="250"
-                        Margin="10,10,10,0">
-                    <Grid >
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0"
-                                   Text="Количество циклов:"
-                                   FontSize="14"
-                                   TextWrapping="Wrap"
-                                   VerticalAlignment="Center"
-                                   Margin="5,0,0,0"/>
-                        <controls:NumericUpDown Grid.Row="1"
-                                                IsEnabled="True"
-                                                Value="{Binding RepeatCount}"
-                                                TextAlignment="Left"
-                                                Minimum="0"
-                                                Maximum="10" 
-                                                Margin="0,5,0,0"/>
-
-                    </Grid>
-                </Border>
+               
             </StackPanel>
            
             <Grid
@@ -260,3 +230,4 @@
         </Grid>
     </Grid>
 </UserControl>
+

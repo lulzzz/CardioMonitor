@@ -7,7 +7,7 @@ namespace Markeli.Storyboards.UnitTests
 {
     public class StoryboardNavigationServiceUnitTests
     {
-        private  readonly Storyboard _patientStoryboard;
+        private readonly Storyboard _patientStoryboard;
         private readonly Storyboard _sessionsStoryboard;
         private readonly Storyboard _settingsStoryboard;
 

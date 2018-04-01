@@ -199,8 +199,13 @@
     <Compile Include="Ui\PageIds.cs" />
     <Compile Include="Ui\ViewModel\Patients\PatientPageContext.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionCycleViewModel.cs" />
-    <Compile Include="Ui\ViewModel\Sessions\SessionsPageContext.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionDataViewingPageContext.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionProcessingInitPageContext.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionProcessingInitViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\PatientSessionsPageContext.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionProcessingPageConetxt.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionProcessingViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionsViewModel.cs" />
     <Compile Include="Ui\View\Patients\PatientsView.xaml.cs">
       <DependentUpon>PatientsView.xaml</DependentUpon>
     </Compile>
@@ -209,13 +214,19 @@
       <DependentUpon>PatientView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\ViewModel\Patients\PatientsViewModel.cs" />
-    <Compile Include="Ui\View\Sessions\SessionCycleView.xaml.cs">
-      <DependentUpon>SessionCycleView.xaml</DependentUpon>
+    <Compile Include="Ui\View\Sessions\SessionProcessingInitView.xaml.cs">
+      <DependentUpon>SessionProcessingInitView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\View\Sessions\SessionsView.xaml.cs">
       <DependentUpon>SessionsView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Ui\ViewModel\Sessions\SessionsViewModel.cs" />
+    <Compile Include="Ui\View\Sessions\SessionCycleView.xaml.cs">
+      <DependentUpon>SessionCycleView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ui\View\Sessions\PatientSessionsView.xaml.cs">
+      <DependentUpon>PatientSessionsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ui\ViewModel\Sessions\PatientSessionsViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionDataViewModel.cs" />
     <Compile Include="Ui\View\Sessions\SessionView.xaml.cs">
       <DependentUpon>SessionView.xaml</DependentUpon>
@@ -223,7 +234,6 @@
     <Compile Include="Ui\View\Sessions\SessionDataView.xaml.cs">
       <DependentUpon>SessionDataView.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Ui\ViewModel\Sessions\OldSessionViewModel.cs" />
     <Compile Include="Settings\AppAppearanceSettings.cs" />
     <Compile Include="Settings\DataBaseSettings.cs" />
     <Compile Include="Settings\CardioSettings.cs" />
@@ -257,11 +267,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Ui\View\Sessions\SessionProcessingInitView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ui\View\Sessions\SessionsView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="Ui\View\Sessions\SessionCycleView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Ui\View\Sessions\SessionsView.xaml">
+    <Page Include="Ui\View\Sessions\PatientSessionsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

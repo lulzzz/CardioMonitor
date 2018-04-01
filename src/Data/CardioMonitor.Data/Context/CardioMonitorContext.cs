@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Configuration;
-using System.Data.Common;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
 using System.Data.Entity.ModelConfiguration;
@@ -8,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using CardioMonitor.Data.Contracts.Entities.Patients;
 using CardioMonitor.Data.Contracts.Entities.Sessions;
-using CardioMonitor.Data.Contracts.Entities.Treatments;
 
 namespace CardioMonitor.Data.Ef.Context
 {

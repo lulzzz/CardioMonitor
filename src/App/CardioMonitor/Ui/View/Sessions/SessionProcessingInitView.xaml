@@ -4,9 +4,95 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CardioMonitor.Ui.View.Sessions"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-            
+             d:DesignHeight="310" d:DesignWidth="400">
+    <Grid VerticalAlignment="Center"
+          HorizontalAlignment="Center"
+          Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="Параметры сеанса"
+                   HorizontalAlignment="Center"
+                   FontSize="14"
+                   FontWeight="Bold"
+                   Margin="10"/>
+        <ComboBox Width="350"
+                  Grid.Row="1"
+                  Margin="0 10 0 10"
+                  mah:TextBoxHelper.UseFloatingWatermark="True"
+                  mah:TextBoxHelper.Watermark="Пациент"
+                  DisplayMemberPath="Title"
+                  IsEditable="True"
+                  ItemsSource="{Binding Patients}"
+                  SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                  MaxDropDownHeight="125"
+                  Style="{DynamicResource VirtualisedMetroComboBox}"
+                  Text="{Binding Path=Name}" />
+        <mah:NumericUpDown 
+            Grid.Row="2"
+            Margin="0 10 0 10"
+            Width="350"
+            mah:TextBoxHelper.UseFloatingWatermark="True"
+            mah:TextBoxHelper.Watermark="Количество повторений"
+            mah:TextBoxHelper.WatermarkAlignment="Left"
+            TextAlignment="Left"
+            Maximum="40"
+            Minimum="1"
+            Delay="1000"
+            NumericInputMode="Numbers"
+            Value="{Binding RepeatsCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Speedup="False" />
+        <mah:NumericUpDown 
+            Grid.Row="3"
+            Margin="0 10 0 10"
+            Width="350"
+            mah:TextBoxHelper.UseFloatingWatermark="True"
+            mah:TextBoxHelper.Watermark="Максимальный угол, °"
+            mah:TextBoxHelper.WatermarkAlignment="Left"
+            TextAlignment="Left"
+            Maximum="40"
+            Minimum="7.5"
+            Interval="0.5"
+            NumericInputMode="Decimal"
+            Value="{Binding MaxAngle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Speedup="False" />
+        <mah:NumericUpDown 
+            Grid.Row="4"
+            Margin="0 10 0 10"
+            Width="350"
+            mah:TextBoxHelper.UseFloatingWatermark="True"
+            mah:TextBoxHelper.Watermark="Частота, Гц"
+            mah:TextBoxHelper.WatermarkAlignment="Left"
+            TextAlignment="Left"
+            Maximum="40"
+            Minimum="7.5"
+            Interval="0.01"
+            NumericInputMode="Decimal"
+            Value="{Binding MovementFrequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Speedup="False" />
+        <mah:ToggleSwitch 
+            Grid.Row="5"
+            HorizontalAlignment="Right"
+            Margin="0 10 0 10"
+            IsChecked="{Binding IsAutopumpingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            OffLabel="Автонакачка отключена"
+            OnLabel="Автонакачка включена"
+            Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}" ContentDirection="LeftToRight" />
+        <StackPanel Grid.Row="6"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+            <Button Content="Начать сеанс"
+                    Width="150"
+                    Margin="10"
+                    Command="{Binding StartSession}"/>
+        </StackPanel>
     </Grid>
 </UserControl>

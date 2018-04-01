@@ -1,14 +1,8 @@
-﻿using System.Configuration;
-using System.Data.Entity;
-using CardioMonitor.BLL.CoreContracts.Patients;
+﻿using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
-using CardioMonitor.BLL.CoreContracts.Treatment;
 using CardioMonitor.BLL.CoreServices.Patients;
 using CardioMonitor.BLL.CoreServices.Sessions;
-using CardioMonitor.BLL.CoreServices.Treatments;
-using CardioMonitor.Data.Common.UnitOfWork;
 using CardioMonitor.Data.Contracts.UnitOfWork;
-using CardioMonitor.Data.Ef.Context;
 using CardioMonitor.Data.Ef.UnitOfWork;
 using CardioMonitor.Devices;
 using CardioMonitor.Files;
@@ -47,7 +41,6 @@ namespace CardioMonitor
             container.Register<TaskHelper, TaskHelper>(Lifestyle.Singleton);
             container.Register<ICardioMonitorUnitOfWorkFactory>(() => new CardioMonitorEfUnitOfWorkFactory("CardioMonitorContext"), Lifestyle.Singleton);
             container.Register<IPatientsService, PatientService>(Lifestyle.Singleton);
-            container.Register<ITreatmentsService, TreatmentsService>(Lifestyle.Singleton);
             container.Register<ISessionsService, SessionsService>(Lifestyle.Singleton);
             container.Register<IFilesManager, FilesManager>(Lifestyle.Singleton);
             

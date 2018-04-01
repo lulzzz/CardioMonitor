@@ -13,7 +13,5 @@ namespace CardioMonitor.Data.Contracts.UnitOfWork
         [NotNull]
         ISessionsRepository Sessions { get; }
 
-        [NotNull]
-        ITreatmentsRepository Treatments { get; }
     }
 }

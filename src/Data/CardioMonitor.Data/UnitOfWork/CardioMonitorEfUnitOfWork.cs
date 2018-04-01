@@ -17,11 +17,9 @@ namespace CardioMonitor.Data.Ef.UnitOfWork
 
             Patients = new PatientsRepository(cardioMonitorContext);
             Sessions = new SessionsRepository(cardioMonitorContext);
-            Treatments = new TreatmentsRepository(cardioMonitorContext);
         }
 
         public IPatientsRepository Patients { get; }
         public ISessionsRepository Sessions { get; }
-        public ITreatmentsRepository Treatments { get; }
     }
 }

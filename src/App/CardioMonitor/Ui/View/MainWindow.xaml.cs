@@ -20,7 +20,7 @@ namespace CardioMonitor.Ui.View
             //initialize messageHelper
             MessageHelper.Instance.Window = this;
             _viewModel = viewModel;
-            _viewModel.SessionViewModel.ThreadAssistant = new ThreadAssistant(this);
+           // _viewModel.SessionViewModel.ThreadAssistant = new ThreadAssistant(this);
             DataContext = _viewModel;
             InitializeComponent();
             //SettingsView.ViewModel = _viewModel.SettingsViewModel;
@@ -61,7 +61,7 @@ namespace CardioMonitor.Ui.View
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            _viewModel.UpdatePatiens();
+          //  _viewModel.UpdatePatiens();
         }
 
         private async void MetroWindow_Closed(object sender, EventArgs e)
