@@ -7,7 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:settings="clr-namespace:CardioMonitor.Ui.View.Settings"
     xmlns:patients="clr-namespace:CardioMonitor.Ui.View.Patients"
-    xmlns:treatments="clr-namespace:CardioMonitor.Ui.View.Treatments"
     xmlns:sessions="clr-namespace:CardioMonitor.Ui.View.Sessions"
     xmlns:iconPacks="using:MahApps.Metro.IconPacks"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -203,7 +202,7 @@
                                     ItemTemplate="{StaticResource MenuItemTemplate}"
                                     OptionsItemTemplate="{StaticResource MenuItemTemplate}"
                                     SelectedIndex="0"
-                                    OpenPaneLength="130"
+                                    OpenPaneLength="150"
                                     Style="{StaticResource HamburgerMenuCreatorsStyle}"
                                     VerticalScrollBarOnLeftSide="False">
         <controls:HamburgerMenu.HamburgerMenuHeaderTemplate>
@@ -217,8 +216,15 @@
                     Label="Пациенты">
 
                 </controls:HamburgerMenuIconItem>
-                <controls:HamburgerMenuIconItem Icon="{iconPacks1:Octicons Kind=Checklist}" Label="Сеансы">
+                <controls:HamburgerMenuIconItem 
+                    Icon="{iconPacks1:Octicons Kind=Checklist}" 
+                    Label="Все сеансы">
           
+                </controls:HamburgerMenuIconItem>
+                <controls:HamburgerMenuIconItem 
+                    Icon="{iconPacks1:Octicons Kind=Pulse}" 
+                    Label="Новый сеанс">
+
                 </controls:HamburgerMenuIconItem>
             </controls:HamburgerMenuItemCollection>
         </controls:HamburgerMenu.ItemsSource>

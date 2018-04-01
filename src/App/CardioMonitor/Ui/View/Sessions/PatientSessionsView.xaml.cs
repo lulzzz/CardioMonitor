@@ -6,11 +6,11 @@ namespace CardioMonitor.Ui.View.Sessions
     /// <summary>
     /// Interaction logic for SessionsView.xaml
     /// </summary>
-    public partial class SessionsView : UserControl
+    public partial class PatientSessionsView : UserControl
     {
-        private SessionsViewModel _viewModel;
+        private PatientSessionsViewModel _viewModel;
 
-        public SessionsView()
+        public PatientSessionsView()
         {
             DataContext = _viewModel;
 

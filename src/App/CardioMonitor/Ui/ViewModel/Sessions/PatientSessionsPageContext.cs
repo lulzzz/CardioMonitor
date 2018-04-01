@@ -3,7 +3,7 @@ using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
-    internal class SessionsPageContext : IStoryboardPageContext
+    internal class PatientSessionsPageContext : IStoryboardPageContext
     {
         /// <summary>
         /// Пациент, сеансы которого необходимо отобразить

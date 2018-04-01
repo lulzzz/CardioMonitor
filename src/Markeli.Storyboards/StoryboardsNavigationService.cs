@@ -166,6 +166,7 @@ namespace Markeli.Storyboards
                 ? _storyboards.FirstOrDefault(x => x.Key == storyboardId.Value).Value
                 : _activeStoryboard;
 
+            //first try to find desired page in current storyboard, then look up at all registered pages
             var pageInfo = storyBoard != null
                 ? _registeredPages.Keys.FirstOrDefault(x =>
                     x.PageId == pageId && x.StoryboardId == storyBoard.StoryboardId)

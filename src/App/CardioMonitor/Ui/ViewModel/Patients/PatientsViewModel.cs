@@ -214,7 +214,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             if (PageTransitionRequested == null) return;
 
             await PageTransitionRequested.Invoke(this,
-                new TransitionRequest(PageIds.SessionsPageId, new SessionsPageContext
+                new TransitionRequest(PageIds.PatientSessionsPageId, new PatientSessionsPageContext
                 {
                     Patient = SelectedPatient
                 })).ConfigureAwait(false);

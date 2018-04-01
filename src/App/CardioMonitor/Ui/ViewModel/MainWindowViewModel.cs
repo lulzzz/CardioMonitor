@@ -48,7 +48,7 @@ namespace CardioMonitor.Ui.ViewModel{
         private PatientsViewModel _patientsViewModel;
         private PatientViewModel _patientViewModel;
         private TreatmentsViewModel _treatmentsViewModel;
-        private SessionsViewModel _sessionsViewModel;
+        private PatientSessionsViewModel _patientSessionsViewModel;
         private SessionProcessingViewModel _sessionViewModel;
         private SessionDataViewModel _sessionDataViewModel;
         private TreatmentDataViewModel _treatmentDataViewModel;
@@ -123,15 +123,15 @@ namespace CardioMonitor.Ui.ViewModel{
             }
         }
 
-        public SessionsViewModel SessionsViewModel
+        public PatientSessionsViewModel PatientSessionsViewModel
         {
-            get { return _sessionsViewModel; }
+            get { return _patientSessionsViewModel; }
             set
             {
-                if (value != _sessionsViewModel)
+                if (value != _patientSessionsViewModel)
                 {
-                    _sessionsViewModel = value;
-                    RisePropertyChanged("SessionsViewModel");
+                    _patientSessionsViewModel = value;
+                    RisePropertyChanged("PatientSessionsViewModel");
                 }
             }
         }
@@ -234,7 +234,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 OpenSessionsEvent = StartOrContinueTreatmentSession,
                 ShowResultsEvent = ShowTreatmentResults
             };
-            SessionsViewModel = new SessionsViewModel(sessionsService)
+            PatientSessionsViewModel = new PatientSessionsViewModel(sessionsService)
             {
                 StartSessionEvent = StartSession,
                 ShowResultsEvent = ShowSessionResults
@@ -267,7 +267,7 @@ namespace CardioMonitor.Ui.ViewModel{
                     MainTCSelectedIndex = (int)ViewIndex.PatientsView;
                     break;
                 case ViewIndex.SessionsView:
-                    SessionsViewModel.Clear();
+                    PatientSessionsViewModel.Clear();
                     UpdatePatiens();
                     MainTCSelectedIndex = (int)ViewIndex.PatientsView;
                     //MainTCSelectedIndex = (int)ViewIndex.TreatmentsView;
@@ -338,13 +338,13 @@ namespace CardioMonitor.Ui.ViewModel{
                         return;
                     }
                 }
-                SessionsViewModel.PatientName = new PatientFullName
+                PatientSessionsViewModel.PatientName = new PatientFullName
                 {
                     FirstName = patient.FirstName,
                     LastName = patient.LastName,
                     PatronymicName = patient.PatronymicName
                 };
-                SessionsViewModel.Treatment = treatment;
+                PatientSessionsViewModel.Treatment = treatment;
                 SessionViewModel.Treatment = treatment;
                 UpdateSessionInfos();
                 MainTCSelectedIndex = (int)ViewIndex.SessionsView;
@@ -361,8 +361,8 @@ namespace CardioMonitor.Ui.ViewModel{
 
         private void UpdateSessionInfos()
         {
-            var sessions = _sessionsService.GetInfos(SessionsViewModel.Treatment.Id);
-            SessionsViewModel.SessionInfos = sessions != null
+            var sessions = _sessionsService.GetInfos(PatientSessionsViewModel.Treatment.Id);
+            PatientSessionsViewModel.SessionInfos = sessions != null
                 ? new ObservableCollection<SessionInfo>(sessions)
                 : new ObservableCollection<SessionInfo>();
         }
@@ -419,7 +419,7 @@ namespace CardioMonitor.Ui.ViewModel{
             try
             {
 
-                var session = _sessionsService.Get(SessionsViewModel.SelectedSessionInfo.Id);
+                var session = _sessionsService.Get(PatientSessionsViewModel.SelectedSessionInfo.Id);
                 SessionDataViewModel.Session = new SessionModel {Session = session};
                 SessionDataViewModel.Patient = PatientsViewModel.SelectedPatient;
                 MainTCSelectedIndex = (int)ViewIndex.SessionDataView;
