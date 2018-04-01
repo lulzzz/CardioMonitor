@@ -25,11 +25,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public PatientViewModel(ILogger logger, IPatientsService patientsService)
         {
-            if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (patientsService == null) throw new ArgumentNullException(nameof(patientsService));
-
-            _logger = logger;
-            _patientsService = patientsService;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
         }
 
         public EventHandler MoveBackwardEvent { get; set; }
@@ -83,7 +80,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     _lastName = value;
                     RisePropertyChanged("LastName");
                     IsSaved = false;
-                    CanCloseChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -98,7 +94,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     _firstName = value;
                     RisePropertyChanged("FirstName");
                     IsSaved = false;
-                    CanCloseChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -113,7 +108,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     _patronymicName = value;
                     RisePropertyChanged("PatronymicName");
                     IsSaved = false;
-                    CanCloseChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -126,7 +120,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     _birthDate = value;
                     RisePropertyChanged("BirthDate");
                     IsSaved = false;
-                CanCloseChanged?.Invoke(this, EventArgs.Empty);
 
             }
         }
@@ -146,17 +139,20 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         }
 
         public bool IsSaved { get; set; }
-        
+
         public ICommand SaveCommand
         {
-            get { return _saveCommand ?? ( _saveCommand = new SimpleCommand
+            get
             {
-                CanExecuteDelegate = x => !IsSaved,
-                ExecuteDelegate = x => Save()
-            }); }
+                return _saveCommand ?? (_saveCommand = new SimpleCommand
+                {
+                    CanExecuteDelegate = x => !IsSaved,
+                    ExecuteDelegate = async x => await Save().ConfigureAwait(true)
+                });
+            }
         }
 
-        private async void Save()
+        private async Task Save()
         {
             var message = String.Empty;
             try
@@ -173,7 +169,11 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                         break;
                 }
                 IsSaved = true;
-                PageBackRequested?.Invoke(this, EventArgs.Empty);
+
+                if (PageBackRequested != null)
+                {
+                    await PageBackRequested.Invoke(this).ConfigureAwait(true);
+                }
             }
             catch (ArgumentNullException ex)
             {
@@ -245,12 +245,13 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             return Task.CompletedTask;
         }
 
-        public event EventHandler PageCanceled;
-        public event EventHandler PageCompleted;
-        public event EventHandler PageBackRequested;
-        public event EventHandler<TransitionRequest> PageTransitionRequested;
-        public event EventHandler CanCloseChanged;
-        public event EventHandler CanLeaveChanged;
+        public event Func<object, Task> PageCanceled;
+
+        public event Func<object, Task> PageCompleted;
+
+        public event Func<object, Task> PageBackRequested;
+
+        public event Func<object, TransitionRequest, Task> PageTransitionRequested;
 
         #endregion
 

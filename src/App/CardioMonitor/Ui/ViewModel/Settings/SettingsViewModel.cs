@@ -7,8 +7,8 @@ using System.Windows.Input;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui.Base;
+using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
-using Task = System.Threading.Tasks.Task;
 
 namespace CardioMonitor.Ui.ViewModel.Settings
 {
@@ -82,7 +82,6 @@ namespace CardioMonitor.Ui.ViewModel.Settings
                     _sessionsFilesDirectoryPath = value;
                     RisePropertyChanged(nameof(SessionsFilesDirectoryPath));
                     _isSettingsChanged = true;
-                    CanCloseChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -364,30 +363,39 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         public Task LeaveAsync()
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public Task ReturnAsync(IStoryboardPageContext context)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
-        public Task<bool> CanCloseAsync()
+        public async Task<bool> CanCloseAsync()
         {
-            throw new NotImplementedException();
+            if (_isSettingsChanged)
+            {
+                var result = await MessageHelper.Instance.ShowMessageAsync(
+                    "Все несохраненные изменения будут потеряны. Вы уверены?", "Cardio Monitor",
+                    MessageDialogStyle.AffirmativeAndNegative).ConfigureAwait(false);
+                return result == MessageDialogResult.Affirmative;
+            }
+
+            return true;
         }
 
         public Task CloseAsync()
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
-        public event EventHandler PageCanceled;
-        public event EventHandler PageCompleted;
-        public event EventHandler PageBackRequested;
-        public event EventHandler<TransitionRequest> PageTransitionRequested;
-        public event EventHandler CanCloseChanged;
-        public event EventHandler CanLeaveChanged;
+        public event Func<object, Task> PageCanceled;
+
+        public event Func<object, Task> PageCompleted;
+
+        public event Func<object, Task> PageBackRequested;
+
+        public event Func<object, TransitionRequest, Task> PageTransitionRequested;
 
         #endregion
 

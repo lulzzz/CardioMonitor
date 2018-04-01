@@ -11,57 +11,49 @@ namespace Markeli.Storyboards.UnitTests
         private readonly Storyboard _sessionsStoryboard;
         private readonly Storyboard _settingsStoryboard;
 
-        private static readonly Guid _firstPageId = Guid.Parse("ea5a0e35-1a67-4d91-8242-1c5e04b47f4d");
-        private static readonly Guid _secondPageId = Guid.Parse("ea5a0e35-2a67-4d91-8242-1c5e04b47f4d");
-        private static readonly Guid _thirdPageId = Guid.Parse("ea5a0e35-3a67-4d91-8242-1c5e04b47f4d");
-        private static readonly Guid _foruthPageId = Guid.Parse("ea5a0e35-4a67-4d91-8242-1c5e04b47f4d");
-        private static readonly Guid _fifthPageId = Guid.Parse("ea5a0e35-5a67-4d91-8242-1c5e04b47f4d");
-        private static readonly Guid _sixthPageId = Guid.Parse("ea5a0e35-6a67-4d91-8242-1c5e04b47f4d");
+        private static readonly Guid FirstPageId = Guid.Parse("ea5a0e35-1a67-4d91-8242-1c5e04b47f4d");
+        private static readonly Guid SecondPageId = Guid.Parse("ea5a0e35-2a67-4d91-8242-1c5e04b47f4d");
+        private static readonly Guid ThirdPageId = Guid.Parse("ea5a0e35-3a67-4d91-8242-1c5e04b47f4d");
+        private static readonly Guid ForuthPageId = Guid.Parse("ea5a0e35-4a67-4d91-8242-1c5e04b47f4d");
+        private static readonly Guid FifthPageId = Guid.Parse("ea5a0e35-5a67-4d91-8242-1c5e04b47f4d");
+        private static readonly Guid SixthPageId = Guid.Parse("ea5a0e35-6a67-4d91-8242-1c5e04b47f4d");
 
-        private Storyboard[] _storyboards;
 
         public StoryboardNavigationServiceUnitTests()
         {
             _patientStoryboard = new Storyboard(Guid.Parse("1a5a0e35-1a67-4d91-8242-1c5e04b47f4d"));
             _sessionsStoryboard = new Storyboard(Guid.Parse("2a5a0e35-1a67-4d91-8242-1c5e04b47f4d"));
             _settingsStoryboard = new Storyboard(Guid.Parse("3a5a0e35-1a67-4d91-8242-1c5e04b47f4d"));
-
-            _storyboards = new[]
-            {
-                _patientStoryboard,
-                _settingsStoryboard,
-                _sessionsStoryboard
-            };
-
+            
             _patientStoryboard.RegisterPage(
-                _firstPageId,
+                FirstPageId,
                 view: typeof(TestView),
                 viewModel: typeof(TestViewModel),
                 isStartPage: true);
             _patientStoryboard.RegisterPage(
-                _foruthPageId,
+                ForuthPageId,
                 view: typeof(TestView),
                 viewModel: typeof(TestViewModel),
                 isStartPage: false);
             _patientStoryboard.RegisterPage(
-                _fifthPageId,
+                FifthPageId,
                 view: typeof(TestView),
                 viewModel: typeof(TestViewModel),
                 isStartPage: false);
 
             _sessionsStoryboard.RegisterPage(
-                _secondPageId,
+                SecondPageId,
                 view: typeof(TestView),
                 viewModel: typeof(TestViewModel),
                 isStartPage: true);
             _sessionsStoryboard.RegisterPage(
-                _sixthPageId,
+                SixthPageId,
                 view: typeof(TestView),
                 viewModel: typeof(TestViewModel),
                 isStartPage: false);
 
             _settingsStoryboard.RegisterPage(
-                _thirdPageId,
+                ThirdPageId,
                 view: typeof(TestView),
                 viewModel: typeof(TestViewModel),
                 isStartPage: true);
@@ -98,7 +90,7 @@ namespace Markeli.Storyboards.UnitTests
         }
 
         [Fact]
-        public void GoToStoryboard_Ok()
+        public async Task GoToStoryboard_Ok()
         {
             var pageCreator = new Mock<IStroryboardPageCreator>();
             pageCreator
@@ -118,21 +110,21 @@ namespace Markeli.Storyboards.UnitTests
             service.RegisterStoryboard(_settingsStoryboard);
             service.CreateStartPages();
 
-            service.GoToStoryboardAsync(_patientStoryboard.StoryboardId);
+            await service.GoToStoryboardAsync(_patientStoryboard.StoryboardId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
 
-            service.GoToStoryboardAsync(_sessionsStoryboard.StoryboardId);
+            await service.GoToStoryboardAsync(_sessionsStoryboard.StoryboardId);
             Assert.Equal(_sessionsStoryboard.StoryboardId, currentStoryboardId);
 
-            service.GoToStoryboardAsync(_settingsStoryboard.StoryboardId);
+            await service.GoToStoryboardAsync(_settingsStoryboard.StoryboardId);
             Assert.Equal(_settingsStoryboard.StoryboardId, currentStoryboardId);
 
-            service.GoToStoryboardAsync(_patientStoryboard.StoryboardId);
+            await service.GoToStoryboardAsync(_patientStoryboard.StoryboardId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
         }
 
         [Fact]
-        public void GoBackOnSameStoryboard_Ok()
+        public async Task GoBackOnSameStoryboard_Ok()
         {
             var pageCreator = new Mock<IStroryboardPageCreator>();
             pageCreator
@@ -162,36 +154,36 @@ namespace Markeli.Storyboards.UnitTests
             service.RegisterStoryboard(_settingsStoryboard);
             service.CreateStartPages();
 
-            service.GoToPageAsync(_firstPageId);
+            await service.GoToPageAsync(FirstPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _firstPageId);
+            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, FirstPageId);
             
-            service.GoToPageAsync(_foruthPageId);
+            await service.GoToPageAsync(ForuthPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _foruthPageId);
+            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, ForuthPageId);
             Assert.True(service.CanGoBack());
 
 
-            service.GoToPageAsync(_fifthPageId);
+            await service.GoToPageAsync(FifthPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _fifthPageId);
+            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, FifthPageId);
 
             Assert.True(service.CanGoBack());
-            service.GoBackAsync();
+            await  service.GoBackAsync();
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _foruthPageId);
+            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, ForuthPageId);
 
             Assert.True(service.CanGoBack());
-            service.GoBackAsync();
+            await service.GoBackAsync();
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _firstPageId);
+            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, FirstPageId);
 
             Assert.False(service.CanGoBack());
 
         }
 
         [Fact]
-        public void GoBackOnDifferentStoryboards_Ok()
+        public async Task GoBackOnDifferentStoryboards_Ok()
         {
             var pageCreator = new Mock<IStroryboardPageCreator>();
             pageCreator
@@ -221,59 +213,59 @@ namespace Markeli.Storyboards.UnitTests
             service.RegisterStoryboard(_settingsStoryboard);
             service.CreateStartPages();
 
-            service.GoToPageAsync(_firstPageId);
+            await service.GoToPageAsync(FirstPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _firstPageId);
+            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, FirstPageId);
 
-            service.GoToPageAsync(_foruthPageId);
+            await service.GoToPageAsync(ForuthPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _foruthPageId);
+            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, ForuthPageId);
             Assert.True(service.CanGoBack());
 
 
-            service.GoToPageAsync(_secondPageId);
+            await service.GoToPageAsync(SecondPageId);
             Assert.Equal(_sessionsStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, _secondPageId);
+            Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, SecondPageId);
 
 
-            service.GoToPageAsync(_sixthPageId);
+            await service.GoToPageAsync(SixthPageId);
             Assert.Equal(_sessionsStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, _sixthPageId);
+            Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, SixthPageId);
 
-            service.GoToPageAsync(_thirdPageId);
+            await service.GoToPageAsync(ThirdPageId);
             Assert.Equal(_settingsStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_settingsStoryboard.ActivePage.ViewModel.PageId, _thirdPageId);
+            Assert.Equal(_settingsStoryboard.ActivePage.ViewModel.PageId, ThirdPageId);
 
             
-            service.GoToPageAsync(_fifthPageId);
+            await service.GoToPageAsync(FifthPageId);
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _fifthPageId);
+            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, FifthPageId);
             
             Assert.True(service.CanGoBack());
-            service.GoBackAsync();
+            await service.GoBackAsync();
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _foruthPageId);
+            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, ForuthPageId);
 
             Assert.True(service.CanGoBack());
-            service.GoBackAsync();
+            await service.GoBackAsync();
             Assert.Equal(_patientStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, _firstPageId);
+            Assert.Equal(_patientStoryboard.ActivePage.ViewModel.PageId, FirstPageId);
 
             Assert.True(service.CanGoBack());
-            service.GoBackAsync();
+            await service.GoBackAsync();
             Assert.Equal(_settingsStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_settingsStoryboard.ActivePage.ViewModel.PageId, _thirdPageId);
+            Assert.Equal(_settingsStoryboard.ActivePage.ViewModel.PageId, ThirdPageId);
 
 
             Assert.True(service.CanGoBack());
-            service.GoBackAsync();
+            await service.GoBackAsync();
             Assert.Equal(_sessionsStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, _sixthPageId);
+            Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, SixthPageId);
             
             Assert.True(service.CanGoBack());
-            service.GoBackAsync();
+            await service.GoBackAsync();
             Assert.Equal(_sessionsStoryboard.StoryboardId, currentStoryboardId);
-            Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, _secondPageId);
+            Assert.Equal(_sessionsStoryboard.ActivePage.ViewModel.PageId, SecondPageId);
 
             Assert.False(service.CanGoBack());
 
@@ -286,8 +278,6 @@ namespace Markeli.Storyboards.UnitTests
 
         private class TestViewModel : IStoryboardPageViewModel
         {
-            public string Name { get; set; }
-
             public void Dispose()
             {
             }
@@ -325,36 +315,36 @@ namespace Markeli.Storyboards.UnitTests
                 return Task.CompletedTask;
             }
 
-            public event EventHandler PageCanceled;
-            public event EventHandler PageCompleted;
-            public event EventHandler PageBackRequested;
-            public event EventHandler<TransitionRequest> PageTransitionRequested;
+            public event Func<object, Task> PageCanceled;
 
-            public event EventHandler CanCloseChanged;
-            public event EventHandler CanLeaveChanged;
+            public event Func<object, Task> PageCompleted;
+
+            public event Func<object, Task> PageBackRequested;
+
+            public event Func<object, TransitionRequest, Task> PageTransitionRequested;
 
             public override string ToString()
             {
-                if (_firstPageId == PageId) { 
+                if (FirstPageId == PageId) { 
                         return "first";
                 }
-                if (_secondPageId == PageId)
+                if (SecondPageId == PageId)
                 {
                     return "second";
                 }
-                if (_thirdPageId == PageId)
+                if (ThirdPageId == PageId)
                 {
                     return "third";
                 }
-                if (_foruthPageId == PageId)
+                if (ForuthPageId == PageId)
                 {
                     return "fourth";
                 }
-                if (_fifthPageId == PageId)
+                if (FifthPageId == PageId)
                 {
                     return "fifth";
                 }
-                if (_sixthPageId == PageId)
+                if (SixthPageId == PageId)
                 {
                     return "sixth";
                 }

@@ -73,7 +73,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                            new SimpleCommand
                            {
                                CanExecuteDelegate = x => true,
-                               ExecuteDelegate = x => AddNewPatient()
+                               ExecuteDelegate = async x => await AddPatientAsync()
                            });
             }
         }
@@ -87,7 +87,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                            new SimpleCommand
                            {
                                CanExecuteDelegate = x => null != SelectedPatient,
-                               ExecuteDelegate = x => EditPatient()
+                               ExecuteDelegate = async x => await EditPatientAsync()
                            });
             }
         }
@@ -101,7 +101,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                            new SimpleCommand
                            {
                                CanExecuteDelegate = x => null != SelectedPatient,
-                               ExecuteDelegate = x=> DeletePatient()
+                               ExecuteDelegate = async x=> await DeletePatientAsync()
                            });
             }
         }
@@ -129,7 +129,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                            new SimpleCommand
                            {
                                CanExecuteDelegate = x => null != SelectedPatient,
-                               ExecuteDelegate = x => OpenSessions()
+                               ExecuteDelegate = async x => await OpenSessionsAsync()
                            });
             }
         }
@@ -142,23 +142,28 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             Patients = new ObservableCollection<Patient>();
         }
 
-        private void AddNewPatient()
+        private async Task AddPatientAsync()
         {
-            PageTransitionRequested?.Invoke(this, 
+            if (PageTransitionRequested == null) return;
+            await PageTransitionRequested.Invoke(this, 
                 new TransitionRequest(
                     PageIds.PatientPageId,
-                    new PatientPageContext { Patient = new Patient(), Mode = AccessMode.Create }));
+                    new PatientPageContext { Patient = new Patient(), Mode = AccessMode.Create }))
+                .ConfigureAwait(false);
         }
 
-        private void EditPatient()
+        private async Task EditPatientAsync()
         {
-            PageTransitionRequested?.Invoke(this,
+            if (PageTransitionRequested == null) return;
+
+            await PageTransitionRequested.Invoke(this,
                 new TransitionRequest(
                     PageIds.PatientPageId,
-                    new PatientPageContext {Patient = SelectedPatient, Mode = AccessMode.Edit}));
+                    new PatientPageContext {Patient = SelectedPatient, Mode = AccessMode.Edit}))
+                .ConfigureAwait(false);
         }
 
-        private async void DeletePatient()
+        private async Task DeletePatientAsync()
         {
             var result = await MessageHelper.Instance.ShowMessageAsync(Localisation.PatientsViewModel_DeletePatientQuestion,
                 style: MessageDialogStyle.AffirmativeAndNegative);
@@ -169,7 +174,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 {
                     try
                     {
-                        _patientsService.Delete(SelectedPatient.Id);
+                        await Task.Factory.StartNew(() => _patientsService.Delete(SelectedPatient.Id)).ConfigureAwait(true);
                         Patients.Remove(SelectedPatient);
                         SelectedPatient = null;
                     }
@@ -197,21 +202,22 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         private bool CanSearch(object sender)
         {
-            var searchQuery = sender as string;
-            if (null == searchQuery)
+            if (!(sender is string searchQuery))
             {
                 return false;
             }
             return !String.IsNullOrWhiteSpace(searchQuery);
         }
 
-        private void OpenSessions()
+        private async Task OpenSessionsAsync()
         {
-            PageTransitionRequested?.Invoke(this,
+            if (PageTransitionRequested == null) return;
+
+            await PageTransitionRequested.Invoke(this,
                 new TransitionRequest(PageIds.SessionsPageId, new SessionsPageContext
                 {
                     Patient = SelectedPatient
-                }));
+                })).ConfigureAwait(false);
         }
 
 
@@ -256,9 +262,12 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public Guid StoryboardId { get; set; }
 
-        public async Task OpenAsync(IStoryboardPageContext context)
+        public Task OpenAsync(IStoryboardPageContext context)
         {
-            await UpdatePatientsSafeAsync().ConfigureAwait(false);
+#pragma warning disable 4014
+            Task.Factory.StartNew(async () => await UpdatePatientsSafeAsync().ConfigureAwait(false));
+#pragma warning restore 4014
+            return Task.CompletedTask;
         }
 
         public Task<bool> CanLeaveAsync()
@@ -286,17 +295,13 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             return Task.CompletedTask;
         }
 
-        public event EventHandler PageCanceled;
+        public event Func<object, Task> PageCanceled;
 
-        public event EventHandler PageCompleted;
+        public event Func<object, Task> PageCompleted;
 
-        public event EventHandler PageBackRequested;
+        public event Func<object, Task> PageBackRequested;
 
-        public event EventHandler<TransitionRequest> PageTransitionRequested;
-
-        public event EventHandler CanCloseChanged;
-
-        public event EventHandler CanLeaveChanged;
+        public event Func<object, TransitionRequest, Task> PageTransitionRequested;
 
         #endregion
     }
