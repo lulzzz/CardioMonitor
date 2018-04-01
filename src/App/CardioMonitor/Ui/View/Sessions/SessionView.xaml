@@ -5,11 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
-             xmlns:sessions="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
-             xmlns:sessions1="clr-namespace:CardioMonitor.Ui.View.Sessions"
+             xmlns:sessionViewModels="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
+             xmlns:sessionViews="clr-namespace:CardioMonitor.Ui.View.Sessions"
+             xmlns:sessionProcessing="clr-namespace:CardioMonitor.BLL.SessionProcessing;assembly=CardioMonitor.BLL.SessionProcessing"
+
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="800"
-             d:DataContext="{d:DesignInstance  Type=sessions:SessionProcessingViewModel}">
+             d:DataContext="{d:DesignInstance  Type=sessionViewModels:SessionProcessingViewModel}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -85,7 +87,8 @@
 
                 <TabControl.ContentTemplate>
                     <DataTemplate>
-                        <sessions1:SessionCycleView/>
+                        <sessionViews:SessionCycleView
+                            d:DataContext="{d:DesignInstance Type=sessionProcessing:CycleData}"/>
                     </DataTemplate>
                 </TabControl.ContentTemplate>
             </TabControl>
@@ -168,7 +171,7 @@
                     <Border Grid.Column="1"
                             BorderBrush="{DynamicResource AccentColorBrush}"
                             BorderThickness="2">
-                        <TextBlock Text="{Binding CurrentAngle, StringFormat='{}{0:0.0°}'}"
+                        <TextBlock Text="{Binding CurrentXAngle, StringFormat='{}{0:0.0°}'}"
                                    VerticalAlignment="Center"
                                    FontSize="20"
                                    Margin="5"/>
