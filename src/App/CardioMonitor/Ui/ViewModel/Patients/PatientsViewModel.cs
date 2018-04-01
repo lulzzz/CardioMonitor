@@ -144,8 +144,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         private async Task AddPatientAsync()
         {
-            if (PageTransitionRequested == null) return;
-            await PageTransitionRequested.Invoke(this, 
+            await PageTransitionRequested.InvokeAsync(this, 
                 new TransitionRequest(
                     PageIds.PatientPageId,
                     new PatientPageContext { Patient = new Patient(), Mode = AccessMode.Create }))
@@ -154,9 +153,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         private async Task EditPatientAsync()
         {
-            if (PageTransitionRequested == null) return;
-
-            await PageTransitionRequested.Invoke(this,
+            await PageTransitionRequested.InvokeAsync(this,
                 new TransitionRequest(
                     PageIds.PatientPageId,
                     new PatientPageContext {Patient = SelectedPatient, Mode = AccessMode.Edit}))
@@ -211,9 +208,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         private async Task OpenSessionsAsync()
         {
-            if (PageTransitionRequested == null) return;
-
-            await PageTransitionRequested.Invoke(this,
+            await PageTransitionRequested.InvokeAsync(this,
                 new TransitionRequest(PageIds.PatientSessionsPageId, new PatientSessionsPageContext
                 {
                     Patient = SelectedPatient
@@ -264,9 +259,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public Task OpenAsync(IStoryboardPageContext context)
         {
-#pragma warning disable 4014
             Task.Factory.StartNew(async () => await UpdatePatientsSafeAsync().ConfigureAwait(false));
-#pragma warning restore 4014
             return Task.CompletedTask;
         }
 

@@ -109,9 +109,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private async Task StartSessionAsync()
         {
-            if (PageTransitionRequested == null) return;
-
-            await PageTransitionRequested.Invoke(
+            await PageTransitionRequested.InvokeAsync(
                 this, 
                 new TransitionRequest(
                     PageIds.SessionProcessingInitPageId, 
@@ -151,9 +149,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private async Task ShowResultsAsync()
         {
-            if (PageTransitionRequested == null) return;
-            
-            await PageTransitionRequested.Invoke(
+            await PageTransitionRequested.InvokeAsync(
                     this,
                     new TransitionRequest(
                         PageIds.SessionDataViewingPageId,

@@ -168,22 +168,21 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                         message = Localisation.PatientViewModel_Patient_Updated;
                         break;
                 }
+
                 IsSaved = true;
 
-                if (PageBackRequested != null)
-                {
-                    await PageBackRequested.Invoke(this).ConfigureAwait(true);
-                }
+                await PageBackRequested.InvokeAsync(this).ConfigureAwait(true);
             }
             catch (ArgumentNullException ex)
             {
-                _logger.LogError(nameof(PatientViewModel),ex);
+                _logger.LogError(nameof(PatientViewModel), ex);
                 message = Localisation.ArgumentNullExceptionMessage;
             }
             catch (Exception ex)
             {
                 message = ex.Message;
             }
+
             if (!String.IsNullOrEmpty(message))
             {
                 await MessageHelper.Instance.ShowMessageAsync(message);
