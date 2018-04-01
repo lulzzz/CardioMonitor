@@ -84,8 +84,7 @@
             Margin="0 10 0 10"
             IsChecked="{Binding IsAutopumpingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             OffLabel="Автонакачка отключена"
-            OnLabel="Автонакачка включена"
-            Style="{StaticResource MahApps.Metro.Styles.ToggleSwitch.Win10}" ContentDirection="LeftToRight" />
+            OnLabel="Автонакачка включена" ContentDirection="LeftToRight" />
         <StackPanel Grid.Row="6"
                     Orientation="Horizontal"
                     HorizontalAlignment="Center">

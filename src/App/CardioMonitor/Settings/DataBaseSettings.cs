@@ -1,6 +1,4 @@
-﻿using System.Data.SqlClient;
-
-namespace CardioMonitor.Settings
+﻿namespace CardioMonitor.Settings
 {
     /// <summary>
     /// Настройки подключения к базе данных

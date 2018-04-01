@@ -1,19 +1,21 @@
 ﻿using System.Windows.Controls;
-using CardioMonitor.Ui.ViewModel.Patients;
-using UserControl = System.Windows.Controls.UserControl;
+using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.View.Patients
 {
     /// <summary>
     /// Interaction logic for PatientsView.xaml
     /// </summary>
-    public partial class PatientsView : UserControl
+    public partial class PatientsView : IStoryboardPageView
     {
-        private readonly PatientsViewModel _viewModel;
+        public IStoryboardPageViewModel ViewModel
+        {
+            get => DataContext as IStoryboardPageViewModel;
+            set => DataContext = value;
+        }
 
         public PatientsView()
         {
-            DataContext = _viewModel;
 
             InitializeComponent();
         }
@@ -22,7 +24,7 @@ namespace CardioMonitor.Ui.View.Patients
         {
             if (0 == SearTB.Text.Length)
             {
-                _viewModel.CancelSearch();
+               // _viewModel.CancelSearch();
             }
         }
 

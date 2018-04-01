@@ -1,18 +1,20 @@
-﻿using System.Windows.Controls;
-using CardioMonitor.Ui.ViewModel.Sessions;
+﻿using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.View.Sessions
 {
     /// <summary>
     /// Interaction logic for SessionsView.xaml
     /// </summary>
-    public partial class PatientSessionsView : UserControl
+    public partial class PatientSessionsView : IStoryboardPageView
     {
-        private PatientSessionsViewModel _viewModel;
+        public IStoryboardPageViewModel ViewModel
+        {
+            get => DataContext as IStoryboardPageViewModel;
+            set => DataContext = value;
+        }
 
         public PatientSessionsView()
         {
-            DataContext = _viewModel;
 
             InitializeComponent();
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Net;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Bed.UDP;

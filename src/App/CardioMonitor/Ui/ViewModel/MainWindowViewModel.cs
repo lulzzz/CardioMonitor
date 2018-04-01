@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
@@ -15,7 +13,6 @@ using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui.Base;
-using CardioMonitor.Ui.Communication;
 using CardioMonitor.Ui.View.Patients;
 using CardioMonitor.Ui.View.Sessions;
 using CardioMonitor.Ui.View.Settings;
@@ -23,7 +20,6 @@ using CardioMonitor.Ui.ViewModel.Patients;
 using CardioMonitor.Ui.ViewModel.Sessions;
 using CardioMonitor.Ui.ViewModel.Settings;
 using JetBrains.Annotations;
-using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel{
@@ -136,7 +132,7 @@ namespace CardioMonitor.Ui.ViewModel{
             TaskHelper taskHelper,
             [NotNull] IWorkerController workerController, 
             [NotNull] StoryboardsNavigationService storyboardsNavigationService,
-            SimpleInjectorPageCreator pageCreator)
+            IStoryboardPageCreator pageCreator)
         {
             if (deviceControllerFactory == null) throw new ArgumentNullException(nameof(deviceControllerFactory));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
@@ -190,30 +186,28 @@ namespace CardioMonitor.Ui.ViewModel{
                 view: typeof(SessionDataView),
                 viewModel: typeof(SessionDataViewModel),
                 isStartPage: false);
-
-            SettingsStoryboard = new Storyboard(StoryboardIds.SettingsStoryboardId);
-
-            SessionsStoryboard.RegisterPage(
-                PageIds.SettingsPageId,
-                view: typeof(SettingsView),
-                viewModel: typeof(SettingsViewModel),
-                isStartPage: true);
-
-
-
+            
             SessionProcessingStoryboard = new Storyboard(StoryboardIds.SessionProcessingStoryboardId);
 
-            SessionsStoryboard.RegisterPage(
+            SessionProcessingStoryboard.RegisterPage(
                 PageIds.SessionProcessingInitPageId,
                 view: typeof(SessionProcessingInitView),
                 viewModel: typeof(SessionProcessingInitViewModel),
                 isStartPage: true);
 
-            SessionsStoryboard.RegisterPage(
+            SessionProcessingStoryboard.RegisterPage(
                 PageIds.SessionProcessingPageId,
                 view: typeof(SessionProcessingView),
                 viewModel: typeof(SessionProcessingViewModel),
                 isStartPage: false);
+
+            SettingsStoryboard = new Storyboard(StoryboardIds.SettingsStoryboardId);
+
+            SettingsStoryboard.RegisterPage(
+                PageIds.SettingsPageId,
+                view: typeof(SettingsView),
+                viewModel: typeof(SettingsViewModel),
+                isStartPage: true);
 
             _storyboardsNavigationService.RegisterStoryboard(PatientsStoryboard);
             _storyboardsNavigationService.RegisterStoryboard(SessionsStoryboard);
@@ -233,6 +227,23 @@ namespace CardioMonitor.Ui.ViewModel{
         private void RiseCanGoBackChaned(object sender, EventArgs args)
         {
             RisePropertyChanged(nameof(MoveBackwardCommand));
+        }
+
+        public void OpenStartStoryboard()
+        {
+            Task.Factory.StartNew(async () =>
+                {
+                    try
+                    {
+
+                        await _storyboardsNavigationService.GoToStoryboardAsync(StoryboardIds.PatientsStoryboardId)
+                            .ConfigureAwait(false);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Log(e.Message);
+                    }
+                });
         }
         
 

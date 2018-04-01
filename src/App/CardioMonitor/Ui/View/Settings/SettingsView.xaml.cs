@@ -1,17 +1,16 @@
-﻿using CardioMonitor.Ui.ViewModel.Settings;
-using UserControl = System.Windows.Controls.UserControl;
+﻿using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.View.Settings
 {
     /// <summary>
     /// Interaction logic for SettingsView.xaml
     /// </summary>
-    public partial class SettingsView : UserControl
+    public partial class SettingsView : IStoryboardPageView
     {
-        public SettingsViewModel ViewModel
+        public IStoryboardPageViewModel ViewModel
         {
-            get { return DataContext as SettingsViewModel; }
-            set { DataContext = value; }
+            get => DataContext as IStoryboardPageViewModel;
+            set => DataContext = value;
         }
 
         public SettingsView()

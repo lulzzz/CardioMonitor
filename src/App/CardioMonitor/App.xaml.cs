@@ -19,6 +19,7 @@ using CardioMonitor.Ui.ViewModel.Sessions;
 using CardioMonitor.Ui.ViewModel.Settings;
 using Markeli.Storyboards;
 using SimpleInjector;
+using SimpleInjector.Lifestyles;
 
 namespace CardioMonitor
 {
@@ -60,10 +61,10 @@ namespace CardioMonitor
             container.Register<SessionProcessingViewModel>(Lifestyle.Transient);
             container.Register<SessionsViewModel>(Lifestyle.Transient);
             container.Register<SettingsViewModel>(Lifestyle.Transient);
-            container.Register<IStoryboardPageCreator, SimpleInjectorPageCreator>(Lifestyle.Singleton);
-            container.Register<StoryboardsNavigationService>(Lifestyle.Transient);
+            container.Register<IStoryboardPageCreator, SimpleInjectorPageCreator>(Lifestyle.Transient);
+            container.Register<StoryboardsNavigationService>(Lifestyle.Singleton);
 
-            container.Verify();
+           // container.Verify();
 
             return container;
         }

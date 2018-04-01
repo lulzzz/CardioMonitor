@@ -1,5 +1,4 @@
-﻿using CardioMonitor.BLL.CoreContracts.Patients;
-using Markeli.Storyboards;
+﻿using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {

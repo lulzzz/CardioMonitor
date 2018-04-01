@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows;
-using CardioMonitor.Threading;
 using CardioMonitor.Ui.ViewModel;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
@@ -61,7 +60,7 @@ namespace CardioMonitor.Ui.View
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
-          //  _viewModel.UpdatePatiens();
+            _viewModel.OpenStartStoryboard();
         }
 
         private async void MetroWindow_Closed(object sender, EventArgs e)
@@ -90,7 +89,7 @@ namespace CardioMonitor.Ui.View
 
         private void HamburgerMenu_OnItemClick(object sender, ItemClickEventArgs e)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         private void HamburgerMenuControl_OnItemInvoked(object sender, HamburgerMenuItemInvokedEventArgs e)
