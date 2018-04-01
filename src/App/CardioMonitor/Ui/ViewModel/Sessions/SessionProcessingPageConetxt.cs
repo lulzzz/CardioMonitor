@@ -5,14 +5,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class SessionProcessingPageConetxt : IStoryboardPageContext
     {
-        public Patient Patient { get; set; }
+        public int PatientId { get; set; }
 
         public bool IsAutopumpingEnabled { get; set; }
 
         /// <summary>
         /// Максимальный угол кровати по оси Х, до которой она будет подниматься
         /// </summary>
-        public double MaxAngleX { get; set; }
+        public float MaxAngleX { get; set; }
 
         /// <summary>
         /// Количество циклов (повторений)
