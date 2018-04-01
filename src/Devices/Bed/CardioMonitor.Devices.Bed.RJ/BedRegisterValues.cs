@@ -63,7 +63,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// </summary>
         public BedStatus BedStatus { get; set; }
 
-        /// <summary>
+        /// <summary> 
         /// Код ошибки
         /// </summary>
         /// todo напомнить уточнить необходимость отображения и списка ошибок

@@ -147,11 +147,11 @@ namespace CardioMonitor.Devices.Bed.UDP
             //todo здесь получение массива с регистрами и обновление результатов в _registerList
             //todo никакой обработки ошибок делать не надо
             await Task.Yield();
-            //здесь короче запрос данных и их парсинг - todo сделать сейчас!
-            var message = new BedMessage(); // todo мб сделать static ?
+            //здесь короче запрос данных и их парсинг 
+            var message = new BedMessage(BedMessageEventType.ReadAll, 0 ); 
             await _udpClient.SendAsync(message.GetAllRegisterMessage(), message.GetAllRegisterMessage().Length);
             var receiveMessage = await _udpClient.ReceiveAsync();
-            _registerValues = message.SettAllRegisterValues(receiveMessage.Buffer);
+            _registerValues = message.SetAllRegisterValues(receiveMessage.Buffer);
         }
         
         /// <summary>
@@ -191,7 +191,7 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         private void AssertConnection()
         {
-            if (!IsConnected) throw new InvalidOperationException($"Соединение с кроватью не уставнолено. Установите соединение с помощью метода {nameof(ConnectAsync)}");
+            if (!IsConnected) throw new InvalidOperationException($"Соединение с кроватью не установлено. Установите соединение с помощью метода {nameof(ConnectAsync)}");
         }
         
         public async Task ExecuteCommandAsync(BedControlCommand command)

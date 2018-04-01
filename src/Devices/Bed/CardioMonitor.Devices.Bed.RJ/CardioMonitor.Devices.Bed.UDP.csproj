@@ -36,6 +36,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Half, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+      <HintPath>..\..\..\libs\System.Half.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -47,6 +50,7 @@
     <Compile Include="BedMessage.cs" />
     <Compile Include="BedMessageCRC16.cs" />
     <Compile Include="BedMessageEventType.cs" />
+    <Compile Include="BedRegisterPosition.cs" />
     <Compile Include="BedRegisterValues.cs" />
     <Compile Include="BedUDPController.cs" />
     <Compile Include="BedUdpControllerInitParams.cs" />
