@@ -17,6 +17,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private PatientFullName _patientName;
         private SessionInfo _selectedSessionInfo;
         private ObservableCollection<SessionInfo> _sessionInfos;
+        private Patient _patient;
 
         private ICommand _startSessionCommand;
         private ICommand _deleteSessionCommand;
@@ -30,39 +31,41 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public PatientFullName PatientName
         {
-            get { return _patientName; }
+            get => _patientName;
             set
             {
                 if (value != _patientName)
                 {
                     _patientName = value;
-                    RisePropertyChanged("PatientEntity");
+                    RisePropertyChanged(nameof(PatientName));
                 }
             }
         }
 
         public SessionInfo SelectedSessionInfo
         {
-            get { return _selectedSessionInfo; }
+            get => _selectedSessionInfo;
             set
             {
                 if (value != _selectedSessionInfo)
                 {
                     _selectedSessionInfo = value;
-                    RisePropertyChanged("SelectedSessionInfo");
+                    RisePropertyChanged(nameof(SelectedSessionInfo));
+                    RisePropertyChanged(nameof(ShowResultsCommand));
+                    RisePropertyChanged(nameof(DeleteSessionCommand));
                 }
             }
         }
 
         public ObservableCollection<SessionInfo> SessionInfos
         {
-            get { return _sessionInfos; }
+            get => _sessionInfos;
             set
             {
                 if (value != _sessionInfos)
                 {
                     _sessionInfos = value;
-                    RisePropertyChanged("SessionInfos");
+                    RisePropertyChanged(nameof(SessionInfos));
                 }
             }
         }
@@ -108,12 +111,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             if (PageTransitionRequested == null) return;
 
-            //todo context
             await PageTransitionRequested.Invoke(
                 this, 
                 new TransitionRequest(
-                    PageIds.SessionProcessingPageId, 
-                    null))
+                    PageIds.SessionProcessingInitPageId, 
+                    new SessionProcessingInitPageContext
+                    {
+                        Patient = _patient
+                    }))
                 .ConfigureAwait(true);
         }
 
@@ -147,13 +152,16 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private async Task ShowResultsAsync()
         {
             if (PageTransitionRequested == null) return;
-
-            //todo context
+            
             await PageTransitionRequested.Invoke(
                     this,
                     new TransitionRequest(
                         PageIds.SessionDataViewingPageId,
-                        null))
+                        new SessionDataViewingPageContext
+                        {
+                            Patient = _patient,
+                            SessionId = SelectedSessionInfo.Id
+                        }))
                 .ConfigureAwait(true);
         }
 
@@ -169,6 +177,29 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         }
 
+        private async Task LoadSessionsAsync()
+        {
+            var message = String.Empty;
+            try
+            {
+                var sessions = await Task.Factory.StartNew(() => _sessionsService.GetInfos(_patient.Id))
+                    .ConfigureAwait(true);
+                SessionInfos = sessions != null
+                    ? new ObservableCollection<SessionInfo>(sessions)
+                    : new ObservableCollection<SessionInfo>();
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+
+            if (!String.IsNullOrEmpty(message))
+            {
+                await MessageHelper.Instance.ShowMessageAsync(message);
+            }
+
+        }
+
         #region IStoryboardPageViewModel
         
         public Guid PageId { get; set; }
@@ -176,7 +207,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task OpenAsync(IStoryboardPageContext context)
         {
-            throw new NotImplementedException();
+            if (!(context is PatientSessionsPageContext pageContext)) throw new ArgumentException("Incorrect type of arguments");
+
+            _patient = pageContext.Patient;
+
+            Task.Factory.StartNew(async () => await LoadSessionsAsync().ConfigureAwait(false));
+            return Task.CompletedTask;
         }
 
         public Task<bool> CanLeaveAsync()
@@ -191,7 +227,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task ReturnAsync(IStoryboardPageContext context)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
 
         public Task<bool> CanCloseAsync()

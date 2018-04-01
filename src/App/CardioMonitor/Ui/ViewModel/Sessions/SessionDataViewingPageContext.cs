@@ -7,6 +7,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     {
         public Patient Patient { get; set; }
 
-        public SessionModel SessionModel { get; set; }
+        public int SessionId { get; set; }
     }
 }
