@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using CardioMonitor.Data.Contracts.Entities.Patients;
-using CardioMonitor.Data.Contracts.Entities.Treatments;
 
 namespace CardioMonitor.Data.Contracts.Entities.Sessions
 {

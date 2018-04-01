@@ -16,7 +16,7 @@ namespace CardioMonitor.BLL.Mappers
                 DateTime = session.DateTime,
                 Id = session.Id,
                 Status = session.Status.ToSessionCompletionStatus(),
-                TreatmentId = session.PatientId,
+                PatientId = session.PatientId,
                 Cycles = session.Cycles.Select(x => x.ToEntity()).ToList()
             };
             foreach (var sessionCycleEntity in entity.Cycles)
@@ -36,7 +36,7 @@ namespace CardioMonitor.BLL.Mappers
                 DateTime = session.DateTime,
                 Id = session.Id,
                 Status = session.Status.ToSessionStatus(),
-                PatientId = session.TreatmentId
+                PatientId = session.PatientId
             };
         }
 

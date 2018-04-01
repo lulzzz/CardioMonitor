@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 
 namespace Markeli.Storyboards
@@ -9,17 +10,17 @@ namespace Markeli.Storyboards
 
         Guid StoryboardId { get; set; }
 
-        void Open([CanBeNull] IStoryboardPageContext context);
+        Task OpenAsync([CanBeNull] IStoryboardPageContext context);
 
-        bool CanLeave();
+        Task<bool> CanLeaveAsync();
 
-        void Leave();
+        Task LeaveAsync();
         
-        void Return([CanBeNull] IStoryboardPageContext context);
+        Task ReturnAsync([CanBeNull] IStoryboardPageContext context);
 
-        bool CanClose();
+        Task<bool> CanCloseAsync();
 
-        void Close();
+        Task CloseAsync();
 
         event EventHandler PageCanceled;
 

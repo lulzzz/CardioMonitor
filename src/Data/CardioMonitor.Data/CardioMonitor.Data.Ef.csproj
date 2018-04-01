@@ -63,11 +63,9 @@
     <Compile Include="Configurations\PatientParamsConfiguration.cs" />
     <Compile Include="Configurations\SessionConfiguration.cs" />
     <Compile Include="Configurations\SessionCycleConfiguration.cs" />
-    <Compile Include="Configurations\TreatmentConfiguration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\PatientsRepository.cs" />
     <Compile Include="Repositories\SessionsRepository.cs" />
-    <Compile Include="Repositories\TreatmentsRepository.cs" />
     <Compile Include="UnitOfWork\CardioMonitorEfUnitOfWorkFactory.cs" />
   </ItemGroup>
   <ItemGroup>

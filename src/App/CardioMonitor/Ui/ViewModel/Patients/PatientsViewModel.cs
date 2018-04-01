@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
+using CardioMonitor.Ui.ViewModel.Sessions;
 using MahApps.Metro.Controls.Dialogs;
+using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
 {
-    public class PatientsViewModel : Notifier
+    public class PatientsViewModel : Notifier, IStoryboardPageViewModel
     {
         private readonly IPatientsService _patientsService;
         private int _seletedPatientIndex;
@@ -19,11 +22,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         private ICommand _addNewPatientCommand;
         private ICommand _deletePatientCommand;
         private ICommand _editPateintCommand;
-        private ICommand _openPatientCommand;
         private ICommand _patientSearchCommand;
         private ICommand _opentSesionsCommand;
-        private ICommand _showTreatmentResultsCommand;
-        private ICommand _openSessionCommand;
 
         public int SelectedPatientIndex
         {
@@ -106,20 +106,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             }
         }
 
-        public ICommand OpenPatientCommand
-        {
-            get
-            {
-                return _openPatientCommand ??
-                       (_openPatientCommand =
-                           new SimpleCommand
-                           {
-                               CanExecuteDelegate = x => null != SelectedPatient,
-                               ExecuteDelegate = x => OpenPatientsTreatment(x)
-                           });
-            }
-        }
-
         public ICommand PatientSearchCommand
         {
             get
@@ -147,57 +133,29 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                            });
             }
         }
-
-        public ICommand ShowResultsCommand
-        {
-            get
-            {
-                return _showTreatmentResultsCommand ??
-                       (_showTreatmentResultsCommand =
-                           new SimpleCommand
-                           {
-                               CanExecuteDelegate = x => null != SelectedPatient,
-                               ExecuteDelegate = x => ShowResults()
-                           });
-            }
-        }
-
-        public ICommand OpenSessionCommand
-        {
-            get
-            {
-                return _openSessionCommand ?? (_openSessionCommand = new SimpleCommand
-                {
-                    CanExecuteDelegate = x => true,
-                    ExecuteDelegate = x => OpenSession()
-                });
-            }
-        }
-
-        //temporary not used
-        public EventHandler OpenPatienEvent { get; set; }
-        public EventHandler AddEditPatient { get; set; }
-        public EventHandler OpenSessionsHandler { get; set; }
-        public EventHandler ShowTreatmentResults { get; set; }
-        public EventHandler OpenSessionHandler { get; set; }
+        
 
         public PatientsViewModel(IPatientsService patientsService)
         {
-            if (patientsService == null) throw new ArgumentNullException(nameof(patientsService));
-
-            _patientsService = patientsService;
+            _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
 
             Patients = new ObservableCollection<Patient>();
         }
 
         private void AddNewPatient()
         {
-            AddEditPatient?.Invoke(this, new PatientEventArgs { Patient = new Patient(), Mode = AccessMode.Create });
+            PageTransitionRequested?.Invoke(this, 
+                new TransitionRequest(
+                    PageIds.PatientPageId,
+                    new PatientPageContext { Patient = new Patient(), Mode = AccessMode.Create }));
         }
 
         private void EditPatient()
         {
-            AddEditPatient?.Invoke(this, new PatientEventArgs { Patient = SelectedPatient, Mode = AccessMode.Edit });
+            PageTransitionRequested?.Invoke(this,
+                new TransitionRequest(
+                    PageIds.PatientPageId,
+                    new PatientPageContext {Patient = SelectedPatient, Mode = AccessMode.Edit}));
         }
 
         private async void DeletePatient()
@@ -226,14 +184,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 }
             }
         }
-
-        private void OpenPatientsTreatment(object sender)
-        {
-            var patient = sender as Patient;
-            if (null == patient) { return; }
-            //here we send id of patientEntity and
-            OpenPatienEvent?.Invoke(this, new CardioEventArgs(patient.Id));
-        }
         
         private void PatientSearch(object sender)
         {
@@ -257,20 +207,97 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         private void OpenSessions()
         {
-            var handler = OpenSessionsHandler;
-            handler?.Invoke(this, null);
+            PageTransitionRequested?.Invoke(this,
+                new TransitionRequest(PageIds.SessionsPageId, new SessionsPageContext
+                {
+                    Patient = SelectedPatient
+                }));
         }
 
-        private void ShowResults()
+
+        public void Dispose()
         {
-            var handler = ShowTreatmentResults;
-            handler?.Invoke(this, null);
         }
 
-        private void OpenSession()
+        private async Task UpdatePatientsSafeAsync()
         {
-            var handler = OpenSessionHandler;
-            handler?.Invoke(this, null);
+            var message = String.Empty;
+            var a = await MessageHelper.Instance.ShowProgressDialogAsync("Загрузка списка пациентов...")
+                .ConfigureAwait(true);
+            try
+            {
+                var patients = await Task.Factory.StartNew(() => _patientsService.GetAll()).ConfigureAwait(true);
+                Patients = patients != null
+                    ? new ObservableCollection<Patient>(patients)
+                    : new ObservableCollection<Patient>();
+
+            }
+            catch (Exception ex)
+            {
+                message = ex.Message;
+            }
+            finally
+            {
+                await a.CloseAsync().ConfigureAwait(true);
+            }
+            if (!String.IsNullOrEmpty(message))
+            {
+
+                await MessageHelper.Instance.ShowMessageAsync(message);
+            }
         }
+
+        #region IStoryboardViewModel
+
+
+
+
+        public Guid PageId { get; set; }
+
+        public Guid StoryboardId { get; set; }
+
+        public async Task OpenAsync(IStoryboardPageContext context)
+        {
+            await UpdatePatientsSafeAsync().ConfigureAwait(false);
+        }
+
+        public Task<bool> CanLeaveAsync()
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task LeaveAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task ReturnAsync(IStoryboardPageContext context)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> CanCloseAsync()
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task CloseAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public event EventHandler PageCanceled;
+
+        public event EventHandler PageCompleted;
+
+        public event EventHandler PageBackRequested;
+
+        public event EventHandler<TransitionRequest> PageTransitionRequested;
+
+        public event EventHandler CanCloseChanged;
+
+        public event EventHandler CanLeaveChanged;
+
+        #endregion
     }
 }

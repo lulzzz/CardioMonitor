@@ -10,9 +10,9 @@ namespace CardioMonitor.Ui.View.Sessions
     public partial class PatientTreatmentSession : UserControl
     {
 
-        public SessionViewModel ViewModel
+        public SessionProcessingViewModel ViewModel
         {
-            get { return DataContext as SessionViewModel; }
+            get { return DataContext as SessionProcessingViewModel; }
             set
             {
                 DataContext = value;

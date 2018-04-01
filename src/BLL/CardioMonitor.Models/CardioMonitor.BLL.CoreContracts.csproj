@@ -53,11 +53,6 @@
     <Compile Include="Session\SessionCycle.cs" />
     <Compile Include="Session\SessionInfo.cs" />
     <Compile Include="Session\SessionStatus.cs" />
-    <Compile Include="Treatment\ITreatmentsService.cs" />
-    <Compile Include="Treatment\Statistic.cs" />
-    <Compile Include="Treatment\Treatment.cs" />
-    <Compile Include="Treatment\TreatmentFullStatistic.cs" />
-    <Compile Include="Treatment\TreatmentParamStatistic.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

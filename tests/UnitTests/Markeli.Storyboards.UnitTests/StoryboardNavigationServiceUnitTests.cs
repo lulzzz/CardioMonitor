@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Moq;
 using Xunit;
 
@@ -294,36 +295,43 @@ namespace Markeli.Storyboards.UnitTests
             public Guid PageId { get; set; }
             public Guid StoryboardId { get; set; }
 
-            public void Open(IStoryboardPageContext context)
+            public Task OpenAsync(IStoryboardPageContext context)
             {
+                return Task.CompletedTask;
             }
 
-            public bool CanLeave()
+            public Task<bool> CanLeaveAsync()
             {
-                return true;
+                return Task.FromResult(true);
             }
 
-            public void Leave()
+            public Task LeaveAsync()
             {
+                return Task.CompletedTask;
             }
 
-            public void Return(IStoryboardPageContext context)
+            public Task ReturnAsync(IStoryboardPageContext context)
             {
+                return Task.CompletedTask;
             }
 
-            public bool CanClose()
+            public Task<bool> CanCloseAsync()
             {
-                return true;
+                return Task.FromResult(true);
             }
 
-            public void Close()
+            public Task CloseAsync()
             {
+                return Task.CompletedTask;
             }
 
             public event EventHandler PageCanceled;
             public event EventHandler PageCompleted;
             public event EventHandler PageBackRequested;
             public event EventHandler<TransitionRequest> PageTransitionRequested;
+
+            public event EventHandler CanCloseChanged;
+            public event EventHandler CanLeaveChanged;
 
             public override string ToString()
             {

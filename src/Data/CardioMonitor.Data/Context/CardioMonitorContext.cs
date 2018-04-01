@@ -15,7 +15,6 @@ namespace CardioMonitor.Data.Ef.Context
     public class CardioMonitorContext : DbContext
     {
         public virtual DbSet<PatientEntity> Patients { get; set; }
-        public virtual DbSet<TreatmentEntity> Treatments { get; set; }
         public virtual DbSet<SessionEntity> Sessions { get; set; }
         public virtual DbSet<SessionCycleEntity> SessionCycles { get; set; }
         public virtual DbSet<PatientParamsEntity> PatientParams { get; set; }

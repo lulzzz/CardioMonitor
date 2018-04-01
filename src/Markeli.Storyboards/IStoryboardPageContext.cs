@@ -1,6 +1,6 @@
 ﻿namespace Markeli.Storyboards
 {
-    public interface IPageContext
+    public interface IStoryboardPageContext
     {
 
     }

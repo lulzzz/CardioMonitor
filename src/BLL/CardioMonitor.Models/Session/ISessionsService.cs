@@ -8,10 +8,10 @@ namespace CardioMonitor.BLL.CoreContracts.Session
 
         Session Get(int sessionId);
 
-        List<Session> GetAll(int treatmentId);
+        List<Session> GetAll(int patientId);
 
 
-        List<SessionInfo> GetInfos(int treatmentId);
+        List<SessionInfo> GetInfos(int patientId);
 
         void Delete(int sessionId);
     }

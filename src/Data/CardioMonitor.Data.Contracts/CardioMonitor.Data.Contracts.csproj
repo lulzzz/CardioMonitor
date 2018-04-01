@@ -50,12 +50,10 @@
     <Compile Include="Entities\Sessions\SessionCompletionStatus.cs" />
     <Compile Include="Entities\Sessions\SessionCycleEntity.cs" />
     <Compile Include="Entities\Sessions\SessionEntity.cs" />
-    <Compile Include="Entities\Treatments\TreatmentEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\IDataBaseRepository.cs" />
     <Compile Include="Repositories\IPatientsRepository.cs" />
     <Compile Include="Repositories\ISessionsRepository.cs" />
-    <Compile Include="Repositories\ITreatmentsRepository.cs" />
     <Compile Include="UnitOfWork\ICardioMonitorUnitOfWork.cs" />
     <Compile Include="UnitOfWork\ICardioMonitorUnitOfWorkFactory.cs" />
   </ItemGroup>

@@ -14,7 +14,7 @@ namespace CardioMonitor.Data.Ef.Configurations
             Property(x => x.LastName).HasColumnName("LastName");
             Property(x => x.BirthDate).HasColumnName("BirthDate");
 
-            HasMany(x => x.Treatments)
+            HasMany(x => x.Sessions)
                 .WithRequired(t => t.PatientEntity)
                 .HasForeignKey(t => t.PatientId);
         }

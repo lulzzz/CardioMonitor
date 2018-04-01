@@ -1,14 +1,17 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
+using MahApps.Metro.Controls.Dialogs;
+using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
 {
-    public class PatientViewModel : Notifier//, IStoryboardViewModel
+    public class PatientViewModel : Notifier, IStoryboardPageViewModel
     {
         private readonly ILogger _logger;
         private readonly IPatientsService _patientsService;
@@ -80,6 +83,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     _lastName = value;
                     RisePropertyChanged("LastName");
                     IsSaved = false;
+                    CanCloseChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -94,6 +98,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     _firstName = value;
                     RisePropertyChanged("FirstName");
                     IsSaved = false;
+                    CanCloseChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -108,6 +113,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     _patronymicName = value;
                     RisePropertyChanged("PatronymicName");
                     IsSaved = false;
+                    CanCloseChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
         }
@@ -120,7 +126,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     _birthDate = value;
                     RisePropertyChanged("BirthDate");
                     IsSaved = false;
-                
+                CanCloseChanged?.Invoke(this, EventArgs.Empty);
+
             }
         }
 
@@ -166,8 +173,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                         break;
                 }
                 IsSaved = true;
-                var hanlder = MoveBackwardEvent;
-                hanlder?.Invoke(null, null);
+                PageBackRequested?.Invoke(this, EventArgs.Empty);
             }
             catch (ArgumentNullException ex)
             {
@@ -183,13 +189,70 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 await MessageHelper.Instance.ShowMessageAsync(message);
             }
         }
+        
+        public void Dispose()
+        {
+        }
 
-        public void Clear()
+        #region StoryBoardPageViewModel
+
+
+        public Guid PageId { get; set; }
+        public Guid StoryboardId { get; set; }
+
+        public Task OpenAsync(IStoryboardPageContext context)
+        {
+            if (!(context is PatientPageContext pageContext)) throw new ArgumentException("Incorrect type of arguments");
+
+            Patient = pageContext.Patient;
+            AccessMode = pageContext.Mode;
+
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> CanLeaveAsync()
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task LeaveAsync()
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task ReturnAsync(IStoryboardPageContext context)
+        {
+            return Task.CompletedTask;
+        }
+
+        public async Task<bool> CanCloseAsync()
+        {
+            if (!IsSaved)
+            {
+                var result = await MessageHelper.Instance.ShowMessageAsync("Все несохраненные изменения будут потеряны. Вы уверены?", "Cardio Monitor", MessageDialogStyle.AffirmativeAndNegative).ConfigureAwait(true);
+                return result == MessageDialogResult.Affirmative;
+            }
+
+            return true;
+        }
+
+        public Task CloseAsync()
         {
             FirstName = String.Empty;
             LastName = String.Empty;
             PatronymicName = String.Empty;
             BirthDate = null;
+            return Task.CompletedTask;
         }
+
+        public event EventHandler PageCanceled;
+        public event EventHandler PageCompleted;
+        public event EventHandler PageBackRequested;
+        public event EventHandler<TransitionRequest> PageTransitionRequested;
+        public event EventHandler CanCloseChanged;
+        public event EventHandler CanLeaveChanged;
+
+        #endregion
+
     }
 }

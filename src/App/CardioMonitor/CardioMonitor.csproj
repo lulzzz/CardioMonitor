@@ -194,7 +194,10 @@
     <Compile Include="Ui\Base\SimpleCommand.cs" />
     <Compile Include="Ui\Communication\TreatmentAction.cs" />
     <Compile Include="Ui\Communication\TreatmentEventArgs.cs" />
+    <Compile Include="Ui\StoryboardIds.cs" />
     <Compile Include="Ui\ViewModel\MainWindowViewModel.cs" />
+    <Compile Include="Ui\PageIds.cs" />
+    <Compile Include="Ui\ViewModel\Patients\PatientPageContext.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionCycleViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionViewModel.cs" />
     <Compile Include="Ui\View\Patients\PatientsView.xaml.cs">
@@ -220,18 +223,6 @@
       <DependentUpon>SessionDataView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\ViewModel\Sessions\OldSessionViewModel.cs" />
-    <Compile Include="Ui\ViewModel\Treatments\TreatmentDataViewModel.cs" />
-    <Compile Include="Statistics\TreatmentStatisticBuilder.cs" />
-    <Compile Include="Ui\View\Treatments\TreatmentsView.xaml.cs">
-      <DependentUpon>TreatmentsView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Ui\View\Treatments\TreatmentDataView.xaml.cs">
-      <DependentUpon>TreatmentDataView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Ui\View\Treatments\TreatmentParametrGridView.xaml.cs">
-      <DependentUpon>TreatmentParametrGridView.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Ui\ViewModel\Treatments\TreatmentsViewModel.cs" />
     <Compile Include="Settings\AppAppearanceSettings.cs" />
     <Compile Include="Settings\DataBaseSettings.cs" />
     <Compile Include="Settings\CardioSettings.cs" />
@@ -278,18 +269,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Ui\View\Sessions\SessionDataView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Ui\View\Treatments\TreatmentsView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Ui\View\Treatments\TreatmentDataView.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Ui\View\Treatments\TreatmentParametrGridView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

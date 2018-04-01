@@ -11,7 +11,7 @@ namespace Markeli.Storyboards
         private readonly Dictionary<Guid, IStoryboardPageView> _cachedPages;
         private readonly LinkedList<InnerStoryboardPageInfo> _journal;
         private readonly Dictionary<Guid, Storyboard> _storyboards;
-        private readonly Dictionary<Guid, IPageContext> _pageContexts;
+        private readonly Dictionary<Guid, IStoryboardPageContext> _pageContexts;
         private bool _isStartPagesCreated;
 
         private readonly Dictionary<Guid, bool> _startPagesOpenningStat;
@@ -30,7 +30,7 @@ namespace Markeli.Storyboards
             _cachedPages = new Dictionary<Guid, IStoryboardPageView>();
             _journal = new LinkedList<InnerStoryboardPageInfo>();
             _storyboards = new Dictionary<Guid, Storyboard>();
-            _pageContexts = new Dictionary<Guid, IPageContext>();
+            _pageContexts = new Dictionary<Guid, IStoryboardPageContext>();
             _isStartPagesCreated = false;
             _pageCreator = new DefaultStoryboardCreator();
             _startPagesOpenningStat = new Dictionary<Guid, bool>();
@@ -77,7 +77,7 @@ namespace Markeli.Storyboards
             _registeredPages[pageInstanceInfo] = creationInfo;
         }
 
-        public void CreateStartPages(Dictionary<Guid, IPageContext> startPageContexts = null)
+        public void CreateStartPages(Dictionary<Guid, IStoryboardPageContext> startPageContexts = null)
         {
             if (_isStartPagesCreated) throw new InvalidOperationException("Start pages have been alread created");
 
@@ -90,7 +90,7 @@ namespace Markeli.Storyboards
                 var view = CreatePageView(startPageInfo);
                 storyboard.Value.ActivePage = view;
                 _startPagesOpenningStat[startPageInfo.PageUniqueId] = false;
-                IPageContext context = null;
+                IStoryboardPageContext context = null;
                 startPageContexts?.TryGetValue(startPageInfo.PageUniqueId, out context);
                 _pageContexts[startPageInfo.PageUniqueId] = context;
             }
@@ -159,7 +159,7 @@ namespace Markeli.Storyboards
             HandleViewModelTransitions(sender, PageTransitionTrigger.Back);
         }
 
-        public void GoToPage(Guid pageId, Guid? storyboardId = null, IPageContext pageContext = null)
+        public void GoToPage(Guid pageId, Guid? storyboardId = null, IStoryboardPageContext pageContext = null)
         {
             var storyBoard = storyboardId.HasValue
                 ? _storyboards.FirstOrDefault(x => x.Key == storyboardId.Value).Value
@@ -181,7 +181,7 @@ namespace Markeli.Storyboards
             OpenPage(pageInfo, pageContext);
         }
 
-        private void OpenPage([NotNull] InnerStoryboardPageInfo pageInfo, IPageContext pageContext = null, bool addToJournal = true)
+        private void OpenPage([NotNull] InnerStoryboardPageInfo pageInfo, IStoryboardPageContext pageContext = null, bool addToJournal = true)
         {
             if (!_storyboards.ContainsKey(pageInfo.StoryboardId))
             {
@@ -193,7 +193,7 @@ namespace Markeli.Storyboards
             {
                 var previousPage = _activeStoryboard.ActivePage;
                 var viewModel = previousPage.ViewModel;
-                if (!viewModel.CanLeave()) return;
+                if (!viewModel.CanLeaveAsync()) return;
 
                 viewModel.Leave();
             }
@@ -287,7 +287,7 @@ namespace Markeli.Storyboards
                 {
                     var previousPage = _activeStoryboard.ActivePage;
                     var viewModel = previousPage.ViewModel;
-                    if (!viewModel.CanClose()) return;
+                    if (!viewModel.CanCloseAsync()) return;
 
                     viewModel.PageBackRequested -= ViewModelOnPageBackRequested;
                     viewModel.PageCanceled -= ViewModelOnPageCanceled;
@@ -317,7 +317,7 @@ namespace Markeli.Storyboards
             {
                 var previousPage = _activeStoryboard.ActivePage;
                 var viewModel = previousPage.ViewModel;
-                if (!viewModel.CanClose()) return false;
+                if (!viewModel.CanCloseAsync()) return false;
             }
             
             return true;

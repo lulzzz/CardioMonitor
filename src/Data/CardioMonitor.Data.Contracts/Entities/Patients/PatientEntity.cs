@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using CardioMonitor.Data.Contracts.Entities.Treatments;
+using CardioMonitor.Data.Contracts.Entities.Sessions;
 
 namespace CardioMonitor.Data.Contracts.Entities.Patients
 {
@@ -34,6 +34,6 @@ namespace CardioMonitor.Data.Contracts.Entities.Patients
         /// </summary>
         public DateTime? BirthDate { get; set; }
 
-        public virtual ICollection<PatientEntity> Patients { get; set; }
+        public virtual ICollection<SessionEntity> Sessions { get; set; }
     }
 }
