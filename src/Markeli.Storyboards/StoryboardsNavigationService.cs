@@ -20,7 +20,7 @@ namespace Markeli.Storyboards
         
         private Storyboard _activeStoryboard;
         private InnerStoryboardPageInfo _activeInnerStoryboardPageInfo;
-        private IStroryboardPageCreator _pageCreator;
+        private IStoryboardPageCreator _pageCreator;
 
         public event EventHandler<Guid> ActiveStoryboardChanged;
 
@@ -39,7 +39,7 @@ namespace Markeli.Storyboards
             _startPagesOpenningStat = new Dictionary<Guid, bool>();
         }
 
-        public void SetStoryboardPageCreator([NotNull] IStroryboardPageCreator pageCreator)
+        public void SetStoryboardPageCreator([NotNull] IStoryboardPageCreator pageCreator)
         {
             _pageCreator = pageCreator ?? throw new ArgumentNullException(nameof(pageCreator));
         }

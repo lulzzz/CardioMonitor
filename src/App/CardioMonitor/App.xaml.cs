@@ -11,8 +11,13 @@ using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Logs;
 using CardioMonitor.Settings;
+using CardioMonitor.Ui;
 using CardioMonitor.Ui.View;
 using CardioMonitor.Ui.ViewModel;
+using CardioMonitor.Ui.ViewModel.Patients;
+using CardioMonitor.Ui.ViewModel.Sessions;
+using CardioMonitor.Ui.ViewModel.Settings;
+using Markeli.Storyboards;
 using SimpleInjector;
 
 namespace CardioMonitor
@@ -38,7 +43,7 @@ namespace CardioMonitor
             container.RegisterSingleton(settings);
             container.Register<ILogger, Logger>(Lifestyle.Singleton);
             container.Register<IDeviceControllerFactory, DeviceControllerFactory>(Lifestyle.Singleton);
-            container.Register<TaskHelper, TaskHelper>(Lifestyle.Singleton);
+            container.Register<TaskHelper>(Lifestyle.Singleton);
             container.Register<ICardioMonitorUnitOfWorkFactory>(() => new CardioMonitorEfUnitOfWorkFactory("CardioMonitorContext"), Lifestyle.Singleton);
             container.Register<IPatientsService, PatientService>(Lifestyle.Singleton);
             container.Register<ISessionsService, SessionsService>(Lifestyle.Singleton);
@@ -47,6 +52,16 @@ namespace CardioMonitor
             container.Register<IWorkerController, WorkerController>(Lifestyle.Singleton);
 
             container.Register<MainWindowViewModel, MainWindowViewModel>(Lifestyle.Transient);
+            container.Register<PatientViewModel>(Lifestyle.Transient);
+            container.Register<PatientsViewModel>(Lifestyle.Transient);
+            container.Register<PatientSessionsViewModel>(Lifestyle.Transient);
+            container.Register<SessionDataViewModel>(Lifestyle.Transient);
+            container.Register<SessionProcessingInitViewModel>(Lifestyle.Transient);
+            container.Register<SessionProcessingViewModel>(Lifestyle.Transient);
+            container.Register<SessionsViewModel>(Lifestyle.Transient);
+            container.Register<SettingsViewModel>(Lifestyle.Transient);
+            container.Register<IStoryboardPageCreator, SimpleInjectorPageCreator>(Lifestyle.Singleton);
+            container.Register<StoryboardsNavigationService>(Lifestyle.Transient);
 
             container.Verify();
 

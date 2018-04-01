@@ -5,9 +5,9 @@ using UserControl = System.Windows.Controls.UserControl;
 namespace CardioMonitor.Ui.View.Sessions
 {
     /// <summary>
-    /// Interaction logic for PatientTreatmentSession.xaml
+    /// Interaction logic for SessionProcessingView.xaml
     /// </summary>
-    public partial class PatientTreatmentSession : UserControl
+    public partial class SessionProcessingView : UserControl
     {
 
         public SessionProcessingViewModel ViewModel
@@ -19,7 +19,7 @@ namespace CardioMonitor.Ui.View.Sessions
             }
         }
 
-        public PatientTreatmentSession()
+        public SessionProcessingView()
         {
             InitializeComponent();
         }

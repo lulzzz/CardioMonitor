@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,11 +16,15 @@ using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
+using CardioMonitor.Ui.View.Patients;
+using CardioMonitor.Ui.View.Sessions;
+using CardioMonitor.Ui.View.Settings;
 using CardioMonitor.Ui.ViewModel.Patients;
 using CardioMonitor.Ui.ViewModel.Sessions;
 using CardioMonitor.Ui.ViewModel.Settings;
 using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
+using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel{
 
@@ -37,23 +42,13 @@ namespace CardioMonitor.Ui.ViewModel{
 
     public class MainWindowViewModel : Notifier
     {
-        /*
         private readonly ILogger _logger;
         private readonly IPatientsService _patientsService;
-        private readonly ITreatmentsService _treatmentsService;
         private readonly ISessionsService _sessionsService;
         private readonly IFilesManager _filesRepository;
         private ICommand _moveBackwardComand;
-        private int _mainTCSelectedIndex;
-        private int _mainTCPreviosSelectedIndex;
-        private PatientsViewModel _patientsViewModel;
-        private PatientViewModel _patientViewModel;
-        private TreatmentsViewModel _treatmentsViewModel;
-        private PatientSessionsViewModel _patientSessionsViewModel;
-        private SessionProcessingViewModel _sessionViewModel;
-        private SessionDataViewModel _sessionDataViewModel;
-        private TreatmentDataViewModel _treatmentDataViewModel;
-        private SettingsViewModel _settingsViewModel;
+
+        private readonly StoryboardsNavigationService _storyboardsNavigationService;
 
         #region Свойства
 
@@ -65,311 +60,180 @@ namespace CardioMonitor.Ui.ViewModel{
                        (_moveBackwardComand =
                            new SimpleCommand
                            {
-                               CanExecuteDelegate = x => true,
-                               ExecuteDelegate = x => MoveBackwardView(x)
+                               CanExecuteDelegate =  x =>  _storyboardsNavigationService.CanGoBack(),
+                               ExecuteDelegate = async x => await _storyboardsNavigationService.GoBackAsync().ConfigureAwait(true)
                            });
             }
         }
 
-        public int MainTCSelectedIndex
+
+        public Storyboard PatientsStoryboard
         {
-            get { return _mainTCSelectedIndex; }
+            get => _patientsStoryboard;
             set
             {
-                if (value != _mainTCSelectedIndex)
+                if (_patientsStoryboard != value)
                 {
-                    _mainTCPreviosSelectedIndex = _mainTCSelectedIndex;
-                    _mainTCSelectedIndex = value;
-                    RisePropertyChanged("MainTCSelectedIndex");
+                    _patientsStoryboard = value;
+                    RisePropertyChanged(nameof(PatientsStoryboard));
                 }
             }
         }
+        private Storyboard _patientsStoryboard;
 
-        public PatientsViewModel PatientsViewModel
+
+        public Storyboard SessionsStoryboard
         {
-            get { return _patientsViewModel; }
+            get => _sessionStoryboard;
             set
             {
-                if (value != _patientsViewModel)
+                if (_sessionStoryboard != value)
                 {
-                    _patientsViewModel = value;
-                    RisePropertyChanged("PatientsViewModel");
+                    _sessionStoryboard = value;
+                    RisePropertyChanged(nameof(SessionsStoryboard));
                 }
             }
         }
+        private Storyboard _sessionStoryboard;
 
-        public PatientViewModel PatientViewModel
+        public Storyboard SessionProcessingStoryboard
         {
-            get { return _patientViewModel; }
+            get => _sessionProcessingStoryboard;
             set
             {
-                if (value != _patientViewModel)
+                if (_sessionProcessingStoryboard != value)
                 {
-                    _patientViewModel = value;
-                    RisePropertyChanged("PatientViewModel");
+                    _sessionProcessingStoryboard = value;
+                    RisePropertyChanged(nameof(SessionProcessingStoryboard));
                 }
             }
         }
+        private Storyboard _sessionProcessingStoryboard;
 
-        public TreatmentsViewModel TreatmentsViewModel
+        public Storyboard SettingsStoryboard
         {
-            get { return _treatmentsViewModel; }
+            get => _settingsStoryboard;
             set
             {
-                if (value != _treatmentsViewModel)
+                if (_settingsStoryboard != value)
                 {
-                    _treatmentsViewModel = value;
-                    RisePropertyChanged("TreatmentsViewModel");
+                    _settingsStoryboard = value;
+                    RisePropertyChanged(nameof(SettingsStoryboard));
                 }
             }
         }
+        private Storyboard _settingsStoryboard;
 
-        public PatientSessionsViewModel PatientSessionsViewModel
-        {
-            get { return _patientSessionsViewModel; }
-            set
-            {
-                if (value != _patientSessionsViewModel)
-                {
-                    _patientSessionsViewModel = value;
-                    RisePropertyChanged("PatientSessionsViewModel");
-                }
-            }
-        }
-
-        public SessionProcessingViewModel SessionViewModel
-        {
-            get { return _sessionViewModel; }
-            set
-            {
-                if (value != _sessionViewModel)
-                {
-                    _sessionViewModel = value;
-                    RisePropertyChanged("SessionViewModel");
-                }
-            }
-        }
-
-        public SessionDataViewModel SessionDataViewModel
-        {
-            get { return _sessionDataViewModel; }
-            set
-            {
-                if (value != _sessionDataViewModel)
-                {
-                    _sessionDataViewModel = value;
-                    RisePropertyChanged("SessionDataViewModel");
-                }
-            }
-        }
-
-        public TreatmentDataViewModel TreatmentDataViewModel
-        {
-            get { return _treatmentDataViewModel; }
-            set
-            {
-                if (value != _treatmentDataViewModel)
-                {
-                    _treatmentDataViewModel = value;
-                    RisePropertyChanged("TreatmentDataViewModel");
-                }
-            }
-        }
-
-        public SettingsViewModel SettingsViewModel
-        {
-            get { return _settingsViewModel; }
-            set
-            {
-                if (value != _settingsViewModel)
-                {
-                    _settingsViewModel = value;
-                    RisePropertyChanged("SettingsViewModel");
-                }
-            }
-        }
-
-#endregion
+        #endregion
 
         public MainWindowViewModel(
             ILogger logger,
             IPatientsService patientsService,
-            ITreatmentsService treatmentsService,
             ISessionsService sessionsService,
             IFilesManager filesRepository,
             IDeviceControllerFactory deviceControllerFactory,
             ICardioSettings settings,
             TaskHelper taskHelper,
-            [NotNull] IWorkerController workerController)
+            [NotNull] IWorkerController workerController, 
+            [NotNull] StoryboardsNavigationService storyboardsNavigationService,
+            SimpleInjectorPageCreator pageCreator)
         {
-            if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (patientsService == null) throw new ArgumentNullException(nameof(patientsService));
-            if (treatmentsService == null) throw new ArgumentNullException(nameof(treatmentsService));
-            if (sessionsService == null) throw new ArgumentNullException(nameof(sessionsService));
-            if (filesRepository == null) throw new ArgumentNullException(nameof(filesRepository));
             if (deviceControllerFactory == null) throw new ArgumentNullException(nameof(deviceControllerFactory));
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             if (taskHelper == null) throw new ArgumentNullException(nameof(taskHelper));
             if (workerController == null) throw new ArgumentNullException(nameof(workerController));
 
-            _logger = logger;
-            _patientsService = patientsService;
-            _treatmentsService = treatmentsService;
-            _sessionsService = sessionsService;
-            _filesRepository = filesRepository;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
+            _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
+            _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
+            _storyboardsNavigationService = storyboardsNavigationService ?? throw new ArgumentNullException(nameof(storyboardsNavigationService));
+            _storyboardsNavigationService.CanBackChanged += RiseCanGoBackChaned;
 
-            PatientsViewModel = new PatientsViewModel(patientsService)
-            {
-                OpenPatienEvent = OpetPatientTreatmentsHanlder,
-                AddEditPatient = AddEditPatientHanlder,
-                OpenSessionsHandler = StartOrContinueTreatmentSession,
-                ShowTreatmentResults = ShowTreatmentResults,
-                OpenSessionHandler = LoadSession
-            };
-            PatientViewModel = new PatientViewModel(logger, patientsService)
-            {
-                MoveBackwardEvent = MoveBackwardPatient
-            };
-            TreatmentsViewModel = new TreatmentsViewModel
-            {
-                OpenSessionsEvent = StartOrContinueTreatmentSession,
-                ShowResultsEvent = ShowTreatmentResults
-            };
-            PatientSessionsViewModel = new PatientSessionsViewModel(sessionsService)
-            {
-                StartSessionEvent = StartSession,
-                ShowResultsEvent = ShowSessionResults
-            };
-            SessionViewModel = new SessionProcessingViewModel(logger, filesRepository, sessionsService, taskHelper, deviceControllerFactory, workerController);
-            //SessionViewModel.StartStatusTimer();
-            SessionDataViewModel = new SessionDataViewModel(logger, filesRepository);
+            PatientsStoryboard = new Storyboard(StoryboardIds.PatientsStoryboardId);
+
+            PatientsStoryboard.RegisterPage(
+                PageIds.PatientsPageId,
+                view: typeof(PatientsView),
+                viewModel: typeof(PatientsViewModel),
+                isStartPage: true);
+
+            PatientsStoryboard.RegisterPage(
+                PageIds.PatientPageId,
+                view: typeof(PatientView),
+                viewModel: typeof(PatientViewModel),
+                isStartPage: false);
+
+            PatientsStoryboard.RegisterPage(
+                PageIds.PatientSessionsPageId,
+                view: typeof(PatientSessionsView),
+                viewModel: typeof(PatientSessionsViewModel),
+                isStartPage: false);
+
+            PatientsStoryboard.RegisterPage(
+                PageIds.SessionDataViewingPageId,
+                view: typeof(SessionDataView),
+                viewModel: typeof(SessionDataViewModel),
+                isStartPage: false);
+
+
+            SessionsStoryboard = new Storyboard(StoryboardIds.SessionsStoryboardId);
             
-            TreatmentDataViewModel = new TreatmentDataViewModel();
-            SettingsViewModel = new SettingsViewModel(settings);
-        }
+            SessionsStoryboard.RegisterPage(
+                PageIds.SessionsPageId,
+                view: typeof(SessionsView),
+                viewModel: typeof(SessionsViewModel),
+                isStartPage: true);
 
-       
+            SessionsStoryboard.RegisterPage(
+                PageIds.SessionDataViewingPageId,
+                view: typeof(SessionDataView),
+                viewModel: typeof(SessionDataViewModel),
+                isStartPage: false);
 
-        private void MoveBackwardPatient(object sender, EventArgs args)
-        {
-            MoveBackwardView((int)ViewIndex.PatientView);
-        }
+            SettingsStoryboard = new Storyboard(StoryboardIds.SettingsStoryboardId);
 
-        private async void MoveBackwardView(object sender)
-        {
-            int index;
-            if (!int.TryParse(sender.ToString(), out index)) { return; }
-            var viewIndex = (ViewIndex)index;
-            switch (viewIndex)
+            SessionsStoryboard.RegisterPage(
+                PageIds.SettingsPageId,
+                view: typeof(SettingsView),
+                viewModel: typeof(SettingsViewModel),
+                isStartPage: true);
+
+
+
+            SessionProcessingStoryboard = new Storyboard(StoryboardIds.SessionProcessingStoryboardId);
+
+            SessionsStoryboard.RegisterPage(
+                PageIds.SessionProcessingInitPageId,
+                view: typeof(SessionProcessingInitView),
+                viewModel: typeof(SessionProcessingInitViewModel),
+                isStartPage: true);
+
+            SessionsStoryboard.RegisterPage(
+                PageIds.SessionProcessingPageId,
+                view: typeof(SessionProcessingView),
+                viewModel: typeof(SessionProcessingViewModel),
+                isStartPage: false);
+
+            _storyboardsNavigationService.RegisterStoryboard(PatientsStoryboard);
+            _storyboardsNavigationService.RegisterStoryboard(SessionsStoryboard);
+            _storyboardsNavigationService.RegisterStoryboard(SessionProcessingStoryboard);
+            _storyboardsNavigationService.RegisterStoryboard(SettingsStoryboard);
+
+            _storyboardsNavigationService.SetStoryboardPageCreator(pageCreator);
+
+            var startPageContexts = new Dictionary<Guid, IStoryboardPageContext>
             {
-                case ViewIndex.TreatmentsView:
-                    TreatmentsViewModel.Clear();
-                    UpdatePatiens();
-                    MainTCSelectedIndex = (int)ViewIndex.PatientsView;
-                    break;
-                case ViewIndex.SessionsView:
-                    PatientSessionsViewModel.Clear();
-                    UpdatePatiens();
-                    MainTCSelectedIndex = (int)ViewIndex.PatientsView;
-                    //MainTCSelectedIndex = (int)ViewIndex.TreatmentsView;
-                    break;
-                case ViewIndex.SessionView:
-                    if (SessionStatus.InProgress == SessionViewModel.SessionStatus)
-                    {
-                        var result = await MessageHelper.Instance.ShowMessageAsync(Localisation.LostChangesConfirmation, style: MessageDialogStyle.AffirmativeAndNegative);
-                        if (MessageDialogResult.Negative == result) { return; }
-                    }
-                    SessionViewModel.Clear();
-                    UpdateSessionInfosSave();
-                    MainTCSelectedIndex = (int)ViewIndex.SessionsView;
-                    break;
-                case ViewIndex.SessionDataView:
-                    if (_mainTCPreviosSelectedIndex == (int) ViewIndex.PatientsView)
-                    {
-                        MainTCSelectedIndex = (int) ViewIndex.PatientsView;
-                        UpdatePatiens();
-                    }
-                    else
-                    {
-                        MainTCSelectedIndex = (int)ViewIndex.SessionsView;
-                        UpdateSessionInfosSave();
-                    }
-                    break;
-                case ViewIndex.TreatmentDataView:
-                    //MainTCSelectedIndex = (int)ViewIndex.TreatmentsView;
-                    UpdatePatiens();
-                    MainTCSelectedIndex = (int)ViewIndex.PatientsView;
-                    break;
-                case ViewIndex.PatientView:
-                    if (!PatientViewModel.IsSaved)
-                    {
-                        var result = await MessageHelper.Instance.ShowMessageAsync(Localisation.LostChangesConfirmation, 
-                                                                                    style: MessageDialogStyle.AffirmativeAndNegative);
-                        if (MessageDialogResult.Negative == result) { return;}
-                    }
-                    PatientViewModel.Clear();
-                    UpdatePatiens();
-                    MainTCSelectedIndex = (int) ViewIndex.PatientsView;
-                    break;
-                default:
-                    UpdatePatiens();
-                    MainTCSelectedIndex = (int) ViewIndex.PatientsView;
-                    break;
-            }
-        }
-        
+                [PageIds.SessionProcessingInitPageId] = new SessionProcessingInitPageContext()
+            };
 
-        public async void StartOrContinueTreatmentSession(object sender, EventArgs args)
+            _storyboardsNavigationService.CreateStartPages(startPageContexts);
+        }
+
+        private void RiseCanGoBackChaned(object sender, EventArgs args)
         {
-            //TODO Old realisation
-            var message = String.Empty;
-            var patient = PatientsViewModel.SelectedPatient;
-            try
-            {
-
-                var treatments = _treatmentsService.GetAll(patient.Id);
-                var treatment = treatments.FirstOrDefault();
-                if (null == treatment)
-                {
-                    _treatmentsService.Add(new Treatment { StartDate = DateTime.Now, PatientId = patient.Id });
-                    treatment = _treatmentsService.GetAll(patient.Id).FirstOrDefault();
-                    if (null == treatment)
-                    {
-                        await MessageHelper.Instance.ShowMessageAsync(Localisation.MainWindowViewModel_CantLoadList);
-                        return;
-                    }
-                }
-                PatientSessionsViewModel.PatientName = new PatientFullName
-                {
-                    FirstName = patient.FirstName,
-                    LastName = patient.LastName,
-                    PatronymicName = patient.PatronymicName
-                };
-                PatientSessionsViewModel.Treatment = treatment;
-                SessionViewModel.Treatment = treatment;
-                UpdateSessionInfos();
-                MainTCSelectedIndex = (int)ViewIndex.SessionsView;
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            if (!String.IsNullOrEmpty(message))
-            {
-                await MessageHelper.Instance.ShowMessageAsync(message);
-            }
+            RisePropertyChanged(nameof(MoveBackwardCommand));
         }
-
-       
-
-       
-        private void StartSession(object sender, EventArgs args)
-        {
-            SessionViewModel.Patient = PatientsViewModel.SelectedPatient;
-            //SessionViewModel.StartStatusTimer();
-            MainTCSelectedIndex = (int) ViewIndex.SessionView;
-        }
-
         
 
         private async void LoadSession(object sender, EventArgs args)
@@ -382,9 +246,6 @@ namespace CardioMonitor.Ui.ViewModel{
                 try
                 {
                     var container = _filesRepository.LoadFromFile(loadDialog.FileName);
-                    SessionDataViewModel.Session = new SessionModel {Session = container.Session};
-                    SessionDataViewModel.Patient = container.Patient;
-                    MainTCSelectedIndex = (int) ViewIndex.SessionDataView;
                 }
                 catch (ArgumentNullException)
                 {
@@ -400,7 +261,6 @@ namespace CardioMonitor.Ui.ViewModel{
                 }
             }
         }
-        */
     }
 
   

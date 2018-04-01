@@ -25,15 +25,19 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private readonly ISessionsService _sessionsService;
         private readonly IPatientsService _patientsService;
 
-        public SessionDataViewModel(SessionModel session)
-        {
-            _session = session;
-        }
-
-        public SessionDataViewModel(ISessionsService sessionsService, IPatientsService patientsService)
+        public SessionDataViewModel(ISessionsService sessionsService, IPatientsService patientsService,
+            ILogger logger,
+            IFilesManager filesRepository)
         {
             _sessionsService = sessionsService;
             _patientsService = patientsService;
+            if (logger == null) throw new ArgumentNullException(nameof(logger));
+            if (filesRepository == null) throw new ArgumentNullException(nameof(filesRepository));
+
+            _logger = logger;
+            _filesRepository = filesRepository;
+
+            IsReadOnly = true;
         }
 
         public PatientFullName PatientName
@@ -114,19 +118,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     ExecuteDelegate = x => SaveToFile()
                 });
             }
-        }
-        
-        public SessionDataViewModel(
-            ILogger logger,
-            IFilesManager filesRepository)
-        {
-            if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (filesRepository == null) throw new ArgumentNullException(nameof(filesRepository));
-
-            _logger = logger;
-            _filesRepository = filesRepository;
-
-            IsReadOnly = true;
         }
 
         public async void SaveToFile()

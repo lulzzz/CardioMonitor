@@ -1,11 +1,20 @@
 ﻿using System;
 using System.Linq;
 using JetBrains.Annotations;
+using Markeli.Storyboards;
+using SimpleInjector;
 
-namespace Markeli.Storyboards
+namespace CardioMonitor.Ui
 {
-    internal class DefaultStoryboardCreator : IStoryboardPageCreator
+    public class SimpleInjectorPageCreator : IStoryboardPageCreator
     {
+        private readonly Container _container;
+
+        public SimpleInjectorPageCreator([NotNull] Container container)
+        {
+            _container = container ?? throw new ArgumentNullException(nameof(container));
+        }
+
         public IStoryboardPageView CreateView([NotNull] Type type)
         {
             if (type == null) throw new ArgumentNullException(nameof(type));
@@ -13,7 +22,7 @@ namespace Markeli.Storyboards
             if (!type.GetInterfaces().Contains(typeof(IStoryboardPageView)))
                 throw new InvalidOperationException($"type must implement {nameof(IStoryboardPageView)}");
 
-            return Activator.CreateInstance(type) as IStoryboardPageView;
+            return _container.GetInstance(type) as IStoryboardPageView;
         }
 
         public IStoryboardPageViewModel CreateViewModel([NotNull] Type type)
@@ -23,7 +32,7 @@ namespace Markeli.Storyboards
             if (!type.GetInterfaces().Contains(typeof(IStoryboardPageViewModel)))
                 throw new InvalidOperationException($"type must implement {nameof(IStoryboardPageViewModel)}");
 
-            return Activator.CreateInstance(type) as IStoryboardPageViewModel;
+            return _container.GetInstance(type) as IStoryboardPageViewModel;
         }
     }
 }

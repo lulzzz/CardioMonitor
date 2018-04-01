@@ -13,6 +13,7 @@ using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
+using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
 
 
@@ -53,6 +54,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private readonly IDeviceControllerFactory _deviceControllerFactory;
 
         [NotNull] private readonly IWorkerController _workerController;
+
+        private bool _isResultSaved;
 
         #endregion
 
@@ -108,50 +111,15 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 //            }
 //        }
 
-
-        /// <summary>
-        /// Количество повторений сеанса
-        /// </summary>
-        public short RepeatCount
-        {
-            get { return _repeatCount; }
-            set
-            {
-                if (value != _repeatCount)
-                {
-                    _repeatCount = value;
-                    RisePropertyChanged(nameof(RepeatCount));
-                }
-            }
-        }
-
         /// <summary>
         /// Максимальный угол наклона кровати
         /// </summary>
-        public float MaxAngle
-        {
-            get => _maxAngle;
-            set
-            {
-                _maxAngle = value;
-                RisePropertyChanged(nameof(MaxAngle));
-            }
-        }
         private float _maxAngle;
         
         
         /// <summary>
         /// Частота
         /// </summary>
-        public float Frequency
-        {
-            get => _frequency;
-            set
-            {
-                _frequency = value;
-                RisePropertyChanged(nameof(Frequency));
-            }
-        }
         private float _frequency;
         
         
@@ -312,13 +280,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     await ResumeAsync().ConfigureAwait(true);
                     break;
                 default:
-
+                    _isResultSaved = false;
                     var bedInitParams =
-                        _deviceControllerFactory.CreateBedControllerInitParams(MaxAngle, RepeatCount, RepeatCount);
+                        _deviceControllerFactory.CreateBedControllerInitParams(_maxAngle, _repeatCount, _frequency);
                     var monitorInitParams = _deviceControllerFactory.CreateMonitorControllerInitParams();
 
                     var startParams = new SessionParams(
-                        RepeatCount,
+                        _repeatCount,
                         //todo в параметры
                         TimeSpan.FromMilliseconds(300),
                         bedInitParams,
@@ -354,6 +322,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         private async void SaveSession()
         {
+            _isResultSaved = true;
 //            var exceptionMessage = String.Empty;
 //            try
 //            {
@@ -409,6 +378,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Guid PageId { get; set; }
         public Guid StoryboardId { get; set; }
+
         public Task OpenAsync(IStoryboardPageContext context)
         {
             throw new NotImplementedException();
@@ -429,14 +399,32 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             return Task.CompletedTask;
         }
 
-        public Task<bool> CanCloseAsync()
+        public async Task<bool> CanCloseAsync()
         {
-            throw new NotImplementedException();
+            if (SessionStatus == SessionStatus.InProgress
+                || SessionStatus == SessionStatus.Suspended)
+            {
+                var result = await MessageHelper.Instance.ShowMessageAsync("Все данные будут потеряны. Вы уверены?", "Cardio Monitor",
+                    MessageDialogStyle.AffirmativeAndNegative);
+                return result == MessageDialogResult.Affirmative;
+            }
+
+            if (SessionStatus == SessionStatus.EmergencyStopped
+                || SessionStatus == SessionStatus.Completed
+                || SessionStatus == SessionStatus.TerminatedOnError && !_isResultSaved)
+            {
+
+                var result = await MessageHelper.Instance.ShowMessageAsync("Все данные будут потеряны. Вы уверены?", "Cardio Monitor",
+                    MessageDialogStyle.AffirmativeAndNegative);
+                return result == MessageDialogResult.Affirmative;
+            }
+
+            return true;
         }
 
-        public Task CloseAsync()
+        public async Task CloseAsync()
         {
-            throw new NotImplementedException();
+            await EmeregencyStopAsync();
         }
 
         public event Func<object, Task> PageCanceled;

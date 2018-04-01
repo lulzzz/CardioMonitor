@@ -12,11 +12,13 @@
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:materialDesignConverters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"
     xmlns:iconPacks1="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel"
     Title="Cardio monitor" 
     Height="350" 
     Width="925"
     WindowStartupLocation="CenterScreen"
     GlowBrush="{DynamicResource AccentColorBrush}"
+    d:DataContext="{d:DesignInstance Type=viewModel:MainWindowViewModel}"
     WindowState="Maximized" 
     IconTemplate="{DynamicResource ClickableIcon}"
     mc:Ignorable="d" 
@@ -181,10 +183,11 @@
                             </ResourceDictionary.MergedDictionaries>
                         </ResourceDictionary>
                     </StackPanel.Resources>
-                    <Button  Click="ButtonBase_OnClick"
+                    <Button  Command="{Binding MoveBackwardCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                              Width="48"
                              Height="30"
-                             Background="{DynamicResource AccentBaseColorBrush}">
+                             Background="{DynamicResource AccentBaseColorBrush}"
+                             Visibility="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <iconPacks1:Material Width="10"
                                                   Height="10"
                                                   Kind="ArrowLeft" />
@@ -214,7 +217,9 @@
                 <controls:HamburgerMenuIconItem 
                     Icon="{iconPacks1:Material Kind=AccountCircle}" 
                     Label="Пациенты">
-
+                    <controls:HamburgerMenuIconItem.Tag>
+                        <ContentPresenter Content="{Binding PatientsStoryboard.ActivePage}" />
+                    </controls:HamburgerMenuIconItem.Tag>
                 </controls:HamburgerMenuIconItem>
                 <controls:HamburgerMenuIconItem 
                     Icon="{iconPacks1:Octicons Kind=Checklist}" 

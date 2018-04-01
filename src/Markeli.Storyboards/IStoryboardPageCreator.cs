@@ -2,7 +2,7 @@
 
 namespace Markeli.Storyboards
 {
-    public interface IStroryboardPageCreator
+    public interface IStoryboardPageCreator
     {
         IStoryboardPageView CreateView(Type type);
 

@@ -72,7 +72,7 @@ namespace Markeli.Storyboards.UnitTests
         [Fact]
         public void CreateStartPages_Ok()
         {
-            var pageCreator = new Mock<IStroryboardPageCreator>();
+            var pageCreator = new Mock<IStoryboardPageCreator>();
             pageCreator
                 .Setup(x => x.CreateView(It.IsAny<Type>()))
                 .Returns(new TestView());
@@ -92,7 +92,7 @@ namespace Markeli.Storyboards.UnitTests
         [Fact]
         public async Task GoToStoryboard_Ok()
         {
-            var pageCreator = new Mock<IStroryboardPageCreator>();
+            var pageCreator = new Mock<IStoryboardPageCreator>();
             pageCreator
                 .Setup(x => x.CreateView(It.IsAny<Type>()))
                 .Returns(new TestView());
@@ -126,7 +126,7 @@ namespace Markeli.Storyboards.UnitTests
         [Fact]
         public async Task GoBackOnSameStoryboard_Ok()
         {
-            var pageCreator = new Mock<IStroryboardPageCreator>();
+            var pageCreator = new Mock<IStoryboardPageCreator>();
             pageCreator
                 .SetupSequence(x => x.CreateView(It.IsAny<Type>()))
                 .Returns(new TestView())
@@ -185,7 +185,7 @@ namespace Markeli.Storyboards.UnitTests
         [Fact]
         public async Task GoBackOnDifferentStoryboards_Ok()
         {
-            var pageCreator = new Mock<IStroryboardPageCreator>();
+            var pageCreator = new Mock<IStoryboardPageCreator>();
             pageCreator
                 .SetupSequence(x => x.CreateView(It.IsAny<Type>()))
                 .Returns(new TestView())

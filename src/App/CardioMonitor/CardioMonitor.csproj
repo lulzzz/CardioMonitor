@@ -194,6 +194,7 @@
     <Compile Include="Ui\Base\SimpleCommand.cs" />
     <Compile Include="Ui\Communication\TreatmentAction.cs" />
     <Compile Include="Ui\Communication\TreatmentEventArgs.cs" />
+    <Compile Include="Ui\SimpleInjectorPageCreator.cs" />
     <Compile Include="Ui\StoryboardIds.cs" />
     <Compile Include="Ui\ViewModel\MainWindowViewModel.cs" />
     <Compile Include="Ui\PageIds.cs" />
