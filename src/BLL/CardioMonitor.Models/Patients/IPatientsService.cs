@@ -6,6 +6,9 @@ namespace CardioMonitor.BLL.CoreContracts.Patients
     {
         void Add(Patient patient);
 
+        List<PatientFullName> GetPatientNames(ICollection<int> patientIds);
+
+
         List<Patient> GetAll();
 
         void Edit(Patient patient);

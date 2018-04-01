@@ -24,6 +24,13 @@ namespace CardioMonitor.Data.Ef.Repositories
             return _context.Patients.ToList();
         }
 
+        public List<PatientEntity> GetPatients([NotNull] ICollection<int> patientIds)
+        {
+            if (patientIds == null) throw new ArgumentNullException(nameof(patientIds));
+            var uniqueIds = new HashSet<int>(patientIds);
+            return _context.Patients.Where(x => uniqueIds.Contains(x.Id)).ToList();
+        }
+
         public void AddPatient([NotNull] PatientEntity patientEntity)
         {
             if (patientEntity == null) throw new ArgumentNullException(nameof(patientEntity));

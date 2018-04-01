@@ -359,53 +359,9 @@ namespace CardioMonitor.Ui.ViewModel{
             }
         }
 
-        private void UpdateSessionInfos()
-        {
-            var sessions = _sessionsService.GetInfos(PatientSessionsViewModel.Treatment.Id);
-            PatientSessionsViewModel.SessionInfos = sessions != null
-                ? new ObservableCollection<SessionInfo>(sessions)
-                : new ObservableCollection<SessionInfo>();
-        }
+       
 
-        private async void UpdateSessionInfosSave()
-        {
-            var message = String.Empty;
-            try
-            {
-                UpdateSessionInfos();
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            if (!String.IsNullOrEmpty(message))
-            {
-                await MessageHelper.Instance.ShowMessageAsync(message);
-            }
-        }
-
-        //temporary not  used
-        public void ShowTreatmentResults(object sender, EventArgs args)
-        {
-            //var treatmentId = _treatmentsViewModel.SelectedTreatment.Id;
-            //getting result
-            var session = new SessionModel {DateTime = new DateTime()};
-            
-            //var statisticBuilder = new TreatmentStatisticBuilder();
-            //TreatmentDataViewModel.Statistic = statisticBuilder.Build(new[]
-            //{
-            //    session.Session, session.Session, session.Session, session.Session, session.Session, session.Session, session.Session,session.Session ,session.Session ,session.Session
-            //});
-            TreatmentDataViewModel.PatientName = new PatientFullName
-            {
-                LastName = PatientsViewModel.SelectedPatient.LastName,
-                FirstName = PatientsViewModel.SelectedPatient.FirstName,
-                PatronymicName = PatientsViewModel.SelectedPatient.PatronymicName,
-            };
-            TreatmentDataViewModel.StartDate = session.DateTime;
-            MainTCSelectedIndex = (int) ViewIndex.TreatmentDataView;
-        }
-
+       
         private void StartSession(object sender, EventArgs args)
         {
             SessionViewModel.Patient = PatientsViewModel.SelectedPatient;

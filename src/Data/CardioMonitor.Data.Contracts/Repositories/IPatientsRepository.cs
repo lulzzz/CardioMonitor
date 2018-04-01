@@ -7,6 +7,8 @@ namespace CardioMonitor.Data.Contracts.Repositories
     {
         List<PatientEntity> GetPatients();
 
+        List<PatientEntity> GetPatients(ICollection<int> patientIds);
+
         void AddPatient(PatientEntity patientEntity);
 
         void UpdatePatient(PatientEntity patientEntity);

@@ -37,6 +37,11 @@ namespace CardioMonitor.Data.Ef.Repositories
             return new List<SessionEntity>(_context.Sessions.Where(x => x.PatientId == patientId));
         }
 
+        public List<SessionEntity> GetSessions()
+        {
+            return new List<SessionEntity>(_context.Sessions);
+        }
+
         public void DeleteSession(int sessionId)
         {
             var result = (from session in _context.Sessions

@@ -31,6 +31,21 @@ namespace CardioMonitor.BLL.CoreServices.Patients
             }
         }
 
+        public List<PatientFullName> GetPatientNames(ICollection<int> patientIds)
+        {
+            using (var uow = _factory.Create())
+            {
+                var result = uow.Patients.GetPatients(patientIds).Select(x => new PatientFullName
+                {
+                    PatientId = x.Id,
+                    LastName = x.LastName,
+                    FirstName = x.FirstName,
+                    PatronymicName = x.PatronymicName
+                });
+                return new List<PatientFullName>(result);
+            }
+        }
+
         public List<Patient> GetAll()
         {
             using (var uow = _factory.Create())

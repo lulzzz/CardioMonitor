@@ -8,6 +8,8 @@ namespace CardioMonitor.BLL.CoreContracts.Patients
     [Serializable]
     public class PatientFullName
     {
+        public int PatientId { get; set; }
+
         /// <summary>
         /// Фамилия
         /// </summary>

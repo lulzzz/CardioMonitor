@@ -182,7 +182,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             var message = String.Empty;
             try
             {
-                var sessions = await Task.Factory.StartNew(() => _sessionsService.GetInfos(_patient.Id))
+                var sessions = await Task.Factory.StartNew(() => _sessionsService.GetPatientSessionInfos(_patient.Id))
                     .ConfigureAwait(true);
                 SessionInfos = sessions != null
                     ? new ObservableCollection<SessionInfo>(sessions)
