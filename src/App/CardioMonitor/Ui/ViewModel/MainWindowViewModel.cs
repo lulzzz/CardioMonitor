@@ -369,26 +369,7 @@ namespace CardioMonitor.Ui.ViewModel{
             MainTCSelectedIndex = (int) ViewIndex.SessionView;
         }
 
-        private async void ShowSessionResults(object sender, EventArgs args)
-        {
-            var message = String.Empty;
-            try
-            {
-
-                var session = _sessionsService.Get(PatientSessionsViewModel.SelectedSessionInfo.Id);
-                SessionDataViewModel.Session = new SessionModel {Session = session};
-                SessionDataViewModel.Patient = PatientsViewModel.SelectedPatient;
-                MainTCSelectedIndex = (int)ViewIndex.SessionDataView;
-            }
-            catch (Exception ex)
-            {
-                message = ex.Message;
-            }
-            if (!String.IsNullOrEmpty(message))
-            {
-                await MessageHelper.Instance.ShowMessageAsync(message);
-            }
-        }
+        
 
         private async void LoadSession(object sender, EventArgs args)
         {

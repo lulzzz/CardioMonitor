@@ -30,6 +30,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _session = session;
         }
 
+        public SessionDataViewModel(ISessionsService sessionsService, IPatientsService patientsService)
+        {
+            _sessionsService = sessionsService;
+            _patientsService = patientsService;
+        }
+
         public PatientFullName PatientName
         {
             get { return _patientName; }
@@ -167,7 +173,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
 
         private async Task LoadSessionInfoAsync(int sessionId, int patientId)
