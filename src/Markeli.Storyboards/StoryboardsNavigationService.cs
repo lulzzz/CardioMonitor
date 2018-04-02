@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using JetBrains.Annotations;
@@ -46,9 +47,7 @@ namespace Markeli.Storyboards
         {
             _pageCreator = pageCreator ?? throw new ArgumentNullException(nameof(pageCreator));
         }
-
-
-
+        
         public void SetUiInvoker(IUiInvoker invoker)
         {
             _invoker = invoker ?? throw new ArgumentNullException(nameof(invoker));
@@ -94,14 +93,16 @@ namespace Markeli.Storyboards
         {
             if (_isStartPagesCreated) throw new InvalidOperationException("Start pages have been alread created");
 
-            foreach (var storyboard in _storyboards)
+            _invoker.Invoke(() =>
             {
-                var startPageInfo =
-                    _registeredPages.Keys.FirstOrDefault(x => x.IsStartPage && x.StoryboardId == storyboard.Key);
-                if (startPageInfo == null) throw new InvalidOperationException($"Start page for storyboard {storyboard.Key} not registered");
-                
-                _invoker.Invoke(() =>
+                foreach (var storyboard in _storyboards)
                 {
+                    var startPageInfo =
+                        _registeredPages.Keys.FirstOrDefault(x => x.IsStartPage && x.StoryboardId == storyboard.Key);
+                    if (startPageInfo == null)
+                        throw new InvalidOperationException(
+                            $"Start page for storyboard {storyboard.Key} not registered");
+
                     var view = CreatePageView(startPageInfo);
                     storyboard.Value.ActivePage = view;
                     _startPagesOpenningStat[startPageInfo.PageUniqueId] = false;
@@ -109,11 +110,10 @@ namespace Markeli.Storyboards
                     startPageContexts?.TryGetValue(startPageInfo.PageUniqueId, out context);
                     _startPageContexts[startPageInfo.PageUniqueId] = context;
                     _pageContexts[startPageInfo.PageUniqueId] = context;
-                });
+                }
 
-            }
-
-            _isStartPagesCreated = true;
+                _isStartPagesCreated = true;
+            });
         }
 
         [NotNull]
@@ -142,9 +142,12 @@ namespace Markeli.Storyboards
         {
             if (transitionRequest == null) throw new ArgumentNullException(nameof(transitionRequest));
 
-            if (!(sender is IStoryboardPageViewModel viewModel)) throw new InvalidOperationException("Incorrect request of transition");
-            
-            return GoToPageAsync(transitionRequest.DestinationPageId, viewModel.StoryboardId, transitionRequest.DestinationPageContext);
+            return _invoker.InvokeAsync(() =>
+            {
+                if (!(sender is IStoryboardPageViewModel viewModel)) throw new InvalidOperationException("Incorrect request of transition");
+
+                return GoToPageAsync(transitionRequest.DestinationPageId, viewModel.StoryboardId, transitionRequest.DestinationPageContext);
+            });
         }
 
         private Task ViewModelOnPageCompleted(object sender)
@@ -154,13 +157,17 @@ namespace Markeli.Storyboards
 
         private Task HandleViewModelTransitionsAsync(object sender, PageTransitionTrigger trigger)
         {
-            if (!(sender is IStoryboardPageViewModel viewModel)) throw new InvalidOperationException("Incorrect request of transition");
+            return _invoker.InvokeAsync(() =>
+            {
+                if (!(sender is IStoryboardPageViewModel viewModel))
+                    throw new InvalidOperationException("Incorrect request of transition");
 
-            var storyboard = _storyboards.Values.FirstOrDefault(x => x.StoryboardId == viewModel.StoryboardId);
-            if (storyboard == null) throw new InvalidOperationException("Storyboard not found");
+                var storyboard = _storyboards.Values.FirstOrDefault(x => x.StoryboardId == viewModel.StoryboardId);
+                if (storyboard == null) throw new InvalidOperationException("Storyboard not found");
 
-            var destinationPageId = storyboard.GetDestinationPage(viewModel.PageId, trigger);
-            return GoToPageAsync(destinationPageId, storyboard.StoryboardId);
+                var destinationPageId = storyboard.GetDestinationPage(viewModel.PageId, trigger);
+                return GoToPageAsync(destinationPageId, storyboard.StoryboardId);
+            });
         }
 
         private Task ViewModelOnPageCanceled(object sender)
@@ -173,94 +180,100 @@ namespace Markeli.Storyboards
             return HandleViewModelTransitionsAsync(sender, PageTransitionTrigger.Back);
         }
 
-        public async Task GoToPageAsync(Guid pageId, Guid? storyboardId = null, IStoryboardPageContext pageContext = null)
+        public Task GoToPageAsync(Guid pageId, Guid? storyboardId = null, IStoryboardPageContext pageContext = null)
         {
-            var storyBoard = storyboardId.HasValue
-                ? _storyboards.FirstOrDefault(x => x.Key == storyboardId.Value).Value
-                : _activeStoryboard;
-
-            //first try to find desired page in current storyboard, then look up at all registered pages
-            var pageInfo = storyBoard != null
-                ? _registeredPages.Keys.FirstOrDefault(x =>
-                    x.PageId == pageId && x.StoryboardId == storyBoard.StoryboardId)
-                : _registeredPages.Keys.FirstOrDefault(x => x.PageId == pageId);
-            if (pageInfo == null)
+            return _invoker.InvokeAsync(() =>
             {
-                pageInfo = _registeredPages.Keys.FirstOrDefault(x => x.PageId == pageId);
+                var storyBoard = storyboardId.HasValue
+                    ? _storyboards.FirstOrDefault(x => x.Key == storyboardId.Value).Value
+                    : _activeStoryboard;
+
+                //first try to find desired page in current storyboard, then look up at all registered pages
+                var pageInfo = storyBoard != null
+                    ? _registeredPages.Keys.FirstOrDefault(x =>
+                        x.PageId == pageId && x.StoryboardId == storyBoard.StoryboardId)
+                    : _registeredPages.Keys.FirstOrDefault(x => x.PageId == pageId);
                 if (pageInfo == null)
                 {
-                    throw new InvalidOperationException("Page not found");
+                    pageInfo = _registeredPages.Keys.FirstOrDefault(x => x.PageId == pageId);
+                    if (pageInfo == null)
+                    {
+                        throw new InvalidOperationException("Page not found");
+                    }
                 }
-            }
 
-            await OpenPageAsync(pageInfo, pageContext).ConfigureAwait(false);
+                return OpenPageAsync(pageInfo, pageContext);
+            });
         }
 
-        private async Task OpenPageAsync([NotNull] InnerStoryboardPageInfo pageInfo, IStoryboardPageContext pageContext = null, bool addToJournal = true)
+        private Task OpenPageAsync([NotNull] InnerStoryboardPageInfo pageInfo,
+            IStoryboardPageContext pageContext = null, bool addToJournal = true)
         {
             if (!_storyboards.ContainsKey(pageInfo.StoryboardId))
             {
                 throw new InvalidOperationException($"Storyboard {pageInfo.StoryboardId} does not registered");
             }
-            var storyboard = _storyboards[pageInfo.StoryboardId];
 
-            if (_activeStoryboard?.ActivePage != null)
+            return _invoker.InvokeAsync(async () =>
             {
-                var previousPage = _activeStoryboard.ActivePage;
-                var viewModel = previousPage.ViewModel;
 
-                var canLeave = await viewModel.CanLeaveAsync().ConfigureAwait(true);
-                if (!canLeave) return;
+                var storyboard = _storyboards[pageInfo.StoryboardId];
 
-                await viewModel.LeaveAsync().ConfigureAwait(false);
-            }
-
-            var previousStoryboardId = _activeInnerStoryboardPageInfo?.StoryboardId;
-            _activeInnerStoryboardPageInfo = pageInfo;
-            _activeStoryboard = storyboard;
-            if (previousStoryboardId == null || previousStoryboardId.Value != pageInfo.StoryboardId)
-            {
-                ActiveStoryboardChanged?.Invoke(this, pageInfo.StoryboardId);
-            }
-
-            if (_cachedPages.ContainsKey(pageInfo.PageUniqueId))
-            {
-                var page = _cachedPages[pageInfo.PageUniqueId];
-               
-                storyboard.ActivePage = page;
-                _pageContexts.TryGetValue(pageInfo.PageUniqueId, out var restoredPageContext);
-
-                _startPagesOpenningStat.TryGetValue(pageInfo.PageUniqueId, out var wasPageOpenned);
-                if (wasPageOpenned)
+                if (_activeStoryboard?.ActivePage != null)
                 {
-                   await page.ViewModel.ReturnAsync(pageContext ?? restoredPageContext).ConfigureAwait(true);
+                    var previousPage = _activeStoryboard.ActivePage;
+                    var viewModel = previousPage.ViewModel;
+
+                    var canLeave = await viewModel.CanLeaveAsync().ConfigureAwait(true);
+                    if (!canLeave) return;
+
+                    await viewModel.LeaveAsync().ConfigureAwait(true);
+                }
+
+                var previousStoryboardId = _activeInnerStoryboardPageInfo?.StoryboardId;
+                _activeInnerStoryboardPageInfo = pageInfo;
+                _activeStoryboard = storyboard;
+                if (previousStoryboardId == null || previousStoryboardId.Value != pageInfo.StoryboardId)
+                {
+                    ActiveStoryboardChanged?.Invoke(this, pageInfo.StoryboardId);
+                }
+
+                if (_cachedPages.ContainsKey(pageInfo.PageUniqueId))
+                {
+                    var page = _cachedPages[pageInfo.PageUniqueId];
+
+                    storyboard.ActivePage = page;
+                    _pageContexts.TryGetValue(pageInfo.PageUniqueId, out var restoredPageContext);
+
+                    _startPagesOpenningStat.TryGetValue(pageInfo.PageUniqueId, out var wasPageOpenned);
+                    if (wasPageOpenned)
+                    {
+                        await page.ViewModel.ReturnAsync(pageContext ?? restoredPageContext).ConfigureAwait(true);
+                    }
+                    else
+                    {
+                        await page.ViewModel.OpenAsync(pageContext ?? restoredPageContext).ConfigureAwait(true);
+                        _startPagesOpenningStat[pageInfo.PageUniqueId] = true;
+                    }
+
                 }
                 else
                 {
-                    await page.ViewModel.OpenAsync(pageContext ?? restoredPageContext).ConfigureAwait(true);
-                    _startPagesOpenningStat[pageInfo.PageUniqueId] = true;
+                    var view = CreatePageView(pageInfo);
+                    storyboard.ActivePage = view;
+
+                    await view.ViewModel.OpenAsync(pageContext).ConfigureAwait(true);
+                    _pageContexts[pageInfo.PageUniqueId] = pageContext;
                 }
 
-            }
-            else
-            {
-                IStoryboardPageView view = null;
-                _invoker.Invoke(() =>
-                    {
-                        view = CreatePageView(pageInfo);
-                        storyboard.ActivePage = view;
-                    });
 
-                await view.ViewModel.OpenAsync(pageContext).ConfigureAwait(true);
-                _pageContexts[pageInfo.PageUniqueId] = pageContext;
-            }
-          
+                if (addToJournal)
+                {
+                    _journal.AddLast(pageInfo);
+                }
 
-            if (addToJournal)
-            {
-                _journal.AddLast(pageInfo);
-            }
-            RiseCanBackChanged();
+                RiseCanBackChanged();
+            });
         }
 
         private void RiseCanBackChanged()
@@ -282,91 +295,98 @@ namespace Markeli.Storyboards
         }
         
 
-        public async Task GoBackAsync()
+        public Task GoBackAsync()
         {
-            if (!CanGoBack()) return;
-            if (_activeInnerStoryboardPageInfo == null) return;
+            if (!CanGoBack()) return Task.CompletedTask;
+            if (_activeInnerStoryboardPageInfo == null) return Task.CompletedTask;
 
-            if (_activeStoryboard?.ActivePage != null)
-            {
-                var previousPage = _activeStoryboard.ActivePage;
-                var viewModel = previousPage.ViewModel;
-                var canClose = await viewModel.CanCloseAsync().ConfigureAwait(true);
-                if (!canClose) return;
-            }
-
-            var lastPageFromStoryboard = _journal.LastOrDefault(x =>
-                x.StoryboardId == _activeInnerStoryboardPageInfo.StoryboardId
-                && x.PageId != _activeInnerStoryboardPageInfo.PageId);
-
-            if (lastPageFromStoryboard == null)
-            {
-                lastPageFromStoryboard =
-                    _journal.LastOrDefault(x => x.StoryboardId != _activeInnerStoryboardPageInfo.StoryboardId);
-                if (lastPageFromStoryboard == null) return;
-            }
-
-           
-            _journal.Remove(_activeInnerStoryboardPageInfo);
-
-            //start pages always in memory
-            if (_cachedPages.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId) && !_activeInnerStoryboardPageInfo.IsStartPage)
-            {
-                _cachedPages.Remove(_activeInnerStoryboardPageInfo.PageUniqueId);
-
+            return _invoker.InvokeAsync(async () => {
                 if (_activeStoryboard?.ActivePage != null)
                 {
                     var previousPage = _activeStoryboard.ActivePage;
                     var viewModel = previousPage.ViewModel;
                     var canClose = await viewModel.CanCloseAsync().ConfigureAwait(true);
                     if (!canClose) return;
-
-                    viewModel.PageBackRequested -= ViewModelOnPageBackRequested;
-                    viewModel.PageCanceled -= ViewModelOnPageCanceled;
-                    viewModel.PageCompleted -= ViewModelOnPageCompleted;
-                    viewModel.PageTransitionRequested -= ViewModelOnPageTransitionRequested;
-
-                    await viewModel.CloseAsync().ConfigureAwait(true);
                 }
-            }
 
-            if (_pageContexts.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId))
-            {
-                _pageContexts.Remove(_activeInnerStoryboardPageInfo.PageUniqueId);
-            }
+                var lastPageFromStoryboard = _journal.LastOrDefault(x =>
+                    x.StoryboardId == _activeInnerStoryboardPageInfo.StoryboardId
+                    && x.PageId != _activeInnerStoryboardPageInfo.PageId);
 
-            //todo maybe add isShared flag?
-            if (_activeInnerStoryboardPageInfo.IsStartPage && _startPageContexts.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId))
-            {
-                _pageContexts[_activeInnerStoryboardPageInfo.PageUniqueId] =
-                    _startPageContexts[_activeInnerStoryboardPageInfo.PageUniqueId];
-            }
-            
+                if (lastPageFromStoryboard == null)
+                {
+                    lastPageFromStoryboard =
+                        _journal.LastOrDefault(x => x.StoryboardId != _activeInnerStoryboardPageInfo.StoryboardId);
+                    if (lastPageFromStoryboard == null) return;
+                }
 
-            // already have been added
-            await OpenPageAsync(lastPageFromStoryboard, addToJournal: false).ConfigureAwait(true);
+
+                _journal.Remove(_activeInnerStoryboardPageInfo);
+
+                //start pages always in memory
+                if (_cachedPages.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId) && !_activeInnerStoryboardPageInfo.IsStartPage)
+                {
+                    _cachedPages.Remove(_activeInnerStoryboardPageInfo.PageUniqueId);
+
+                    if (_activeStoryboard?.ActivePage != null)
+                    {
+                        var previousPage = _activeStoryboard.ActivePage;
+                        var viewModel = previousPage.ViewModel;
+                        var canClose = await viewModel.CanCloseAsync().ConfigureAwait(true);
+                        if (!canClose) return;
+
+                        viewModel.PageBackRequested -= ViewModelOnPageBackRequested;
+                        viewModel.PageCanceled -= ViewModelOnPageCanceled;
+                        viewModel.PageCompleted -= ViewModelOnPageCompleted;
+                        viewModel.PageTransitionRequested -= ViewModelOnPageTransitionRequested;
+
+                        await viewModel.CloseAsync().ConfigureAwait(true);
+                    }
+                }
+
+                if (_pageContexts.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId))
+                {
+                    _pageContexts.Remove(_activeInnerStoryboardPageInfo.PageUniqueId);
+                }
+
+                //todo maybe add isShared flag?
+                if (_activeInnerStoryboardPageInfo.IsStartPage && _startPageContexts.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId))
+                {
+                    _pageContexts[_activeInnerStoryboardPageInfo.PageUniqueId] =
+                        _startPageContexts[_activeInnerStoryboardPageInfo.PageUniqueId];
+                }
+
+
+                // already have been added
+                await OpenPageAsync(lastPageFromStoryboard, addToJournal: false).ConfigureAwait(true);
+            });
         }
 
         public bool CanGoBack()
         {
-            if (_activeStoryboard?.ActivePage == null) return false;
-            if (_storyboards.Count < 0) return false;
-            // if no page or one there is no reason to execute back command
-            if (_journal.Count < 2) return false;
-            // if opened only start pages there is no reason to execute back command
-            if (_journal.All(x => x.IsStartPage)) return false;
-            
-            return true;
+            return _invoker.Invoke(() => {
+                if (_activeStoryboard?.ActivePage == null) return false;
+                if (_storyboards.Count < 0) return false;
+                // if no page or one there is no reason to execute back command
+                if (_journal.Count < 2) return false;
+                // if opened only start pages there is no reason to execute back command
+                if (_journal.All(x => x.IsStartPage)) return false;
+
+                return true;
+            });
         }
-        
+
 
         public void Dispose()
         {
-            foreach (var page in _cachedPages)
+            _invoker.Invoke(() =>
             {
-                var viewModel = page.Value?.ViewModel;
-                viewModel?.Dispose();
-            }
+                foreach (var page in _cachedPages)
+                {
+                    var viewModel = page.Value?.ViewModel;
+                    viewModel?.Dispose();
+                }
+            });
         }
 
         //todo add can close app support

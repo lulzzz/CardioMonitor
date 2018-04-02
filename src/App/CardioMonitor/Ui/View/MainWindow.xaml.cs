@@ -16,12 +16,13 @@ namespace CardioMonitor.Ui.View
         public MainWindow(MainWindowViewModel viewModel)
         {
             if (viewModel == null) throw new ArgumentNullException(nameof(viewModel));
+            InitializeComponent();
             //initialize messageHelper
             MessageHelper.Instance.Window = this;
             _viewModel = viewModel;
+            HamburgerMenuControl.DataContext = _viewModel;
            // _viewModel.SessionViewModel.ThreadAssistant = new ThreadAssistant(this);
             DataContext = _viewModel;
-            InitializeComponent();
             //SettingsView.ViewModel = _viewModel.SettingsViewModel;
 
             /*try

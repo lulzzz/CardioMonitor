@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -70,13 +71,41 @@ namespace CardioMonitor.Ui.ViewModel{
             {
                 if (_patientsStoryboard != value)
                 {
+                    if (_patientsStoryboard != null)
+                    {
+                        _patientsStoryboard.PropertyChanged -= PatientsStoryboardOnPropertyChanged;
+                    }
                     _patientsStoryboard = value;
-                    RisePropertyChanged(nameof(PatientsStoryboard));
+                    if (_patientsStoryboard != null)
+                    {
+
+                        _patientsStoryboard.PropertyChanged += PatientsStoryboardOnPropertyChanged;
+                    }
                 }
             }
         }
+
+        private void PatientsStoryboardOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
+        {
+            PatientsView = _patientsStoryboard.ActivePage as UIElement;
+        }
+
         private Storyboard _patientsStoryboard;
 
+
+        public UIElement PatientsView
+        {
+            get => _patientsView;
+            set
+            {
+                if (!Equals(_patientsView, value))
+                {
+                    _patientsView = value;
+                    RisePropertyChanged(nameof(PatientsView));
+                }
+            }
+        }
+        private UIElement _patientsView;
 
         public Storyboard SessionsStoryboard
         {

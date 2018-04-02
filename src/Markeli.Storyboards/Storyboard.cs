@@ -18,10 +18,10 @@ namespace Markeli.Storyboards
             get => _activePage;
             set
             {
-                if (Equals(_activePage, value)) return;
+               // if (Equals(_activePage, value)) return;
 
+                _activePage = value;
                 OnPropertyChanged(nameof(ActivePage));
-                _activePage = value; 
 
             }
         }

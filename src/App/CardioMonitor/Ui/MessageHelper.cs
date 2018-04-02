@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using System.Windows;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 
@@ -22,6 +23,7 @@ namespace CardioMonitor.Ui
                 {
                     return _instance;
                 }
+
                 lock (SyncObject)
                 {
                     return _instance ?? (_instance = new MessageHelper());
@@ -44,16 +46,25 @@ namespace CardioMonitor.Ui
             }
         }
 
-        public Task<MessageDialogResult> ShowMessageAsync(string message, string title = null , MessageDialogStyle style = MessageDialogStyle.Affirmative, MetroDialogSettings settings = null)
+        public async Task<MessageDialogResult> ShowMessageAsync(string message, string title = null,
+            MessageDialogStyle style = MessageDialogStyle.Affirmative, MetroDialogSettings settings = null)
         {
-            title = title ?? Window.Title;
-            return Window.ShowMessageAsync(title, message, style, settings);
+            var result = await Application.Current.Dispatcher.InvokeAsync(async () =>
+            {
+                title = title ?? Window.Title;
+                return await Window.ShowMessageAsync(title, message, style, settings);
+            }).Task;
+            return await result;
         }
 
-        public Task<ProgressDialogController> ShowProgressDialogAsync(string message, string title = null)
+        public async Task<ProgressDialogController> ShowProgressDialogAsync(string message, string title = null)
         {
-            title = title ?? Window.Title;
-            return Window.ShowProgressAsync(title, message);
+            var result = await Application.Current.Dispatcher.InvokeAsync(async () =>
+            {
+                title = title ?? Window.Title;
+                return await Window.ShowProgressAsync(title, message);
+            }).Task;
+            return await result;
         }
     }
 }

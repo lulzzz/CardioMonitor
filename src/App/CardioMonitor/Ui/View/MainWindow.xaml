@@ -183,7 +183,7 @@
                             </ResourceDictionary.MergedDictionaries>
                         </ResourceDictionary>
                     </StackPanel.Resources>
-                    <Button  Command="{Binding MoveBackwardCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    <Button  Command="{Binding MoveBackwardCommand, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                              Width="48"
                              Height="30"
                              Background="{DynamicResource AccentBaseColorBrush}"
@@ -218,7 +218,7 @@
                     Icon="{iconPacks1:Material Kind=AccountCircle}" 
                     Label="Пациенты">
                     <controls:HamburgerMenuIconItem.Tag>
-                        <ContentPresenter Content="{Binding PatientsStoryboard.ActivePage}" />
+                        <ContentPresenter Content="{Binding PatientsView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </controls:HamburgerMenuIconItem.Tag>
                 </controls:HamburgerMenuIconItem>
                 <controls:HamburgerMenuIconItem 

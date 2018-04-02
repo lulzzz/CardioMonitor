@@ -22,7 +22,8 @@ namespace CardioMonitor.Ui
             if (!type.GetInterfaces().Contains(typeof(IStoryboardPageView)))
                 throw new InvalidOperationException($"type must implement {nameof(IStoryboardPageView)}");
 
-            return _container.GetInstance(type) as IStoryboardPageView;
+            // cause we should not register views in IoC
+            return Activator.CreateInstance(type) as IStoryboardPageView;
         }
 
         public IStoryboardPageViewModel CreateViewModel([NotNull] Type type)

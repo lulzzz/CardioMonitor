@@ -33,7 +33,8 @@ namespace CardioMonitor
         {
             //todo add startup window
             var container = Bootstrap();
-            var mainWindow = container.GetInstance<MainWindow>();
+            var mainWindowViewModel = container.GetInstance<MainWindowViewModel>();
+            var mainWindow = new MainWindow(mainWindowViewModel);
             mainWindow.Show();
         }
 

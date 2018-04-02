@@ -25,6 +25,27 @@ namespace Markeli.Storyboards.UnitTests
             {
                 action.Invoke();
             }
+
+            public T Invoke<T>(Func<T> function)
+            {
+                return function.Invoke();
+            }
+
+            public Task Invoke(Func<Task> function)
+            {
+                return function.Invoke();
+            }
+
+            public Task InvokeAsync(Action action)
+            {
+                action.Invoke();
+                return Task.CompletedTask;
+            }
+
+            public Task InvokeAsync(Func<Task> function)
+            {
+                return function.Invoke();
+            }
         }
 
         public StoryboardNavigationServiceUnitTests()

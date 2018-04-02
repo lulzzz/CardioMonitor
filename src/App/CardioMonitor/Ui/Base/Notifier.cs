@@ -9,11 +9,7 @@ namespace CardioMonitor.Ui.Base
 
         public void RisePropertyChanged(string propertyName)
         {
-            var handler = PropertyChanged;
-            if (null != handler)
-            {
-                handler(this, new PropertyChangedEventArgs(propertyName));
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
