@@ -207,6 +207,7 @@
     <Compile Include="Ui\ViewModel\Sessions\SessionProcessingPageConetxt.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionProcessingViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionsViewModel.cs" />
+    <Compile Include="Ui\ViewModel\ExtendedStoryboard.cs" />
     <Compile Include="Ui\View\Patients\PatientsView.xaml.cs">
       <DependentUpon>PatientsView.xaml</DependentUpon>
     </Compile>

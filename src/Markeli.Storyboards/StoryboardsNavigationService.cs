@@ -229,14 +229,10 @@ namespace Markeli.Storyboards
 
                     await viewModel.LeaveAsync().ConfigureAwait(true);
                 }
-
-                var previousStoryboardId = _activeInnerStoryboardPageInfo?.StoryboardId;
+                
                 _activeInnerStoryboardPageInfo = pageInfo;
                 _activeStoryboard = storyboard;
-                if (previousStoryboardId == null || previousStoryboardId.Value != pageInfo.StoryboardId)
-                {
                     ActiveStoryboardChanged?.Invoke(this, pageInfo.StoryboardId);
-                }
 
                 if (_cachedPages.ContainsKey(pageInfo.PageUniqueId))
                 {

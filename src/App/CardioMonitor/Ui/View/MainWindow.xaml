@@ -32,11 +32,11 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.buttons.xaml"/>
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Themes/HamburgerMenuTemplate.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Clean/Clean.xaml" />
-</ResourceDictionary.MergedDictionaries>
+            </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="btv" />
 
             <!--  This is the template for the menu items.  -->
-            <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type controls:HamburgerMenuIconItem}">
+            <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type viewModel:ExtendedStoryboard}">
                 <Grid Height="48">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="48" />
@@ -51,31 +51,12 @@
                     <TextBlock Grid.Column="1"
                                VerticalAlignment="Center"
                                FontSize="16"
-                               Text="{Binding Label}" />
+                               Text="{Binding Name}" />
                 </Grid>
             </DataTemplate>
 
-            <ObjectDataProvider x:Key="DisplayModeEnumValues"
-                                MethodName="GetValues"
-                                ObjectType="{x:Type controls:SplitViewDisplayMode}">
-                <ObjectDataProvider.MethodParameters>
-                    <x:Type TypeName="controls:SplitViewDisplayMode" />
-                </ObjectDataProvider.MethodParameters>
-            </ObjectDataProvider>
-
-            <ObjectDataProvider x:Key="VisibilityEnumValues"
-                                MethodName="GetValues"
-                                ObjectType="{x:Type Visibility}">
-                <ObjectDataProvider.MethodParameters>
-                    <x:Type TypeName="Visibility" />
-                </ObjectDataProvider.MethodParameters>
-            </ObjectDataProvider>
-
-            <materialDesignConverters:BrushRoundConverter x:Key="BrushRoundConverter" />
-
             <Style x:Key="HamburgerMenuCreatorsItemStyle"
-                   BasedOn="{StaticResource HamburgerMenuItemStyle}"
-                   TargetType="{x:Type ListBoxItem}">
+                   BasedOn="{StaticResource HamburgerMenuItemStyle}">
                 <Setter Property="controls:ItemHelper.ActiveSelectionBackgroundBrush" Value="Transparent" />
                 <Setter Property="controls:ItemHelper.ActiveSelectionForegroundBrush" Value="{DynamicResource AccentBaseColorBrush}" />
                 <Setter Property="controls:ItemHelper.DisabledForegroundBrush" Value="{DynamicResource GrayNormalBrush}" />
@@ -85,95 +66,21 @@
                 <Setter Property="controls:ItemHelper.HoverSelectedBackgroundBrush" Value="{DynamicResource GrayBrush9}" />
                 <Setter Property="controls:ItemHelper.SelectedBackgroundBrush" Value="Transparent" />
                 <Setter Property="controls:ItemHelper.SelectedForegroundBrush" Value="{DynamicResource AccentBaseColorBrush}" />
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="{x:Type ListBoxItem}">
-                            <Grid Background="{TemplateBinding Background}" RenderOptions.ClearTypeHint="{TemplateBinding RenderOptions.ClearTypeHint}">
-                                <Border x:Name="Border"
-                                        Background="{TemplateBinding Background}"
-                                        BorderBrush="{TemplateBinding BorderBrush}"
-                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                        SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                <Grid Margin="{TemplateBinding BorderThickness}">
-                                    <Grid HorizontalAlignment="Left"
-                                          VerticalAlignment="Center"
-                                          Visibility="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type controls:HamburgerMenu}}, Path=ShowSelectionIndicator, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                        <Rectangle x:Name="SelectionIndicator"
-                                                   Width="{DynamicResource HamburgerMenuSelectionIndicatorThemeWidth}"
-                                                   Height="{DynamicResource HamburgerMenuSelectionIndicatorThemeHeight}"
-                                                   Fill="{TemplateBinding Foreground}"
-                                                   Focusable="False"
-                                                   Opacity="0.0" />
-                                    </Grid>
-                                    <materialDesign:Ripple Padding="{TemplateBinding Padding}"
-                                                           HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                                           VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
-                                                           Content="{TemplateBinding Content}"
-                                                           ContentTemplate="{TemplateBinding ContentTemplate}"
-                                                           ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
-                                                           Feedback="{TemplateBinding Foreground, Converter={StaticResource BrushRoundConverter}}"
-                                                           Focusable="False"
-                                                           SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
-                                </Grid>
-                            </Grid>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsSelected" Value="True">
-                                    <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource Self}, Path=(controls:ItemHelper.SelectedForegroundBrush), Mode=OneWay}" />
-                                    <Setter TargetName="Border" Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(controls:ItemHelper.SelectedBackgroundBrush), Mode=OneWay}" />
-                                    <Setter TargetName="SelectionIndicator" Property="Opacity" Value="1.0" />
-                                </Trigger>
-                                <MultiTrigger>
-                                    <MultiTrigger.Conditions>
-                                        <Condition Property="IsSelected" Value="True" />
-                                        <Condition Property="Selector.IsSelectionActive" Value="True" />
-                                    </MultiTrigger.Conditions>
-                                    <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource Self}, Path=(controls:ItemHelper.ActiveSelectionForegroundBrush), Mode=OneWay}" />
-                                    <Setter TargetName="Border" Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(controls:ItemHelper.ActiveSelectionBackgroundBrush), Mode=OneWay}" />
-                                </MultiTrigger>
-
-                                <MultiTrigger>
-                                    <MultiTrigger.Conditions>
-                                        <Condition Property="IsMouseOver" Value="True" />
-                                        <Condition Property="IsSelected" Value="True" />
-                                    </MultiTrigger.Conditions>
-                                    <Setter TargetName="Border" Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(controls:ItemHelper.HoverSelectedBackgroundBrush), Mode=OneWay}" />
-                                </MultiTrigger>
-                                <MultiTrigger>
-                                    <MultiTrigger.Conditions>
-                                        <Condition Property="IsMouseOver" Value="True" />
-                                        <Condition Property="IsSelected" Value="False" />
-                                    </MultiTrigger.Conditions>
-                                    <Setter TargetName="Border" Property="Background" Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=(controls:ItemHelper.HoverBackgroundBrush), Mode=OneWay}" />
-                                </MultiTrigger>
-
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource Self}, Path=(controls:ItemHelper.DisabledForegroundBrush), Mode=OneWay}" />
-                                    <Setter TargetName="Border" Property="Background" Value="{Binding RelativeSource={RelativeSource Self}, Path=(controls:ItemHelper.DisabledBackgroundBrush), Mode=OneWay}" />
-                                </Trigger>
-                                <MultiTrigger>
-                                    <MultiTrigger.Conditions>
-                                        <Condition Property="IsEnabled" Value="False" />
-                                        <Condition Property="IsSelected" Value="True" />
-                                    </MultiTrigger.Conditions>
-                                    <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource Self}, Path=(controls:ItemHelper.DisabledSelectedForegroundBrush), Mode=OneWay}" />
-                                    <Setter TargetName="Border" Property="Background" Value="{Binding RelativeSource={RelativeSource Self}, Path=(controls:ItemHelper.DisabledSelectedBackgroundBrush), Mode=OneWay}" />
-                                </MultiTrigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
+               
             </Style>
 
             <Style x:Key="HamburgerMenuCreatorsStyle"
                    BasedOn="{StaticResource {x:Type controls:HamburgerMenu}}"
                    TargetType="{x:Type controls:HamburgerMenu}">
-                <Setter Property="ItemContainerStyle" Value="{StaticResource HamburgerMenuCreatorsItemStyle}" />
-                <Setter Property="OptionsItemContainerStyle" Value="{StaticResource HamburgerMenuCreatorsItemStyle}" />
                 <Setter Property="PaneBackground" Value="{DynamicResource WhiteBrush}" />
                 <Setter Property="PaneForeground" Value="{DynamicResource TextBrush}" />
                 <Setter Property="ShowSelectionIndicator" Value="True" />
             </Style>
 
+
+            <materialDesignConverters:BrushRoundConverter x:Key="BrushRoundConverter" />
+
+          
             <DataTemplate x:Key="ClickableIcon">
                 <StackPanel>
                     <StackPanel.Resources>
@@ -195,74 +102,33 @@
                 </StackPanel>
             </DataTemplate>
 
+            
+
         </ResourceDictionary>
     </controls:MetroWindow.Resources>
 
     <controls:HamburgerMenu x:Name="HamburgerMenuControl"
-                                    HamburgerWidth="48"
-                                    IsPaneOpen="True"
-                                    ItemInvoked="HamburgerMenuControl_OnItemInvoked"
-                                    ItemTemplate="{StaticResource MenuItemTemplate}"
-                                    OptionsItemTemplate="{StaticResource MenuItemTemplate}"
-                                    SelectedIndex="0"
-                                    OpenPaneLength="150"
-                                    Style="{StaticResource HamburgerMenuCreatorsStyle}"
-                                    VerticalScrollBarOnLeftSide="False">
-        <controls:HamburgerMenu.HamburgerMenuHeaderTemplate>
-            <DataTemplate></DataTemplate>
-        </controls:HamburgerMenu.HamburgerMenuHeaderTemplate>
-        <!--  Items  -->
-        <controls:HamburgerMenu.ItemsSource>
-            <controls:HamburgerMenuItemCollection>
-                <controls:HamburgerMenuIconItem 
-                    Icon="{iconPacks1:Material Kind=AccountCircle}" 
-                    Label="Пациенты">
-                    <controls:HamburgerMenuIconItem.Tag>
-                        <ContentPresenter Content="{Binding PatientsView, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </controls:HamburgerMenuIconItem.Tag>
-                </controls:HamburgerMenuIconItem>
-                <controls:HamburgerMenuIconItem 
-                    Icon="{iconPacks1:Octicons Kind=Checklist}" 
-                    Label="Все сеансы">
-          
-                </controls:HamburgerMenuIconItem>
-                <controls:HamburgerMenuIconItem 
-                    Icon="{iconPacks1:Octicons Kind=Pulse}" 
-                    Label="Новый сеанс">
+                            HamburgerWidth="48"
+                            IsPaneOpen="True"
+                            ItemInvoked="HamburgerMenuControl_OnItemInvoked"
+                            ItemTemplate="{StaticResource MenuItemTemplate}"
+                            OptionsItemTemplate="{StaticResource MenuItemTemplate}"
+                            Content="{Binding SelectedStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            SelectedItem="{Binding SelectedStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            ItemsSource="{Binding ItemStoryboards, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                            OptionsItemsSource="{Binding OptionsStoryboards, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                            OpenPaneLength="150"
+                            Style="{StaticResource HamburgerMenuCreatorsStyle}"
+                            VerticalScrollBarOnLeftSide="False">
 
-                </controls:HamburgerMenuIconItem>
-            </controls:HamburgerMenuItemCollection>
-        </controls:HamburgerMenu.ItemsSource>
-
-        <!--  Options  -->
-        <controls:HamburgerMenu.OptionsItemsSource>
-            <controls:HamburgerMenuItemCollection>
-                <controls:HamburgerMenuIconItem Icon="{iconPacks1:Material Kind=Settings}" Label="Настройки">
-                    
-                </controls:HamburgerMenuIconItem>
-            </controls:HamburgerMenuItemCollection>
-        </controls:HamburgerMenu.OptionsItemsSource>
 
         <controls:HamburgerMenu.ContentTemplate>
-            <DataTemplate DataType="{x:Type controls:HamburgerMenuIconItem}">
-                <Grid Margin="20 0 10 0">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.Row="0"
-                                       Margin="0 15 0 5"
-                                       Padding="0"
-                                       FontFamily="{DynamicResource HeaderFontFamily}"
-                                       FontSize="{DynamicResource HeaderFontSize}"
-                                       Text="{Binding Label}" />
-                    <ScrollViewer Grid.Row="1"
-                                          Focusable="False"
-                                          HorizontalScrollBarVisibility="Disabled"
-                                          VerticalScrollBarVisibility="Auto">
-                        <ContentControl Content="{Binding Tag}" Focusable="False" />
-                    </ScrollViewer>
-                </Grid>
+            <DataTemplate DataType="{x:Type viewModel:ExtendedStoryboard}">
+
+                <ContentControl x:Name="TheContent"
+                                Focusable="False"
+                                Foreground="{DynamicResource BlackBrush}"
+                                Content="{Binding ActivePage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </DataTemplate>
         </controls:HamburgerMenu.ContentTemplate>
 

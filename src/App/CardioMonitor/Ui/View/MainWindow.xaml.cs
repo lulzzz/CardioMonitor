@@ -95,7 +95,7 @@ namespace CardioMonitor.Ui.View
 
         private void HamburgerMenuControl_OnItemInvoked(object sender, HamburgerMenuItemInvokedEventArgs e)
         {
-            HamburgerMenuControl.Content = e.InvokedItem;
+            //HamburgerMenuControl.Content = e.InvokedItem;
         }
 
         private void ButtonBase_OnClick(object sender, RoutedEventArgs e)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -14,6 +16,7 @@ using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui.Base;
+using CardioMonitor.Ui.View;
 using CardioMonitor.Ui.View.Patients;
 using CardioMonitor.Ui.View.Sessions;
 using CardioMonitor.Ui.View.Settings;
@@ -21,6 +24,7 @@ using CardioMonitor.Ui.ViewModel.Patients;
 using CardioMonitor.Ui.ViewModel.Sessions;
 using CardioMonitor.Ui.ViewModel.Settings;
 using JetBrains.Annotations;
+using MahApps.Metro.IconPacks;
 using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel{
@@ -62,94 +66,55 @@ namespace CardioMonitor.Ui.ViewModel{
                            });
             }
         }
-
-
-        public Storyboard PatientsStoryboard
-        {
-            get => _patientsStoryboard;
-            set
-            {
-                if (_patientsStoryboard != value)
-                {
-                    if (_patientsStoryboard != null)
-                    {
-                        _patientsStoryboard.PropertyChanged -= PatientsStoryboardOnPropertyChanged;
-                    }
-                    _patientsStoryboard = value;
-                    if (_patientsStoryboard != null)
-                    {
-
-                        _patientsStoryboard.PropertyChanged += PatientsStoryboardOnPropertyChanged;
-                    }
-                }
-            }
-        }
-
-        private void PatientsStoryboardOnPropertyChanged(object sender, PropertyChangedEventArgs propertyChangedEventArgs)
-        {
-            PatientsView = _patientsStoryboard.ActivePage as UIElement;
-        }
-
-        private Storyboard _patientsStoryboard;
-
-
-        public UIElement PatientsView
-        {
-            get => _patientsView;
-            set
-            {
-                if (!Equals(_patientsView, value))
-                {
-                    _patientsView = value;
-                    RisePropertyChanged(nameof(PatientsView));
-                }
-            }
-        }
-        private UIElement _patientsView;
-
-        public Storyboard SessionsStoryboard
-        {
-            get => _sessionStoryboard;
-            set
-            {
-                if (_sessionStoryboard != value)
-                {
-                    _sessionStoryboard = value;
-                    RisePropertyChanged(nameof(SessionsStoryboard));
-                }
-            }
-        }
-        private Storyboard _sessionStoryboard;
-
-        public Storyboard SessionProcessingStoryboard
-        {
-            get => _sessionProcessingStoryboard;
-            set
-            {
-                if (_sessionProcessingStoryboard != value)
-                {
-                    _sessionProcessingStoryboard = value;
-                    RisePropertyChanged(nameof(SessionProcessingStoryboard));
-                }
-            }
-        }
-        private Storyboard _sessionProcessingStoryboard;
-
-        public Storyboard SettingsStoryboard
-        {
-            get => _settingsStoryboard;
-            set
-            {
-                if (_settingsStoryboard != value)
-                {
-                    _settingsStoryboard = value;
-                    RisePropertyChanged(nameof(SettingsStoryboard));
-                }
-            }
-        }
-        private Storyboard _settingsStoryboard;
+        
+        private readonly ICollection<ExtendedStoryboard> _storyboards;
+        
 
         #endregion
+
+
+
+        public ObservableCollection<ExtendedStoryboard> ItemStoryboards
+        {
+            get => _itemStoryboards;
+            set
+            {
+                if (Equals(_itemStoryboards, value)) return;
+                _itemStoryboards = value;
+                RisePropertyChanged(nameof(ItemStoryboards));
+            }
+        }
+        private ObservableCollection<ExtendedStoryboard> _itemStoryboards;
+
+        public ObservableCollection<ExtendedStoryboard> OptionsStoryboards
+        {
+            get => _optionsStoryboards;
+            set
+            {
+                if (Equals(_optionsStoryboards, value)) return;
+                _optionsStoryboards = value; 
+                RisePropertyChanged(nameof(OptionsStoryboards));
+            }
+        }
+        private ObservableCollection<ExtendedStoryboard> _optionsStoryboards;
+
+        private ExtendedStoryboard _selectedStoryboard;
+
+        public ExtendedStoryboard SelectedStoryboard
+        {
+            get => _selectedStoryboard;
+            set
+            {
+                if (Equals(_selectedStoryboard, value)) return;
+                _selectedStoryboard = value;
+                RisePropertyChanged(nameof(SelectedStoryboard));
+                // monkey hack
+                if (SelectedStoryboard != null)
+                {
+                    SelectedStoryboard.ActivePage = SelectedStoryboard.ActivePage;
+                }
+            }
+        }
 
         public MainWindowViewModel(
             ILogger logger,
@@ -178,73 +143,85 @@ namespace CardioMonitor.Ui.ViewModel{
             _storyboardsNavigationService.CanBackChanged += RiseCanGoBackChaned;
             _storyboardsNavigationService.SetUiInvoker(invoker);
 
-            PatientsStoryboard = new Storyboard(StoryboardIds.PatientsStoryboardId);
+            var patientsStoryboard = new ExtendedStoryboard(
+                StoryboardIds.PatientsStoryboardId,
+                "Пациенты",
+                new PackIconMaterial{Kind = PackIconMaterialKind.Account});
 
-            PatientsStoryboard.RegisterPage(
+            patientsStoryboard.RegisterPage(
                 PageIds.PatientsPageId,
                 view: typeof(PatientsView),
                 viewModel: typeof(PatientsViewModel),
                 isStartPage: true);
 
-            PatientsStoryboard.RegisterPage(
+            patientsStoryboard.RegisterPage(
                 PageIds.PatientPageId,
                 view: typeof(PatientView),
                 viewModel: typeof(PatientViewModel),
                 isStartPage: false);
 
-            PatientsStoryboard.RegisterPage(
+            patientsStoryboard.RegisterPage(
                 PageIds.PatientSessionsPageId,
                 view: typeof(PatientSessionsView),
                 viewModel: typeof(PatientSessionsViewModel),
                 isStartPage: false);
 
-            PatientsStoryboard.RegisterPage(
+            patientsStoryboard.RegisterPage(
                 PageIds.SessionDataViewingPageId,
                 view: typeof(SessionDataView),
                 viewModel: typeof(SessionDataViewModel),
                 isStartPage: false);
 
 
-            SessionsStoryboard = new Storyboard(StoryboardIds.SessionsStoryboardId);
-            
-            SessionsStoryboard.RegisterPage(
+            var sessionsStoryboard = new ExtendedStoryboard(
+                StoryboardIds.SessionsStoryboardId,
+                "Все сеансы",
+                new PackIconOcticons{Kind = PackIconOcticonsKind.Checklist });
+
+            sessionsStoryboard.RegisterPage(
                 PageIds.SessionsPageId,
                 view: typeof(SessionsView),
                 viewModel: typeof(SessionsViewModel),
                 isStartPage: true);
 
-            SessionsStoryboard.RegisterPage(
+            sessionsStoryboard.RegisterPage(
                 PageIds.SessionDataViewingPageId,
                 view: typeof(SessionDataView),
                 viewModel: typeof(SessionDataViewModel),
                 isStartPage: false);
             
-            SessionProcessingStoryboard = new Storyboard(StoryboardIds.SessionProcessingStoryboardId);
+            var sessionProcessingStoryboard = new ExtendedStoryboard(
+                StoryboardIds.SessionProcessingStoryboardId,
+                "Новый сеанс",
+                new PackIconOcticons { Kind = PackIconOcticonsKind.Pulse});
 
-            SessionProcessingStoryboard.RegisterPage(
+            sessionProcessingStoryboard.RegisterPage(
                 PageIds.SessionProcessingInitPageId,
                 view: typeof(SessionProcessingInitView),
                 viewModel: typeof(SessionProcessingInitViewModel),
                 isStartPage: true);
 
-            SessionProcessingStoryboard.RegisterPage(
+            sessionProcessingStoryboard.RegisterPage(
                 PageIds.SessionProcessingPageId,
                 view: typeof(SessionProcessingView),
                 viewModel: typeof(SessionProcessingViewModel),
                 isStartPage: false);
 
-            SettingsStoryboard = new Storyboard(StoryboardIds.SettingsStoryboardId);
+            var settingsStoryboard = new ExtendedStoryboard(
+                StoryboardIds.SettingsStoryboardId,
+                "Настройки",
+                new PackIconMaterial{ Kind = PackIconMaterialKind.Settings});
 
-            SettingsStoryboard.RegisterPage(
+            settingsStoryboard.RegisterPage(
                 PageIds.SettingsPageId,
                 view: typeof(SettingsView),
                 viewModel: typeof(SettingsViewModel),
                 isStartPage: true);
 
-            _storyboardsNavigationService.RegisterStoryboard(PatientsStoryboard);
-            _storyboardsNavigationService.RegisterStoryboard(SessionsStoryboard);
-            _storyboardsNavigationService.RegisterStoryboard(SessionProcessingStoryboard);
-            _storyboardsNavigationService.RegisterStoryboard(SettingsStoryboard);
+            _storyboardsNavigationService.RegisterStoryboard(patientsStoryboard);
+            _storyboardsNavigationService.RegisterStoryboard(sessionsStoryboard);
+            _storyboardsNavigationService.RegisterStoryboard(sessionProcessingStoryboard);
+            _storyboardsNavigationService.RegisterStoryboard(settingsStoryboard);
 
             _storyboardsNavigationService.SetStoryboardPageCreator(pageCreator);
 
@@ -254,6 +231,35 @@ namespace CardioMonitor.Ui.ViewModel{
             };
 
             _storyboardsNavigationService.CreateStartPages(startPageContexts);
+
+            _storyboardsNavigationService.ActiveStoryboardChanged += StoryboardsNavigationServiceOnActiveStoryboardChanged;
+
+            _storyboards = new List<ExtendedStoryboard>
+            {
+                patientsStoryboard,
+                sessionsStoryboard,
+                sessionProcessingStoryboard,
+                sessionProcessingStoryboard
+            };
+
+            ItemStoryboards = new ObservableCollection<ExtendedStoryboard>(new []
+            {
+                patientsStoryboard,
+                sessionsStoryboard,
+                sessionProcessingStoryboard
+            });
+
+            OptionsStoryboards = new ObservableCollection<ExtendedStoryboard>(new []
+            {
+                settingsStoryboard
+            });
+        }
+
+        private void StoryboardsNavigationServiceOnActiveStoryboardChanged(object sender, Guid guid)
+        {
+            SelectedStoryboard = 
+                ItemStoryboards.FirstOrDefault(x => x.StoryboardId == guid) 
+                ?? OptionsStoryboards.FirstOrDefault(x => x.StoryboardId == guid);
         }
 
         private void RiseCanGoBackChaned(object sender, EventArgs args)
