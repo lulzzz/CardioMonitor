@@ -107,7 +107,7 @@ namespace Markeli.Storyboards
                     storyboard.Value.ActivePage = view;
                     _startPagesOpenningStat[startPageInfo.PageUniqueId] = false;
                     IStoryboardPageContext context = null;
-                    startPageContexts?.TryGetValue(startPageInfo.PageUniqueId, out context);
+                    startPageContexts?.TryGetValue(startPageInfo.PageId, out context);
                     _startPageContexts[startPageInfo.PageUniqueId] = context;
                     _pageContexts[startPageInfo.PageUniqueId] = context;
                 }
@@ -206,8 +206,10 @@ namespace Markeli.Storyboards
             });
         }
 
-        private Task OpenPageAsync([NotNull] InnerStoryboardPageInfo pageInfo,
-            IStoryboardPageContext pageContext = null, bool addToJournal = true)
+        private Task OpenPageAsync(
+            [NotNull] InnerStoryboardPageInfo pageInfo,
+            [CanBeNull] IStoryboardPageContext pageContext = null, 
+            bool addToJournal = true)
         {
             if (!_storyboards.ContainsKey(pageInfo.StoryboardId))
             {

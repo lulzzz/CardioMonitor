@@ -188,6 +188,7 @@
     <Compile Include="Ui\Communication\AccessMode.cs" />
     <Compile Include="Ui\Communication\CardioEventArgs.cs" />
     <Compile Include="Files\FilesManager.cs" />
+    <Compile Include="Ui\Converters\InvertedBooleanToVisibilityConverter.cs" />
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\Base\Notifier.cs" />
     <Compile Include="Ui\Communication\PatientEventArgs.cs" />

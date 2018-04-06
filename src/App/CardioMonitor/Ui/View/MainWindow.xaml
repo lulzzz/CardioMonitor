@@ -5,14 +5,9 @@
     x:Class="CardioMonitor.Ui.View.MainWindow"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:settings="clr-namespace:CardioMonitor.Ui.View.Settings"
-    xmlns:patients="clr-namespace:CardioMonitor.Ui.View.Patients"
-    xmlns:sessions="clr-namespace:CardioMonitor.Ui.View.Sessions"
-    xmlns:iconPacks="using:MahApps.Metro.IconPacks"
-    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-    xmlns:materialDesignConverters="clr-namespace:MaterialDesignThemes.Wpf.Converters;assembly=MaterialDesignThemes.Wpf"
     xmlns:iconPacks1="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel"
+    xmlns:converters="clr-namespace:CardioMonitor.Ui.Converters"
     Title="Cardio monitor" 
     Height="350" 
     Width="925"
@@ -20,7 +15,6 @@
     GlowBrush="{DynamicResource AccentColorBrush}"
     d:DataContext="{d:DesignInstance Type=viewModel:MainWindowViewModel}"
     WindowState="Maximized" 
-    IconTemplate="{DynamicResource ClickableIcon}"
     mc:Ignorable="d" 
     Loaded="MetroWindow_Loaded" 
     Closing="MetroWindow_Closing"
@@ -34,6 +28,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Clean/Clean.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="btv" />
+            <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
 
             <!--  This is the template for the menu items.  -->
             <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type viewModel:ExtendedStoryboard}">
@@ -77,45 +72,32 @@
                 <Setter Property="ShowSelectionIndicator" Value="True" />
             </Style>
 
-
-            <materialDesignConverters:BrushRoundConverter x:Key="BrushRoundConverter" />
-
-          
-            <DataTemplate x:Key="ClickableIcon">
-                <StackPanel>
-                    <StackPanel.Resources>
-                        <ResourceDictionary>
-                            <ResourceDictionary.MergedDictionaries>
-                                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatButton.xaml" />
-                            </ResourceDictionary.MergedDictionaries>
-                        </ResourceDictionary>
-                    </StackPanel.Resources>
-                    <Button  Command="{Binding MoveBackwardCommand, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                             Width="48"
-                             Height="30"
-                             Background="{DynamicResource AccentBaseColorBrush}"
-                             Visibility="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <iconPacks1:Material Width="10"
-                                                  Height="10"
-                                                  Kind="ArrowLeft" />
-                    </Button>
-                </StackPanel>
-            </DataTemplate>
-
-            
-
         </ResourceDictionary>
     </controls:MetroWindow.Resources>
-
+    <controls:MetroWindow.LeftWindowCommands>
+        <controls:WindowCommands ShowSeparators="False">
+            <Button x:Name="GoBackButton"
+                    Width="{Binding ElementName=HamburgerMenuControl, Path=CompactPaneLength}"
+                    Command="{Binding MoveBackwardCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    Visibility="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <iconPacks1:PackIconMaterial Kind="ArrowLeft" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
+            <Image 
+                Source="../../Resources/usbHeart.ico"
+                Width="{Binding ElementName=HamburgerMenuControl, Path=CompactPaneLength}"
+                Visibility="{Binding ElementName=GoBackButton, Path=IsEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"/>
+        </controls:WindowCommands>
+    </controls:MetroWindow.LeftWindowCommands>
     <controls:HamburgerMenu x:Name="HamburgerMenuControl"
                             HamburgerWidth="48"
                             IsPaneOpen="True"
                             ItemInvoked="HamburgerMenuControl_OnItemInvoked"
+                            Content="{Binding SelectedItemStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            SelectedItem="{Binding SelectedItemStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             ItemTemplate="{StaticResource MenuItemTemplate}"
-                            OptionsItemTemplate="{StaticResource MenuItemTemplate}"
-                            Content="{Binding SelectedStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            SelectedItem="{Binding SelectedStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             ItemsSource="{Binding ItemStoryboards, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                            SelectedOptionsItem="{Binding SelectedOptionsStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            OptionsItemTemplate="{StaticResource MenuItemTemplate}"
                             OptionsItemsSource="{Binding OptionsStoryboards, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                             OpenPaneLength="150"
                             Style="{StaticResource HamburgerMenuCreatorsStyle}"

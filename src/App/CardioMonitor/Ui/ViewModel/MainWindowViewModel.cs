@@ -72,7 +72,17 @@ namespace CardioMonitor.Ui.ViewModel{
 
         #endregion
 
+        private bool _isIconVisible;
 
+        public bool IsIconVisible
+        {
+            get => _isIconVisible;
+            set
+            {
+                _isIconVisible = value;
+                RisePropertyChanged(nameof(IsIconVisible));
+            }
+        }
 
         public ObservableCollection<ExtendedStoryboard> ItemStoryboards
         {
@@ -98,23 +108,40 @@ namespace CardioMonitor.Ui.ViewModel{
         }
         private ObservableCollection<ExtendedStoryboard> _optionsStoryboards;
 
-        private ExtendedStoryboard _selectedStoryboard;
 
-        public ExtendedStoryboard SelectedStoryboard
+        public ExtendedStoryboard SelectedItemStoryboard
         {
-            get => _selectedStoryboard;
+            get => _selectedItemStoryboard;
             set
             {
-                if (Equals(_selectedStoryboard, value)) return;
-                _selectedStoryboard = value;
-                RisePropertyChanged(nameof(SelectedStoryboard));
+                if (Equals(_selectedItemStoryboard, value)) return;
+                _selectedItemStoryboard = value;
+                RisePropertyChanged(nameof(SelectedItemStoryboard));
                 // monkey hack
-                if (SelectedStoryboard != null)
+                if (SelectedItemStoryboard != null)
                 {
-                    SelectedStoryboard.ActivePage = SelectedStoryboard.ActivePage;
+                    _storyboardsNavigationService.GoToStoryboardAsync(_selectedItemStoryboard.StoryboardId);
                 }
             }
         }
+        private ExtendedStoryboard _selectedItemStoryboard;
+
+        public ExtendedStoryboard SelectedOptionsStoryboard
+        {
+            get => _selectedOptionsStoryboard;
+            set
+            {
+                if (Equals(_selectedOptionsStoryboard, value)) return;
+                _selectedOptionsStoryboard = value;
+                RisePropertyChanged(nameof(SelectedOptionsStoryboard));
+                if (SelectedOptionsStoryboard != null)
+                {
+                    _storyboardsNavigationService.GoToStoryboardAsync(_selectedOptionsStoryboard.StoryboardId);
+                }
+               
+            }
+        }
+        private ExtendedStoryboard _selectedOptionsStoryboard;
 
         public MainWindowViewModel(
             ILogger logger,
@@ -172,6 +199,9 @@ namespace CardioMonitor.Ui.ViewModel{
                 viewModel: typeof(SessionDataViewModel),
                 isStartPage: false);
 
+            patientsStoryboard.RegisterTransition(PageIds.PatientPageId, PageIds.PatientsPageId, PageTransitionTrigger.Back);
+            patientsStoryboard.RegisterTransition(PageIds.PatientSessionsPageId, PageIds.PatientsPageId, PageTransitionTrigger.Back);
+
 
             var sessionsStoryboard = new ExtendedStoryboard(
                 StoryboardIds.SessionsStoryboardId,
@@ -189,7 +219,9 @@ namespace CardioMonitor.Ui.ViewModel{
                 view: typeof(SessionDataView),
                 viewModel: typeof(SessionDataViewModel),
                 isStartPage: false);
-            
+
+            sessionsStoryboard.RegisterTransition(PageIds.SessionDataViewingPageId, PageIds.SessionsPageId, PageTransitionTrigger.Back);
+
             var sessionProcessingStoryboard = new ExtendedStoryboard(
                 StoryboardIds.SessionProcessingStoryboardId,
                 "Новый сеанс",
@@ -206,6 +238,8 @@ namespace CardioMonitor.Ui.ViewModel{
                 view: typeof(SessionProcessingView),
                 viewModel: typeof(SessionProcessingViewModel),
                 isStartPage: false);
+
+            sessionProcessingStoryboard.RegisterTransition(PageIds.SessionProcessingPageId, PageIds.SessionProcessingInitPageId, PageTransitionTrigger.Back);
 
             var settingsStoryboard = new ExtendedStoryboard(
                 StoryboardIds.SettingsStoryboardId,
@@ -257,14 +291,23 @@ namespace CardioMonitor.Ui.ViewModel{
 
         private void StoryboardsNavigationServiceOnActiveStoryboardChanged(object sender, Guid guid)
         {
-            SelectedStoryboard = 
-                ItemStoryboards.FirstOrDefault(x => x.StoryboardId == guid) 
-                ?? OptionsStoryboards.FirstOrDefault(x => x.StoryboardId == guid);
+            var storyboard =
+                ItemStoryboards.FirstOrDefault(x => x.StoryboardId == guid);
+            if (storyboard != null)
+            {
+                SelectedItemStoryboard = storyboard;
+                return;
+            }
+
+            storyboard =
+                OptionsStoryboards.FirstOrDefault(x => x.StoryboardId == guid);
+            SelectedOptionsStoryboard = storyboard;
         }
 
         private void RiseCanGoBackChaned(object sender, EventArgs args)
         {
             RisePropertyChanged(nameof(MoveBackwardCommand));
+            IsIconVisible = !MoveBackwardCommand?.CanExecute(null) ?? true;
         }
 
         public void OpenStartStoryboard()
