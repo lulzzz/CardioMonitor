@@ -87,19 +87,6 @@ namespace CardioMonitor.Ui.View
                 e.Cancel = false;
             }*/
         }
-
-        private void HamburgerMenu_OnItemClick(object sender, ItemClickEventArgs e)
-        {
-            //throw new NotImplementedException();
-        }
-
-        private void HamburgerMenuControl_OnItemInvoked(object sender, HamburgerMenuItemInvokedEventArgs e)
-        {
-            //HamburgerMenuControl.Content = e.InvokedItem;
-        }
-
-        private void ButtonBase_OnClick(object sender, RoutedEventArgs e)
-        {
-        }
+        
     }
 }

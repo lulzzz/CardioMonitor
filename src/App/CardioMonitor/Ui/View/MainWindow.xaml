@@ -91,8 +91,8 @@
     <controls:HamburgerMenu x:Name="HamburgerMenuControl"
                             HamburgerWidth="48"
                             IsPaneOpen="True"
-                            ItemInvoked="HamburgerMenuControl_OnItemInvoked"
-                            Content="{Binding SelectedItemStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            ContentTransition="LeftReplace"
+                            Content="{Binding CurrentOpennedStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             SelectedItem="{Binding SelectedItemStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                             ItemTemplate="{StaticResource MenuItemTemplate}"
                             ItemsSource="{Binding ItemStoryboards, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
@@ -107,8 +107,7 @@
         <controls:HamburgerMenu.ContentTemplate>
             <DataTemplate DataType="{x:Type viewModel:ExtendedStoryboard}">
 
-                <ContentControl x:Name="TheContent"
-                                Focusable="False"
+                <ContentControl Focusable="False"
                                 Foreground="{DynamicResource BlackBrush}"
                                 Content="{Binding ActivePage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </DataTemplate>

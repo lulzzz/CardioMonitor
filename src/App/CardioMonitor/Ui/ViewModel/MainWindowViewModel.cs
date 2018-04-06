@@ -67,9 +67,6 @@ namespace CardioMonitor.Ui.ViewModel{
             }
         }
         
-        private readonly ICollection<ExtendedStoryboard> _storyboards;
-        
-
         #endregion
 
         private bool _isIconVisible;
@@ -117,7 +114,6 @@ namespace CardioMonitor.Ui.ViewModel{
                 if (Equals(_selectedItemStoryboard, value)) return;
                 _selectedItemStoryboard = value;
                 RisePropertyChanged(nameof(SelectedItemStoryboard));
-                // monkey hack
                 if (SelectedItemStoryboard != null)
                 {
                     _storyboardsNavigationService.GoToStoryboardAsync(_selectedItemStoryboard.StoryboardId);
@@ -142,6 +138,18 @@ namespace CardioMonitor.Ui.ViewModel{
             }
         }
         private ExtendedStoryboard _selectedOptionsStoryboard;
+
+        public ExtendedStoryboard CurrentOpennedStoryboard
+        {
+            get => _currentOpennedStoryboard;
+            set
+            {
+                if (Equals(_currentOpennedStoryboard, value)) return;
+                _currentOpennedStoryboard = value;
+                RisePropertyChanged(nameof(CurrentOpennedStoryboard));
+            }
+        }
+        private ExtendedStoryboard _currentOpennedStoryboard;
 
         public MainWindowViewModel(
             ILogger logger,
@@ -268,21 +276,13 @@ namespace CardioMonitor.Ui.ViewModel{
 
             _storyboardsNavigationService.ActiveStoryboardChanged += StoryboardsNavigationServiceOnActiveStoryboardChanged;
 
-            _storyboards = new List<ExtendedStoryboard>
-            {
-                patientsStoryboard,
-                sessionsStoryboard,
-                sessionProcessingStoryboard,
-                sessionProcessingStoryboard
-            };
-
             ItemStoryboards = new ObservableCollection<ExtendedStoryboard>(new []
             {
                 patientsStoryboard,
                 sessionsStoryboard,
                 sessionProcessingStoryboard
             });
-
+            
             OptionsStoryboards = new ObservableCollection<ExtendedStoryboard>(new []
             {
                 settingsStoryboard
@@ -296,12 +296,16 @@ namespace CardioMonitor.Ui.ViewModel{
             if (storyboard != null)
             {
                 SelectedItemStoryboard = storyboard;
+                SelectedOptionsStoryboard = null;
+                CurrentOpennedStoryboard = storyboard;
                 return;
             }
 
             storyboard =
                 OptionsStoryboards.FirstOrDefault(x => x.StoryboardId == guid);
             SelectedOptionsStoryboard = storyboard;
+            SelectedItemStoryboard = null;
+            CurrentOpennedStoryboard = storyboard;
         }
 
         private void RiseCanGoBackChaned(object sender, EventArgs args)
@@ -316,7 +320,6 @@ namespace CardioMonitor.Ui.ViewModel{
                 {
                     try
                     {
-
                         await _storyboardsNavigationService.GoToStoryboardAsync(StoryboardIds.PatientsStoryboardId)
                             .ConfigureAwait(false);
                     }
