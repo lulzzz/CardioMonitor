@@ -2,7 +2,7 @@
 using NLog;
 using NLogInternal = NLog;
 
-namespace Scout.Utils.Logging.NLog
+namespace Markeli.Utils.Logging.NLog
 {
     /// <summary>
     /// Фабрика по созданию фасада логера NLog

@@ -9,22 +9,19 @@ namespace CardioMonitor.Ui.View
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : MetroWindow
+    public partial class MainWindow
     {
         private readonly MainWindowViewModel _viewModel;
 
         public MainWindow(MainWindowViewModel viewModel)
         {
-            if (viewModel == null) throw new ArgumentNullException(nameof(viewModel));
             InitializeComponent();
-            //initialize messageHelper
             MessageHelper.Instance.Window = this;
-            _viewModel = viewModel;
+            _viewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
             HamburgerMenuControl.DataContext = _viewModel;
-           // _viewModel.SessionViewModel.ThreadAssistant = new ThreadAssistant(this);
             DataContext = _viewModel;
-            //SettingsView.ViewModel = _viewModel.SettingsViewModel;
 
+            // applying theme
             /*try
             {
                 var accent = ThemeManager.GetAccent(Core.CardioSettings.CardioSettings.Instance.SelectedAcentColorName);
@@ -37,39 +34,13 @@ namespace CardioMonitor.Ui.View
             }*/
         }
 
-        private void SettingsB_OnClick(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-
-                var flyout = this.Flyouts.Items[0] as Flyout;
-                if (flyout == null)
-                {
-                    return;
-                }
-                if (!flyout.IsOpen)
-                {
-                  flyout.IsOpen =  true;
-                }
-            }
-            catch (Exception ex)
-            {
-                this.ShowMessageAsync("Error", ex.Message);
-            }
-
-        }
+        
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             _viewModel.OpenStartStoryboard();
         }
-
-        private async void MetroWindow_Closed(object sender, EventArgs e)
-        {   
-        }
-
-
-
+        
         private async void MetroWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             /*

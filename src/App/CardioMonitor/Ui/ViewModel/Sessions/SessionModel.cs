@@ -13,7 +13,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     public class SessionModel: Notifier
     {
         private int _id;
-        private int _treatmentId;
+        private int _patientId;
         private DateTime _dateTime;
         private SessionStatus _status;
         private ObservableCollection<SessionCycleViewModel> _cycles;
@@ -23,30 +23,26 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public int Id 
         {
-            get { return _id; }
+            get => _id;
             set
             {
-                if (value != _id)
-                {
-                    _id = value;
-                    RisePropertyChanged("Id");
-                }
+                if (value == _id) return;
+                _id = value;
+                RisePropertyChanged(nameof(Id));
             } 
         }
 
         /// <summary>
         /// Идентифкатор курса лечения
         /// </summary>
-        public int TreatmentId 
+        public int PatientId 
         {
-            get { return _treatmentId; }
+            get => _patientId;
             set
             {
-                if (value != _treatmentId)
-                {
-                    _treatmentId = value;
-                    RisePropertyChanged("Treatment");
-                }
+                if (value == _patientId) return;
+                _patientId = value;
+                RisePropertyChanged(nameof(PatientId));
             }
         }
 
@@ -55,14 +51,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public DateTime DateTime
         {
-            get { return _dateTime; }
+            get => _dateTime;
             set
             {
-                if (value != _dateTime)
-                {
-                    _dateTime = value;
-                    RisePropertyChanged("DateTime");
-                }
+                if (value == _dateTime) return;
+                _dateTime = value;
+                RisePropertyChanged(nameof(DateTime));
             }
         }
 
@@ -71,14 +65,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public SessionStatus Status
         {
-            get { return _status; }
+            get => _status;
             set
             {
-                if (value != _status)
-                {
-                    _status = value;
-                    RisePropertyChanged("Status");
-                }
+                if (value == _status) return;
+                _status = value;
+                RisePropertyChanged(nameof(Status));
             }
         }
 
@@ -87,14 +79,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public ObservableCollection<SessionCycleViewModel> Cycles
         {
-            get { return _cycles; }
+            get => _cycles;
             set
             {
-                if (value != _cycles)
-                {
-                    _cycles = value;
-                    RisePropertyChanged("Cycles");
-                }
+                if (value == _cycles) return;
+                _cycles = value;
+                RisePropertyChanged(nameof(Cycles));
             }
         }
 
@@ -108,7 +98,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 return new Session
                 {
                     Id = Id,
-                    PatientId = TreatmentId,
+                    PatientId = PatientId,
                     DateTime = DateTime,
                     Status = Status,
                     Cycles = new List<SessionCycle>(Cycles.Select(x => new SessionCycle
@@ -121,7 +111,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             set
             {
                 Id = value.Id;
-                TreatmentId = value.PatientId;
+                PatientId = value.PatientId;
                 DateTime = value.DateTime;
                 Status = value.Status;
                 Cycles = new ObservableCollection<SessionCycleViewModel>(value.Cycles.Select(x => new SessionCycleViewModel

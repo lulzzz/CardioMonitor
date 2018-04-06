@@ -32,7 +32,6 @@ namespace CardioMonitor.Devices
         /// <returns></returns>
         public IBedController CreateBedController()
         {
-
             return new BedUDPController(_workerController);
         }
 

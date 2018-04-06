@@ -1,6 +1,4 @@
-﻿using System.Windows.Controls;
-using CardioMonitor.Ui.ViewModel.Patients;
-using Markeli.Storyboards;
+﻿using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.View.Patients
 {

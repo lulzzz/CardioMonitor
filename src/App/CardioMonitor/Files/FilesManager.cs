@@ -3,9 +3,9 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
-using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Files 
 {
@@ -19,11 +19,8 @@ namespace CardioMonitor.Files
 
         public FilesManager(ILogger logger, ICardioSettings settings)
         {
-            if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-
-            _logger = logger;
-            _settings = settings;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         }
 
         /// <summary>
@@ -80,7 +77,7 @@ namespace CardioMonitor.Files
             }
             catch (Exception ex)
             {
-                _logger.LogError(nameof(FilesManager), ex);
+                _logger.Error($"{GetType().Name}: Ошибка сохранения сеанса в файл. Причина: {ex.Message}", ex);
                 throw new Exception(Localisation.FileRepository_SavePatientException);
             }
             
@@ -108,7 +105,7 @@ namespace CardioMonitor.Files
             }
             catch (Exception ex)
             {
-                _logger.LogError(nameof(FilesManager), ex);
+                _logger.Error($"{GetType().Name}: Ошибка загрузки сеанса из файла. Причина: {ex.Message}", ex);
                 throw new Exception(Localisation.FileRepository_LoadPatientException);
             }
         }

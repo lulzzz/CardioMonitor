@@ -6,8 +6,10 @@ using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
+using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
@@ -15,6 +17,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     {
         private readonly ISessionsService _sessionsService;
         private readonly IPatientsService _patientsService;
+        private readonly ILogger _logger;
         private SessionWithPatientInfo _selectedSessionInfo;
         private ObservableCollection<SessionWithPatientInfo> _sessionInfos;
 
@@ -23,10 +26,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _showResultsCommand;
 
         public SessionsViewModel(
-            ISessionsService sessionsService, IPatientsService patientsService)
+            ISessionsService sessionsService, 
+            IPatientsService patientsService,
+            [NotNull] ILogger logger)
         {
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _patientsService = patientsService;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         
@@ -35,13 +41,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _selectedSessionInfo;
             set
             {
-                if (value != _selectedSessionInfo)
-                {
-                    _selectedSessionInfo = value;
-                    RisePropertyChanged(nameof(SelectedSessionInfo));
-                    RisePropertyChanged(nameof(ShowResultsCommand));
-                    RisePropertyChanged(nameof(DeleteSessionCommand));
-                }
+                if (Equals(value, _selectedSessionInfo)) return;
+                _selectedSessionInfo = value;
+                RisePropertyChanged(nameof(SelectedSessionInfo));
+                RisePropertyChanged(nameof(ShowResultsCommand));
+                RisePropertyChanged(nameof(DeleteSessionCommand));
             }
         }
 
@@ -50,11 +54,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _sessionInfos;
             set
             {
-                if (value != _sessionInfos)
-                {
-                    _sessionInfos = value;
-                    RisePropertyChanged(nameof(SessionInfos));
-                }
+                if (Equals(value, _sessionInfos)) return;
+                _sessionInfos = value;
+                RisePropertyChanged(nameof(SessionInfos));
             }
         }
 
@@ -110,28 +112,25 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private async Task DeleteSessionAsync()
         {
-            var result = await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionsViewModel_DeleteSessionQuestion,
+            var result = await MessageHelper.Instance.ShowMessageAsync(
+                Localisation.SessionsViewModel_DeleteSessionQuestion,
                 style: MessageDialogStyle.AffirmativeAndNegative);
-            if (MessageDialogResult.Affirmative == result)
+            if (MessageDialogResult.Affirmative != result) return;
+
+            var sessionInfo = SelectedSessionInfo;
+            if (null == sessionInfo) return;
+
+
+            try
             {
-                var sessionInfo = SelectedSessionInfo;
-                var exceptionMessage = String.Empty;
-                if (null != sessionInfo)
-                {
-                    try
-                    {
-                        await Task.Factory.StartNew(() => _sessionsService.Delete(sessionInfo.Id)).ConfigureAwait(true);
-                        SessionInfos.Remove(sessionInfo);
-                    }
-                    catch (Exception ex)
-                    {
-                        exceptionMessage = ex.Message;
-                    }
-                }
-                if (!String.IsNullOrEmpty(exceptionMessage))
-                {
-                    await MessageHelper.Instance.ShowMessageAsync(exceptionMessage);
-                }
+                await Task.Factory.StartNew(() => _sessionsService.Delete(sessionInfo.Id)).ConfigureAwait(true);
+                SessionInfos.Remove(sessionInfo);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"{GetType().Name}: Ошибка удаления сессии с Id {sessionInfo.Id}. Причина: {ex.Message}",
+                    ex);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления сессии");
             }
         }
 

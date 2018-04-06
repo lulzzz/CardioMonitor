@@ -6,14 +6,17 @@ using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
+using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class PatientSessionsViewModel : Notifier, IStoryboardPageViewModel
     {
         private readonly ISessionsService _sessionsService;
+        private readonly ILogger _logger;
         private PatientFullName _patientName;
         private SessionInfo _selectedSessionInfo;
         private ObservableCollection<SessionInfo> _sessionInfos;
@@ -24,9 +27,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _showResultsCommand;
 
         public PatientSessionsViewModel(
-            ISessionsService sessionsService)
+            ISessionsService sessionsService,
+            [NotNull] ILogger logger)
         {
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public PatientFullName PatientName
@@ -34,11 +39,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _patientName;
             set
             {
-                if (value != _patientName)
-                {
-                    _patientName = value;
-                    RisePropertyChanged(nameof(PatientName));
-                }
+                if (value == _patientName) return;
+                _patientName = value;
+                RisePropertyChanged(nameof(PatientName));
             }
         }
 
@@ -47,13 +50,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _selectedSessionInfo;
             set
             {
-                if (value != _selectedSessionInfo)
-                {
-                    _selectedSessionInfo = value;
-                    RisePropertyChanged(nameof(SelectedSessionInfo));
-                    RisePropertyChanged(nameof(ShowResultsCommand));
-                    RisePropertyChanged(nameof(DeleteSessionCommand));
-                }
+                if (value == _selectedSessionInfo) return;
+                _selectedSessionInfo = value;
+                RisePropertyChanged(nameof(SelectedSessionInfo));
+                RisePropertyChanged(nameof(ShowResultsCommand));
+                RisePropertyChanged(nameof(DeleteSessionCommand));
             }
         }
 
@@ -62,11 +63,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _sessionInfos;
             set
             {
-                if (value != _sessionInfos)
-                {
-                    _sessionInfos = value;
-                    RisePropertyChanged(nameof(SessionInfos));
-                }
+                if (value == _sessionInfos) return;
+                _sessionInfos = value;
+                RisePropertyChanged(nameof(SessionInfos));
             }
         }
 
@@ -122,28 +121,25 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private async Task DeleteSessionAsync()
         {
-            var result = await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionsViewModel_DeleteSessionQuestion,
+            var result = await MessageHelper.Instance.ShowMessageAsync(
+                Localisation.SessionsViewModel_DeleteSessionQuestion,
                 style: MessageDialogStyle.AffirmativeAndNegative);
-            if (MessageDialogResult.Affirmative == result)
+            if (MessageDialogResult.Affirmative != result) return;
+
+
+            var sessionInfo = SelectedSessionInfo;
+            if (null == sessionInfo) return;
+
+            try
             {
-                var sessionInfo = SelectedSessionInfo;
-                var exceptionMessage = String.Empty;
-                if (null != sessionInfo)
-                {
-                    try
-                    {
-                        await Task.Factory.StartNew(() => _sessionsService.Delete(sessionInfo.Id)).ConfigureAwait(true);
-                        SessionInfos.Remove(sessionInfo);
-                    }
-                    catch (Exception ex)
-                    {
-                        exceptionMessage = ex.Message;
-                    }
-                }
-                if (!String.IsNullOrEmpty(exceptionMessage))
-                {
-                    await MessageHelper.Instance.ShowMessageAsync(exceptionMessage);
-                }
+                await Task.Factory.StartNew(() => _sessionsService.Delete(sessionInfo.Id)).ConfigureAwait(true);
+                SessionInfos.Remove(sessionInfo);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"{GetType().Name}: Ошибка удаления сессии с Id {sessionInfo.Id}. Причина: {ex.Message}",
+                    ex);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления сессии");
             }
         }
 
@@ -175,7 +171,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private async Task LoadSessionsAsync()
         {
-            var message = String.Empty;
             try
             {
                 var sessions = await Task.Factory.StartNew(() => _sessionsService.GetPatientSessionInfos(_patient.Id))
@@ -186,14 +181,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
             catch (Exception ex)
             {
-                message = ex.Message;
+                _logger.Error($"{GetType().Name}: Ошибка загрузки сессий. Причина: {ex.Message}", ex);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сессий");
             }
-
-            if (!String.IsNullOrEmpty(message))
-            {
-                await MessageHelper.Instance.ShowMessageAsync(message);
-            }
-
         }
 
         #region IStoryboardPageViewModel

@@ -12,7 +12,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public int CycleNumber
         {
-            get {return _cycleNumber; }
+            get => _cycleNumber;
             set
             {
                 _cycleNumber = value;
@@ -24,14 +24,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public ObservableCollection<PatientParams> PatientParams
         {
-            get { return _patientParams; }
+            get => _patientParams;
             set
             {
-                if (value != _patientParams)
-                {
-                    _patientParams = value;
-                    RisePropertyChanged(nameof(PatientParams));
-                }
+                if (value == _patientParams) return;
+                _patientParams = value;
+                RisePropertyChanged(nameof(PatientParams));
             }
         }
 

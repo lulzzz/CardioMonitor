@@ -14,13 +14,13 @@ namespace CardioMonitor.Ui.Base
             {
                 return CanExecuteDelegate(parameter);
             }
-            return true; // if there is no can execute default to true
+            return true; 
         }
 
         public event EventHandler CanExecuteChanged
         {
-            add { CommandManager.RequerySuggested += value; }
-            remove { CommandManager.RequerySuggested -= value; }
+            add => CommandManager.RequerySuggested += value;
+            remove => CommandManager.RequerySuggested -= value;
         }
 
         public void Execute(object parameter)

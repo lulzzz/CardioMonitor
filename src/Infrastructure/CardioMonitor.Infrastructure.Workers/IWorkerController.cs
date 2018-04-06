@@ -1,5 +1,5 @@
 ﻿using System;
-using Scout.Utils.Logging;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Infrastructure.Workers
 {

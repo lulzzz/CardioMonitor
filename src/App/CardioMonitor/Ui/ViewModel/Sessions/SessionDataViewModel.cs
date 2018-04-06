@@ -6,10 +6,10 @@ using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Files;
-using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using Markeli.Storyboards;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
@@ -25,85 +25,76 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private readonly ISessionsService _sessionsService;
         private readonly IPatientsService _patientsService;
 
-        public SessionDataViewModel(ISessionsService sessionsService, IPatientsService patientsService,
+        public SessionDataViewModel(
+            ISessionsService sessionsService, 
+            IPatientsService patientsService,
             ILogger logger,
             IFilesManager filesRepository)
         {
             _sessionsService = sessionsService;
             _patientsService = patientsService;
-            if (logger == null) throw new ArgumentNullException(nameof(logger));
-            if (filesRepository == null) throw new ArgumentNullException(nameof(filesRepository));
 
-            _logger = logger;
-            _filesRepository = filesRepository;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
 
             IsReadOnly = true;
         }
 
         public PatientFullName PatientName
         {
-            get { return _patientName; }
+            get => _patientName;
             set
             {
-                if (value != _patientName)
-                {
-                    _patientName = value;
-                    RisePropertyChanged("PatientName");
-                }
+                if (value == _patientName) return;
+                _patientName = value;
+                RisePropertyChanged(nameof(PatientName));
             }
         }
 
         public Patient Patient
         {
-            get { return _patient; }
+            get => _patient;
             set
             {
-                if (value != _patient)
-                {
-                    _patient = value;
+                if (value == _patient) return;
 
-                    PatientName = _patient != null
-                        ? new PatientFullName
-                        {
-                            LastName = _patient.LastName,
-                            FirstName = _patient.FirstName,
-                            PatronymicName = _patient.PatronymicName,
-                        }
-                        : new PatientFullName();
-                    RisePropertyChanged("PatientEntity");
-                    RisePropertyChanged("Patients");
-                }
+                _patient = value;
+
+                PatientName = _patient != null
+                    ? new PatientFullName
+                    {
+                        LastName = _patient.LastName,
+                        FirstName = _patient.FirstName,
+                        PatronymicName = _patient.PatronymicName,
+                    }
+                    : new PatientFullName();
+                RisePropertyChanged(nameof(Patient));
+                RisePropertyChanged(nameof(Patients));
             }
         }
 
-        public ObservableCollection<Patient> Patients
-        {
-            get { return Patient != null 
-                    ? new ObservableCollection<Patient> { Patient }
-                    : new ObservableCollection<Patient>(); 
-            }
-        }
+        public ObservableCollection<Patient> Patients => Patient != null 
+            ? new ObservableCollection<Patient> { Patient }
+            : new ObservableCollection<Patient>();
 
         public SessionModel Session
         {
-            get { return _session; }
+            get => _session;
             set
             {
-                if (value != _session)
-                {
-                    _session = value;
-                    RisePropertyChanged("Session");
-                }
+                if (Equals(value, _session)) return;
+                _session = value;
+                RisePropertyChanged(nameof(Session));
             }
         }
 
         public bool IsReadOnly
         {
-            get { return _isReadOnly; }
+            get => _isReadOnly;
             set
             {
                 _isReadOnly = value;
-                RisePropertyChanged("IsReadOnly");
+                RisePropertyChanged(nameof(IsReadOnly));
             }
         }
         private bool _isReadOnly;
@@ -124,28 +115,17 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             var saveFileDialog = new SaveFileDialog {Filter = Localisation.FileRepository_SeansFileFilter};
             var dialogResult = saveFileDialog.ShowDialog();
-            if (dialogResult == DialogResult.OK)
+            if (dialogResult != DialogResult.OK) return;
+            
+            try
             {
-
-                var exceptionMessage = String.Empty;
-                try
-                {
-                    _filesRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
-                    await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionDataViewModel_FileSaved);
-                }
-                catch (ArgumentNullException ex)
-                {
-                    _logger.LogError(nameof(SessionDataViewModel), ex);
-                    exceptionMessage = Localisation.SessionViewModel_SaveSession_ArgumentNullException;
-                }
-                catch (Exception ex)
-                {
-                    exceptionMessage = ex.Message;
-                }
-                if (!String.IsNullOrEmpty(exceptionMessage))
-                {
-                    await MessageHelper.Instance.ShowMessageAsync(exceptionMessage);
-                }
+                _filesRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
+                await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionDataViewModel_FileSaved);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"{GetType().Name}: Ошибка сохранения сессии в файл. Причина: {ex.Message}", ex);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка сохранения сессии в файл");
             }
         }
 
@@ -178,7 +158,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
             catch (Exception ex)
             {
-                await MessageHelper.Instance.ShowMessageAsync(ex.Message);
+                _logger.Error($"{GetType().Name}: Ошибка загрузки сессии. Причина: {ex.Message}", ex);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сессии");
             }
         }
 

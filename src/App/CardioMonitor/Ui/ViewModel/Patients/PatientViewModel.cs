@@ -2,12 +2,12 @@
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
-using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
 {
@@ -23,7 +23,9 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         private DateTime? _birthDate;
         private ICommand _saveCommand;
 
-        public PatientViewModel(ILogger logger, IPatientsService patientsService)
+        public PatientViewModel(
+            ILogger logger, 
+            IPatientsService patientsService)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
@@ -33,32 +35,28 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public AccessMode AccessMode
         {
-            get { return _accessMode; }
+            get => _accessMode;
             set
             {
                 IsSaved = true;
-                if (value != _accessMode)
-                {
-                    _accessMode = value;
-                    //magic for changing title
-                    Title = "";
-                }
+                if (value == _accessMode) return;
+
+                _accessMode = value;
+                //magic for changing title
+                Title = "";
             }
         }
 
         public Patient Patient
         {
-            get
+            get => new Patient
             {
-                return new Patient
-                {
-                    FirstName = FirstName,
-                    LastName = LastName,
-                    PatronymicName =  PatronymicName,
-                    Id = _id,
-                    BirthDate = BirthDate
-                };
-            }
+                FirstName = FirstName,
+                LastName = LastName,
+                PatronymicName =  PatronymicName,
+                Id = _id,
+                BirthDate = BirthDate
+            };
 
             set
             {
@@ -72,13 +70,13 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public string LastName
         {
-            get { return _lastName; }
+            get => _lastName;
             set
             {
                 if (value != _lastName)
                 {
                     _lastName = value;
-                    RisePropertyChanged("LastName");
+                    RisePropertyChanged(nameof(LastName));
                     IsSaved = false;
                 }
             }
@@ -86,13 +84,13 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public string FirstName
         {
-            get { return _firstName; }
+            get => _firstName;
             set
             {
                 if (value != _firstName)
                 {
                     _firstName = value;
-                    RisePropertyChanged("FirstName");
+                    RisePropertyChanged(nameof(FirstName));
                     IsSaved = false;
                 }
             }
@@ -100,13 +98,13 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public string PatronymicName
         {
-            get { return _patronymicName; }
+            get => _patronymicName;
             set
             {
                 if (value != _patronymicName)
                 {
                     _patronymicName = value;
-                    RisePropertyChanged("PatronymicName");
+                    RisePropertyChanged(nameof(PatronymicName));
                     IsSaved = false;
                 }
             }
@@ -114,11 +112,11 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public DateTime? BirthDate
         {
-            get { return _birthDate; }
+            get => _birthDate;
             set 
             {
                     _birthDate = value;
-                    RisePropertyChanged("BirthDate");
+                    RisePropertyChanged(nameof(BirthDate));
                     IsSaved = false;
 
             }
@@ -126,16 +124,10 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public string Title
         {
-            get
-            {
-                return (AccessMode.Create == AccessMode)
-                    ? Localisation.PatientViewModel_Title_Add
-                    : Localisation.PatientViewModel_Title_Edit;
-            }
-            set
-            {
-                RisePropertyChanged("Title");
-            }
+            get => (AccessMode.Create == AccessMode)
+                ? Localisation.PatientViewModel_Title_Add
+                : Localisation.PatientViewModel_Title_Edit;
+            set => RisePropertyChanged(nameof(Title));
         }
 
         public bool IsSaved { get; set; }
@@ -154,18 +146,18 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         private async Task Save()
         {
-            var message = String.Empty;
+            var operationName = String.Empty;
             try
             {
                 switch (AccessMode)
                 {
                     case AccessMode.Create:
                         _patientsService.Add(Patient);
-                        message = Localisation.PatientViewModel_Patient_Added;
+                        operationName = "создании нового";
                         break;
                     case AccessMode.Edit:
                         _patientsService.Edit(Patient);
-                        message = Localisation.PatientViewModel_Patient_Updated;
+                        operationName = "редактировании";
                         break;
                 }
 
@@ -175,19 +167,18 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             }
             catch (ArgumentNullException ex)
             {
-                _logger.LogError(nameof(PatientViewModel), ex);
-                message = Localisation.ArgumentNullExceptionMessage;
+                _logger.Error($"{GetType().Name}: Ошибка при {operationName} пациента. Причина: {Localisation.ArgumentNullExceptionMessage}", ex);
+                await MessageHelper.Instance.ShowMessageAsync(Localisation.ArgumentNullExceptionMessage).ConfigureAwait(true);
             }
             catch (Exception ex)
             {
-                message = ex.Message;
+                _logger.Error($"{GetType().Name}: Ошибка при {operationName} пациента. Причина: {ex.Message}", ex);
+                await MessageHelper.Instance.ShowMessageAsync($"Ошибка при {operationName}").ConfigureAwait(true);
             }
 
-            if (!String.IsNullOrEmpty(message))
-            {
-                await MessageHelper.Instance.ShowMessageAsync(message);
-            }
         }
+
+
         
         public void Dispose()
         {
@@ -228,7 +219,11 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         {
             if (!IsSaved)
             {
-                var result = await MessageHelper.Instance.ShowMessageAsync("Все несохраненные изменения будут потеряны. Вы уверены?", "Cardio Monitor", MessageDialogStyle.AffirmativeAndNegative).ConfigureAwait(true);
+                var result = await MessageHelper.Instance.ShowMessageAsync(
+                    "Все несохраненные изменения будут потеряны. Вы уверены?", 
+                    "Cardio Monitor", 
+                    MessageDialogStyle.AffirmativeAndNegative)
+                    .ConfigureAwait(true);
                 return result == MessageDialogResult.Affirmative;
             }
 

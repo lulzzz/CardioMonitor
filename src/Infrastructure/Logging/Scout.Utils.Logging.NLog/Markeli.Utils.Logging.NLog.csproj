@@ -7,8 +7,8 @@
     <ProjectGuid>{9370FDF4-0A95-4113-AC2B-93ED0C710A59}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Scout.Utils.Logging.NLog</RootNamespace>
-    <AssemblyName>Scout.Utils.Logging.NLog</AssemblyName>
+    <RootNamespace>Markeli.Utils.Logging.NLog</RootNamespace>
+    <AssemblyName>Markeli.Utils.Logging.NLog</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -29,7 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\..\..\Artifacts\Scout.Utils.Logging.NLog\bin\Release\Scout.Utils.Logging.NLog.XML</DocumentationFile>
+    <DocumentationFile>..\..\..\Artifacts\Scout.Utils.Logging.NLog\bin\Release\Markeli.Utils.Logging.NLog.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">

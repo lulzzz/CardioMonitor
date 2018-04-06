@@ -6,13 +6,16 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.Ui.Base;
+using JetBrains.Annotations;
 using Markeli.Storyboards;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class SessionProcessingInitViewModel : Notifier, IStoryboardPageViewModel, IDataErrorInfo
     {
         private readonly IPatientsService _patientsService;
+        private readonly ILogger _logger;
         private ICommand _startCommand;
         private bool _isValid;
 
@@ -24,11 +27,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _patients;
             set
             {
-                if (!Equals(_patients, value))
-                {
-                    _patients = value;
-                    RisePropertyChanged(nameof(Patients));
-                }
+                if (Equals(_patients, value)) return;
+
+                _patients = value;
+                RisePropertyChanged(nameof(Patients));
             }
         }
         private IReadOnlyList<PatientFullName> _patients;
@@ -40,11 +42,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _selectedPatient;
             set
             {
-                if (!Equals(_selectedPatient, value))
-                {
-                    _selectedPatient = value;
-                    RisePropertyChanged(nameof(SelectedPatient));
-                }
+                if (Equals(_selectedPatient, value)) return;
+
+                _selectedPatient = value;
+                RisePropertyChanged(nameof(SelectedPatient));
             }
         }
 
@@ -57,15 +58,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _maxAngleX;
             set
             {
-                if (!Equals(_maxAngleX, value))
-                {
-                    _maxAngleX = value;
-                    RisePropertyChanged(nameof(MaxAngleX));
-                }
+                if (Equals(_maxAngleX, value)) return;
+                _maxAngleX = value;
+                RisePropertyChanged(nameof(MaxAngleX));
             }
 
         }
-
         private float _maxAngleX;
 
         /// <summary>
@@ -76,11 +74,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _cyclesCount;
             set
             {
-                if (!Equals(_cyclesCount, value))
-                {
-                    _cyclesCount = value;
-                    RisePropertyChanged(nameof(CyclesCount));
-                }
+                if (Equals(_cyclesCount, value)) return;
+                _cyclesCount = value;
+                RisePropertyChanged(nameof(CyclesCount));
             }
 
         }
@@ -94,11 +90,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _movementFrequency;
             set
             {
-                if (!Equals(_movementFrequency, value))
-                {
-                    _movementFrequency = value;
-                    RisePropertyChanged(nameof(MovementFrequency));
-                }
+                if (Equals(_movementFrequency, value)) return;
+                _movementFrequency = value;
+                RisePropertyChanged(nameof(MovementFrequency));
             }
 
         }
@@ -112,11 +106,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _isAutopumpingEnabled;
             set
             {
-                if (!Equals(_isAutopumpingEnabled, value))
-                {
-                    _isAutopumpingEnabled = value;
-                    RisePropertyChanged(nameof(IsAutopumpingEnabled));
-                }
+                if (Equals(_isAutopumpingEnabled, value)) return;
+                _isAutopumpingEnabled = value;
+                RisePropertyChanged(nameof(IsAutopumpingEnabled));
             }
 
         }
@@ -134,9 +126,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
-        public SessionProcessingInitViewModel(IPatientsService patientsService)
+        public SessionProcessingInitViewModel(
+            [NotNull] IPatientsService patientsService,
+            [NotNull] ILogger logger)
         {
-            _patientsService = patientsService;
+            _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public void Dispose()
@@ -161,15 +156,22 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             if (!(context is SessionProcessingInitPageContext pageContext)) throw new ArgumentException("Incorrect argument");
             if (_previouslySelectedPatientIdFromContext == pageContext.PatientId && Patients != null) return;
 
-
-            Patients = await Task.Factory.StartNew(_patientsService.GetPatientNames).ConfigureAwait(true);
-
-            if (pageContext.PatientId.HasValue)
+            try
             {
-                SelectedPatient = Patients.FirstOrDefault(x => x.PatientId == pageContext.PatientId.Value);
-            }
+                Patients = await Task.Factory.StartNew(_patientsService.GetPatientNames).ConfigureAwait(true);
 
-            _previouslySelectedPatientIdFromContext = pageContext.PatientId;
+                if (pageContext.PatientId.HasValue)
+                {
+                    SelectedPatient = Patients.FirstOrDefault(x => x.PatientId == pageContext.PatientId.Value);
+                }
+
+                _previouslySelectedPatientIdFromContext = pageContext.PatientId;
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"{GetType().Name}: Ошибка обновления списка пациентов. Причина: {e.Message}", e);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка обновления списка пациентов");
+            }
         }
 
         #region IStoryboardPageViewModel
@@ -223,25 +225,19 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 if (columnName == nameof(SelectedPatient) && SelectedPatient == null)
                 {
-                    _isValid = false;
+                    IsValid = false;
                     return "Нужно выбрать пациента";
                 }
-                _isValid = true;
+                IsValid = true;
                 return null;
             }
         }
 
-        public string Error
-        {
-            get
-            {
-                return String.Empty;
-            }
-        }
+        public string Error => String.Empty;
 
         public bool IsValid
         {
-            get { return _isValid; }
+            get => _isValid;
             set
             {
                 var oldValod = _isValid;

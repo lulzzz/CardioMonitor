@@ -6,6 +6,7 @@ namespace CardioMonitor.Threading
     /// <summary>
     /// Помощник для работы с потоками
     /// </summary>
+    [Obsolete("Вроде не используется нигде, можно удалить после проверки работоспособности приоложения")]
     public class ThreadAssistant
     {
         private readonly MetroWindow _metroWindow;

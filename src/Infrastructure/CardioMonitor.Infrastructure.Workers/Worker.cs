@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading;
-using Scout.Utils.Logging;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Infrastructure.Workers
 {

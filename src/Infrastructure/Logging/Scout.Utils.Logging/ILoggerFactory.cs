@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Scout.Utils.Logging
+﻿namespace Markeli.Utils.Logging
 {
     /// <summary>
     /// Интерфейс фабрики по созданию логеров

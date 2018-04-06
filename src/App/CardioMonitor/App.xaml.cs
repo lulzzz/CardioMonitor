@@ -1,4 +1,4 @@
-﻿using System.Windows;
+﻿using System.IO;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreServices.Patients;
@@ -7,10 +7,7 @@ using CardioMonitor.Data.Contracts.UnitOfWork;
 using CardioMonitor.Data.Ef.UnitOfWork;
 using CardioMonitor.Devices;
 using CardioMonitor.Files;
-using CardioMonitor.Infrastructure.Logs;
-using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Infrastructure.Workers;
-using CardioMonitor.Logs;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui;
 using CardioMonitor.Ui.View;
@@ -19,8 +16,9 @@ using CardioMonitor.Ui.ViewModel.Patients;
 using CardioMonitor.Ui.ViewModel.Sessions;
 using CardioMonitor.Ui.ViewModel.Settings;
 using Markeli.Storyboards;
+using Markeli.Utils.Logging;
+using Markeli.Utils.Logging.NLog;
 using SimpleInjector;
-using SimpleInjector.Lifestyles;
 
 namespace CardioMonitor
 {
@@ -29,6 +27,8 @@ namespace CardioMonitor
     /// </summary>
     public partial class App
     {
+        private static string NLogConfigName = "NLog.config";
+
         public App()
         {
             //todo add startup window
@@ -42,18 +42,48 @@ namespace CardioMonitor
         {
             var container = new Container();
 
+            RegisterInfrastructure(container);
+            RegisterLogger(container);
+            RegisterViewModels(container);
+            RegisterDevices(container);
+            RegisterServices(container);
+
+            // throw exception, incorrect seleted lifycycles for disposable objects
+            // container.Verify();
+
+            return container;
+        }
+
+        private static void RegisterInfrastructure(Container container)
+        {
+            container.Register<IWorkerController, WorkerController>(Lifestyle.Singleton);
+            container.Register<ICardioMonitorUnitOfWorkFactory>(() => new CardioMonitorEfUnitOfWorkFactory("CardioMonitorContext"), Lifestyle.Singleton);
+
             var settings = GetSettings();
             container.RegisterSingleton(settings);
-            container.Register<ILogger, Logger>(Lifestyle.Singleton);
-            container.Register<IDeviceControllerFactory, DeviceControllerFactory>(Lifestyle.Singleton);
-            container.Register<TaskHelper>(Lifestyle.Singleton);
-            container.Register<ICardioMonitorUnitOfWorkFactory>(() => new CardioMonitorEfUnitOfWorkFactory("CardioMonitorContext"), Lifestyle.Singleton);
-            container.Register<IPatientsService, PatientService>(Lifestyle.Singleton);
-            container.Register<ISessionsService, SessionsService>(Lifestyle.Singleton);
-            container.Register<IFilesManager, FilesManager>(Lifestyle.Singleton);
-            
-            container.Register<IWorkerController, WorkerController>(Lifestyle.Singleton);
 
+            container.Register<IStoryboardPageCreator, SimpleInjectorPageCreator>(Lifestyle.Transient);
+            container.Register<StoryboardsNavigationService>(Lifestyle.Singleton);
+            container.Register<IUiInvoker, WpfUiInvoker>(Lifestyle.Singleton);
+        }
+
+        private static ICardioSettings GetSettings()
+        {
+            var settingsManager = new SettingsManager();
+            return settingsManager.Load();
+        }
+
+        private static void RegisterLogger(Container container)
+        {
+            var configPath = Path.Combine(Directory.GetCurrentDirectory(), NLogConfigName);
+            var logFactory = new NLoggerFactory(configPath);
+
+            container.RegisterSingleton<ILoggerFactory>(logFactory);
+            container.Register(() => logFactory.CreateLogger(LogNames.MainLog));
+        }
+
+        private static void RegisterViewModels(Container container)
+        {
             container.Register<MainWindowViewModel, MainWindowViewModel>(Lifestyle.Transient);
             container.Register<PatientViewModel>(Lifestyle.Transient);
             container.Register<PatientsViewModel>(Lifestyle.Transient);
@@ -63,19 +93,19 @@ namespace CardioMonitor
             container.Register<SessionProcessingViewModel>(Lifestyle.Transient);
             container.Register<SessionsViewModel>(Lifestyle.Transient);
             container.Register<SettingsViewModel>(Lifestyle.Transient);
-            container.Register<IStoryboardPageCreator, SimpleInjectorPageCreator>(Lifestyle.Transient);
-            container.Register<StoryboardsNavigationService>(Lifestyle.Singleton);
-            container.Register<IUiInvoker, WpfUiInvoker>(Lifestyle.Singleton);
-
-            // container.Verify();
-            return container;
         }
 
-
-        private static ICardioSettings GetSettings()
+        private static void RegisterDevices(Container container)
         {
-            var settingsManager = new SettingsManager();
-            return settingsManager.Load();
+            container.Register<IDeviceControllerFactory, DeviceControllerFactory>(Lifestyle.Singleton);
         }
+
+        private static void RegisterServices(Container container)
+        {
+            container.Register<IPatientsService, PatientService>(Lifestyle.Singleton);
+            container.Register<ISessionsService, SessionsService>(Lifestyle.Singleton);
+            container.Register<IFilesManager, FilesManager>(Lifestyle.Singleton);
+        }
+
     }
 }

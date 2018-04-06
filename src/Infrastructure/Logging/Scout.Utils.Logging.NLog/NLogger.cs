@@ -1,7 +1,7 @@
 ﻿using System;
 using NLog;
 
-namespace Scout.Utils.Logging.NLog
+namespace Markeli.Utils.Logging.NLog
 {
     /// <summary>
     /// Фасад логера над NLog

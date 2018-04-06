@@ -1,22 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
-using CardioMonitor.BLL.CoreContracts.Patients;
-using CardioMonitor.BLL.CoreContracts.Session;
-using CardioMonitor.Devices;
-using CardioMonitor.Files;
-using CardioMonitor.Infrastructure.Logs;
-using CardioMonitor.Infrastructure.Threading;
-using CardioMonitor.Infrastructure.Workers;
-using CardioMonitor.Resources;
-using CardioMonitor.Settings;
 using CardioMonitor.Ui.Base;
-using CardioMonitor.Ui.View;
 using CardioMonitor.Ui.View.Patients;
 using CardioMonitor.Ui.View.Sessions;
 using CardioMonitor.Ui.View.Settings;
@@ -26,30 +14,15 @@ using CardioMonitor.Ui.ViewModel.Settings;
 using JetBrains.Annotations;
 using MahApps.Metro.IconPacks;
 using Markeli.Storyboards;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel{
 
-    internal enum ViewIndex
-    {
-        NotSelected = -1,
-        PatientsView = 0,
-        TreatmentsView = 1,
-        SessionsView = 2,
-        SessionView = 3,
-        TreatmentDataView = 4,
-        SessionDataView = 5,
-        PatientView = 6
-    }
 
     public class MainWindowViewModel : Notifier
     {
-        private readonly ILogger _logger;
-        private readonly IPatientsService _patientsService;
-        private readonly ISessionsService _sessionsService;
-        private readonly IFilesManager _filesRepository;
-        private ICommand _moveBackwardComand;
-
         private readonly StoryboardsNavigationService _storyboardsNavigationService;
+        private readonly ILogger _logger;
 
         #region Свойства
 
@@ -66,10 +39,8 @@ namespace CardioMonitor.Ui.ViewModel{
                            });
             }
         }
+        private ICommand _moveBackwardComand;
         
-        #endregion
-
-        private bool _isIconVisible;
 
         public bool IsIconVisible
         {
@@ -80,6 +51,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 RisePropertyChanged(nameof(IsIconVisible));
             }
         }
+        private bool _isIconVisible;
 
         public ObservableCollection<ExtendedStoryboard> ItemStoryboards
         {
@@ -151,30 +123,16 @@ namespace CardioMonitor.Ui.ViewModel{
         }
         private ExtendedStoryboard _currentOpennedStoryboard;
 
-        public MainWindowViewModel(
-            ILogger logger,
-            IPatientsService patientsService,
-            ISessionsService sessionsService,
-            IFilesManager filesRepository,
-            IDeviceControllerFactory deviceControllerFactory,
-            ICardioSettings settings,
-            TaskHelper taskHelper,
-            [NotNull] IWorkerController workerController, 
+        #endregion
+
+        public MainWindowViewModel( 
             [NotNull] StoryboardsNavigationService storyboardsNavigationService,
             IStoryboardPageCreator pageCreator,
-            IUiInvoker invoker)
+            IUiInvoker invoker,
+            [NotNull] ILogger logger)
         {
-            if (deviceControllerFactory == null) throw new ArgumentNullException(nameof(deviceControllerFactory));
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-            if (taskHelper == null) throw new ArgumentNullException(nameof(taskHelper));
-            if (workerController == null) throw new ArgumentNullException(nameof(workerController));
-
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
-            _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
-            _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
-
             _storyboardsNavigationService = storyboardsNavigationService ?? throw new ArgumentNullException(nameof(storyboardsNavigationService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _storyboardsNavigationService.CanBackChanged += RiseCanGoBackChaned;
             _storyboardsNavigationService.SetUiInvoker(invoker);
 
@@ -325,7 +283,7 @@ namespace CardioMonitor.Ui.ViewModel{
                     }
                     catch (Exception e)
                     {
-                        _logger.Log(e.Message);
+                        _logger.Error($"{GetType().Name}: ошибка перехода на storyboard с Id {StoryboardIds.PatientsStoryboardId}. Причина: {e.Message} ", e);
                     }
                 });
         }

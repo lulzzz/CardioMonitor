@@ -7,14 +7,17 @@ using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
 using CardioMonitor.Ui.ViewModel.Sessions;
+using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
 {
     public class PatientsViewModel : Notifier, IStoryboardPageViewModel
     {
         private readonly IPatientsService _patientsService;
+        [NotNull] private readonly ILogger _logger;
         private int _seletedPatientIndex;
         private Patient _selectePatient;
         private ObservableCollection<Patient> _patients; 
@@ -27,40 +30,36 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public int SelectedPatientIndex
         {
-            get { return _seletedPatientIndex; }
+            get => _seletedPatientIndex;
             set
             {
-                if (value != _seletedPatientIndex)
-                {
-                    _seletedPatientIndex = value;
-                    RisePropertyChanged("SelectedPatientIndex");
-                }
+                if (value == _seletedPatientIndex) return;
+                _seletedPatientIndex = value;
+                RisePropertyChanged(nameof(SelectedPatientIndex));
             }
         }
 
         public Patient SelectedPatient
         {
-            get { return _selectePatient; }
+            get => _selectePatient;
             set
             {
                 if (value != _selectePatient)
                 {
                     _selectePatient = value;
-                    RisePropertyChanged("SelectedPatient");
+                    RisePropertyChanged(nameof(SelectedPatient));
                 }
             }
         }
 
         public ObservableCollection<Patient> Patients
         {
-            get { return _patients; }
+            get => _patients;
             set
             {
-                if (value != _patients)
-                {
-                    _patients = value;
-                    RisePropertyChanged("Patients");
-                }
+                if (value == _patients) return;
+                _patients = value;
+                RisePropertyChanged(nameof(Patients));
             }
         }
 
@@ -135,9 +134,12 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         }
         
 
-        public PatientsViewModel(IPatientsService patientsService)
+        public PatientsViewModel(
+            IPatientsService patientsService,
+            [NotNull] ILogger logger)
         {
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             Patients = new ObservableCollection<Patient>();
         }
@@ -162,34 +164,33 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         private async Task DeletePatientAsync()
         {
-            var result = await MessageHelper.Instance.ShowMessageAsync(Localisation.PatientsViewModel_DeletePatientQuestion,
+            var result = await MessageHelper.Instance.ShowMessageAsync(
+                Localisation.PatientsViewModel_DeletePatientQuestion,
                 style: MessageDialogStyle.AffirmativeAndNegative);
-            if (MessageDialogResult.Affirmative == result)
+            if (MessageDialogResult.Affirmative != result) return;
+
+            if (null == SelectedPatient) return;
+
+            try
             {
-                var exceptionMassage = String.Empty;
-                if (null != SelectedPatient)
-                {
-                    try
-                    {
-                        await Task.Factory.StartNew(() => _patientsService.Delete(SelectedPatient.Id)).ConfigureAwait(true);
-                        Patients.Remove(SelectedPatient);
-                        SelectedPatient = null;
-                    }
-                    catch (Exception ex)
-                    {
-                        exceptionMassage = ex.Message;
-                    }
-                }
-                if (!String.IsNullOrEmpty(exceptionMassage))
-                {
-                    await MessageHelper.Instance.ShowMessageAsync(exceptionMassage);
-                }
+                await Task.Factory.StartNew(
+                        () => _patientsService.Delete(SelectedPatient.Id))
+                    .ConfigureAwait(true);
+                Patients.Remove(SelectedPatient);
+                SelectedPatient = null;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(
+                    $"{GetType().Name}: Ошибка удаления пациента с Id {SelectedPatient?.Id}. Причина: {ex.Message}",
+                    ex);
+
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления пациента.").ConfigureAwait(true);
             }
         }
-        
+
         private void PatientSearch(object sender)
         {
-            MessageHelper.Instance.ShowMessageAsync(sender.ToString());
         }
 
         public void CancelSearch()
@@ -225,6 +226,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             var message = String.Empty;
             var a = await MessageHelper.Instance.ShowProgressDialogAsync("Загрузка списка пациентов...")
                 .ConfigureAwait(true);
+
             try
             {
                 var patients = await Task.Factory.StartNew(() => _patientsService.GetAll()).ConfigureAwait(true);
@@ -235,24 +237,18 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             }
             catch (Exception ex)
             {
-                message = ex.Message;
+                _logger.Error($"{GetType().Name}: Ошибка обновление списка пациентов. Причина: {ex.Message}", ex);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка обновления списка пациентов").ConfigureAwait(true);
             }
             finally
             {
                 await a.CloseAsync().ConfigureAwait(true);
             }
-            if (!String.IsNullOrEmpty(message))
-            {
-
-                await MessageHelper.Instance.ShowMessageAsync(message);
-            }
         }
 
         #region IStoryboardViewModel
 
-
-
-
+        
         public Guid PageId { get; set; }
 
         public Guid StoryboardId { get; set; }
