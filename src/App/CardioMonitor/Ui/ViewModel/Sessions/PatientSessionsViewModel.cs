@@ -34,6 +34,28 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set
+            {
+                _isBusy = value;
+                RisePropertyChanged(nameof(IsBusy));
+            }
+        }
+        private bool _isBusy;
+
+        public string BusyMessage
+        {
+            get => _busyMessage;
+            set
+            {
+                _busyMessage = value;
+                RisePropertyChanged(nameof(BusyMessage));
+            }
+        }
+        private string _busyMessage;
+
         public PatientFullName PatientName
         {
             get => _patientName;
@@ -132,14 +154,20 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
             try
             {
+                IsBusy = true;
+                BusyMessage = "Удаление сеанса..";
                 await Task.Factory.StartNew(() => _sessionsService.Delete(sessionInfo.Id)).ConfigureAwait(true);
                 SessionInfos.Remove(sessionInfo);
             }
             catch (Exception ex)
             {
-                _logger.Error($"{GetType().Name}: Ошибка удаления сессии с Id {sessionInfo.Id}. Причина: {ex.Message}",
+                _logger.Error($"{GetType().Name}: Ошибка удаления сеанса с Id {sessionInfo.Id}. Причина: {ex.Message}",
                     ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления сессии").ConfigureAwait(true);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления сеанса").ConfigureAwait(true);
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 
@@ -173,6 +201,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             try
             {
+                IsBusy = true;
+                BusyMessage = "Загрузка сеансов...";
                 var sessions = await Task.Factory.StartNew(() => _sessionsService.GetPatientSessionInfos(_patient.Id))
                     .ConfigureAwait(true);
                 SessionInfos = sessions != null
@@ -181,8 +211,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
             catch (Exception ex)
             {
-                _logger.Error($"{GetType().Name}: Ошибка загрузки сессий. Причина: {ex.Message}", ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сессий").ConfigureAwait(true);
+                _logger.Error($"{GetType().Name}: Ошибка загрузки сеансов. Причина: {ex.Message}", ex);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сеансов").ConfigureAwait(true);
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 

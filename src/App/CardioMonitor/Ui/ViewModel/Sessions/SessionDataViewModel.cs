@@ -99,6 +99,29 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         }
         private bool _isReadOnly;
 
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set
+            {
+                _isBusy = value;
+                RisePropertyChanged(nameof(IsBusy));
+            }
+        }
+        private bool _isBusy;
+
+        public string BusyMessage
+        {
+            get => _busyMessage;
+            set
+            {
+                _busyMessage = value;
+                RisePropertyChanged(nameof(BusyMessage));
+            }
+        }
+        private string _busyMessage;
+
+
         public ICommand SaveCommand
         {
             get
@@ -116,9 +139,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             var saveFileDialog = new SaveFileDialog {Filter = Localisation.FileRepository_SeansFileFilter};
             var dialogResult = saveFileDialog.ShowDialog();
             if (dialogResult != DialogResult.OK) return;
-            
+
             try
             {
+                IsBusy = true;
+                BusyMessage = "Сохранение в файл...";
                 _filesRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
                 await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionDataViewModel_FileSaved);
             }
@@ -126,6 +151,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 _logger.Error($"{GetType().Name}: Ошибка сохранения сессии в файл. Причина: {ex.Message}", ex);
                 await MessageHelper.Instance.ShowMessageAsync("Ошибка сохранения сессии в файл").ConfigureAwait(true);
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 
@@ -150,16 +179,21 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             try
             {
-
+                IsBusy = true;
+                BusyMessage = "Загрузка информации о сеансе...";
                 var session = await Task.Factory.StartNew(() => _sessionsService.Get(sessionId));
-                Session = new SessionModel { Session = session };
-                var patient = await Task.Factory.StartNew(() =>_patientsService.GetPatient(patientId));
+                Session = new SessionModel {Session = session};
+                var patient = await Task.Factory.StartNew(() => _patientsService.GetPatient(patientId));
                 Patient = patient;
             }
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: Ошибка загрузки сессии. Причина: {ex.Message}", ex);
                 await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сессии").ConfigureAwait(true);
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 

@@ -5,9 +5,16 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CardioMonitor.Ui.View.Sessions"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
+             d:DataContext="{d:DesignInstance Type=viewModel:SessionProcessingInitViewModel}"
+             xmlns:busy="clr-namespace:CardioMonitor.Ui.Controls"
              mc:Ignorable="d" 
-             d:DesignHeight="310" d:DesignWidth="400">
-    <Grid VerticalAlignment="Center"
+             d:DesignHeight="330" d:DesignWidth="400">
+    <busy:BusyIndicator
+        Style="{DynamicResource BusyIndicatorStylekey}"
+        IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+        Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+        <Grid VerticalAlignment="Center"
           HorizontalAlignment="Center"
           Margin="10">
         <Grid.RowDefinitions>
@@ -93,4 +100,5 @@
                     Command="{Binding StartSession}"/>
         </StackPanel>
     </Grid>
+    </busy:BusyIndicator>
 </UserControl>

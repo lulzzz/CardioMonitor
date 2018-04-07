@@ -4,9 +4,16 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Patients"
+             d:DataContext="{d:DesignInstance Type=viewModel:PatientViewModel}"
+             xmlns:busy="clr-namespace:CardioMonitor.Ui.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="400">
-    <Grid VerticalAlignment="Center">
+    <busy:BusyIndicator
+        Style="{DynamicResource BusyIndicatorStylekey}"
+        IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+        Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+        <Grid VerticalAlignment="Center">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -68,5 +75,6 @@
                     Margin="10"
                     Command="{Binding SaveCommand}"/>
         </StackPanel>
-    </Grid>
+        </Grid>
+    </busy:BusyIndicator>
 </UserControl>

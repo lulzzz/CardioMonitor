@@ -63,6 +63,28 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             }
         }
 
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set
+            {
+                _isBusy = value;
+                RisePropertyChanged(nameof(IsBusy));
+            }
+        }
+        private bool _isBusy;
+
+        public string BusyMessage
+        {
+            get => _busyMessage;
+            set
+            {
+                _busyMessage = value; 
+                RisePropertyChanged(nameof(BusyMessage));
+            }
+        }
+        private string _busyMessage;
+
         public ICommand AddNewPatientCommand
         {
             get
@@ -173,6 +195,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
             try
             {
+                IsBusy = true;
+                BusyMessage = "Удаление пациента...";
                 await Task.Factory.StartNew(
                         () => _patientsService.Delete(SelectedPatient.Id))
                     .ConfigureAwait(true);
@@ -186,6 +210,10 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     ex);
 
                 await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления пациента.").ConfigureAwait(true);
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 
@@ -223,12 +251,11 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         private async Task UpdatePatientsSafeAsync()
         {
-            var message = String.Empty;
-            var a = await MessageHelper.Instance.ShowProgressDialogAsync("Загрузка списка пациентов...")
-                .ConfigureAwait(true);
-
             try
             {
+                IsBusy = true;
+                BusyMessage = "Загрузка списка пациентов...";
+
                 var patients = await Task.Factory.StartNew(() => _patientsService.GetAll()).ConfigureAwait(true);
                 Patients = patients != null
                     ? new ObservableCollection<Patient>(patients)
@@ -242,7 +269,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             }
             finally
             {
-                await a.CloseAsync().ConfigureAwait(true);
+                IsBusy = false;
             }
         }
 

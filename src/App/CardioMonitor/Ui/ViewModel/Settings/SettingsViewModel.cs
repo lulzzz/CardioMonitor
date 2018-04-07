@@ -7,14 +7,17 @@ using System.Windows.Input;
 using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui.Base;
+using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Settings
 {
     public class SettingsViewModel : Notifier, IDataErrorInfo, IStoryboardPageViewModel
     {
         private readonly ICardioSettings _settings;
+        private readonly ILogger _logger;
         private string _sessionsFilesDirectoryPath;
         private ICommand _chooseFolderCommand;
         private ICommand _closeCommand;
@@ -166,12 +169,35 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             }
         }
 
-        public SettingsViewModel(ICardioSettings settings)
+        public bool IsBusy
         {
-            if (settings == null) throw new ArgumentNullException(nameof(settings));
-            
-            _settings = settings;
-              
+            get => _isBusy;
+            set
+            {
+                _isBusy = value;
+                RisePropertyChanged(nameof(IsBusy));
+            }
+        }
+        private bool _isBusy;
+
+        public string BusyMessage
+        {
+            get => _busyMessage;
+            set
+            {
+                _busyMessage = value;
+                RisePropertyChanged(nameof(BusyMessage));
+            }
+        }
+        private string _busyMessage;
+
+
+        public SettingsViewModel(
+            ICardioSettings settings,
+            [NotNull] ILogger logger)
+        {
+            _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         private void InitializeSettings()
@@ -250,18 +276,32 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         private async void SaveSettings()
         {
+            try
+            {
 
-            /* CardioSettings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
-            CardioSettings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
-            _settings.SessionsFilesDirectoryPath = SessionsFilesDirectoryPath;
+                IsBusy = true;
+                BusyMessage = "Сохранение настроек";
+                /* CardioSettings.Instance.SelectedAcentColorName = SelectedAccentColor.Name;
+                CardioSettings.Instance.SeletedAppThemeName = SelectedAppTheme.Name;*/
+                _settings.SessionsFilesDirectoryPath = SessionsFilesDirectoryPath;
 
-            //_settings.DataBaseSettings = new DataBaseSettings(DbName, DbServerName, DbPort, DbLogin, DbPassword);
+                //_settings.DataBaseSettings = new DataBaseSettings(DbName, DbServerName, DbPort, DbLogin, DbPassword);
 
-            var settingsManager = new SettingsManager();
-            settingsManager.Save(_settings);
+                var settingsManager = new SettingsManager();
+                settingsManager.Save(_settings);
 
-            _isSettingsChanged = false;
-            await MessageHelper.Instance.ShowMessageAsync(Localisation.SettingsViewModel_Saved);
+                _isSettingsChanged = false;
+                await MessageHelper.Instance.ShowMessageAsync(Localisation.SettingsViewModel_Saved);
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"{GetType().Name}: Ошибка сохранения настроек. Причина: {e.Message}", e);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка сохранения настроек");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private void CloseSettings()

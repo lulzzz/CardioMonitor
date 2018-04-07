@@ -144,6 +144,29 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         }
         private short _pumpingNumberOfAttemptsOnProcessing;
 
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set
+            {
+                _isBusy = value;
+                RisePropertyChanged(nameof(IsBusy));
+            }
+        }
+        private bool _isBusy;
+
+        public string BusyMessage
+        {
+            get => _busyMessage;
+            set
+            {
+                _busyMessage = value;
+                RisePropertyChanged(nameof(BusyMessage));
+            }
+        }
+        private string _busyMessage;
+
+
         public ICommand StartCommand
         {
             get
@@ -188,6 +211,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
             try
             {
+                IsBusy = true;
+                BusyMessage = "Загрузка информации о пациентах...";
                 Patients = await Task.Factory.StartNew(_patientsService.GetPatientNames).ConfigureAwait(true);
 
                 if (pageContext.PatientId.HasValue)
@@ -200,7 +225,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception e)
             {
                 _logger.Error($"{GetType().Name}: Ошибка обновления списка пациентов. Причина: {e.Message}", e);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка обновления списка пациентов").ConfigureAwait(true);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка обновления списка пациентов")
+                    .ConfigureAwait(true);
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 

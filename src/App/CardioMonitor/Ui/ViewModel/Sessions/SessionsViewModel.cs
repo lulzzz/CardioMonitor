@@ -60,6 +60,28 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set
+            {
+                _isBusy = value;
+                RisePropertyChanged(nameof(IsBusy));
+            }
+        }
+        private bool _isBusy;
+
+        public string BusyMessage
+        {
+            get => _busyMessage;
+            set
+            {
+                _busyMessage = value;
+                RisePropertyChanged(nameof(BusyMessage));
+            }
+        }
+        private string _busyMessage;
+
 
         public ICommand StartSessionCommand
         {
@@ -123,14 +145,20 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
             try
             {
+                IsBusy = true;
+                BusyMessage = "Удаление сеанса...";
                 await Task.Factory.StartNew(() => _sessionsService.Delete(sessionInfo.Id)).ConfigureAwait(true);
                 SessionInfos.Remove(sessionInfo);
             }
             catch (Exception ex)
             {
-                _logger.Error($"{GetType().Name}: Ошибка удаления сессии с Id {sessionInfo.Id}. Причина: {ex.Message}",
+                _logger.Error($"{GetType().Name}: Ошибка удаления сеанса с Id {sessionInfo.Id}. Причина: {ex.Message}",
                     ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления сессии").ConfigureAwait(true);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления сеанса").ConfigureAwait(true);
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
 
@@ -139,13 +167,20 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             Patient patient;
             try
             {
+                IsBusy = true;
+                BusyMessage = "Подготовка данных...";
                 patient =
-                    await Task.Factory.StartNew(() => _patientsService.GetPatient(SelectedSessionInfo.PatientId)).ConfigureAwait(true);
+                    await Task.Factory.StartNew(() => _patientsService.GetPatient(SelectedSessionInfo.PatientId))
+                        .ConfigureAwait(true);
             }
             catch (Exception e)
             {
                 await MessageHelper.Instance.ShowMessageAsync(e.Message, "Cardio Monitor").ConfigureAwait(true);
                 return;
+            }
+            finally
+            {
+                IsBusy = false;
             }
 
             await PageTransitionRequested.InvokeAsync(
@@ -173,24 +208,29 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private async Task LoadSessionsAsync()
         {
-            var message = String.Empty;
             try
             {
+                IsBusy = true;
+                BusyMessage = "Загрузка сеансов...";
                 var sessions = await Task.Factory.StartNew(() => _sessionsService.GetSessions())
                     .ConfigureAwait(true);
                 SessionInfos = sessions != null
                     ? new ObservableCollection<SessionWithPatientInfo>(sessions)
                     : new ObservableCollection<SessionWithPatientInfo>();
+                IsBusy = false;
             }
             catch (Exception ex)
             {
-                message = ex.Message;
+                _logger.Error($"{GetType().Name}: Ошибка загрузки сеансов. Причина: {ex.Message}",
+                    ex);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сеансов");
+            }
+            finally
+            {
+                IsBusy = false;
             }
 
-            if (!String.IsNullOrEmpty(message))
-            {
-                await MessageHelper.Instance.ShowMessageAsync(message);
-            }
+           
 
         }
 

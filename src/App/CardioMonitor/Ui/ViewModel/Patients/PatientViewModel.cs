@@ -101,12 +101,10 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             get => _patronymicName;
             set
             {
-                if (value != _patronymicName)
-                {
-                    _patronymicName = value;
-                    RisePropertyChanged(nameof(PatronymicName));
-                    IsSaved = false;
-                }
+                if (value == _patronymicName) return;
+                _patronymicName = value;
+                RisePropertyChanged(nameof(PatronymicName));
+                IsSaved = false;
             }
         }
 
@@ -132,6 +130,29 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public bool IsSaved { get; set; }
 
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            set
+            {
+                _isBusy = value;
+                RisePropertyChanged(nameof(IsBusy));
+            }
+        }
+        private bool _isBusy;
+
+        public string BusyMessage
+        {
+            get => _busyMessage;
+            set
+            {
+                _busyMessage = value;
+                RisePropertyChanged(nameof(BusyMessage));
+            }
+        }
+        private string _busyMessage;
+
         public ICommand SaveCommand
         {
             get
@@ -149,15 +170,18 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             var operationName = String.Empty;
             try
             {
+                IsBusy = true;
                 switch (AccessMode)
                 {
                     case AccessMode.Create:
                         _patientsService.Add(Patient);
                         operationName = "создании нового";
+                        BusyMessage = "Создание нового пользователя...";
                         break;
                     case AccessMode.Edit:
                         _patientsService.Edit(Patient);
                         operationName = "редактировании";
+                        BusyMessage = "Редактирование нового пользователя...";
                         break;
                 }
 
@@ -167,13 +191,20 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             }
             catch (ArgumentNullException ex)
             {
-                _logger.Error($"{GetType().Name}: Ошибка при {operationName} пациента. Причина: {Localisation.ArgumentNullExceptionMessage}", ex);
-                await MessageHelper.Instance.ShowMessageAsync(Localisation.ArgumentNullExceptionMessage).ConfigureAwait(true);
+                _logger.Error(
+                    $"{GetType().Name}: Ошибка при {operationName} пациента. Причина: {Localisation.ArgumentNullExceptionMessage}",
+                    ex);
+                await MessageHelper.Instance.ShowMessageAsync(Localisation.ArgumentNullExceptionMessage)
+                    .ConfigureAwait(true);
             }
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: Ошибка при {operationName} пациента. Причина: {ex.Message}", ex);
                 await MessageHelper.Instance.ShowMessageAsync($"Ошибка при {operationName}").ConfigureAwait(true);
+            }
+            finally
+            {
+                IsBusy = false;
             }
 
         }

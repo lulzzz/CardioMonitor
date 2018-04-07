@@ -5,6 +5,7 @@
              mc:Ignorable="d" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:busy="clr-namespace:CardioMonitor.Ui.Controls"
              xmlns:settings="clr-namespace:CardioMonitor.Ui.ViewModel.Settings"
              d:DataContext="{d:DesignInstance Type=settings:SettingsViewModel}">
     <UserControl.Resources>
@@ -26,7 +27,11 @@
             
         </ResourceDictionary>
     </UserControl.Resources>
-    <ScrollViewer>
+    <busy:BusyIndicator
+        Style="{DynamicResource BusyIndicatorStylekey}"
+        IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+        Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+        <ScrollViewer>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -216,4 +221,5 @@
             </StackPanel>
         </Grid>
     </ScrollViewer>
+    </busy:BusyIndicator>
 </UserControl>

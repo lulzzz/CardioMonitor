@@ -3,9 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
+             d:DataContext="{d:DesignInstance Type=viewModel:SessionDataViewModel}"
+             xmlns:busy="clr-namespace:CardioMonitor.Ui.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="500">
-    <Grid>
+    <busy:BusyIndicator
+        Style="{DynamicResource BusyIndicatorStylekey}"
+        IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+        Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+        <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -107,4 +114,5 @@
                    Margin="10"
                    TextAlignment="Center"></TextBlock>
     </Grid>
+    </busy:BusyIndicator>
 </UserControl>

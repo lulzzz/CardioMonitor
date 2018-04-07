@@ -90,7 +90,6 @@ namespace CardioMonitor.Ui.Controls
         /// <param name="e">Event arguments.</param>
         protected virtual void OnStatusChanged(DependencyPropertyChangedEventArgs e)
         {
-            .Text = (string)e.NewValue;
         }
     }
 }
