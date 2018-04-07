@@ -13,6 +13,7 @@ using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure;
 using CardioMonitor.Infrastructure.Workers;
 using JetBrains.Annotations;
+using Markeli.Utils.Logging;
 using PatientPressureParams = CardioMonitor.BLL.SessionProcessing.DeviceFacade.PatientPressureParams;
 
 namespace CardioMonitor.BLL.SessionProcessing
@@ -31,6 +32,7 @@ namespace CardioMonitor.BLL.SessionProcessing
 
         [CanBeNull]
         private IDevicesFacade _devicesFacade;
+        
         
         [NotNull]
         private readonly object _cycleDataLocker = new object();
@@ -176,19 +178,21 @@ namespace CardioMonitor.BLL.SessionProcessing
             [NotNull] SessionParams startParams,
             [NotNull] IBedController bedController,
             [NotNull] IMonitorController monitorController,
-            [NotNull] IWorkerController workerController)
+            [NotNull] IWorkerController workerController,
+            [NotNull] ILogger logger)
         {
             if (bedController == null) throw new ArgumentNullException(nameof(bedController));
             if (monitorController == null) throw new ArgumentNullException(nameof(monitorController));
             if (workerController == null) throw new ArgumentNullException(nameof(workerController));
-            
+
             _startParams = startParams ?? throw new ArgumentNullException(nameof(startParams));
             
             _devicesFacade = new DevicesFacade(
                 startParams,
                 bedController,
                 monitorController,
-                workerController);
+                workerController,
+                logger);
             
             _devicesFacade.OnException += OnException;
             _devicesFacade.OnException += HandleOnException;

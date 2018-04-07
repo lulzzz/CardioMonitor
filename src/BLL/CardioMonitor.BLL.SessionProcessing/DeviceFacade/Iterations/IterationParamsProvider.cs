@@ -6,6 +6,7 @@ using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
+using Markeli.Utils.Logging;
 using Polly;
 using Polly.Timeout;
 
@@ -15,6 +16,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
     {
         [NotNull] private readonly IBedController _bedController;
         private readonly TimeSpan _bedControllerTimeout;
+        private ILogger _logger;
 
         public IterationParamsProvider([NotNull] IBedController bedController, 
             TimeSpan bedControllerTimeout)
@@ -33,26 +35,35 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
             
             try
             {
+                _logger?.Trace($"{GetType().Name}: запрос текущей итерации...");
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
                 var currentIteration = await timeoutPolicy
                     .ExecuteAsync(_bedController
                         .GetCurrentIterationAsync)
                     .ConfigureAwait(false);
+                _logger?.Trace($"{GetType().Name}: текущая итерация - {currentIteration}");
 
+                _logger?.Trace($"{GetType().Name}: запрос следующей итерации для измерения общих параметров...");
                 var nextIterationToMeasuringCommonParams = await timeoutPolicy
                     .ExecuteAsync(_bedController
                         .GetNextIterationNumberForCommonParamsMeasuringAsync)
                     .ConfigureAwait(false);
+                _logger?.Trace($"{GetType().Name}: следующая итерация для измерения общих параметров - {nextIterationToMeasuringCommonParams}.");
 
+
+                _logger?.Trace($"{GetType().Name}: запрос следующей итерации для измерения давления...");
                 var nextIterationToMeasuringPressureParams = await timeoutPolicy
                     .ExecuteAsync(_bedController
                         .GetNextIterationNumberForPressureMeasuringAsync)
                     .ConfigureAwait(false);
+                _logger?.Trace($"{GetType().Name}: следующая итерация для измерения давления - {nextIterationToMeasuringCommonParams}.");
 
+                _logger?.Trace($"{GetType().Name}: запрос следующей итерации для измерения ЭКГ...");
                 var nextIterationToMeasuringEcg = await timeoutPolicy
                     .ExecuteAsync(_bedController
                         .GetNextIterationNumberForEcgMeasuringAsync)
                     .ConfigureAwait(false);
+                _logger?.Trace($"{GetType().Name}: следующая итерация для измерения ЭКГ - {nextIterationToMeasuringEcg}.");
 
                 context.AddOrUpdate(new IterationCycleProcessingContextParams(
                     iterationToGetEcg: nextIterationToMeasuringEcg,
@@ -98,6 +109,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             return true;
+        }
+
+        public void SetLogger(ILogger logger)
+        {
+            _logger = logger;
         }
     }
 }

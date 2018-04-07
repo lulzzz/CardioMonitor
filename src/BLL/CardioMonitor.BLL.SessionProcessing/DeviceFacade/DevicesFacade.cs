@@ -180,6 +180,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var sessionInfoProvider = new SessionProcessingInfoProvider(
                 _bedController, 
                 _startParams.BedControllerInitParams.Timeout);
+            sessionInfoProvider.SetLogger(_logger);
             var sessionInfoProvidingBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
                     sessionInfoProvider.ProcessAsync(context));
@@ -187,6 +188,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var iterationProvider = new IterationParamsProvider(
                 _bedController,
                 _startParams.BedControllerInitParams.Timeout);
+            iterationProvider.SetLogger(_logger);
             var iterationProvidingBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
                     iterationProvider.ProcessAsync(context));
@@ -194,11 +196,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var angleReciever = new AngleReciever(
                 bedController,
                 _startParams.BedControllerInitParams.Timeout);
+            angleReciever.SetLogger(_logger);
             var anlgeRecieveBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
                     angleReciever.ProcessAsync(context));
 
             var checkPointChecker = new IterationBasedCheckPointChecker();
+            checkPointChecker.SetLogger(_logger);
             var checkPointCheckBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
                     checkPointChecker.ProcessAsync(context));
@@ -206,16 +210,19 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var mainBroadcastBlock = new BroadcastBlock<CycleProcessingContext>(context => context);
 
             var pumpingManager = new PumpingManager(_monitorController);
+            pumpingManager.SetLogger(_logger);
             var pupmingManagerBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pumpingManager.ProcessAsync(context));
             var forcedCommandPupmingManagerBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pumpingManager.ProcessAsync(context));
 
             var pressureParamsProvider = new PatientPressureParamsProvider(monitorController);
+            pressureParamsProvider.SetLogger(_logger);
             var pressureParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pressureParamsProvider.ProcessAsync(context));
 
             var commonParamsProvider = new CommonPatientParamsProvider(monitorController, _startParams.MonitorControllerInitParams.Timeout);
+            commonParamsProvider.SetLogger(_logger);
             var commonParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => commonParamsProvider.ProcessAsync(context));
 

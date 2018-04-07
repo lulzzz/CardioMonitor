@@ -119,6 +119,9 @@
       <HintPath>..\..\packages\Npgsql.2.2.7\lib\net45\Mono.Security.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="NLog.StructuredEvents, Version=0.4.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NLog.StructuredEvents.0.4.0\lib\net35\NLog.StructuredEvents.dll</HintPath>
+    </Reference>
     <Reference Include="Npgsql, Version=2.2.7.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Npgsql.2.2.7\lib\net45\Npgsql.dll</HintPath>
       <Private>True</Private>
@@ -174,27 +177,24 @@
     <Compile Include="Devices\DeviceControllerFactory.cs" />
     <Compile Include="Devices\IDeviceControllerFactory.cs" />
     <Compile Include="Files\IFilesManager.cs" />
+    <Compile Include="LogNames.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Localisation.resx</DependentUpon>
     </Compile>
-    <Compile Include="Logs\Logger.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Settings\ICardioSettings.cs" />
     <Compile Include="Settings\SettingsConstants.cs" />
     <Compile Include="Settings\SettingsManager.cs" />
     <Compile Include="Threading\ThreadAssistant.cs" />
     <Compile Include="Ui\Communication\AccessMode.cs" />
-    <Compile Include="Ui\Communication\CardioEventArgs.cs" />
     <Compile Include="Files\FilesManager.cs" />
+    <Compile Include="Ui\Controls\BusyIndicator.cs" />
     <Compile Include="Ui\Converters\InvertedBooleanToVisibilityConverter.cs" />
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\Base\Notifier.cs" />
-    <Compile Include="Ui\Communication\PatientEventArgs.cs" />
     <Compile Include="Ui\Base\SimpleCommand.cs" />
-    <Compile Include="Ui\Communication\TreatmentAction.cs" />
-    <Compile Include="Ui\Communication\TreatmentEventArgs.cs" />
     <Compile Include="Ui\SimpleInjectorPageCreator.cs" />
     <Compile Include="Ui\StoryboardIds.cs" />
     <Compile Include="Ui\ViewModel\MainWindowViewModel.cs" />
@@ -254,6 +254,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Ui\Controls\BusyIndicator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Ui\View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -306,7 +310,12 @@
     <None Include="app.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="packages.config" />
+    <None Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Resources\Entypo.ttf" />
   </ItemGroup>
   <ItemGroup>
@@ -397,6 +406,14 @@
     <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj">
       <Project>{60422AEB-3748-4B0F-928E-689B1378A5EE}</Project>
       <Name>CardioMonitor.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Infrastructure\Logging\Scout.Utils.Logging.NLog\Markeli.Utils.Logging.NLog.csproj">
+      <Project>{9370fdf4-0a95-4113-ac2b-93ed0c710a59}</Project>
+      <Name>Markeli.Utils.Logging.NLog</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Infrastructure\Logging\Scout.Utils.Logging\Markeli.Utils.Logging.csproj">
+      <Project>{540c94ce-85ab-4b97-9fe7-9baf8429b080}</Project>
+      <Name>Markeli.Utils.Logging</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Markeli.Storyboards\Markeli.Storyboards.csproj">
       <Project>{cd647696-9249-416a-a116-7a4f86c0542d}</Project>

@@ -7,7 +7,6 @@ using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.Devices;
 using CardioMonitor.Files;
-using CardioMonitor.Infrastructure.Logs;
 using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Threading;
@@ -15,6 +14,7 @@ using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
+using Markeli.Utils.Logging;
 
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
@@ -66,15 +66,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public Patient Patient
         {
-            get { return _patient; }
+            get => _patient;
             set
             {
-                if (value != _patient)
-                {
-                    _patient = value;
-                    RisePropertyChanged(nameof(Patient));
-                    RisePropertyChanged(nameof(Patients));
-                }
+                if (Equals(value, _patient)) return;
+                _patient = value;
+                RisePropertyChanged(nameof(Patient));
+                RisePropertyChanged(nameof(Patients));
             }
         }
 
@@ -84,12 +82,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// <remarks>
         /// Лайфхак для отображения пациента в таблице
         /// </remarks>
-        public ObservableCollection<Patient> Patients
-        {
-            get { return (null != Patient) 
-                            ? new ObservableCollection<Patient> {Patient} 
-                            : new ObservableCollection<Patient>();}
-        }
+        public ObservableCollection<Patient> Patients => (null != Patient) 
+            ? new ObservableCollection<Patient> {Patient} 
+            : new ObservableCollection<Patient>();
 
 //        /// <summary>
 //        /// Сеанс
@@ -110,58 +105,16 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 //                }
 //            }
 //        }
-
-        /// <summary>
-        /// Максимальный угол наклона кровати
-        /// </summary>
-        private float _maxAngle;
         
         
-        /// <summary>
-        /// Частота
-        /// </summary>
-        private float _frequency;
         
-        
-        /// <summary>
-        /// Количество попыток накачки при старте и финише
-        /// </summary>
-        public short PumpingNumberOfAttemptsOnStartAndFinish
-        {
-            get => _pumpingNumberOfAttemptsOnStartAndFinish;
-            set
-            {
-                if (value != _pumpingNumberOfAttemptsOnStartAndFinish)
-                {
-                    _pumpingNumberOfAttemptsOnStartAndFinish = value;
-                    RisePropertyChanged(nameof(PumpingNumberOfAttemptsOnStartAndFinish));
-                }
-            }
-        }
-
-        private short _pumpingNumberOfAttemptsOnStartAndFinish;
-        /// <summary>
-        /// Количество попыток накачики в процессе выполнения сеанса
-        /// </summary>
-        public short PumpingNumberOfAttemptsOnProcessing{
-            get => _pumpingNumberOfAttemptsOnStartAndFinish;
-            set
-            {
-                if (value != _pumpingNumberOfAttemptsOnProcessing)
-                {
-                    _pumpingNumberOfAttemptsOnProcessing = value;
-                    RisePropertyChanged(nameof(PumpingNumberOfAttemptsOnProcessing));
-                }
-            }
-        }
-        private short _pumpingNumberOfAttemptsOnProcessing;
         
         /// <summary>
         /// Текст кнопки старт
         /// </summary>
         public string StartButtonText
         {
-            get { return _startButtonText; }
+            get => _startButtonText;
             set
             {
                 if (value != _startButtonText)
@@ -184,7 +137,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 return _startCommand ?? (_startCommand = new SimpleCommand
                 {
                     CanExecuteDelegate = o => true,
-                    ExecuteDelegate = o => StartButtonClickAsync()
+                    ExecuteDelegate = async o => await StartButtonClickAsync().ConfigureAwait(true)
                 });
             }
         }
@@ -199,7 +152,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 return _reverseCommand ?? (_reverseCommand = new SimpleCommand
                 {
                     CanExecuteDelegate = o => true,
-                    ExecuteDelegate = o => ReverseButtonClickAsync()
+                    ExecuteDelegate = async o => await ReverseButtonClickAsync().ConfigureAwait(true)
                 });
             }
         }
@@ -214,7 +167,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 return _emergencyStopCommand ?? (_emergencyStopCommand = new SimpleCommand
                 {
                     CanExecuteDelegate = o => true,
-                    ExecuteDelegate = o => EmergencyStopButtonClickAsync()
+                    ExecuteDelegate = async o => await EmergencyStopButtonClickAsync().ConfigureAwait(true)
                 });
             }
         }
@@ -249,11 +202,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             ILogger logger,
             IFilesManager filesRepository,
             ISessionsService sessionsService,
-            TaskHelper taskHelper,
             [NotNull] IDeviceControllerFactory deviceControllerFactory,
             [NotNull] IWorkerController workerController) 
         {
-            if (taskHelper == null) throw new ArgumentNullException(nameof(taskHelper));
 
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
@@ -279,7 +230,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 case SessionStatus.Suspended:
                     await ResumeAsync().ConfigureAwait(true);
                     break;
-                default:
+                default:/*
                     _isResultSaved = false;
                     var bedInitParams =
                         _deviceControllerFactory.CreateBedControllerInitParams(_maxAngle, _repeatCount, _frequency);
@@ -302,7 +253,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         bedController,
                         monitorController,
                         _workerController);
-                    await StartAsync().ConfigureAwait(true);
+                    await StartAsync().ConfigureAwait(true);*/
                     break;
             }
         }
@@ -349,18 +300,18 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// <summary>
         /// Реверс
         /// </summary>
-        private async void ReverseButtonClickAsync()
+        private Task ReverseButtonClickAsync()
         {
-            await ReverseAsync().ConfigureAwait(true);
+            return ReverseAsync();
 
         }
 
         /// <summary>
         /// Прерывает сеанс
         /// </summary>
-        private async void EmergencyStopButtonClickAsync()
+        private Task EmergencyStopButtonClickAsync()
         {
-            await EmeregencyStopAsync().ConfigureAwait(true);
+            return EmeregencyStopAsync();
         }
 
         /// <summary>

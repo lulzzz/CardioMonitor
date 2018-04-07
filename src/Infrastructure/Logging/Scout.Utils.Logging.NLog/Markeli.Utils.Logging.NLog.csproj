@@ -56,9 +56,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Scout.Utils.Logging\Scout.Utils.Logging.csproj">
+    <ProjectReference Include="..\Scout.Utils.Logging\Markeli.Utils.Logging.csproj">
       <Project>{540c94ce-85ab-4b97-9fe7-9baf8429b080}</Project>
-      <Name>Scout.Utils.Logging</Name>
+      <Name>Markeli.Utils.Logging</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

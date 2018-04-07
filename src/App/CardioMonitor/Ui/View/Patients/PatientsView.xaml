@@ -4,18 +4,23 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:busy="clr-namespace:CardioMonitor.Ui.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="900">
     <UserControl.Resources>
         <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.TextBox.xaml" />
     </UserControl.Resources>
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <TextBox x:Name="SearTB"
+    <busy:BusyIndicator
+        Style="{DynamicResource BusyIndicatorStylekey}"
+        IsBusy="True"
+        Status="Hello">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBox x:Name="SearTB"
                  x:FieldModifier="private"
                  Visibility="Collapsed"
                  Margin="0, 10, 0, 10"
@@ -23,23 +28,23 @@
                  controls:TextBoxHelper.UseFloatingWatermark="True"
                  controls:TextBoxHelper.ClearTextButton="True"
                  TextChanged="SearTB_TextChanged">
-            <TextBox.Style>
-                <Style TargetType="{x:Type TextBox}"
+                <TextBox.Style>
+                    <Style TargetType="{x:Type TextBox}"
                        BasedOn="{StaticResource SearchMetroTextBox}">
-                    <Style.Triggers>
-                        <Trigger Property="controls:TextBoxHelper.HasText"
+                        <Style.Triggers>
+                            <Trigger Property="controls:TextBoxHelper.HasText"
                                          Value="True">
-                            <Setter Property="controls:TextBoxHelper.ButtonTemplate"
+                                <Setter Property="controls:TextBoxHelper.ButtonTemplate"
                                             Value="{DynamicResource ChromelessButtonTemplate}" />
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </TextBox.Style>
-            <TextBox.InputBindings>
-                <KeyBinding Command="{Binding PatientSearchCommand}" CommandParameter="{Binding ElementName=SearTB, Path=Text}" Key="Enter"/>
-            </TextBox.InputBindings>
-        </TextBox>
-        <DataGrid x:Name="PatientsDG"
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+                <TextBox.InputBindings>
+                    <KeyBinding Command="{Binding PatientSearchCommand}" CommandParameter="{Binding ElementName=SearTB, Path=Text}" Key="Enter"/>
+                </TextBox.InputBindings>
+            </TextBox>
+            <DataGrid x:Name="PatientsDG"
                   Grid.Row="1"
                   ItemsSource="{Binding Patients}"
                   SelectedIndex="{Binding SelectedPatientIndex}"
@@ -58,30 +63,30 @@
                   SelectionUnit="FullRow"
                   IsReadOnly="True"
                   ColumnWidth="*">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="ИД"
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ИД"
                                     Binding="{Binding Id}"/>
-                <DataGridTextColumn Header="Фамилия"
+                    <DataGridTextColumn Header="Фамилия"
                                     Binding="{Binding LastName}"/>
-                <DataGridTextColumn Header="Имя"
+                    <DataGridTextColumn Header="Имя"
                                     Binding="{Binding FirstName}"/>
-                <DataGridTextColumn Header="Отчество"
+                    <DataGridTextColumn Header="Отчество"
                                     Binding="{Binding PatronymicName}"/>
-                <DataGridTextColumn Header="Дата рождения"
+                    <DataGridTextColumn Header="Дата рождения"
                                     Binding="{Binding BirthDate, StringFormat='{}{0:dd.MM.yyyy}'}"/>
-            </DataGrid.Columns>
-        </DataGrid>
-        <StackPanel Grid.Row="2"
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel Grid.Row="2"
                     Orientation="Horizontal"
                     HorizontalAlignment="Center">
-            <Button x:Name="AddPatientB"
+                <Button x:Name="AddPatientB"
                     x:FieldModifier="private"
                     Command="{Binding AddNewPatientCommand}"
                     Content="Добавить"
                     Width="150"
                     Margin="10"
                     FontSize="11"/>
-            <Button x:Name="EditPatientB"
+                <Button x:Name="EditPatientB"
                     x:FieldModifier="private"
                     Command="{Binding EditPatientCommand}"
                     CommandParameter="{Binding ElementName=PatientsDG, Path=SelectedItem}"
@@ -89,7 +94,7 @@
                     Width="150"
                     Margin="10"
                     FontSize="11"/>
-            <Button x:Name="DeletePatientB"
+                <Button x:Name="DeletePatientB"
                     x:FieldModifier="private"
                     Command="{Binding DeletePatientCommnad}"
                     CommandParameter="{Binding ElementName=PatientsDG, Path=SelectedItem}"
@@ -97,7 +102,7 @@
                     Width="150"
                     Margin="10"
                     FontSize="11"/>
-            <Button x:Name="OpenPatinetB"
+                <Button x:Name="OpenPatinetB"
                     x:FieldModifier="private"
                     Visibility="Collapsed"
                     Content="Открыть курсы"
@@ -106,14 +111,14 @@
                     FontSize="11"
                     Command="{Binding OpenPatientCommand}"
                     CommandParameter="{Binding ElementName=PatientsDG, Path=SelectedItem}"/>
-            <Button x:Name="OpenSessionsB"
+                <Button x:Name="OpenSessionsB"
                     x:FieldModifier="private"
                     Content="Открыть сеансы"
                     Width="150"
                     Margin="10"
                     FontSize="11"
                     Command="{Binding OpenSessionsCommand}"/>
-            <Button x:Name="OpenTreatmentResultsB"
+                <Button x:Name="OpenTreatmentResultsB"
                     x:FieldModifier="private"
                     Visibility="Collapsed"
                     Content="Открыть результаты"
@@ -121,13 +126,15 @@
                     Margin="10"
                     FontSize="11"
                     Command="{Binding ShowResultsCommand}"/>
-            <Button x:Name="OpenFileResultsB"
+                <Button x:Name="OpenFileResultsB"
                     x:FieldModifier="private"
                     Content="Открыть файл"
                     Width="150"
                     Margin="10"
                     FontSize="11"
                     Command="{Binding OpenSessionCommand}"/>
-        </StackPanel>
-    </Grid>
+            </StackPanel>
+        </Grid>
+    </busy:BusyIndicator>
+    
 </UserControl>

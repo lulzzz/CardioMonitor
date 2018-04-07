@@ -114,6 +114,36 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         }
         private bool _isAutopumpingEnabled;
 
+        /// <summary>
+        /// Количество попыток накачки при старте и финише
+        /// </summary>
+        public short PumpingNumberOfAttemptsOnStartAndFinish
+        {
+            get => _pumpingNumberOfAttemptsOnStartAndFinish;
+            set
+            {
+                if (value == _pumpingNumberOfAttemptsOnStartAndFinish) return;
+                _pumpingNumberOfAttemptsOnStartAndFinish = value;
+                RisePropertyChanged(nameof(PumpingNumberOfAttemptsOnStartAndFinish));
+            }
+        }
+        private short _pumpingNumberOfAttemptsOnStartAndFinish;
+
+        /// <summary>
+        /// Количество попыток накачики в процессе выполнения сеанса
+        /// </summary>
+        public short PumpingNumberOfAttemptsOnProcessing
+        {
+            get => _pumpingNumberOfAttemptsOnStartAndFinish;
+            set
+            {
+                if (value == _pumpingNumberOfAttemptsOnProcessing) return;
+                _pumpingNumberOfAttemptsOnProcessing = value;
+                RisePropertyChanged(nameof(PumpingNumberOfAttemptsOnProcessing));
+            }
+        }
+        private short _pumpingNumberOfAttemptsOnProcessing;
+
         public ICommand StartCommand
         {
             get
@@ -170,7 +200,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception e)
             {
                 _logger.Error($"{GetType().Name}: Ошибка обновления списка пациентов. Причина: {e.Message}", e);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка обновления списка пациентов");
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка обновления списка пациентов").ConfigureAwait(true);
             }
         }
 

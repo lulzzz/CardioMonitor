@@ -125,14 +125,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: Ошибка сохранения сессии в файл. Причина: {ex.Message}", ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка сохранения сессии в файл");
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка сохранения сессии в файл").ConfigureAwait(true);
             }
         }
 
         public async void LoadFromFile()
         {
             //todo what?
-            await MessageHelper.Instance.ShowMessageAsync("Opened!");
+            await MessageHelper.Instance.ShowMessageAsync("Opened!").ConfigureAwait(true);
         }
 
         public void Clear()
@@ -159,7 +159,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: Ошибка загрузки сессии. Причина: {ex.Message}", ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сессии");
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сессии").ConfigureAwait(true);
             }
         }
 

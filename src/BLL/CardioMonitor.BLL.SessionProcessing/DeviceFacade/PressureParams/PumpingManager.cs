@@ -7,6 +7,7 @@ using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using JetBrains.Annotations;
+using Markeli.Utils.Logging;
 using Polly;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
@@ -21,6 +22,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         [NotNull]
         private readonly IMonitorController _monitorController;
 
+        private ILogger _logger;
+
         public PumpingManager([NotNull] IMonitorController monitorController)
         {
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
@@ -33,8 +36,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             if (context == null) throw new ArgumentNullException(nameof(context));
             var needPumping = context.TryGetAutoPumpingRequestParams()?.IsAutoPumpingEnabled ?? false;
 
+            _logger?.Trace($"{GetType().Name}: накачка манжеты...");
             if (!needPumping)
             {
+                _logger?.Trace($"{GetType().Name}: накачка манжеты не требуется");
                 context.AddOrUpdate(new PumpingResultContextParams(true));
                 return context;
             }
@@ -103,6 +108,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             
             var checkPointReachedParams = context.TryGetCheckPointParams();
             return checkPointReachedParams != null && checkPointReachedParams.NeedRequestEcg;
+        }
+
+        public void SetLogger(ILogger logger)
+        {
+            _logger = logger;
         }
     }
 }

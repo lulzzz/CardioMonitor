@@ -27,54 +27,10 @@ namespace CardioMonitor.Ui.ViewModel.Settings
         private string _dbLogin;
         private string _dbPassword;
         private string _dbPort;
-
-        #region Apperance settings
-        /*
-        private AppAppearanceSettings _selectedAccentColor;
-        private AppAppearanceSettings _selectedAppTheme;
-        public List<AppAppearanceSettings> AccentColors { get; set; }
-        public List<AppAppearanceSettings> AppThemes { get; set; }
-
-        public AppAppearanceSettings SelectedAccentColor
-        {
-            get { return _selectedAccentColor; }
-            set
-            {
-                if (_selectedAccentColor != value)
-                {
-                    _selectedAccentColor = value;
-                    RisePropertyChanged("SelectedAccentColor");
-
-                    var theme = ThemeManager.DetectAppStyle(Application.Current);
-                    var accent = ThemeManager.GetAccent(value.Name);
-                    ThemeManager.ChangeAppStyle(Application.Current, accent, theme.Item1);
-                    _isSettingsChanged = true;
-                }
-            }
-        }
-
-        public AppAppearanceSettings SelectedAppTheme
-        {
-            get { return _selectedAppTheme; }
-            set
-            {
-                if (_selectedAppTheme != value)
-                {
-                    _selectedAppTheme = value;
-                    RisePropertyChanged("SelectedAppTheme");
-
-                    var theme = ThemeManager.DetectAppStyle(Application.Current);
-                    var appTheme = ThemeManager.GetAppTheme(value.Name);
-                    ThemeManager.ChangeAppStyle(Application.Current, theme.Item2, appTheme);
-                    _isSettingsChanged = true;
-                }
-            }
-        }*/
-        #endregion
-
+        
         public string SessionsFilesDirectoryPath
         {
-            get { return _sessionsFilesDirectoryPath; }
+            get => _sessionsFilesDirectoryPath;
             set
             {
                 if (value != _sessionsFilesDirectoryPath)
@@ -140,7 +96,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         public string DbServerName
         {
-            get { return _dbServerName; }
+            get => _dbServerName;
             set
             {
                 if (value != _dbServerName)
@@ -155,7 +111,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         public string DbPort
         {
-            get { return _dbPort; }
+            get => _dbPort;
             set
             {
                 if (value != _dbPort)
@@ -170,7 +126,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         public string DbName
         {
-            get { return _dbName; }
+            get => _dbName;
             set
             {
                 if (value != _dbName)
@@ -184,7 +140,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         public string DbLogin
         {
-            get { return _dbLogin; }
+            get => _dbLogin;
             set
             {
                 if (value != _dbLogin)
@@ -198,7 +154,7 @@ namespace CardioMonitor.Ui.ViewModel.Settings
 
         public string DbPassword
         {
-            get { return _dbPassword; }
+            get => _dbPassword;
             set
             {
                 if (value != _dbPassword)
@@ -215,23 +171,11 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             if (settings == null) throw new ArgumentNullException(nameof(settings));
             
             _settings = settings;
-            /*
-            AccentColors = ThemeManager.Accents
-                                            .Select(a => new AppAppearanceSettings { Name = a.Name, ColorBrush = a.Resources["AccentColorBrush"] as Brush })
-                                            .ToList();
-
-            AppThemes = ThemeManager.AppThemes
-                                           .Select(a => new AppAppearanceSettings { Name = a.Name, BorderColorBrush = a.Resources["BlackColorBrush"] as Brush, ColorBrush = a.Resources["WhiteColorBrush"] as Brush })
-                                           .ToList();*/
-            
+              
         }
 
         private void InitializeSettings()
         {
-            /*SelectedAppTheme =
-               AppThemes.FirstOrDefault(x => x.Name == CardioSettings.Instance.SeletedAppThemeName);
-            SelectedAccentColor =
-                AccentColors.FirstOrDefault(x => x.Name == CardioSettings.Instance.SelectedAcentColorName);*/
             SessionsFilesDirectoryPath = _settings.SessionsFilesDirectoryPath;
             //DbLogin = _settings.DataBaseSettings.User;
             //DbName = _settings.DataBaseSettings.DataBase;
@@ -274,17 +218,11 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             }
         }
 
-        public string Error
-        {
-            get
-            {
-                return String.Empty;
-            }
-        }
+        public string Error => String.Empty;
 
         public bool IsValid
         {
-            get { return _isValid; }
+            get => _isValid;
             set
             {
                 var oldValod = _isValid;

@@ -10,6 +10,7 @@ using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using JetBrains.Annotations;
+using Markeli.Utils.Logging;
 using Polly;
 using Polly.Timeout;
 
@@ -23,6 +24,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
         private readonly TimeSpan _updatePatientParamTimeout;
         [NotNull]
         private readonly IMonitorController _monitorController;
+
+        private ILogger _logger;
 
         public CommonPatientParamsProvider(
             [NotNull] IMonitorController monitorController,
@@ -47,6 +50,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             
             try
             {
+                _logger?.Trace($"{GetType().Name}: запрос общих параметров пациента");
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
                 param = await timeoutPolicy
                     .ExecuteAsync(_monitorController.GetPatientCommonParamsAsync)
@@ -116,6 +120,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             
             var checkPointReachedParams = context.TryGetCheckPointParams();
             return checkPointReachedParams != null && checkPointReachedParams.NeedRequestEcg;
+        }
+
+        public void SetLogger(ILogger logger)
+        {
+            _logger = logger;
         }
     }
 }

@@ -130,7 +130,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 _logger.Error($"{GetType().Name}: Ошибка удаления сессии с Id {sessionInfo.Id}. Причина: {ex.Message}",
                     ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления сессии");
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления сессии").ConfigureAwait(true);
             }
         }
 
@@ -144,7 +144,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
             catch (Exception e)
             {
-                await MessageHelper.Instance.ShowMessageAsync(e.Message, "Cardio Monitor");
+                await MessageHelper.Instance.ShowMessageAsync(e.Message, "Cardio Monitor").ConfigureAwait(true);
                 return;
             }
 

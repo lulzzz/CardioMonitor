@@ -6,6 +6,7 @@ using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
+using Markeli.Utils.Logging;
 using Polly;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
@@ -19,7 +20,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
         private readonly IBedController _bedController;
 
         private readonly TimeSpan _bedControllerTimeout;
-        
+        private ILogger _logger;
         
         public SessionProcessingInfoProvider([NotNull] IBedController bedController, TimeSpan bedControllerTimeout)
         {
@@ -32,26 +33,32 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
             try
             {
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
+
+                _logger?.Trace($"{GetType().Name}: запрос прошедшего времени");
                 var elapsedTime = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetElapsedTimeAsync)
                     .ConfigureAwait(false);
 
+                _logger?.Trace($"{GetType().Name}: запрос оставшегося времени");
                 var remainingTime = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController .GetRemainingTimeAsync)
                     .ConfigureAwait(false);
 
+                _logger?.Trace($"{GetType().Name}: запрос длительности цикла");
                 var cycleDuration = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetCycleDurationAsync)
                     .ConfigureAwait(false);
 
+                _logger?.Trace($"{GetType().Name}: запрос количества циклов");
                 var cyclesCount = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetCyclesCountAsync)
                     .ConfigureAwait(false);
 
+                _logger?.Trace($"{GetType().Name}: запрос номера текущего цикла");
                 var currentCycleNumber = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetCurrentCycleNumberAsync)
@@ -99,6 +106,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
         public bool CanProcess(CycleProcessingContext context)
         {
             return true;
+        }
+
+        public void SetLogger(ILogger logger)
+        {
+            _logger = logger;
         }
     }
 }

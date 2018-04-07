@@ -7,6 +7,7 @@ using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
+using Markeli.Utils.Logging;
 using Polly;
 using Polly.Timeout;
 
@@ -16,6 +17,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
     {
         private readonly IBedController _bedController;
         private readonly TimeSpan _bedControllerTimeout;
+        private ILogger _logger;
         
         public AngleReciever(
             [NotNull] IBedController bedController, 
@@ -38,6 +40,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
             {
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
 
+                _logger?.Trace($"{GetType().Name}: запрос текущего угла наклона кровати по оси X");
                 var currentAngle = await timeoutPolicy.ExecuteAsync(_bedController
                         .GetAngleXAsync)
                     .ConfigureAwait(false);
@@ -85,6 +88,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             return true;
+        }
+
+        public void SetLogger(ILogger logger)
+        {
+            _logger = logger;
         }
     }
 }

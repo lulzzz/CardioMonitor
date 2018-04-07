@@ -10,6 +10,7 @@ using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using JetBrains.Annotations;
+using Markeli.Utils.Logging;
 using Polly;
 using Polly.Timeout;
 
@@ -24,6 +25,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         private readonly TimeSpan _updatePatientParamTimeout;
         [NotNull]
         private readonly IMonitorController _monitorController;
+
+        private ILogger _logger;
 
         public PatientPressureParamsProvider(
             [NotNull] IMonitorController monitorController)
@@ -49,6 +52,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
            
             try
             {
+                _logger?.Trace($"{GetType().Name}: запрос показателей давления");
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
                 param = await timeoutPolicy.ExecuteAsync(
                         _monitorController
@@ -127,6 +131,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             
             var checkPointReachedParams = context.TryGetCheckPointParams();
             return checkPointReachedParams != null && checkPointReachedParams.NeedRequestEcg;
+        }
+
+        public void SetLogger(ILogger logger)
+        {
+            _logger = logger;
         }
     }
 }

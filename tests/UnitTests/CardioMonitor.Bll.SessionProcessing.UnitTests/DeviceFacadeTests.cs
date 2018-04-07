@@ -5,8 +5,6 @@ using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;
-using CardioMonitor.Infrastructure.Logs;
-using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Infrastructure.Workers;
 using Moq;
 using Xunit;
