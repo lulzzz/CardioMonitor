@@ -13,11 +13,11 @@ using CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
-using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Workers;
 using JetBrains.Annotations;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 {
@@ -40,6 +40,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private bool _isFailedOnPumping;
         
         [NotNull] private readonly IMonitorController _monitorController;
+        [CanBeNull] private readonly ILogger _logger;
         [NotNull] private readonly IBedController _bedController;
         [NotNull] private readonly CycleProcessingSynchronizer _cycleProcessingSynchronizer;
 
@@ -137,10 +138,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             [NotNull] SessionParams startParams,
             [NotNull] IBedController bedController,
             [NotNull] IMonitorController monitorController,
-            [NotNull] IWorkerController workerController)
+            [NotNull] IWorkerController workerController,
+            [CanBeNull] ILogger logger = null)
         {
             if (workerController == null) throw new ArgumentNullException(nameof(workerController));
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
+            _logger = logger;
             _bedController = bedController ?? throw new ArgumentNullException(nameof(bedController));
 
             _startParams = startParams ?? throw new ArgumentNullException(nameof(startParams));
@@ -173,6 +176,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             [NotNull] IBedController bedController,
             [NotNull] IMonitorController monitorController)
         {
+            _logger?.Trace($"{GetType().Name}: начато создание pipeline...");
             var sessionInfoProvider = new SessionProcessingInfoProvider(
                 _bedController, 
                 _startParams.BedControllerInitParams.Timeout);
@@ -338,6 +342,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 {
                     PropagateCompletion = true
                 });
+
+            _logger?.Trace($"{GetType().Name}: создание pipeline завершено");
         }
 
 
@@ -345,7 +351,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         {
             try
             {
-                
+                _logger?.Trace($"{GetType().Name}: агрегация данных...");
+
                 var isForcedCollectionRequested = context.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
                 
                 var exceptionParams = context.TryGetExceptionContextParams();
@@ -356,6 +363,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     {
                         _isFailedOnPumping = true;
                     }
+                    _logger?.Trace($"{GetType().Name}: ошибка в Pipeline: " +
+                                   $"итерация {exceptionParams.Exception.IterationNumber}, " +
+                                   $"сенас {exceptionParams.Exception.CycleNumber} " +
+                                   $"код ошибки {exceptionParams.Exception.ErrorCode}" +
+                                   $"причина: {exceptionParams.Exception.Message}",
+                        exceptionParams.Exception);
                     RiseOnce(exceptionParams, () => OnException?.Invoke(this, exceptionParams.Exception));
                     return HandleConnectionErrorsOnDemandAsync(exceptionParams);
                 }
@@ -363,12 +376,15 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 var sessionProcessingInfo = context.TryGetSessionProcessingInfo();
                 if (sessionProcessingInfo == null)
                 {
+
+                    _logger?.Warning($"{GetType().Name}: не удалось получить информацию о сеансе");
                     return Task.CompletedTask;
                 }
 
                 var iterationsInfo = context.TryGetIterationParams();
                 if (iterationsInfo == null)
                 {
+                    _logger?.Warning($"{GetType().Name}: не удалось получить информацию об итерациях");
                     return Task.CompletedTask;
                 }
 
@@ -378,6 +394,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 var pressureParams = context.TryGetPressureParams();
                 if (pressureParams != null)
                 {
+                    _logger?.Trace($"{GetType().Name}: поступили новые данных о давлении пациента");
                     RiseOnce(pressureParams, () => OnPatientPressureParamsRecieved?.Invoke(
                         this,
                         new PatientPressureParams(
@@ -392,6 +409,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 var commonParams = context.TryGetCommonPatientParams();
                 if (commonParams != null)
                 {
+                    _logger?.Trace($"{GetType().Name}: поступили новые общие данные пациента");
                     RiseOnce(commonParams, () => OnCommonPatientParamsRecieved?.Invoke(
                         this,
                         new CommonPatientParams(
@@ -408,6 +426,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 
                 if (angleParams != null)
                 {
+                    _logger?.Trace($"{GetType().Name}: текущий угол наклона кровати по оси Х - {angleParams.CurrentAngle}");
                     RiseOnce(angleParams, () => OnCurrentAngleXRecieved?.Invoke(this, angleParams.CurrentAngle));
                 }
 
@@ -421,6 +440,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     // чтобы не было лишних вызовов в случае долгого обновления в последней фазе
                     if (isSessionCompleted)
                     {
+                        _logger?.Trace($"{GetType().Name}: остановка синхронизатора сессии");
                         _cycleProcessingSynchronizer.Stop();
                     }
                     //todo придумать, как определять, что закончился цикл, что надо снять показатели в последнем 0
@@ -431,18 +451,21 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         await InnerForceDataCollectionRequestAsync().ConfigureAwait(false);
                         _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber; // по идеи, 
                         OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
+                        _logger?.Info($"{GetType().Name}: закончился цикл {sessionProcessingInfo.CurrentCycleNumber}");
                     }
 
                     if (isSessionCompleted)
                     {
                         _isStandartProcessingInProgress = false;
                         OnSessionCompleted?.Invoke(this, EventArgs.Empty);
+                        _logger?.Info($"{GetType().Name}: сеанс завершился");
                     }
                 });
 
             }
             catch (Exception e)
             {
+                _logger?.Error($"{GetType().Name}: Необработанная ошибка в процессе выполнения сеанса. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this,
                     new SessionProcessingException(
@@ -485,15 +508,18 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             
             if (Monitor.TryEnter(_monitorRecconectionSyncObject))
             {
+                _logger?.Info($"{GetType().Name}: повторное подключение к инверсионному столу...");
                 try
                 {
                     if (_monitorController.IsConnected) return;
                     await _monitorController.DisconnectAsync().ConfigureAwait(false);
                     await Task.Delay(_startParams.DeviceReconnectionTimeout.Value).ConfigureAwait(false);
                     await _monitorController.ConnectAsync().ConfigureAwait(false);
+                    _logger?.Info($"{GetType().Name}: установлено подключение к инверсионному столу");
                 }
                 catch (Exception ex)
                 {
+                    _logger?.Error($"{GetType().Name}: ошибка повторного подключения к инверсионному столу. Причина: {ex.Message}", ex);
                     OnSessionErrorStop?.Invoke(this, ex);
                 }
                 finally
@@ -517,13 +543,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             {
                 try
                 {
+                    _logger?.Info($"{GetType().Name}: повторное подключение к кардиомонитору...");
                     if (_bedController.IsConnected) return;
                     await _bedController.DisconnectAsync().ConfigureAwait(false);
                     await Task.Delay(_startParams.DeviceReconnectionTimeout.Value).ConfigureAwait(false);
                     await _bedController.ConnectAsync().ConfigureAwait(false);
+                    _logger?.Info($"{GetType().Name}: установлено подключение к кардиомонитору");
                 }
                 catch (Exception ex)
                 {
+                    _logger?.Error($"{GetType().Name}: ошибка повторного подключения к кардиомонитору. Причина: {ex.Message}", ex);
                     OnSessionErrorStop?.Invoke(this, ex);
                 }
                 finally
@@ -559,12 +588,22 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             {
                 try
                 {
+                    _logger?.Info($"{GetType().Name}: запрос экстренной остановки с инверсионного стола...");
                     await InnerEmeregencyStopAsync(true)
                         .ConfigureAwait(false);
                     OnEmeregencyStoppedFromDevice?.Invoke(this, EventArgs.Empty);
+                    _logger?.Info($"{GetType().Name}: запрос экстренной остановки с инверсионного стола выполнен");
+                }
+                catch (SessionProcessingException e)
+                {
+                    _logger?.Error($"{GetType().Name}: ошибка экстренной остановки, запущенной с инверсионное стола. Причина: {e.Message}", e);
+                    OnException?.Invoke(
+                        this,
+                        e);
                 }
                 catch (Exception e)
                 {
+                    _logger?.Error($"{GetType().Name}: непредвиденная ошибка экстренной остановки, запущенной с инверсионное стола. Причина: {e.Message}", e);
                     OnException?.Invoke(
                         this, 
                         new SessionProcessingException(
@@ -581,12 +620,22 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             {
                 try
                 {
+                    _logger?.Info($"{GetType().Name}: запрос реверса с инверсионного стола...");
                     await InnerProcessReverseRequestAsync(true)
                         .ConfigureAwait(false);
                     OnReversedFromDevice?.Invoke(this, EventArgs.Empty);
+                    _logger?.Info($"{GetType().Name}: запрос реверса с инверсионного стола выполнен");
+                }
+                catch (SessionProcessingException e)
+                {
+                    _logger?.Error($"{GetType().Name}: ошибка реверса, запущенного с инверсионного стола. Причина: {e.Message}", e);
+                    OnException?.Invoke(
+                        this,
+                        e);
                 }
                 catch (Exception e)
                 {
+                    _logger?.Error($"{GetType().Name}: непредвиденаня ошибка реверса, запущенного с инверсионного стола. Причина: {e.Message}", e);
                     OnException?.Invoke(
                         this,
                         new SessionProcessingException(
@@ -603,12 +652,22 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             {
                 try
                 {
+                    _logger?.Info($"{GetType().Name}: запрос продолжения сеанса с инверсионного стола...");
                     await InnerStartAsync(true)
                         .ConfigureAwait(false);
                     OnResumedFromDevice?.Invoke(this, EventArgs.Empty);
+                    _logger?.Info($"{GetType().Name}: запрос продолжения сеанса с инверсионного стола выполнен");
+                }
+                catch (SessionProcessingException e)
+                {
+                    _logger?.Error($"{GetType().Name}: ошибка продолжения сеанса, запущенного с инверсионного стола. Причина: {e.Message}", e);
+                    OnException?.Invoke(
+                        this,
+                        e);
                 }
                 catch (Exception e)
                 {
+                    _logger?.Error($"{GetType().Name}: непредвиденная ошибка продолжения сеанса, запущенного с инверсионного стола. Причина: {e.Message}", e);
                     OnException?.Invoke(
                         this,
                         new SessionProcessingException(
@@ -625,12 +684,15 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             {
                 try
                 {
+                    _logger?.Info($"{GetType().Name}: запрос приостановки сеанса с инверсионного стола...");
                     await InnerPauseAsync(true)
                         .ConfigureAwait(false);
                     OnPausedFromDevice?.Invoke(this, EventArgs.Empty);
+                    _logger?.Info($"{GetType().Name}: запрос приостановки сеанса с инверсионного стола выполнен");
                 }
                 catch (Exception e)
                 {
+                    _logger?.Error($"{GetType().Name}: ошибка приостановки сеанса с инверсионного стола. Причина: {e.Message}", e);
                     OnException?.Invoke(
                         this,
                         new SessionProcessingException(
@@ -645,28 +707,33 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         {
             _isAutoPumpingEnabled = true;
             _cycleProcessingSynchronizer.EnableAutoPumping();
+            _logger?.Info($"{GetType().Name}: автонакачка включена");
         }
 
         public void DisableAutoPumping()
         {
             _isAutoPumpingEnabled = false;
             _cycleProcessingSynchronizer.DisableAutoPumping();
+            _logger?.Info($"{GetType().Name}: автонакачка выключена");
         }
 
         public Task StartAsync()
         {
             try
             {
+                _logger?.Info($"{GetType().Name}: запуск/продолжение сеанса");
                 return InnerStartAsync(false);
             }
             catch (SessionProcessingException e)
             {
+                _logger?.Error($"{GetType().Name}: ошибка запуска/продолжения сеанса. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this, 
                     e);
             }
             catch (Exception e)
             {
+                _logger?.Error($"{GetType().Name}: непредвиденная ошибка запуска/продолжения сеанса. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this,
                     new SessionProcessingException(
@@ -684,33 +751,44 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 _cycleProcessingSynchronizer.Resume();
                 if (!isCalledFromDevice)
                 {
+                    _logger?.Info($"{GetType().Name}: вызвано продолжение сеанса");
                     await _bedController
                         .ExecuteCommandAsync(BedControlCommand.Start)
                         .ConfigureAwait(false);
+
+                    _logger?.Info($"{GetType().Name}: сеанс продолжен");
                 }
             }
             else
             {
+                _logger?.Info($"{GetType().Name}: вызван старт сеанса");
+                _logger?.Trace($"{GetType().Name}: инициализация контроллера инверсионного стола");
                 _bedController.Init(_startParams.BedControllerInitParams);
+                _logger?.Trace($"{GetType().Name}: подключение к инверсионному столу");
                 await _bedController
                     .ConnectAsync()
                     .ConfigureAwait(false);
                 // выполнить калиборвку относительно горизонта
+                _logger?.Trace($"{GetType().Name}: калибровка инверсионного стола");
                 await _bedController
                     .ExecuteCommandAsync(BedControlCommand.Callibrate)
                     .ConfigureAwait(false);
-                
+
+                _logger?.Trace($"{GetType().Name}: инициализация контроллера кардиомонитора");
                 _monitorController.Init(_startParams.MonitorControllerInitParams);
+                _logger?.Trace($"{GetType().Name}: подключение к кардиомонитору");
                 await _monitorController
                     .ConnectAsync()
                     .ConfigureAwait(false);
-                
+
                 // измерим перед стартом
+                _logger?.Trace($"{GetType().Name}: начальный запрос данных");
                 await InnerForceDataCollectionRequestAsync()
                     .ConfigureAwait(false);
                 // уведомление об ошибке уже сформировалось выше, просто не стартуем
                 if (_isFailedOnPumping)
                 {
+                    _logger?.Trace($"{GetType().Name}: ошибка накачки давления.");
                     OnException?.Invoke(
                         this, 
                         new SessionProcessingException(
@@ -719,13 +797,19 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     return;
                 }
                 // запускаем кровать
+
+                _logger?.Trace($"{GetType().Name}: старт сеанса");
                 await _bedController
                     .ExecuteCommandAsync(BedControlCommand.Start)
                     .ConfigureAwait(false);
                 // запускаем обработку
+                _logger?.Trace($"{GetType().Name}: инициализация сервиса синхронизации");
                 _cycleProcessingSynchronizer.Init(_startParams.UpdateDataPeriod);
+                _logger?.Trace($"{GetType().Name}: старт сервиса синхронизации");
                 _cycleProcessingSynchronizer.Start();
                 _isStandartProcessingInProgress = true;
+
+                _logger?.Info($"{GetType().Name}: сеанс запущен");
             }
         }
 
@@ -733,16 +817,20 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         {
             try
             {
+                _logger?.Trace($"{GetType().Name}: вызвана экстренная остановка");
                 return InnerEmeregencyStopAsync(false);
             }
             catch (SessionProcessingException e)
             {
+
+                _logger?.Error($"{GetType().Name}: ошибка экстренной остановки. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this, 
                     e);
             }
             catch (Exception e)
             {
+                _logger?.Error($"{GetType().Name}: непредвиденная ошибка экстренной остановки. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this,
                     new SessionProcessingException(
@@ -755,17 +843,21 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         private async Task InnerEmeregencyStopAsync(bool isCalledFromDevice)
         {
+            _logger?.Trace($"{GetType().Name}: остановка сервиса синхронизации");
             _cycleProcessingSynchronizer.Stop();
             _isStandartProcessingInProgress = false;
             if (!isCalledFromDevice)
             {
+                _logger?.Trace($"{GetType().Name}: отправка команды экстренной остановки инверсионному столу");
                 await _bedController
                     .ExecuteCommandAsync(BedControlCommand.EmergencyStop)
                     .ConfigureAwait(false);
             }
+            _logger?.Trace($"{GetType().Name}: отключение от инверсионного стола");
             await _bedController
                 .DisconnectAsync()
                 .ConfigureAwait(false);
+            _logger?.Trace($"{GetType().Name}: отключение от кардиомонитора");
             await _monitorController
                 .DisconnectAsync()
                 .ConfigureAwait(false);
@@ -775,16 +867,19 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         {
             try
             {
+                _logger?.Info($"{GetType().Name}: запрос приостановки сеанса");
                 return InnerPauseAsync(false);
             }
             catch (SessionProcessingException e)
             {
+                _logger?.Error($"{GetType().Name}: ошибка приостановки сеанса. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this, 
                     e);
             }
             catch (Exception e)
             {
+                _logger?.Error($"{GetType().Name}: непредвиденная ошибка приостановки сеанса. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this,
                     new SessionProcessingException(
@@ -797,9 +892,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         private async Task InnerPauseAsync(bool isCalledFromDevice)
         {
+            _logger?.Trace($"{GetType().Name}: пауза сервиса синхронизации");
             _cycleProcessingSynchronizer.Pause();
             if (!isCalledFromDevice)
             {
+                _logger?.Trace($"{GetType().Name}: отправка команды паузы инверсионному столу");
                 await _bedController
                     .ExecuteCommandAsync(BedControlCommand.Pause)
                     .ConfigureAwait(false);
@@ -811,16 +908,19 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         {
             try
             {
+                _logger?.Info($"{GetType().Name}: запрос реверса");
                 return InnerProcessReverseRequestAsync(false);
             }
             catch (SessionProcessingException e)
             {
+                _logger?.Error($"{GetType().Name}: ошибка реверса. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this,
                     e);
             }
             catch (Exception e)
             {
+                _logger?.Error($"{GetType().Name}: непредвиденная ошибка реверса. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this,
                     new SessionProcessingException(
@@ -835,6 +935,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         {
             if (!isCalledFromDevice)
             {
+                _logger?.Trace($"{GetType().Name}: отправка команды реверса инверсионному столу");
                 return _bedController
                     .ExecuteCommandAsync(BedControlCommand.Reverse);
             }
@@ -850,16 +951,19 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             
             try
             {
+                _logger?.Info($"{GetType().Name}: ручной запуск сбора показателей пациента");
                 return InnerForceDataCollectionRequestAsync();
             }
             catch (SessionProcessingException e)
             {
+                _logger?.Error($"{GetType().Name}: ошибка ручного запуска сбора показателей пациента. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this,
                     e);
             }
             catch (Exception e)
             {
+                _logger?.Error($"{GetType().Name}: непредвиденная ошибка ручного запуска сбора показателей пациента. Причина: {e.Message}", e);
                 OnException?.Invoke(
                     this,
                     new SessionProcessingException(
@@ -879,6 +983,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 new PumpingRequestContextParams(
                     _isAutoPumpingEnabled, 
                     _startParams.PumpingNumberOfAttemptsOnStartAndFinish));
+
+            _logger?.Trace($"{GetType().Name}: запуск pipeline для ручного сбора показателей пациента");
             await _forcedRequestBlock
                 .SendAsync(context)
                 .ConfigureAwait(false);

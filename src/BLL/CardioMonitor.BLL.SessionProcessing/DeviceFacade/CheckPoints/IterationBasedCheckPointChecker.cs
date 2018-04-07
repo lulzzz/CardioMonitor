@@ -6,6 +6,7 @@ using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using JetBrains.Annotations;
+using Markeli.Utils.Logging;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
 {
@@ -14,7 +15,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
         private readonly HashSet<IterationBasedCheckPoint> _commonParamsCheckPoints;
         private readonly HashSet<IterationBasedCheckPoint> _pressureParamsCheckPoints;
         private readonly HashSet<IterationBasedCheckPoint> _ecgParamsCheckPoints;
-        
+        private ILogger _logger;
+
         public IterationBasedCheckPointChecker()
         {
             _commonParamsCheckPoints = new HashSet<IterationBasedCheckPoint>();
@@ -45,6 +47,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
                 var nextIterationToEcgMeassuring = iterationParams.IterationToGetEcg;
                 var nextIterationToCommonParamsMeassuring = iterationParams.IterationToGetCommonParams;
                 var nextIterationToPressureParamsMeassuring = iterationParams.IterationToGetPressureParams;
+                _logger?.Trace($"{GetType().Name}: определение необходимости сбора параметров. Цикл {currentCycleNumber}, итерация {currentIteration}");
 
                 var ecgCheckPoint = new IterationBasedCheckPoint(currentCycleNumber, nextIterationToEcgMeassuring);
                 var commonParamsCheckPoint = new IterationBasedCheckPoint(currentCycleNumber, nextIterationToCommonParamsMeassuring);
@@ -77,7 +80,18 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
                         _pressureParamsCheckPoints.Add(pressureParamsCheckPoint);
                     }
                 }
-                
+
+                var ecgStatus = needRequestEcg
+                    ? "требуется"
+                    : "не требуется";
+                var commonParamsStatus = needRequestEcg
+                    ? "требуется"
+                    : "не требуется";
+                var pressureParamsStatus = needRequestEcg
+                    ? "требуется"
+                    : "не требуется";
+                _logger?.Trace($"{GetType().Name}: Цикл {currentCycleNumber}, итерация {currentIteration}: запрос ЭКГ {ecgStatus}, запрос общих параметров {commonParamsStatus}, запрос давления {pressureParamsStatus}");
+
                 context.AddOrUpdate(
                     new CheckPointCycleProcessingContextParams(
                         needRequestEcg,
@@ -104,7 +118,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
             if (context == null) throw new ArgumentNullException(nameof(context));
             return true;
         }
-        
+
+        public void SetLogger(ILogger logger)
+        {
+            _logger = logger;
+        }
+
         private class IterationBasedCheckPoint
         {
             public IterationBasedCheckPoint(
