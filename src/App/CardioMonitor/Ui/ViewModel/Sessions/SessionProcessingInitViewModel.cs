@@ -167,7 +167,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private string _busyMessage;
 
 
-        public ICommand StartCommand
+        public ICommand StartSessionCommand
         {
             get
             {
@@ -306,7 +306,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 if (oldValod != value)
                 {
                     RisePropertyChanged(nameof(IsValid));
-                    RisePropertyChanged(nameof(StartCommand));
+                    RisePropertyChanged(nameof(StartSessionCommand));
                 }
             }
         }

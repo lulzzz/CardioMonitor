@@ -9,7 +9,7 @@
              d:DataContext="{d:DesignInstance Type=viewModel:SessionProcessingInitViewModel}"
              xmlns:busy="clr-namespace:CardioMonitor.Ui.Controls"
              mc:Ignorable="d" 
-             d:DesignHeight="330" d:DesignWidth="400">
+             d:DesignHeight="700" d:DesignWidth="400">
     <busy:BusyIndicator
         Style="{DynamicResource BusyIndicatorStylekey}"
         IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
@@ -54,7 +54,7 @@
             Minimum="1"
             Delay="1000"
             NumericInputMode="Numbers"
-            Value="{Binding RepeatsCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Value="{Binding CyclesCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             Speedup="False" />
         <mah:NumericUpDown 
             Grid.Row="3"
@@ -68,7 +68,7 @@
             Minimum="7.5"
             Interval="0.5"
             NumericInputMode="Decimal"
-            Value="{Binding MaxAngle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Value="{Binding MaxAngleX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             Speedup="False" />
         <mah:NumericUpDown 
             Grid.Row="4"
@@ -97,7 +97,7 @@
             <Button Content="Начать сеанс"
                     Width="150"
                     Margin="10"
-                    Command="{Binding StartSession}"/>
+                    Command="{Binding StartSessionCommand}"/>
         </StackPanel>
     </Grid>
     </busy:BusyIndicator>

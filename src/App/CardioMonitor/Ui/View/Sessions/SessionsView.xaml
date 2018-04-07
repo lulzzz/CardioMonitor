@@ -20,7 +20,8 @@
         Style="{DynamicResource BusyIndicatorStylekey}"
         IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
         Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
-        <Grid>
+        <Grid 
+            Margin="10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
