@@ -22,5 +22,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// Частота движения
         /// </summary>
         public float MovementFrequency { get; set; }
+
+
+        public short PumpingNumberOfAttemptsOnStartAndFinish { get; set; }
+
+        public short PumpingNumberOfAttemptsOnProcessing { get; set; }
     }
 }

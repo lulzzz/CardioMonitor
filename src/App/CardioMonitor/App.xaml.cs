@@ -3,6 +3,7 @@ using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreServices.Patients;
 using CardioMonitor.BLL.CoreServices.Sessions;
+using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.Data.Contracts.UnitOfWork;
 using CardioMonitor.Data.Ef.UnitOfWork;
 using CardioMonitor.Devices;
@@ -102,9 +103,10 @@ namespace CardioMonitor
 
         private static void RegisterServices(Container container)
         {
-            container.Register<IPatientsService, PatientService>(Lifestyle.Singleton);
-            container.Register<ISessionsService, SessionsService>(Lifestyle.Singleton);
-            container.Register<IFilesManager, FilesManager>(Lifestyle.Singleton);
+            container.Register<IPatientsService, PatientService>(Lifestyle.Transient);
+            container.Register<ISessionsService, SessionsService>(Lifestyle.Transient);
+            container.Register<IFilesManager, FilesManager>(Lifestyle.Transient);
+            container.RegisterSingleton<ISessionParamsValidator, SessionParamsValidator>();
         }
 
     }

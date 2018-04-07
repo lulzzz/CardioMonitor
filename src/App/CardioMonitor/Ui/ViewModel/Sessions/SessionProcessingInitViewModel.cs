@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using Markeli.Storyboards;
@@ -14,6 +15,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class SessionProcessingInitViewModel : Notifier, IStoryboardPageViewModel, IDataErrorInfo
     {
+        private readonly float Tolerance = 1e-4f;
+
+        private readonly ISessionParamsValidator _sessionParamsValidator;
         private readonly IPatientsService _patientsService;
         private readonly ILogger _logger;
         private ICommand _startCommand;
@@ -85,18 +89,18 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// <summary>
         /// Частота движения
         /// </summary>
-        public float MovementFrequency
+        public double MovementFrequency
         {
             get => _movementFrequency;
             set
             {
-                if (Equals(_movementFrequency, value)) return;
-                _movementFrequency = value;
+                if (Math.Abs(_movementFrequency - value) < Tolerance) return;
+                _movementFrequency = (double)Math.Round((Decimal)value, 3, MidpointRounding.AwayFromZero);
                 RisePropertyChanged(nameof(MovementFrequency));
             }
 
         }
-        private float _movementFrequency;
+        private double _movementFrequency;
 
         /// <summary>
         /// Частота движения
@@ -134,7 +138,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public short PumpingNumberOfAttemptsOnProcessing
         {
-            get => _pumpingNumberOfAttemptsOnStartAndFinish;
+            get => _pumpingNumberOfAttemptsOnProcessing;
             set
             {
                 if (value == _pumpingNumberOfAttemptsOnProcessing) return;
@@ -179,12 +183,46 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+        #region DefaultValues
+
+
+        public short MinCyclesCount => SessionParamsConstants.MinCyclesCount;
+
+        public short MaxCyclesCount => SessionParamsConstants.MaxCyclesCount;
+
+        
+        public float MinValueMaxXAngle => SessionParamsConstants.MinValueMaxXAngle;
+
+        public float MaxValueMaxXAngle => SessionParamsConstants.MaxValueMaxXAngle;
+
+        public float MaxXAngleStep => SessionParamsConstants.MaxXAngleStep;
+
+
+        public double MinMovementFrequency => SessionParamsConstants.MinMovementFrequency;
+
+        public double MaxMovementFrequency => SessionParamsConstants.MaxMovementFrequency;
+
+        public double MovementFrequencyStep => SessionParamsConstants.MovementFrequencyStep;
+
+
+        public short MinPumpingNumberOfAttemptsOnStartAndFinish => SessionParamsConstants.MinPumpingNumberOfAttemptsOnStartAndFinish;
+
+        public short MaxPumpingNumberOfAttemptsOnStartAndFinish => SessionParamsConstants.MaxPumpingNumberOfAttemptsOnStartAndFinish;
+
+        public short MinPumpingNumberOfAttemptsOnProcessing => SessionParamsConstants.MinPumpingNumberOfAttemptsOnProcessing;
+
+        public short MaxPumpingNumberOfAttemptsOnProcessing => SessionParamsConstants.MaxPumpingNumberOfAttemptsOnProcessing;
+
+        #endregion
+
         public SessionProcessingInitViewModel(
             [NotNull] IPatientsService patientsService,
-            [NotNull] ILogger logger)
+            [NotNull] ILogger logger,
+            [NotNull] ISessionParamsValidator sessionParamsValidator)
         {
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _sessionParamsValidator = sessionParamsValidator ?? throw new ArgumentNullException(nameof(sessionParamsValidator));
         }
 
         public void Dispose()
@@ -200,27 +238,46 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     MaxAngleX = MaxAngleX,
                     CyclesCount = CyclesCount,
                     IsAutopumpingEnabled = IsAutopumpingEnabled,
-                    MovementFrequency = MovementFrequency
+                    MovementFrequency = (float)MovementFrequency,
+                    PumpingNumberOfAttemptsOnProcessing = PumpingNumberOfAttemptsOnProcessing,
+                    PumpingNumberOfAttemptsOnStartAndFinish = PumpingNumberOfAttemptsOnStartAndFinish
                 })).ConfigureAwait(true);
         }
 
-        private async Task InitPageAsync(IStoryboardPageContext context)
+        private Task InitPageAsync(IStoryboardPageContext context)
         {
             if (!(context is SessionProcessingInitPageContext pageContext)) throw new ArgumentException("Incorrect argument");
-            if (_previouslySelectedPatientIdFromContext == pageContext.PatientId && Patients != null) return;
+            SetDefaultValues();
+            if (_previouslySelectedPatientIdFromContext == pageContext.PatientId && Patients != null) return Task.CompletedTask;
+            var temp = this[String.Empty];
+            return LoadPatientsAsync(pageContext.PatientId);
+        }
 
+        private void SetDefaultValues()
+        {
+            SelectedPatient = null;
+            MaxAngleX = SessionParamsConstants.DefaultMaxXAngle;
+            CyclesCount = SessionParamsConstants.DefaultCyclesCount;
+            MovementFrequency = SessionParamsConstants.DefaultMovementFrequency;
+            PumpingNumberOfAttemptsOnProcessing = SessionParamsConstants.DefaultPumpingNumberOfAttemptsOnProcessing;
+            PumpingNumberOfAttemptsOnStartAndFinish =
+                SessionParamsConstants.DefaultPumpingNumberOfAttemptsOnStartAndFinish;
+            IsAutopumpingEnabled = true;
+        }
+
+        private async Task LoadPatientsAsync(int? selectedPatientId = null)
+        {
             try
             {
                 IsBusy = true;
                 BusyMessage = "Загрузка информации о пациентах...";
                 Patients = await Task.Factory.StartNew(_patientsService.GetPatientNames).ConfigureAwait(true);
-
-                if (pageContext.PatientId.HasValue)
+                if (selectedPatientId.HasValue)
                 {
-                    SelectedPatient = Patients.FirstOrDefault(x => x.PatientId == pageContext.PatientId.Value);
+                    SelectedPatient = Patients.FirstOrDefault(x => x.PatientId == selectedPatientId.Value);
                 }
 
-                _previouslySelectedPatientIdFromContext = pageContext.PatientId;
+                _previouslySelectedPatientIdFromContext = selectedPatientId;
             }
             catch (Exception e)
             {
@@ -283,10 +340,61 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             get
             {
-                if (columnName == nameof(SelectedPatient) && SelectedPatient == null)
+                if (String.IsNullOrEmpty(columnName) || columnName == nameof(SelectedPatient) && SelectedPatient == null)
                 {
                     IsValid = false;
                     return "Нужно выбрать пациента";
+                }
+
+                if (String.IsNullOrEmpty(columnName) || columnName == nameof(MaxAngleX))
+                {
+                    var result = _sessionParamsValidator.IsMaxXAngleValid(MaxAngleX);
+                    if (!result)
+                    {
+                        IsValid = false;
+                        return $"Нужно указать максимальный угол по оси X в диапазоне [{SessionParamsConstants.MinValueMaxXAngle}; " +
+                               $"{SessionParamsConstants.MaxValueMaxXAngle}]";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || columnName == nameof(CyclesCount))
+                {
+                    var result = _sessionParamsValidator.IsCyclesCountValid(CyclesCount);
+                    if (!result)
+                    {
+                        IsValid = false;
+                        return $"Нужно указать количество повторений в диапазоне [{SessionParamsConstants.MinCyclesCount}; " +
+                               $"{SessionParamsConstants.MaxCyclesCount}]";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || columnName == nameof(MovementFrequency))
+                {
+                    var result = _sessionParamsValidator.IsMovementFrequencyValid((float)MovementFrequency);
+                    if (!result)
+                    {
+                        IsValid = false;
+                        return $"Нужно указать частоту в диапазоне [{SessionParamsConstants.MinMovementFrequency}; " +
+                               $"{SessionParamsConstants.MaxMovementFrequency}]";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || IsAutopumpingEnabled && columnName == nameof(PumpingNumberOfAttemptsOnStartAndFinish))
+                {
+                    var result = _sessionParamsValidator.IsPumpingNumberOfAttemptsOnStartAndFinishValid(PumpingNumberOfAttemptsOnStartAndFinish);
+                    if (!result)
+                    {
+                        IsValid = false;
+                        return $"Нужно указать число в диапазоне [{SessionParamsConstants.MinPumpingNumberOfAttemptsOnStartAndFinish}; " +
+                               $"{SessionParamsConstants.MaxPumpingNumberOfAttemptsOnStartAndFinish}]";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || IsAutopumpingEnabled && columnName == nameof(PumpingNumberOfAttemptsOnProcessing))
+                {
+                    var result = _sessionParamsValidator.IsPumpingNumberOfAttemptsOnProcessing(PumpingNumberOfAttemptsOnProcessing);
+                    if (!result)
+                    {
+                        IsValid = false;
+                        return $"Нужно указать число в диапазоне [{SessionParamsConstants.MinPumpingNumberOfAttemptsOnProcessing}; " +
+                               $"{SessionParamsConstants.MaxPumpingNumberOfAttemptsOnProcessing}]";
+                    }
                 }
                 IsValid = true;
                 return null;
@@ -300,14 +408,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _isValid;
             set
             {
-                var oldValod = _isValid;
                 _isValid = value;
-
-                if (oldValod != value)
-                {
-                    RisePropertyChanged(nameof(IsValid));
-                    RisePropertyChanged(nameof(StartSessionCommand));
-                }
+                RisePropertyChanged(nameof(IsValid));
+                RisePropertyChanged(nameof(StartSessionCommand));
             }
         }
 

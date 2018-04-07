@@ -10,6 +10,9 @@
              xmlns:busy="clr-namespace:CardioMonitor.Ui.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="400">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
     <busy:BusyIndicator
         Style="{DynamicResource BusyIndicatorStylekey}"
         IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
@@ -24,8 +27,10 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
         <TextBlock Text="Параметры сеанса"
                    HorizontalAlignment="Center"
                    FontSize="14"
@@ -39,7 +44,7 @@
                   DisplayMemberPath="Name"
                   IsEditable="True"
                   ItemsSource="{Binding Patients}"
-                  SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                  SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                   MaxDropDownHeight="125"
                   Style="{DynamicResource VirtualisedMetroComboBox}" />
         <mah:NumericUpDown 
@@ -50,11 +55,11 @@
             mah:TextBoxHelper.Watermark="Количество повторений"
             mah:TextBoxHelper.WatermarkAlignment="Left"
             TextAlignment="Left"
-            Maximum="40"
-            Minimum="1"
+            Maximum="{Binding MaxCyclesCount}"
+            Minimum="{Binding MinCyclesCount}"
             Delay="1000"
             NumericInputMode="Numbers"
-            Value="{Binding CyclesCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Value="{Binding CyclesCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
             Speedup="False" />
         <mah:NumericUpDown 
             Grid.Row="3"
@@ -64,11 +69,11 @@
             mah:TextBoxHelper.Watermark="Максимальный угол, °"
             mah:TextBoxHelper.WatermarkAlignment="Left"
             TextAlignment="Left"
-            Maximum="40"
-            Minimum="7.5"
-            Interval="0.5"
+            Maximum="{Binding MaxValueMaxXAngle}"
+            Minimum="{Binding MinValueMaxXAngle}"
+            Interval="{Binding MaxXAngleStep}"
             NumericInputMode="Decimal"
-            Value="{Binding MaxAngleX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Value="{Binding MaxAngleX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
             Speedup="False" />
         <mah:NumericUpDown 
             Grid.Row="4"
@@ -78,20 +83,50 @@
             mah:TextBoxHelper.Watermark="Частота, Гц"
             mah:TextBoxHelper.WatermarkAlignment="Left"
             TextAlignment="Left"
-            Maximum="40"
-            Minimum="7.5"
-            Interval="0.01"
+            Maximum="{Binding MaxMovementFrequency}"
+            Minimum="{Binding MinMovementFrequency}"
+            Interval="{Binding MovementFrequencyStep}"
             NumericInputMode="Decimal"
-            Value="{Binding MovementFrequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Value="{Binding MovementFrequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
             Speedup="False" />
-        <mah:ToggleSwitch 
-            Grid.Row="5"
-            HorizontalAlignment="Right"
-            Margin="0 10 0 10"
-            IsChecked="{Binding IsAutopumpingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            OffLabel="Автонакачка отключена"
-            OnLabel="Автонакачка включена" ContentDirection="LeftToRight" />
-        <StackPanel Grid.Row="6"
+            <mah:ToggleSwitch 
+                Grid.Row="5"
+                HorizontalAlignment="Right"
+                Margin="0 10 0 10"
+                IsChecked="{Binding IsAutopumpingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                OffLabel="Автонакачка отключена"
+                OnLabel="Автонакачка включена" ContentDirection="LeftToRight" />
+            <mah:NumericUpDown 
+                Grid.Row="6"
+                Margin="0 10 0 10"
+                Width="350"
+                mah:TextBoxHelper.UseFloatingWatermark="True"
+                mah:TextBoxHelper.Watermark="Повторные попытки накачки при старте и финише"
+                mah:TextBoxHelper.WatermarkAlignment="Left"
+                TextAlignment="Left"
+                Maximum="{Binding MaxPumpingNumberOfAttemptsOnStartAndFinish}"
+                Minimum="{Binding MinPumpingNumberOfAttemptsOnStartAndFinish}"
+                Interval="1"
+                NumericInputMode="Numbers"
+                Value="{Binding PumpingNumberOfAttemptsOnStartAndFinish, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Speedup="False"
+                Visibility="{Binding IsAutopumpingEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}, ValidatesOnDataErrors=True}"/>
+            <mah:NumericUpDown 
+                Grid.Row="7"
+                Margin="0 10 0 10"
+                Width="350"
+                mah:TextBoxHelper.UseFloatingWatermark="True"
+                mah:TextBoxHelper.Watermark="Повторные попытки накачки в промежуточных точках"
+                mah:TextBoxHelper.WatermarkAlignment="Left"
+                TextAlignment="Left"
+                Maximum="{Binding MaxPumpingNumberOfAttemptsOnProcessing}"
+                Minimum="{Binding MinPumpingNumberOfAttemptsOnProcessing}"
+                Interval="1"
+                NumericInputMode="Numbers"
+                Value="{Binding PumpingNumberOfAttemptsOnProcessing, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                Speedup="False"
+                Visibility="{Binding IsAutopumpingEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}, ValidatesOnDataErrors=True}" />
+            <StackPanel Grid.Row="8"
                     Orientation="Horizontal"
                     HorizontalAlignment="Center">
             <Button Content="Начать сеанс"

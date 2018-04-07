@@ -51,6 +51,7 @@
     <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoContextParamses.cs" />
     <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoProvider.cs" />
     <Compile Include="DeviceValue.cs" />
+    <Compile Include="ISessionParamsValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CycleStateMachine\CycleStates.cs" />
     <Compile Include="CycleStateMachine\CycleTriggers.cs" />
@@ -72,6 +73,8 @@
     <Compile Include="DeviceFacade\PressureParams\PressureCycleProcessingContextParams.cs" />
     <Compile Include="SessionContext.cs" />
     <Compile Include="SessionParams.cs" />
+    <Compile Include="SessionParamsConstants.cs" />
+    <Compile Include="SessionParamsValidator.cs" />
     <Compile Include="SessionProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
