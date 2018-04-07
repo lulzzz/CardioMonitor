@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace CardioMonitor.Data.Ef.Context
 {
+    [Obsolete("Может, позже пригодится")]
     public class ContextInitializer : CreateDatabaseIfNotExists<CardioMonitorContext>
     {
         private const string SqlPostfix = ".sql";

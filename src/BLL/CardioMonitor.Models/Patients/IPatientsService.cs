@@ -1,21 +1,22 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CardioMonitor.BLL.CoreContracts.Patients
 {
     public interface IPatientsService
     {
-        void Add(Patient patient);
+        Task AddAsync(Patient patient);
 
-        List<PatientFullName> GetPatientNames(ICollection<int> patientIds);
+        Task<ICollection<PatientFullName>> GetPatientNamesAsync(ICollection<int> patientIds);
 
-        List<PatientFullName> GetPatientNames();
+        Task<ICollection<PatientFullName>> GetPatientNamesAsync();
 
-        Patient GetPatient(int patientId);
+        Task<Patient> GetPatientAsync(int patientId);
 
-        List<Patient> GetAll();
+        Task<ICollection<Patient>> GetAllAsync();
 
-        void Edit(Patient patient);
+        Task EditAsync(Patient patient);
 
-        void Delete(int patientId);
+        Task DeleteAsync(int patientId);
     }
 }

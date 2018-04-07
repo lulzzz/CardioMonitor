@@ -197,8 +197,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             {
                 IsBusy = true;
                 BusyMessage = "Удаление пациента...";
-                await Task.Factory.StartNew(
-                        () => _patientsService.Delete(SelectedPatient.Id))
+                await _patientsService
+                    .DeleteAsync(SelectedPatient.Id)
                     .ConfigureAwait(true);
                 Patients.Remove(SelectedPatient);
                 SelectedPatient = null;
@@ -256,7 +256,9 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 IsBusy = true;
                 BusyMessage = "Загрузка списка пациентов...";
 
-                var patients = await Task.Factory.StartNew(() => _patientsService.GetAll()).ConfigureAwait(true);
+                var patients = await  _patientsService
+                    .GetAllAsync()
+                    .ConfigureAwait(true);
                 Patients = patients != null
                     ? new ObservableCollection<Patient>(patients)
                     : new ObservableCollection<Patient>();

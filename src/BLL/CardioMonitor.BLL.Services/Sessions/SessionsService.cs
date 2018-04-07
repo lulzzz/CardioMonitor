@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.Mappers;
-using CardioMonitor.Data.Contracts.Entities.Sessions;
-using CardioMonitor.Data.Contracts.UnitOfWork;
+using CardioMonitor.Data.Ef.Context;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.CoreServices.Sessions
@@ -13,49 +14,67 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
     public class SessionsService : ISessionsService
     {
         [NotNull]
-        private readonly ICardioMonitorUnitOfWorkFactory _factory;
+        private readonly ICardioMonitorContextFactory _factory;
 
-        private readonly IPatientsService _patientsService;
-
-        public SessionsService([NotNull] ICardioMonitorUnitOfWorkFactory factory, [NotNull] IPatientsService patientsService)
+        public SessionsService(
+            [NotNull] ICardioMonitorContextFactory factory)
         {
-            if (factory == null) throw new ArgumentNullException(nameof(factory));
-            _factory = factory;
-            _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
+            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
         }
 
-        public void Add(Session session)
+        public async Task AddAsync(Session session)
         {
             if (session == null) throw new ArgumentNullException(nameof(session));
 
-            using (var uow = _factory.Create())
+            using (var context = _factory.Create())
             {
-                uow.BeginTransation();
 
-                uow.Sessions.AddSession(session.ToEntity());
-                uow.Commit();
+                context.Sessions.Add(session.ToEntity());
+                await context
+                    .SaveChangesAsync()
+                    .ConfigureAwait(false);
             }
         }
 
 
-        public Session Get(int sessionId)
+        public async Task<Session> GetAsync(int sessionId)
         {
-            using (var uow = _factory.Create())
+            using (var context = _factory.Create())
             {
-                return uow.Sessions.GetSession(sessionId).ToDomain();
+                var result = await context.Sessions
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == sessionId)
+                    .ConfigureAwait(false);
+                return result?.ToDomain();
             }
         }
 
-        public List<SessionWithPatientInfo> GetSessions()
+        public async Task<ICollection<SessionWithPatientInfo>> GetAllAsync()
         {
-            using (var uow = _factory.Create())
+            using (var context = _factory.Create())
             {
-                var sessions =  uow.Sessions.GetSessions()?.ToList() ?? new List<SessionEntity>(0);
+                var sessions = await context.Sessions
+                    .AsNoTracking()
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+                if (sessions.Count == 0) return new List<SessionWithPatientInfo>(0);
 
-                var patientIds = sessions.Select(x => x.Id);
+                var patientIds = new HashSet<int>(sessions.Select(x => x.Id));
 
-                var patientNames = _patientsService.GetPatientNames(patientIds.ToList()) ??
-                                   new List<PatientFullName>(0);
+                var patients = await context
+                    .Patients
+                    .AsNoTracking()
+                    .Where(x => patientIds.Contains(x.Id))
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                var patientNames = patients.Select(x => new PatientFullName
+                {
+                    PatientId = x.Id,
+                    LastName = x.LastName,
+                    FirstName = x.FirstName,
+                    PatronymicName = x.PatronymicName
+                });
 
                 var patientNamesMap = new Dictionary<int, PatientFullName>();
                 foreach (var patientFullName in patientNames)
@@ -83,22 +102,33 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
         }
 
         
-        public List<SessionInfo> GetPatientSessionInfos(int patientId)
+        public async Task<ICollection<SessionInfo>> GetPatientSessionInfosAsync(int patientId)
         {
-            using (var uow = _factory.Create())
+            using (var context = _factory.Create())
             {
-                return uow.Sessions.GetSessions(patientId)?.Select(x => x.ToInfoDomain()).ToList();
+                var result = await context
+                    .Sessions
+                    .AsNoTracking()
+                    .Where(x => x.PatientId == patientId)
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+                return result.Select(x => x.ToInfoDomain()).ToList();
             }
         }
 
 
-        public void Delete(int sessionId)
+        public async Task DeleteAsync(int sessionId)
         {
-            using (var uow = _factory.Create())
+            using (var context = _factory.Create())
             {
-                uow.BeginTransation();
-                uow.Sessions.DeleteSession(sessionId);
-                uow.Commit();
+                var session = await context
+                    .Sessions
+                    .FirstOrDefaultAsync(x => x.Id == sessionId)
+                    .ConfigureAwait(false);
+                if (session == null) throw new ArgumentException();
+
+                context.Sessions.Remove(session);
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }

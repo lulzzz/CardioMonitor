@@ -1,17 +1,18 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CardioMonitor.BLL.CoreContracts.Session
 {
     public interface ISessionsService
     {
-        void Add(Session session);
+        Task AddAsync(Session session);
 
-        Session Get(int sessionId);
+        Task<Session> GetAsync(int sessionId);
 
-        List<SessionWithPatientInfo> GetSessions();
-        
-        List<SessionInfo> GetPatientSessionInfos(int patientId);
+        Task<ICollection<SessionWithPatientInfo>> GetAllAsync();
 
-        void Delete(int sessionId);
+        Task<ICollection<SessionInfo>> GetPatientSessionInfosAsync(int patientId);
+
+        Task DeleteAsync(int sessionId);
     }
 }

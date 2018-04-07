@@ -169,10 +169,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\Data\CardioMonitor.Data.Contracts\CardioMonitor.Data.Contracts.csproj">
-      <Project>{11907cdd-8176-4019-bd41-d6e524252688}</Project>
-      <Name>CardioMonitor.Data.Contracts</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\src\Data\CardioMonitor.Data\CardioMonitor.Data.Ef.csproj">
       <Project>{a7c10e0a-c0cc-4cae-8ad4-3cd9e05528d7}</Project>
       <Name>CardioMonitor.Data.Ef</Name>

@@ -300,7 +300,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 //            {
 //                _filesRepository.SaveToFile(Patient, Session.Session);
 //                //todo это работать не будет
-//                _sessionsService.Add(Session.Session);
+//                _sessionsService.AddAsync(Session.Session);
 //                await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionViewModel_SessionCompeted);
 //            }
 //            catch (ArgumentNullException ex)

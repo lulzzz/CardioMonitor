@@ -156,7 +156,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = true;
                 BusyMessage = "Удаление сеанса..";
-                await Task.Factory.StartNew(() => _sessionsService.Delete(sessionInfo.Id)).ConfigureAwait(true);
+                await _sessionsService.DeleteAsync(sessionInfo.Id).ConfigureAwait(true);
                 SessionInfos.Remove(sessionInfo);
             }
             catch (Exception ex)
@@ -203,7 +203,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = true;
                 BusyMessage = "Загрузка сеансов...";
-                var sessions = await Task.Factory.StartNew(() => _sessionsService.GetPatientSessionInfos(_patient.Id))
+                var sessions = await  _sessionsService.GetPatientSessionInfosAsync(_patient.Id)
                     .ConfigureAwait(true);
                 SessionInfos = sessions != null
                     ? new ObservableCollection<SessionInfo>(sessions)

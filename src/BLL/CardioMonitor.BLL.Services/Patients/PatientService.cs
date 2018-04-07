@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
+using System.Threading.Tasks;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.Mappers;
-using CardioMonitor.Data.Contracts.UnitOfWork;
+using CardioMonitor.Data.Ef.Context;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.CoreServices.Patients
@@ -11,91 +13,117 @@ namespace CardioMonitor.BLL.CoreServices.Patients
     public class PatientService : IPatientsService
     {
         [NotNull]
-        private readonly ICardioMonitorUnitOfWorkFactory _factory;
+        private readonly ICardioMonitorContextFactory _contextFactory;
 
-        public PatientService(ICardioMonitorUnitOfWorkFactory factory)
+        public PatientService(ICardioMonitorContextFactory contextFactory)
         {
-            _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
         }
 
-        public void Add([NotNull] Patient patient)
+        public async Task AddAsync([NotNull] Patient patient)
         {
             if (patient == null) throw new ArgumentNullException(nameof(patient));
 
-            using (var uow = _factory.Create())
+            using (var context = _contextFactory.Create())
             {
-                uow.BeginTransation();
-                uow.Patients.AddPatient(patient.ToEntity());
-                uow.Commit();
+                context.Patients.Add(patient.ToEntity());
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        public List<PatientFullName> GetPatientNames(ICollection<int> patientIds)
+        public async Task<ICollection<PatientFullName>> GetPatientNamesAsync([NotNull] ICollection<int> patientIds)
         {
-            using (var uow = _factory.Create())
+            if (patientIds == null) throw new ArgumentNullException(nameof(patientIds));
+            using (var context = _contextFactory.Create())
             {
-                var result = uow.Patients.GetPatients(patientIds).Select(x => new PatientFullName
+                var uniquePatientIds = new HashSet<int>(patientIds);
+                var result = await context.Patients
+                    .AsNoTracking()
+                    .Where(x => uniquePatientIds.Contains(x.Id))
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+               return new List<PatientFullName>(result.Select(x => new PatientFullName
                 {
                     PatientId = x.Id,
                     LastName = x.LastName,
                     FirstName = x.FirstName,
                     PatronymicName = x.PatronymicName
-                });
-                return new List<PatientFullName>(result);
+                }));
             }
         }
 
-        public List<PatientFullName> GetPatientNames()
+        public async Task<ICollection<PatientFullName>> GetPatientNamesAsync()
         {
-            using (var uow = _factory.Create())
+            using (var context = _contextFactory.Create())
             {
-                var result = uow.Patients.GetPatients().Select(x => new PatientFullName
+                var result = await context.Patients
+                    .AsNoTracking()
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                return new List<PatientFullName>(result.Select(x => new PatientFullName
                 {
                     PatientId = x.Id,
                     LastName = x.LastName,
                     FirstName = x.FirstName,
                     PatronymicName = x.PatronymicName
-                });
-                return new List<PatientFullName>(result);
+                }));
             }
         }
 
-        public Patient GetPatient(int patientId)
+        public async Task<Patient> GetPatientAsync(int patientId)
         {
-            using (var uow = _factory.Create())
+            using (var uow = _contextFactory.Create())
             {
-                return uow.Patients.GetPatient(patientId)?.ToDomain();
+                var result = await uow.Patients
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(x => x.Id == patientId)
+                    .ConfigureAwait(false);
+
+                return result?.ToDomain();
             }
         }
 
-        public List<Patient> GetAll()
+        public async Task<ICollection<Patient>> GetAllAsync()
         {
-            using (var uow = _factory.Create())
+            using (var context = _contextFactory.Create())
             {
-                var result = uow.Patients.GetPatients().Select(x => x.ToDomain());
-                return  new List<Patient>(result);
+                var result = await context.Patients
+                    .AsNoTracking()
+                    .ToListAsync()
+                    .ConfigureAwait(false);
+
+                return  new List<Patient>(result.Select(x => x.ToDomain()));
             }
         }
 
-        public void Edit(Patient patient)
+        public async Task EditAsync(Patient patient)
         {
             if (patient == null) throw new ArgumentNullException(nameof(patient));
 
-            using (var uow = _factory.Create())
+            using (var context = _contextFactory.Create())
             {
-                uow.BeginTransation();
-                uow.Patients.UpdatePatient(patient.ToEntity());
-                uow.Commit();
+                var entity = patient.ToEntity();
+                context.Patients.Attach(entity);
+                context.Entry(entity).State = EntityState.Modified;
+                await context.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
-        public void Delete(int patientId)
+        public async Task DeleteAsync(int patientId)
         {
-            using (var uow = _factory.Create())
+            using (var context = _contextFactory.Create())
             {
-                uow.BeginTransation();
-                uow.Patients.DeletePatient(patientId);
-                uow.Commit();
+                var patient = await context.Patients
+                    .FirstOrDefaultAsync(x => x.Id == patientId)
+                    .ConfigureAwait(false);
+                if (patient == null) throw new ArgumentException();
+
+                context.Patients.Remove(patient);
+                await context
+                    .SaveChangesAsync()
+                    .ConfigureAwait(false);
             }
         }
     }

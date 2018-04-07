@@ -4,8 +4,7 @@ using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreServices.Patients;
 using CardioMonitor.BLL.CoreServices.Sessions;
 using CardioMonitor.BLL.SessionProcessing;
-using CardioMonitor.Data.Contracts.UnitOfWork;
-using CardioMonitor.Data.Ef.UnitOfWork;
+using CardioMonitor.Data.Ef.Context;
 using CardioMonitor.Devices;
 using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Workers;
@@ -58,7 +57,7 @@ namespace CardioMonitor
         private static void RegisterInfrastructure(Container container)
         {
             container.Register<IWorkerController, WorkerController>(Lifestyle.Singleton);
-            container.Register<ICardioMonitorUnitOfWorkFactory>(() => new CardioMonitorEfUnitOfWorkFactory("CardioMonitorContext"), Lifestyle.Singleton);
+            container.Register<ICardioMonitorContextFactory>(() => new CardioMonitorContextFactory("CardioMonitorContext"), Lifestyle.Singleton);
 
             var settings = GetSettings();
             container.RegisterSingleton(settings);

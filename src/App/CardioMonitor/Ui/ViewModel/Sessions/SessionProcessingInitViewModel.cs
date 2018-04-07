@@ -271,7 +271,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = true;
                 BusyMessage = "Загрузка информации о пациентах...";
-                Patients = await Task.Factory.StartNew(_patientsService.GetPatientNames).ConfigureAwait(true);
+                var temp = await _patientsService.GetPatientNamesAsync().ConfigureAwait(true);
+                Patients = new List<PatientFullName>(temp);
                 if (selectedPatientId.HasValue)
                 {
                     SelectedPatient = Patients.FirstOrDefault(x => x.PatientId == selectedPatientId.Value);

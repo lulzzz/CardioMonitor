@@ -181,9 +181,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = true;
                 BusyMessage = "Загрузка информации о сеансе...";
-                var session = await Task.Factory.StartNew(() => _sessionsService.Get(sessionId));
+                var session =  await _sessionsService
+                    .GetAsync(sessionId)
+                    .ConfigureAwait(true);
                 Session = new SessionModel {Session = session};
-                var patient = await Task.Factory.StartNew(() => _patientsService.GetPatient(patientId));
+                var patient =  await _patientsService
+                    .GetPatientAsync(patientId)
+                    .ConfigureAwait(true);
                 Patient = patient;
             }
             catch (Exception ex)

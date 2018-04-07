@@ -51,9 +51,9 @@
     <Compile Include="SessionStatusMapper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Data\CardioMonitor.Data.Contracts\CardioMonitor.Data.Contracts.csproj">
-      <Project>{11907CDD-8176-4019-BD41-D6E524252688}</Project>
-      <Name>CardioMonitor.Data.Contracts</Name>
+    <ProjectReference Include="..\..\Data\CardioMonitor.Data\CardioMonitor.Data.Ef.csproj">
+      <Project>{A7C10E0A-C0CC-4CAE-8AD4-3CD9E05528D7}</Project>
+      <Name>CardioMonitor.Data.Ef</Name>
     </ProjectReference>
     <ProjectReference Include="..\CardioMonitor.Models\CardioMonitor.BLL.CoreContracts.csproj">
       <Project>{33247b5d-3763-4034-a97c-4c7922b04f9f}</Project>

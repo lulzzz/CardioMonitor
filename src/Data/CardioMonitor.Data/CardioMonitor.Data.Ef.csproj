@@ -56,27 +56,19 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context\CardioMonitorContext.cs" />
+    <Compile Include="Context\CardioMonitorContextFactory.cs" />
     <Compile Include="Context\ContextInitializer.cs" />
-    <Compile Include="Migrations\Configuration.cs" />
-    <Compile Include="UnitOfWork\CardioMonitorEfUnitOfWork.cs" />
     <Compile Include="Configurations\PatientConfiguration.cs" />
     <Compile Include="Configurations\PatientParamsConfiguration.cs" />
     <Compile Include="Configurations\SessionConfiguration.cs" />
     <Compile Include="Configurations\SessionCycleConfiguration.cs" />
+    <Compile Include="Context\ICardioMonitorContextFactory.cs" />
+    <Compile Include="Entities\Patients\PatientEntity.cs" />
+    <Compile Include="Entities\Sessions\PatientParamsEntity.cs" />
+    <Compile Include="Entities\Sessions\SessionCompletionStatus.cs" />
+    <Compile Include="Entities\Sessions\SessionCycleEntity.cs" />
+    <Compile Include="Entities\Sessions\SessionEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repositories\PatientsRepository.cs" />
-    <Compile Include="Repositories\SessionsRepository.cs" />
-    <Compile Include="UnitOfWork\CardioMonitorEfUnitOfWorkFactory.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CardioMonitor.Data.Common\CardioMonitor.Data.Common.csproj">
-      <Project>{41CE643F-8384-4DA5-ACE3-3DB97FFBF4EF}</Project>
-      <Name>CardioMonitor.Data.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CardioMonitor.Data.Contracts\CardioMonitor.Data.Contracts.csproj">
-      <Project>{11907CDD-8176-4019-BD41-D6E524252688}</Project>
-      <Name>CardioMonitor.Data.Contracts</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

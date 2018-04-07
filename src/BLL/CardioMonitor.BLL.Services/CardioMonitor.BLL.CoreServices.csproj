@@ -59,13 +59,9 @@
     <Compile Include="Sessions\SessionsService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Data\CardioMonitor.Data.Common\CardioMonitor.Data.Common.csproj">
-      <Project>{41CE643F-8384-4DA5-ACE3-3DB97FFBF4EF}</Project>
-      <Name>CardioMonitor.Data.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Data\CardioMonitor.Data.Contracts\CardioMonitor.Data.Contracts.csproj">
-      <Project>{11907cdd-8176-4019-bd41-d6e524252688}</Project>
-      <Name>CardioMonitor.Data.Contracts</Name>
+    <ProjectReference Include="..\..\Data\CardioMonitor.Data\CardioMonitor.Data.Ef.csproj">
+      <Project>{a7c10e0a-c0cc-4cae-8ad4-3cd9e05528d7}</Project>
+      <Name>CardioMonitor.Data.Ef</Name>
     </ProjectReference>
     <ProjectReference Include="..\CardioMonitor.BLL.Mappers\CardioMonitor.BLL.Mappers.csproj">
       <Project>{7b5c2e13-cdf5-4d29-b5f5-fa464b4effa8}</Project>

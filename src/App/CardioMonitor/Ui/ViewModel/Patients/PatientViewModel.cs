@@ -174,12 +174,16 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 switch (AccessMode)
                 {
                     case AccessMode.Create:
-                        _patientsService.Add(Patient);
+                        await _patientsService
+                            .AddAsync(Patient)
+                            .ConfigureAwait(false);
                         operationName = "создании нового";
                         BusyMessage = "Создание нового пользователя...";
                         break;
                     case AccessMode.Edit:
-                        _patientsService.Edit(Patient);
+                        await _patientsService
+                            .EditAsync(Patient)
+                            .ConfigureAwait(false);
                         operationName = "редактировании";
                         BusyMessage = "Редактирование нового пользователя...";
                         break;
