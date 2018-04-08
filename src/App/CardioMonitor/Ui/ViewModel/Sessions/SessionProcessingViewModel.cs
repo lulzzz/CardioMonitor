@@ -57,6 +57,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private bool _isResultSaved;
 
+        private bool _isSessionStarted;
+        private bool _isSessionCompleted;
+
         #endregion
 
         #region Свойства
@@ -391,11 +394,15 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 return result == MessageDialogResult.Affirmative;
             }
 
+            //todo is saved?
             return true;
         }
 
         public async Task CloseAsync()
         {
+            if (_isSessionCompleted) return;
+            if (!_isSessionStarted) return;
+
             await EmeregencyStopAsync();
         }
 

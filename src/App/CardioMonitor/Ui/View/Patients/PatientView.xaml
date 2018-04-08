@@ -29,21 +29,21 @@
                    FontWeight="Bold"
                    Margin="10"/>
         <TextBox Grid.Row="1"
-                   Text="{Binding LastName}"
+                   Text="{Binding LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                    HorizontalAlignment="Center"
                    Width="350"
                    controls:TextBoxHelper.Watermark="Фамилия"
                    controls:TextBoxHelper.UseFloatingWatermark="True"
                    Margin="10"/>
         <TextBox Grid.Row="2"
-                   Text="{Binding FirstName}"
+                   Text="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                    HorizontalAlignment="Center"
                    Width="350"
                    controls:TextBoxHelper.Watermark="Имя"
                    controls:TextBoxHelper.UseFloatingWatermark="True"
                    Margin="10"/>
         <TextBox Grid.Row="3"
-                   Text="{Binding PatronymicName}"
+                   Text="{Binding PatronymicName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                    HorizontalAlignment="Center"
                    Width="350"
                    controls:TextBoxHelper.Watermark="Отчество"
@@ -63,7 +63,7 @@
                        VerticalAlignment="Center"
                        HorizontalAlignment="Left"/>
             <DatePicker Grid.Column="1"
-                    SelectedDate="{Binding BirthDate}"
+                    SelectedDate="{Binding BirthDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                     controls:TextBoxHelper.Watermark="Дата рождения"
                     controls:TextBoxHelper.UseFloatingWatermark="True"
                     Margin="10,0,10,0"/>

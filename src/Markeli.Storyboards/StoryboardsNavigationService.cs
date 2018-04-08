@@ -150,23 +150,28 @@ namespace Markeli.Storyboards
             });
         }
 
-        private Task ViewModelOnPageCompleted(object sender)
+        private async Task ViewModelOnPageCompleted(object sender)
         {
-            return HandleViewModelTransitionsAsync(sender, PageTransitionTrigger.Completed);
+            if (!(sender is IStoryboardPageViewModel viewModel))
+                throw new InvalidOperationException("Incorrect request of transition");
+            
+            await HandleViewModelTransitionsAsync(viewModel, PageTransitionTrigger.Completed).ConfigureAwait(false);
         }
 
         private Task HandleViewModelTransitionsAsync(object sender, PageTransitionTrigger trigger)
         {
-            return _invoker.InvokeAsync(() =>
+            return _invoker.InvokeAsync(async () =>
             {
                 if (!(sender is IStoryboardPageViewModel viewModel))
                     throw new InvalidOperationException("Incorrect request of transition");
+
+                await RemoveOpennedPageAsync().ConfigureAwait(true);
 
                 var storyboard = _storyboards.Values.FirstOrDefault(x => x.StoryboardId == viewModel.StoryboardId);
                 if (storyboard == null) throw new InvalidOperationException("Storyboard not found");
 
                 var destinationPageId = storyboard.GetDestinationPage(viewModel.PageId, trigger);
-                return GoToPageAsync(destinationPageId, storyboard.StoryboardId);
+                await GoToPageAsync(destinationPageId, storyboard.StoryboardId).ConfigureAwait(true);
             });
         }
 
@@ -218,7 +223,6 @@ namespace Markeli.Storyboards
 
             return _invoker.InvokeAsync(async () =>
             {
-
                 var storyboard = _storyboards[pageInfo.StoryboardId];
 
                 if (_activeStoryboard?.ActivePage != null)
@@ -281,7 +285,7 @@ namespace Markeli.Storyboards
        
         public async Task GoToStoryboardAsync(Guid storyboardId)
         {
-            var pageInfo = _journal.FirstOrDefault(x => x.StoryboardId == storyboardId);
+            var pageInfo = _journal.LastOrDefault(x => x.StoryboardId == storyboardId);
             if (pageInfo == null)
             {
                 pageInfo =
@@ -298,66 +302,84 @@ namespace Markeli.Storyboards
             if (!CanGoBack()) return Task.CompletedTask;
             if (_activeInnerStoryboardPageInfo == null) return Task.CompletedTask;
 
-            return _invoker.InvokeAsync(async () => {
+            return _invoker.InvokeAsync(async () =>
+            {
+
+                var lastPageFromStoryboard = await RemoveOpennedPageAsync().ConfigureAwait(true);
+                if (lastPageFromStoryboard == null) return;
+                
+                // already have been added
+                await OpenPageAsync(lastPageFromStoryboard, addToJournal: false).ConfigureAwait(true);
+            });
+        }
+
+        private async Task<InnerStoryboardPageInfo> RemoveOpennedPageAsync()
+        {
+            if (_activeInnerStoryboardPageInfo == null) return null;
+
+            // start pages does not close
+            if (_activeStoryboard?.ActivePage != null && 
+                !_activeInnerStoryboardPageInfo.IsStartPage)
+            {
+                var previousPage = _activeStoryboard.ActivePage;
+                var viewModel = previousPage.ViewModel;
+                var canClose = await viewModel.CanCloseAsync().ConfigureAwait(true);
+                if (!canClose) return null;
+            }
+
+            var lastPageFromStoryboard =  _activeInnerStoryboardPageInfo.IsStartPage
+                ? _journal.LastOrDefault(x =>
+                    x.StoryboardId != _activeInnerStoryboardPageInfo.StoryboardId)
+                : _journal.LastOrDefault(x =>
+                    x.StoryboardId == _activeInnerStoryboardPageInfo.StoryboardId
+                    && x.PageId != _activeInnerStoryboardPageInfo.PageId);
+
+            if (lastPageFromStoryboard == null)
+            {
+                lastPageFromStoryboard =
+                    _journal.LastOrDefault(x => x.StoryboardId != _activeInnerStoryboardPageInfo.StoryboardId);
+                if (lastPageFromStoryboard == null) return null;
+            }
+
+
+            _journal.Remove(_activeInnerStoryboardPageInfo);
+
+            //start pages always in memory
+            if (_cachedPages.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId) &&
+                !_activeInnerStoryboardPageInfo.IsStartPage)
+            {
+                _cachedPages.Remove(_activeInnerStoryboardPageInfo.PageUniqueId);
+
                 if (_activeStoryboard?.ActivePage != null)
                 {
                     var previousPage = _activeStoryboard.ActivePage;
                     var viewModel = previousPage.ViewModel;
                     var canClose = await viewModel.CanCloseAsync().ConfigureAwait(true);
-                    if (!canClose) return;
+                    if (!canClose) return null;
+
+                    viewModel.PageBackRequested -= ViewModelOnPageBackRequested;
+                    viewModel.PageCanceled -= ViewModelOnPageCanceled;
+                    viewModel.PageCompleted -= ViewModelOnPageCompleted;
+                    viewModel.PageTransitionRequested -= ViewModelOnPageTransitionRequested;
+
+                    await viewModel.CloseAsync().ConfigureAwait(true);
                 }
+            }
 
-                var lastPageFromStoryboard = _journal.LastOrDefault(x =>
-                    x.StoryboardId == _activeInnerStoryboardPageInfo.StoryboardId
-                    && x.PageId != _activeInnerStoryboardPageInfo.PageId);
+            if (_pageContexts.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId))
+            {
+                _pageContexts.Remove(_activeInnerStoryboardPageInfo.PageUniqueId);
+            }
 
-                if (lastPageFromStoryboard == null)
-                {
-                    lastPageFromStoryboard =
-                        _journal.LastOrDefault(x => x.StoryboardId != _activeInnerStoryboardPageInfo.StoryboardId);
-                    if (lastPageFromStoryboard == null) return;
-                }
+            //todo maybe add isShared flag?
+            if (_activeInnerStoryboardPageInfo.IsStartPage &&
+                _startPageContexts.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId))
+            {
+                _pageContexts[_activeInnerStoryboardPageInfo.PageUniqueId] =
+                    _startPageContexts[_activeInnerStoryboardPageInfo.PageUniqueId];
+            }
 
-
-                _journal.Remove(_activeInnerStoryboardPageInfo);
-
-                //start pages always in memory
-                if (_cachedPages.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId) && !_activeInnerStoryboardPageInfo.IsStartPage)
-                {
-                    _cachedPages.Remove(_activeInnerStoryboardPageInfo.PageUniqueId);
-
-                    if (_activeStoryboard?.ActivePage != null)
-                    {
-                        var previousPage = _activeStoryboard.ActivePage;
-                        var viewModel = previousPage.ViewModel;
-                        var canClose = await viewModel.CanCloseAsync().ConfigureAwait(true);
-                        if (!canClose) return;
-
-                        viewModel.PageBackRequested -= ViewModelOnPageBackRequested;
-                        viewModel.PageCanceled -= ViewModelOnPageCanceled;
-                        viewModel.PageCompleted -= ViewModelOnPageCompleted;
-                        viewModel.PageTransitionRequested -= ViewModelOnPageTransitionRequested;
-
-                        await viewModel.CloseAsync().ConfigureAwait(true);
-                    }
-                }
-
-                if (_pageContexts.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId))
-                {
-                    _pageContexts.Remove(_activeInnerStoryboardPageInfo.PageUniqueId);
-                }
-
-                //todo maybe add isShared flag?
-                if (_activeInnerStoryboardPageInfo.IsStartPage && _startPageContexts.ContainsKey(_activeInnerStoryboardPageInfo.PageUniqueId))
-                {
-                    _pageContexts[_activeInnerStoryboardPageInfo.PageUniqueId] =
-                        _startPageContexts[_activeInnerStoryboardPageInfo.PageUniqueId];
-                }
-
-
-                // already have been added
-                await OpenPageAsync(lastPageFromStoryboard, addToJournal: false).ConfigureAwait(true);
-            });
+            return lastPageFromStoryboard;
         }
 
         public bool CanGoBack()

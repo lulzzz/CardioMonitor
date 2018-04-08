@@ -63,6 +63,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
                 _selectedPatient = value;
                 RisePropertyChanged(nameof(SelectedPatient));
+                RisePropertyChanged(nameof(StartSessionCommand));
             }
         }
 
@@ -78,6 +79,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 if (Equals(_maxAngleX, value)) return;
                 _maxAngleX = value;
                 RisePropertyChanged(nameof(MaxAngleX));
+                RisePropertyChanged(nameof(StartSessionCommand));
             }
 
         }
@@ -94,6 +96,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 if (Equals(_cyclesCount, value)) return;
                 _cyclesCount = value;
                 RisePropertyChanged(nameof(CyclesCount));
+                RisePropertyChanged(nameof(StartSessionCommand));
             }
 
         }
@@ -110,6 +113,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 if (Math.Abs(_movementFrequency - value) < Tolerance) return;
                 _movementFrequency = (double)Math.Round((Decimal)value, 3, MidpointRounding.AwayFromZero);
                 RisePropertyChanged(nameof(MovementFrequency));
+                RisePropertyChanged(nameof(StartSessionCommand));
             }
 
         }
@@ -126,6 +130,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 if (Equals(_isAutopumpingEnabled, value)) return;
                 _isAutopumpingEnabled = value;
                 RisePropertyChanged(nameof(IsAutopumpingEnabled));
+                RisePropertyChanged(nameof(StartSessionCommand));
             }
 
         }
@@ -142,6 +147,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 if (value == _pumpingNumberOfAttemptsOnStartAndFinish) return;
                 _pumpingNumberOfAttemptsOnStartAndFinish = value;
                 RisePropertyChanged(nameof(PumpingNumberOfAttemptsOnStartAndFinish));
+                RisePropertyChanged(nameof(StartSessionCommand));
             }
         }
         private short _pumpingNumberOfAttemptsOnStartAndFinish;
@@ -157,6 +163,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 if (value == _pumpingNumberOfAttemptsOnProcessing) return;
                 _pumpingNumberOfAttemptsOnProcessing = value;
                 RisePropertyChanged(nameof(PumpingNumberOfAttemptsOnProcessing));
+                RisePropertyChanged(nameof(StartSessionCommand));
             }
         }
         private short _pumpingNumberOfAttemptsOnProcessing;
@@ -376,15 +383,15 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public event Func<object, TransitionRequest, Task> PageTransitionRequested;
 
         #endregion
+
         #region Validation
 
         public string this[string columnName]
         {
             get
             {
-                if (String.IsNullOrEmpty(columnName) || columnName == nameof(SelectedPatient) && SelectedPatient == null)
+                if ((String.IsNullOrEmpty(columnName) || columnName == nameof(SelectedPatient)) && SelectedPatient == null)
                 {
-                    IsValid = false;
                     return "Нужно выбрать пациента";
                 }
 
@@ -393,7 +400,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     var result = _sessionParamsValidator.IsMaxXAngleValid(MaxAngleX);
                     if (!result)
                     {
-                        IsValid = false;
                         return $"Нужно указать максимальный угол по оси X в диапазоне [{SessionParamsConstants.MinValueMaxXAngle}; " +
                                $"{SessionParamsConstants.MaxValueMaxXAngle}]";
                     }
@@ -403,7 +409,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     var result = _sessionParamsValidator.IsCyclesCountValid(CyclesCount);
                     if (!result)
                     {
-                        IsValid = false;
                         return $"Нужно указать количество повторений в диапазоне [{SessionParamsConstants.MinCyclesCount}; " +
                                $"{SessionParamsConstants.MaxCyclesCount}]";
                     }
@@ -413,7 +418,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     var result = _sessionParamsValidator.IsMovementFrequencyValid((float)MovementFrequency);
                     if (!result)
                     {
-                        IsValid = false;
                         return $"Нужно указать частоту в диапазоне [{SessionParamsConstants.MinMovementFrequency}; " +
                                $"{SessionParamsConstants.MaxMovementFrequency}]";
                     }
@@ -423,7 +427,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     var result = _sessionParamsValidator.IsPumpingNumberOfAttemptsOnStartAndFinishValid(PumpingNumberOfAttemptsOnStartAndFinish);
                     if (!result)
                     {
-                        IsValid = false;
                         return $"Нужно указать число в диапазоне [{SessionParamsConstants.MinPumpingNumberOfAttemptsOnStartAndFinish}; " +
                                $"{SessionParamsConstants.MaxPumpingNumberOfAttemptsOnStartAndFinish}]";
                     }
@@ -433,28 +436,17 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     var result = _sessionParamsValidator.IsPumpingNumberOfAttemptsOnProcessing(PumpingNumberOfAttemptsOnProcessing);
                     if (!result)
                     {
-                        IsValid = false;
                         return $"Нужно указать число в диапазоне [{SessionParamsConstants.MinPumpingNumberOfAttemptsOnProcessing}; " +
                                $"{SessionParamsConstants.MaxPumpingNumberOfAttemptsOnProcessing}]";
                     }
                 }
-                IsValid = true;
                 return null;
             }
         }
 
         public string Error => String.Empty;
 
-        public bool IsValid
-        {
-            get => _isValid;
-            set
-            {
-                _isValid = value;
-                RisePropertyChanged(nameof(IsValid));
-                RisePropertyChanged(nameof(StartSessionCommand));
-            }
-        }
+        public bool IsValid => String.IsNullOrEmpty(this[String.Empty]);
 
         #endregion
     }

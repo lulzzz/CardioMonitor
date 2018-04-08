@@ -84,6 +84,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     _lastName = value;
                     RisePropertyChanged(nameof(LastName));
                     IsSaved = false;
+                    RisePropertyChanged(nameof(SaveCommand));
                 }
             }
         }
@@ -98,6 +99,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     _firstName = value;
                     RisePropertyChanged(nameof(FirstName));
                     IsSaved = false;
+                    RisePropertyChanged(nameof(SaveCommand));
                 }
             }
         }
@@ -111,6 +113,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 _patronymicName = value;
                 RisePropertyChanged(nameof(PatronymicName));
                 IsSaved = false;
+                RisePropertyChanged(nameof(SaveCommand));
             }
         }
 
@@ -121,7 +124,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             {
                     _birthDate = value;
                     RisePropertyChanged(nameof(BirthDate));
-                    IsSaved = false;
+                IsSaved = false;
+                RisePropertyChanged(nameof(SaveCommand));
 
             }
         }
@@ -203,7 +207,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
                 IsSaved = true;
 
-                await PageBackRequested.InvokeAsync(this).ConfigureAwait(true);
+                await PageCompleted.InvokeAsync(this).ConfigureAwait(true);
             }
             catch (ArgumentNullException ex)
             {
@@ -247,9 +251,16 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             return Task.CompletedTask;
         }
 
-        public Task<bool> CanLeaveAsync()
+        public async Task<bool> CanLeaveAsync()
         {
-            return Task.FromResult(true);
+            if (!IsSaved)
+            {
+                var result = await MessageHelper.Instance
+                    .ShowMessageAsync("Данные будут потеряны. Вы уверены?", "Cardio Monitor", MessageDialogStyle.AffirmativeAndNegative)
+                    .ConfigureAwait(true);
+                return result == MessageDialogResult.Affirmative;
+            }
+            return true;
         }
 
         public Task LeaveAsync()
@@ -308,7 +319,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 {
                     if (String.IsNullOrEmpty(LastName))
                     {
-                        IsValid = false;
                         return "Необходимо указать фамилию пациента";
                     }
                 }
@@ -316,7 +326,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 {
                     if (String.IsNullOrEmpty(FirstName))
                     {
-                        IsValid = false;
                         return "Необходимо указать имя пациента";
                     }
                 }
@@ -324,7 +333,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 {
                     if (String.IsNullOrEmpty(PatronymicName))
                     {
-                        IsValid = false;
                         return "Необходимо указать отчетсво пациента";
                     }
                 }
@@ -332,28 +340,16 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 {
                     if (!BirthDate.HasValue)
                     {
-                        IsValid = false;
                         return "Необходимо указать дату рождения пациента";
                     }
                 }
-
-                IsValid = true;
+                
                 return String.Empty;
             }
         }
 
-        public bool IsValid
-        {
-            get => _isValid;
-            set
-            {
-                _isValid = value;
-                RisePropertyChanged(nameof(IsValid));
-                RisePropertyChanged(nameof(SaveCommand));
-            }
-        }
-        private bool _isValid;
-
+        public bool IsValid => String.IsNullOrEmpty(this[String.Empty]);
+ 
         public string Error  =>String.Empty;
         
 

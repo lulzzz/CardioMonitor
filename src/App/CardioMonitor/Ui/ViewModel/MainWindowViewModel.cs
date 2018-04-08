@@ -165,7 +165,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 viewModel: typeof(SessionDataViewModel),
                 isStartPage: false);
 
-            patientsStoryboard.RegisterTransition(PageIds.PatientPageId, PageIds.PatientsPageId, PageTransitionTrigger.Back);
+            patientsStoryboard.RegisterTransition(PageIds.PatientPageId, PageIds.PatientsPageId, PageTransitionTrigger.Completed);
             patientsStoryboard.RegisterTransition(PageIds.PatientSessionsPageId, PageIds.PatientsPageId, PageTransitionTrigger.Back);
 
 
