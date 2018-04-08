@@ -4,9 +4,9 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
-using Scout.Utils.EventBus.Contracts;
+using Markeli.Utils.EventBus.Contracts;
 
-namespace Scout.Utils.EventBus
+namespace Markeli.Utils.EventBus.Local
 {
     /// <summary>
     /// Локальная для сервера шина событий
@@ -31,8 +31,7 @@ namespace Scout.Utils.EventBus
 
         public void Publish<TEvent>(TEvent @event) where TEvent : IEvent
         {
-            object subject;
-            if (_subjects.TryGetValue(typeof(TEvent), out subject))
+            if (_subjects.TryGetValue(typeof(TEvent), out var subject))
             {
                 ((ISubject<TEvent>)subject).OnNext(@event);
             }

@@ -1,4 +1,4 @@
-﻿namespace Scout.Utils.EventBus.Contracts
+﻿namespace Markeli.Utils.EventBus.Contracts
 {
     /// <summary>
     /// Локальная для сервера шина событий

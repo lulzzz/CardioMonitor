@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Scout.Utils.EventBus.Contracts
+namespace Markeli.Utils.EventBus.Contracts
 {
     /// <summary>
     /// Шина событий

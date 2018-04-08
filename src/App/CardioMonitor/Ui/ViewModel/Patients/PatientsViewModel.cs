@@ -3,6 +3,8 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.EventHandlers.Patients;
+using CardioMonitor.Events.Patients;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
@@ -10,17 +12,29 @@ using CardioMonitor.Ui.ViewModel.Sessions;
 using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
+using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
 {
     public class PatientsViewModel : Notifier, IStoryboardPageViewModel
     {
+        #region  Events
+        
+        private readonly IEventBus _eventBus;
+        private readonly PatientAddedEventHandler _patientAddedEventHandler;
+        private readonly PatientChangedEventHandler _patientChangedEventHandler;
+
+        private bool _isPatientListChanged;
+
+        #endregion
+
+
         private readonly IPatientsService _patientsService;
         [NotNull] private readonly ILogger _logger;
         private int _seletedPatientIndex;
         private Patient _selectePatient;
-        private ObservableCollection<Patient> _patients; 
+        private ObservableCollection<Patient> _patients;
 
         private ICommand _addNewPatientCommand;
         private ICommand _deletePatientCommand;
@@ -158,10 +172,21 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public PatientsViewModel(
             IPatientsService patientsService,
-            [NotNull] ILogger logger)
+            [NotNull] ILogger logger,
+            [NotNull] IEventBus eventBus,
+            [NotNull] PatientAddedEventHandler patientAddedEventHandler,
+            [NotNull] PatientChangedEventHandler patientChangedEventHandler)
         {
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+            _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+            _patientAddedEventHandler = patientAddedEventHandler ?? throw new ArgumentNullException(nameof(patientAddedEventHandler));
+            _patientChangedEventHandler = patientChangedEventHandler ?? throw new ArgumentNullException(nameof(patientChangedEventHandler));
+            _patientAddedEventHandler.PatientAdded += (sender, i) => _isPatientListChanged = true;
+            _patientChangedEventHandler.PatientChanged += (sender, i) => _isPatientListChanged = true;
+
+            _isPatientListChanged = false;
 
             Patients = new ObservableCollection<Patient>();
         }
@@ -195,13 +220,17 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
             try
             {
+                var deletedPatienId = SelectedPatient.Id;
                 IsBusy = true;
                 BusyMessage = "Удаление пациента...";
                 await _patientsService
-                    .DeleteAsync(SelectedPatient.Id)
+                    .DeleteAsync(deletedPatienId)
                     .ConfigureAwait(true);
                 Patients.Remove(SelectedPatient);
                 SelectedPatient = null;
+                await _eventBus
+                    .PublishAsync(new PatientDeletedEvent(deletedPatienId))
+                    .ConfigureAwait(true);
             }
             catch (Exception ex)
             {
@@ -247,6 +276,10 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public void Dispose()
         {
+            _patientAddedEventHandler?.Unsubscribe();
+            _patientChangedEventHandler?.Unsubscribe();
+            _patientAddedEventHandler?.Dispose();
+            _patientChangedEventHandler?.Dispose();
         }
 
         private async Task UpdatePatientsSafeAsync()
@@ -262,7 +295,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 Patients = patients != null
                     ? new ObservableCollection<Patient>(patients)
                     : new ObservableCollection<Patient>();
-
+                _isPatientListChanged = false;
             }
             catch (Exception ex)
             {
@@ -284,6 +317,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public Task OpenAsync(IStoryboardPageContext context)
         {
+            _patientAddedEventHandler.Subscribe();
+            _patientChangedEventHandler.Subscribe();
             Task.Factory.StartNew(async () => await UpdatePatientsSafeAsync().ConfigureAwait(false));
             return Task.CompletedTask;
         }
@@ -300,6 +335,10 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public Task ReturnAsync(IStoryboardPageContext context)
         {
+            if (_isPatientListChanged)
+            {
+                Task.Factory.StartNew(async () => await UpdatePatientsSafeAsync().ConfigureAwait(false));
+            }
             return Task.CompletedTask;
         }
 

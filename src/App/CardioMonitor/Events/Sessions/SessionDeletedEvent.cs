@@ -1,8 +1,8 @@
-﻿using Enexure.MicroBus;
+﻿
 
-namespace CardioMonitor.Events.Patients
+namespace CardioMonitor.Events.Sessions
 {
-    public class SessionDeletedEvent : IEvent
+    public class SessionDeletedEvent 
     {
         public SessionDeletedEvent(int sessionId)
         {

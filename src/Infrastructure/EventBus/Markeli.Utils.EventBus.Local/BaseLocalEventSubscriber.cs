@@ -1,7 +1,7 @@
 using System;
-using Scout.Utils.EventBus.Contracts;
+using Markeli.Utils.EventBus.Contracts;
 
-namespace Scout.Utils.EventBus
+namespace Markeli.Utils.EventBus.Local
 {
    
     /// <summary>

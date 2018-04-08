@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.SessionProcessing;
+using CardioMonitor.EventHandlers.Patients;
+using CardioMonitor.Events.Patients;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using Markeli.Storyboards;
+using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
@@ -17,6 +20,17 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     {
         private readonly float Tolerance = 1e-4f;
 
+        #region Events
+        
+        private readonly IEventBus _eventBus;
+        private readonly PatientAddedEventHandler _patientAddedEventHandler;
+        private readonly PatientChangedEventHandler _patientChangedEventHandler;
+        private readonly PatientDeletedEventHandler _patientDeletedEventHandler;
+
+        private bool _isPatienListChanged;
+
+        #endregion
+
         private readonly ISessionParamsValidator _sessionParamsValidator;
         private readonly IPatientsService _patientsService;
         private readonly ILogger _logger;
@@ -24,7 +38,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private bool _isValid;
 
         private int? _previouslySelectedPatientIdFromContext;
-
 
         public IReadOnlyList<PatientFullName> Patients
         {
@@ -218,15 +231,36 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public SessionProcessingInitViewModel(
             [NotNull] IPatientsService patientsService,
             [NotNull] ILogger logger,
-            [NotNull] ISessionParamsValidator sessionParamsValidator)
+            [NotNull] ISessionParamsValidator sessionParamsValidator,
+            [NotNull] IEventBus eventBus,
+            [NotNull] PatientAddedEventHandler patientAddedEventHandler,
+            [NotNull] PatientChangedEventHandler patientChangedEventHandler,
+            [NotNull] PatientDeletedEventHandler patientDeletedEvent)
         {
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _sessionParamsValidator = sessionParamsValidator ?? throw new ArgumentNullException(nameof(sessionParamsValidator));
+            _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+            _patientAddedEventHandler = patientAddedEventHandler ?? throw new ArgumentNullException(nameof(patientAddedEventHandler));
+            _patientChangedEventHandler = patientChangedEventHandler ?? throw new ArgumentNullException(nameof(patientChangedEventHandler));
+            _patientDeletedEventHandler = patientDeletedEvent ?? throw new ArgumentNullException(nameof(patientDeletedEvent));
+
+            _patientAddedEventHandler.PatientAdded += (sender, args) => _isPatienListChanged = true;
+            _patientChangedEventHandler.PatientChanged += (sender, args) => _isPatienListChanged = true;
+            _patientDeletedEventHandler.PatientDeleted += (sender, args) => _isPatienListChanged = true;
+
+            _isPatienListChanged = true;
         }
 
         public void Dispose()
         {
+            _patientAddedEventHandler?.Unsubscribe();
+            _patientChangedEventHandler?.Unsubscribe();
+            _patientDeletedEventHandler?.Unsubscribe();
+
+            _patientAddedEventHandler?.Dispose();
+            _patientChangedEventHandler?.Dispose();
+            _patientDeletedEventHandler?.Dispose();
         }
 
         private async Task StartSessionAsync()
@@ -248,7 +282,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             if (!(context is SessionProcessingInitPageContext pageContext)) throw new ArgumentException("Incorrect argument");
             SetDefaultValues();
-            if (_previouslySelectedPatientIdFromContext == pageContext.PatientId && Patients != null) return Task.CompletedTask;
+            if (_previouslySelectedPatientIdFromContext == pageContext.PatientId 
+                && Patients != null
+                && !_isPatienListChanged) return Task.CompletedTask;
             var temp = this[String.Empty];
             return LoadPatientsAsync(pageContext.PatientId);
         }
@@ -279,6 +315,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 }
 
                 _previouslySelectedPatientIdFromContext = selectedPatientId;
+                _isPatienListChanged = false;
             }
             catch (Exception e)
             {
@@ -299,6 +336,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task OpenAsync(IStoryboardPageContext context)
         {
+            _patientAddedEventHandler.Subscribe();
+            _patientChangedEventHandler.Subscribe();
+            _patientDeletedEventHandler.Subscribe();
+
             Task.Factory.StartNew(async () => await InitPageAsync(context).ConfigureAwait(false)).ConfigureAwait(false);
             return Task.CompletedTask;
         }

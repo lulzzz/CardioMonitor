@@ -6,6 +6,7 @@ using CardioMonitor.BLL.CoreServices.Sessions;
 using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.Data.Ef.Context;
 using CardioMonitor.Devices;
+using CardioMonitor.EventHandlers.Patients;
 using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Settings;
@@ -16,6 +17,8 @@ using CardioMonitor.Ui.ViewModel.Patients;
 using CardioMonitor.Ui.ViewModel.Sessions;
 using CardioMonitor.Ui.ViewModel.Settings;
 using Markeli.Storyboards;
+using Markeli.Utils.EventBus.Contracts;
+using Markeli.Utils.EventBus.Local;
 using Markeli.Utils.Logging;
 using Markeli.Utils.Logging.NLog;
 using SimpleInjector;
@@ -47,7 +50,8 @@ namespace CardioMonitor
             RegisterViewModels(container);
             RegisterDevices(container);
             RegisterServices(container);
-
+            RegisterEventBus(container);
+            RegisterPatientEventsHandlers(container);
             // throw exception, incorrect seleted lifycycles for disposable objects
             // container.Verify();
 
@@ -60,7 +64,7 @@ namespace CardioMonitor
             container.Register<ICardioMonitorContextFactory>(() => new CardioMonitorContextFactory("CardioMonitorContext"), Lifestyle.Singleton);
 
             var settings = GetSettings();
-            container.RegisterSingleton(settings);
+            container.RegisterInstance(settings);
 
             container.Register<IStoryboardPageCreator, SimpleInjectorPageCreator>(Lifestyle.Transient);
             container.Register<StoryboardsNavigationService>(Lifestyle.Singleton);
@@ -78,7 +82,7 @@ namespace CardioMonitor
             var configPath = Path.Combine(Directory.GetCurrentDirectory(), NLogConfigName);
             var logFactory = new NLoggerFactory(configPath);
 
-            container.RegisterSingleton<ILoggerFactory>(logFactory);
+            container.RegisterInstance<ILoggerFactory>(logFactory);
             container.Register(() => logFactory.CreateLogger(LogNames.MainLog));
         }
 
@@ -108,5 +112,16 @@ namespace CardioMonitor
             container.RegisterSingleton<ISessionParamsValidator, SessionParamsValidator>();
         }
 
+        private static void RegisterEventBus(Container container)
+        {
+            container.RegisterSingleton<IEventBus, LocalEventBus>();
+        }
+
+        private static void RegisterPatientEventsHandlers(Container container)
+        {
+            container.Register<PatientAddedEventHandler>();
+            container.Register<PatientChangedEventHandler>();
+            container.Register<PatientDeletedEventHandler>();
+        }
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace CardioMonitor.Events.Settings
+﻿
+
+namespace CardioMonitor.Events.Settings
 {
-    public class CardioMonitorControllerAddedEvent
+    public class CardioMonitorControllerAddedEvent 
     {
         
     }

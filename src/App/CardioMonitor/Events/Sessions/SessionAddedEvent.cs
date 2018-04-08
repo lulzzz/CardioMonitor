@@ -1,24 +1,14 @@
-﻿using Enexure.MicroBus;
+﻿
 
-namespace CardioMonitor.Events.Patients
+namespace CardioMonitor.Events.Sessions
 {
-    public class PatientAddedEvent  : IEvent
+    public class SessionAddedEvent  
     {
-        public PatientAddedEvent(int patientId)
+        public SessionAddedEvent(int sessionId)
         {
-            PatientId = patientId;
+            SessionId = sessionId;
         }
 
-        public int PatientId { get; }
-    }
-
-    public class PatientDeletedEvent : IEvent
-    {
-        public PatientDeletedEvent(int patientId)
-        {
-            PatientId = patientId;
-        }
-
-        public int PatientId { get; }
+        public int SessionId { get; }
     }
 }

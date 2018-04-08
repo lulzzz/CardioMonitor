@@ -2,11 +2,14 @@
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.Events.Patients;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
+using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
+using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
@@ -22,13 +25,15 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         private int _id;
         private DateTime? _birthDate;
         private ICommand _saveCommand;
+        private readonly IEventBus _eventBus;
 
         public PatientViewModel(
             ILogger logger, 
-            IPatientsService patientsService)
+            IPatientsService patientsService, [NotNull] IEventBus eventBus)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
+            _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
         }
 
         public EventHandler MoveBackwardEvent { get; set; }
@@ -174,18 +179,24 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 switch (AccessMode)
                 {
                     case AccessMode.Create:
+                        operationName = "создании нового";
+                        BusyMessage = "Создание нового пользователя...";
                         await _patientsService
                             .AddAsync(Patient)
                             .ConfigureAwait(false);
-                        operationName = "создании нового";
-                        BusyMessage = "Создание нового пользователя...";
+                        await _eventBus
+                            .PublishAsync(new PatientAddedEvent())
+                            .ConfigureAwait(true);
                         break;
                     case AccessMode.Edit:
+                        operationName = "редактировании";
+                        BusyMessage = "Редактирование нового пользователя...";
                         await _patientsService
                             .EditAsync(Patient)
                             .ConfigureAwait(false);
-                        operationName = "редактировании";
-                        BusyMessage = "Редактирование нового пользователя...";
+                        await _eventBus
+                            .PublishAsync(new PatientChangedEvent(Patient.Id))
+                            .ConfigureAwait(true);
                         break;
                 }
 

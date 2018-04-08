@@ -79,15 +79,6 @@
     <Reference Include="ControlzEx, Version=3.0.2.4, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\packages\ControlzEx.3.0.2.4\lib\net45\ControlzEx.dll</HintPath>
     </Reference>
-    <Reference Include="Enexure.MicroBus, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Enexure.MicroBus.3.6.0\lib\net451\Enexure.MicroBus.dll</HintPath>
-    </Reference>
-    <Reference Include="Enexure.MicroBus.InfrastructureContracts, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Enexure.MicroBus.InfrastructureContracts.3.6.0\lib\net451\Enexure.MicroBus.InfrastructureContracts.dll</HintPath>
-    </Reference>
-    <Reference Include="Enexure.MicroBus.MessageContracts, Version=3.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Enexure.MicroBus.MessageContracts.3.2.0\lib\net40\Enexure.MicroBus.MessageContracts.dll</HintPath>
-    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -140,6 +131,15 @@
       <HintPath>..\..\packages\System.Data.SqlClient.4.4.3\lib\net461\System.Data.SqlClient.dll</HintPath>
     </Reference>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Reactive.Core, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Reactive.Core.3.1.1\lib\net46\System.Reactive.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Interfaces, Version=3.0.1000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Reactive.Interfaces.3.1.1\lib\net45\System.Reactive.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive.Linq, Version=3.0.3000.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Reactive.Linq.3.1.1\lib\net46\System.Reactive.Linq.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\ControlzEx.3.0.2.4\lib\net45\System.Windows.Interactivity.dll</HintPath>
@@ -165,7 +165,22 @@
     </Compile>
     <Compile Include="Devices\DeviceControllerFactory.cs" />
     <Compile Include="Devices\IDeviceControllerFactory.cs" />
+    <Compile Include="EventHandlers\Patients\PatientAddedEventHandler.cs" />
+    <Compile Include="EventHandlers\Patients\PatientChangedEventHandler.cs" />
+    <Compile Include="EventHandlers\Patients\PatientDeletedEventHandler.cs" />
+    <Compile Include="Events\Sessions\SessionAddedEvent.cs" />
     <Compile Include="Events\Patients\PatientAddedEvent.cs" />
+    <Compile Include="Events\Patients\PatientChangedEvent.cs" />
+    <Compile Include="Events\Patients\PatientDeletedEvent.cs" />
+    <Compile Include="Events\Sessions\SessionDeletedEvent.cs" />
+    <Compile Include="Events\Settings\CardioMonitorControllerAddedEvent.cs" />
+    <Compile Include="Events\Settings\CardioMonitorControllerChangedEvent.cs" />
+    <Compile Include="Events\Settings\CardioMonitorControllerDeletedEvent.cs" />
+    <Compile Include="Events\Settings\DbConnectionParamsChanged.cs" />
+    <Compile Include="Events\Settings\DeviceControllerAddedEvent.cs" />
+    <Compile Include="Events\Settings\DeviceControllerChangedEvent.cs" />
+    <Compile Include="Events\Settings\DeviceControllerDeletedEvent.cs" />
+    <Compile Include="Events\Settings\FileStorageLocationChanged.cs" />
     <Compile Include="Files\IFilesManager.cs" />
     <Compile Include="LogNames.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
@@ -316,8 +331,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Events\Sessions\" />
-    <Folder Include="Events\Settings\" />
     <Folder Include="Ui\ViewModel\Ecg\" />
     <Folder Include="Ui\View\EcgController\" />
   </ItemGroup>
@@ -386,6 +399,14 @@
     <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj">
       <Project>{60422AEB-3748-4B0F-928E-689B1378A5EE}</Project>
       <Name>CardioMonitor.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Infrastructure\EventBus\Markeli.Utils.EventBus.Contracts\Markeli.Utils.EventBus.Contracts.csproj">
+      <Project>{b3b0a272-b23b-4880-a481-87c6b8db27ed}</Project>
+      <Name>Markeli.Utils.EventBus.Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Infrastructure\EventBus\Markeli.Utils.EventBus.Local\Markeli.Utils.EventBus.Local.csproj">
+      <Project>{77604705-a316-45da-a11f-b6a91751ae29}</Project>
+      <Name>Markeli.Utils.EventBus.Local</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Infrastructure\Logging\Scout.Utils.Logging.NLog\Markeli.Utils.Logging.NLog.csproj">
       <Project>{9370fdf4-0a95-4113-ac2b-93ed0c710a59}</Project>
