@@ -130,17 +130,19 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// </summary>
         /// <returns></returns>
         Task<TimeSpan> GetElapsedTimeAsync();
-        
+
         /// <summary>
         /// Возвращает признак начала работы кровати
         /// </summary>
         /// <returns></returns>
+        [Obsolete]
         Task<StartFlag> GetStartFlagAsync();
 
         /// <summary>
         /// Возвращает флаг реверсного движения кровати
         /// </summary>
         /// <returns></returns>
+        [Obsolete]
         Task<ReverseFlag> GetReverseFlagAsync();
         
         /// <summary>
