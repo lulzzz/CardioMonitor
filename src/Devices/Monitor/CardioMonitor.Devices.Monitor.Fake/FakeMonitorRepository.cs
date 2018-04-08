@@ -1,124 +1,73 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 
 namespace CardioMonitor.Devices.Monitor.Fake
 {
-    [Obsolete("Удалить позже")]
-    public class FakeMonitorRepository //: IMonitorController
+    public class FakeMonitorRepository : IMonitorController
     {
+        private FakeCardioMonitorInitParams _initParams;
+        private Random _randomizer;
 
-        private readonly List<PatientParams> _patientParams;
-        
-        /// <summary>
-        /// Индекс для эмуляции доступа к данным
-        /// </summary>
-        /// <remarks>Чтобы можно было бесконечно считывать, не выходя за границы</remarks>
-        private int Index
+        public void Dispose()
         {
-            get
-            {
-                if (_index + 1 > _patientParams.Count)
-                {
-                    _index = 0;
-                }
-                return _index++;
-            }
-        }
-        private int _index;
-
-        public FakeMonitorRepository()
-        { //заполняем псведоданнымиы
-            _patientParams = new List<PatientParams>
-            {
-                new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 0,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                },
-                new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = (float)10.5,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                },
-                new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 21,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                },
-                new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 30,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                },
-                new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 21,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                },
-                new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = (float)10.5,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                },
-                new PatientParams
-                {
-                    AverageArterialPressure = 100,
-                    DiastolicArterialPressure = 80,
-                    HeartRate = 70,
-                    InclinationAngle = 0,
-                    RepsirationRate = 40,
-                    Spo2 = 40,
-                    SystolicArterialPressure = 120
-                }
-            };
         }
 
-        public Task<bool> PumpCuffAsync()
+        public bool IsConnected { get; }
+        public void Init(IMonitorControllerInitParams initParams)
         {
-            throw new System.NotImplementedException();
+            if (!(initParams is FakeCardioMonitorInitParams temp)) throw new ArgumentException();
+
+            _initParams = temp;
         }
 
-        public Task<PatientParams> GetPatientParamsAsync()
+        public Task ConnectAsync()
         {
-            return Task.Factory.StartNew(() => _patientParams[Index]);
+            return Task.Delay(_initParams.DefaultDelay);
         }
 
-        public Task<PatientPressureParams> GetPatientPressureParamsAsync()
+        public Task DisconnectAsync()
         {
-            throw new System.NotImplementedException();
+            return Task.Delay(_initParams.DefaultDelay);
         }
+
+        public Task PumpCuffAsync()
+        {
+            return Task.Delay(_initParams.PumpingDelay);
+        }
+
+        public async Task<PatientCommonParams> GetPatientCommonParamsAsync()
+        {
+            await Task.Delay(_initParams.DefaultDelay);
+            return new PatientCommonParams(
+                (short)_randomizer.Next(50,120), 
+                (short)_randomizer.Next(0, 100), 
+                (short)_randomizer.Next(0, 100));
+        }
+
+        public async Task<PatientPressureParams> GetPatientPressureParamsAsync()
+        {
+            await Task.Delay(_initParams.DefaultDelay);
+            return new PatientPressureParams(
+                (short)_randomizer.Next(50, 180),
+                (short)_randomizer.Next(50, 180),
+                (short)_randomizer.Next(50, 180));
+        }
+
+        public async Task<PatientEcgParams> GetPatientEcgParamsAsync(TimeSpan duration)
+        {
+            await Task.Delay(_initParams.DefaultDelay);
+            return new PatientEcgParams(new short[0]);
+        }
+    }
+
+    public class FakeCardioMonitorInitParams : IMonitorControllerInitParams
+    {
+        public TimeSpan UpdateDataPeriod { get; }
+        public TimeSpan Timeout { get; }
+
+        public TimeSpan DefaultDelay { get; set; }
+
+        public TimeSpan PumpingDelay { get; set; }
     }
 }
