@@ -48,6 +48,7 @@
     <Compile Include="MitarMonitorControlerInitParams.cs" />
     <Compile Include="MitarMonitorController.cs" />
     <Compile Include="MitarMonitorDataParser.cs" />
+    <Compile Include="MitarMonitorDeviceId.cs" />
     <Compile Include="MonitorTCPClient.cs" />
     <Compile Include="OldMonitorController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

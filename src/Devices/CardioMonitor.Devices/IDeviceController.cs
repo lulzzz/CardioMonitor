@@ -7,6 +7,7 @@ namespace CardioMonitor.Devices
     /// </summary>
     public interface IDeviceController : IDisposable
     {
-        
+        Guid DeviceId { get; }
+        Guid DeviceTypeId { get; }
     }
 }

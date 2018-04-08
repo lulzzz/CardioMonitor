@@ -412,5 +412,8 @@ namespace CardioMonitor.Devices.Monitor
         }
 
         #endregion
+
+        public Guid DeviceId => MitarMonitorDeviceId.DeviceId;
+        public Guid DeviceTypeId => MonitorDeviceTypeId.DeviceTypeId;
     }
 }

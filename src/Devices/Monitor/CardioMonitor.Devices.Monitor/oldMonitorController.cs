@@ -8,6 +8,7 @@ using CardioMonitor.Devices.Monitor.Infrastructure;
 
 namespace CardioMonitor.Devices.Monitor
 {
+    [Obsolete]
     public class OldMonitorController 
     {
         public Task<bool> PumpCuffAsync()

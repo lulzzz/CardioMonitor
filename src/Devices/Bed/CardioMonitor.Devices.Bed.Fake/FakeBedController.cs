@@ -215,6 +215,9 @@ namespace CardioMonitor.Devices.Bed.Fake
 
             return (float) (_initParams.MaxAngleX * cycleElapsedTime.Ticks / _cycleDuration.Ticks);
         }
+
+        public Guid DeviceId => FakeInversionTableDeviceId.DeviceId;
+        public Guid DeviceTypeId => InversionTableDeviceTypeId.DeviceTypeId;
     }
 
     public class FakeDeviceInitParams : IBedControllerInitParams

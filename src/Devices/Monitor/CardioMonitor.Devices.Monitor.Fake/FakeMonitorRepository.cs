@@ -59,6 +59,9 @@ namespace CardioMonitor.Devices.Monitor.Fake
             await Task.Delay(_initParams.DefaultDelay);
             return new PatientEcgParams(new short[0]);
         }
+
+        public Guid DeviceId => FakeMonitorDeviceId.DeviceId;
+        public Guid DeviceTypeId => MonitorDeviceTypeId.DeviceTypeId;
     }
 
     public class FakeCardioMonitorInitParams : IMonitorControllerInitParams

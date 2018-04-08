@@ -349,5 +349,8 @@ namespace CardioMonitor.Devices.Bed.UDP
             _workerController.CloseWorker(_syncWorker);
             _udpClient?.Dispose();
         }
+
+        public Guid DeviceId => InversionTableUpdDeviceId.DeviceId;
+        public Guid DeviceTypeId => InversionTableDeviceTypeId.DeviceTypeId;
     }
 }
