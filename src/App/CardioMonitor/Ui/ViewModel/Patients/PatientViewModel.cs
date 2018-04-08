@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
@@ -14,7 +15,7 @@ using Markeli.Utils.Logging;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
 {
-    public class PatientViewModel : Notifier, IStoryboardPageViewModel
+    public class PatientViewModel : Notifier, IStoryboardPageViewModel, IDataErrorInfo
     {
         private readonly ILogger _logger;
         private readonly IPatientsService _patientsService;
@@ -164,7 +165,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             {
                 return _saveCommand ?? (_saveCommand = new SimpleCommand
                 {
-                    CanExecuteDelegate = x => !IsSaved,
+                    CanExecuteDelegate = x => !IsSaved && IsValid,
                     ExecuteDelegate = async x => await Save().ConfigureAwait(true)
                 });
             }
@@ -258,6 +259,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public Task ReturnAsync(IStoryboardPageContext context)
         {
+            //validation
+            var temp = this[String.Empty];
             return Task.CompletedTask;
         }
 
@@ -292,6 +295,68 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         public event Func<object, Task> PageBackRequested;
 
         public event Func<object, TransitionRequest, Task> PageTransitionRequested;
+
+        #endregion
+
+        #region DataErrorInfo
+
+        public string this[string columnName]
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(columnName) || String.Equals(columnName, nameof(LastName)))
+                {
+                    if (String.IsNullOrEmpty(LastName))
+                    {
+                        IsValid = false;
+                        return "Необходимо указать фамилию пациента";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || String.Equals(columnName, nameof(FirstName)))
+                {
+                    if (String.IsNullOrEmpty(FirstName))
+                    {
+                        IsValid = false;
+                        return "Необходимо указать имя пациента";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || String.Equals(columnName, nameof(PatronymicName)))
+                {
+                    if (String.IsNullOrEmpty(PatronymicName))
+                    {
+                        IsValid = false;
+                        return "Необходимо указать отчетсво пациента";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || String.Equals(columnName, nameof(BirthDate)))
+                {
+                    if (!BirthDate.HasValue)
+                    {
+                        IsValid = false;
+                        return "Необходимо указать дату рождения пациента";
+                    }
+                }
+
+                IsValid = true;
+                return String.Empty;
+            }
+        }
+
+        public bool IsValid
+        {
+            get => _isValid;
+            set
+            {
+                _isValid = value;
+                RisePropertyChanged(nameof(IsValid));
+                RisePropertyChanged(nameof(SaveCommand));
+            }
+        }
+        private bool _isValid;
+
+        public string Error  =>String.Empty;
+        
+
 
         #endregion
 
