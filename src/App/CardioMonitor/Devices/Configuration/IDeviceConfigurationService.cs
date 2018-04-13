@@ -6,8 +6,10 @@ namespace CardioMonitor.Devices.Configuration
 {
     public interface IDeviceConfigurationService
     {
-        Task<ICollection<DeviceConfiguration>> GetAllDeviceConfigurationsAsync();
-        
+        Task<ICollection<DeviceConfiguration>> GetMonitorsConfigurationsAsync();
+
+        Task<ICollection<DeviceConfiguration>> GetInversionTablesConfigurationsAsync();
+
         Task<ICollection<DeviceInfo>> GetRegisterdMonitorsAsync();
 
         Task<ICollection<DeviceInfo>> GetRegisteredInversionTablesAsync();
