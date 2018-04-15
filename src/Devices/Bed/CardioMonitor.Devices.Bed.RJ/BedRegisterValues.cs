@@ -21,42 +21,14 @@ namespace CardioMonitor.Devices.Bed.UDP
         //todo а нужно ли нам это сейчас? - конкретно сейчас нет, но может пригодится чуть позже 
         public int BedID { get; set; }
 
-        /// <summary>
-        /// Общий счетчик всех запущенных сеансов
-        /// </summary>
-        //todo а нужно ли нам это сейчас?
-        public int BedFullSessionsCount { get; set; }
-
-        /// <summary>
-        /// Период сеансов между сервисным обслуживанием
-        /// </summary>
-        //todo а нужно ли нам это сейчас?
-        public int BedSessionServicePeriod { get; set; }
-
+        
         /// <summary>
         /// Общее время работы кровати
         /// </summary>
         //todo а нужно ли нам это сейчас?
         public int BedFullWorkingTime { get; set; }
 
-        /// <summary>
-        /// Период времени между сервисным обслуживанием
-        /// </summary>
-        //todo а нужно ли нам это сейчас?
-        public int BedTimeServicePeriod { get; set; }
-
-        /// <summary>
-        /// Максимальная скорость мотора по X-оси, degree/sec
-        /// </summary>
-        //todo а нужно ли нам это сейчас?
-        public int BedMaxSpeedX { get; set; }
-
-        /// <summary>
-        /// Максимальная скорость мотора по Y-оси, degree/sec
-        /// </summary>
-        //todo а нужно ли нам это сейчас?
-        public int BedMaxSpeedY { get; set; }
-
+       
         /// <summary>
         /// Статус сеанса. 0x0001 - подготовка к сеансу; 0x0000 - готов к запуску сеанса;
         ///  0x0002 - работа (сеанс запущен); 0x0005 -  неисправность (ошибка); 0x0003 - блокировка при старте с ПК
@@ -69,12 +41,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// todo напомнить уточнить необходимость отображения и списка ошибок
         public int BedError { get; set; }
 
-        /// <summary>
-        /// Код предупреждения
-        /// </summary>
-        /// todo по варнингам - вроде как пофиг, особо не используются
-        public int BedWarning { get; set; }
-
+       
         /// <summary>
         /// Блокирование кровати. Если 1, то старт сеанса происходит с ПК. Перед началом движения,
         ///  во время проверки давления неообходимо заблокировать кровать. Для исключения дублирующего запуска с кнопок.

@@ -150,8 +150,9 @@ namespace CardioMonitor.Devices.Bed.UDP
             //todo никакой обработки ошибок делать не надо
             await Task.Yield();
             //здесь короче запрос данных и их парсинг 
-            var message = new BedMessage(BedMessageEventType.ReadAll, 0 ); 
-            await _udpClient.SendAsync(message.GetAllRegisterMessage(), message.GetAllRegisterMessage().Length);
+            var message = new BedMessage(BedMessageEventType.ReadAll, 0 );
+            var getAllRegister = message.GetAllRegisterMessage();
+            await _udpClient.SendAsync(getAllRegister, getAllRegister.Length);
             var receiveMessage = await _udpClient.ReceiveAsync();
             _registerValues = message.SetAllRegisterValues(receiveMessage.Buffer);
         }

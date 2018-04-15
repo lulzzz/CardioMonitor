@@ -7,16 +7,24 @@ using System.Threading.Tasks;
 namespace CardioMonitor.Devices.Bed.UDP
 {
     /// <summary>
-    /// вычисляем контрольную сумму методом (todo вспомнить каким)
+    /// вычисляем контрольную сумму 
     /// </summary>
     public class BedMessageCRC16
     {
-        public static byte[] GetCRC16(byte[] inputMessage)
+        public static ushort GetCRC16(byte[] inputMessage)
         {
-            return null; //todo заглушка 
+            if (inputMessage == null) throw new ArgumentException();
+
+            ushort crc = 0xffff;
+
+            for (int i = 0; i < inputMessage.Length; i++)
+            {
+                crc = Compute(inputMessage[i], crc);
+            }
+            return crc; 
         }
 
-        private ushort CRC16_Compute(byte data, ushort seed)
+        private static ushort Compute(byte data, ushort seed)
         {
             for (byte bitsLeft = 8; bitsLeft > 0; bitsLeft--) {
                byte temp = (byte)((seed ^ data) & 0x01);
