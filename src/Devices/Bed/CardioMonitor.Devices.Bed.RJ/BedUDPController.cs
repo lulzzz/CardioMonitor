@@ -2,9 +2,11 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Bed.Infrastructure;
+using CardioMonitor.Infrastructure;
 using CardioMonitor.Infrastructure.Workers;
 using JetBrains.Annotations;
 
@@ -23,12 +25,11 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// NotNull помечено специально, чтобы анализатор не ругался. В каждом методе должны быть провеки методом <see cref="AssertInitParams"/>
         /// </remarks>
         [NotNull] 
-        private BedUdpControllerConfig _initParams;
+        private BedUdpControllerConfig _config;
 
         [CanBeNull]
         private UdpClient _udpClient;
-
-        #region Old
+        
 
         /// <summary>
         /// 
@@ -55,10 +56,8 @@ namespace CardioMonitor.Devices.Bed.UDP
             IsConnected = false;
             _lastExceptions = new ConcurrentQueue<Exception>();
         }
+      
        
-
-
-        #endregion
 
         #region Управление взаимодействием и обработка событий
 
@@ -73,7 +72,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         {
             if (initParams == null) throw new ArgumentNullException(nameof(initParams));
             var udpControllerInitParams = initParams as BedUdpControllerConfig;
-            _initParams = udpControllerInitParams ?? throw new InvalidOperationException($"Необходимо передать объект типа {typeof(BedUdpControllerConfig)}");
+            _config = udpControllerInitParams ?? throw new InvalidOperationException($"Необходимо передать объект типа {typeof(BedUdpControllerConfig)}");
         }
 
         public async Task ConnectAsync()
@@ -89,12 +88,15 @@ namespace CardioMonitor.Devices.Bed.UDP
                 {
                 }
                 _udpClient = new UdpClient();
-                _udpClient.Connect(_initParams.BedIPEndpoint);
+
+
+                var endPoint = IpEndPointParser.Parse(_config.BedIPEndpoint);
+                _udpClient.Connect(endPoint);
                 await UpdateRegistersValueAsync()
                     .ConfigureAwait(false);
                 await RiseEventOnCommandFromDeviceAsync()
                     .ConfigureAwait(false);
-                _syncWorker = _workerController.StartWorker(_initParams.UpdateDataPeriod, async () =>
+                _syncWorker = _workerController.StartWorker(_config.UpdateDataPeriod, async () =>
                 {
                     try
                     {
@@ -134,7 +136,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         
         private void AssertInitParams()
         {
-            if (_initParams == null)throw new InvalidOperationException($"Контроллер не инициализирован. Необходимо сначала вызвать метод {nameof(Init)}");
+            if (_config == null)throw new InvalidOperationException($"Контроллер не инициализирован. Необходимо сначала вызвать метод {nameof(Init)}");
         }
         
         /// <summary>
@@ -251,7 +253,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             RiseExceptions();
             AssertRegisterIsNull();
             await Task.Yield();
-            return  (short)_initParams.CyclesCount;
+            return  (short)_config.CyclesCount;
         }
 
         public async Task<short> GetCurrentCycleNumberAsync()

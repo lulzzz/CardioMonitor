@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Monitor.Infrastructure;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace CardioMonitor.Devices.Monitor.Fake
 {
-    public class FakeMonitorRepository : IMonitorController
+    public class FakeMonitorController : IMonitorController
     {
         private FakeCardioMonitorConfig _config;
         private Random _randomizer;
@@ -66,11 +68,28 @@ namespace CardioMonitor.Devices.Monitor.Fake
 
     public class FakeCardioMonitorConfig : IMonitorControllerConfig
     {
+        public FakeCardioMonitorConfig(
+            TimeSpan updateDataPeriod, 
+            TimeSpan timeout, 
+            TimeSpan defaultDelay, 
+            TimeSpan pumpingDelay)
+        {
+            UpdateDataPeriod = updateDataPeriod;
+            Timeout = timeout;
+            DefaultDelay = defaultDelay;
+            PumpingDelay = pumpingDelay;
+        }
+
+        [JsonProperty("UpdateDataPeriod")]
         public TimeSpan UpdateDataPeriod { get; }
+
+        [JsonProperty("Timeout")]
         public TimeSpan Timeout { get; }
 
-        public TimeSpan DefaultDelay { get; set; }
+        [JsonProperty("DefaultDelay")]
+        public TimeSpan DefaultDelay { get; }
 
-        public TimeSpan PumpingDelay { get; set; }
+        [JsonProperty("PumpingDelay")]
+        public TimeSpan PumpingDelay { get;  }
     }
 }

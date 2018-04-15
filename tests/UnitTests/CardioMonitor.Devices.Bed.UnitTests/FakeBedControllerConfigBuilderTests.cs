@@ -23,10 +23,17 @@ namespace CardioMonitor.Devices.Bed.UnitTests
                              $"\"{timeoutText}" +
                              "\"}";
 
+            var maxAngle = 1f;
+            short cyclesCount = 2;
+            var movementFrequency = 3f;
+
             var builder = new FakeBedControllerConfigBuilder();
 
-            var config = builder.Build(0, 0, 0, jsonConfig);
+            var config = builder.Build(maxAngle, cyclesCount, movementFrequency, jsonConfig);
 
+            Assert.Equal(maxAngle, config.MaxAngleX);
+            Assert.Equal(cyclesCount, config.CyclesCount);
+            Assert.Equal(movementFrequency, config.MovementFrequency);
             Assert.Equal(timeout, config.Timeout);
             Assert.Equal(updatePeriod, config.UpdateDataPeriod);
         }

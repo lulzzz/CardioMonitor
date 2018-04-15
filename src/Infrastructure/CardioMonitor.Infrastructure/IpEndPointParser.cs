@@ -4,9 +4,9 @@ using System.Net;
 
 namespace CardioMonitor.Infrastructure
 {
-    public class IpEndPointParser
+    public static class IpEndPointParser
     {
-        public IPEndPoint Parse(string endPoint)
+        public static IPEndPoint Parse(string endPoint)
         {
             var ep = endPoint.Split(':');
             if (ep.Length < 2) throw new FormatException("Invalid endpoint format");

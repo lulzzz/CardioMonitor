@@ -2,6 +2,7 @@
 using System.Net;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
 
 namespace CardioMonitor.Devices.Bed.UDP
 {
@@ -11,7 +12,7 @@ namespace CardioMonitor.Devices.Bed.UDP
     public class BedUdpControllerConfig : IBedControllerConfig
     {
         public BedUdpControllerConfig(
-            [NotNull] IPEndPoint bedIpEndpoint,
+            [NotNull] string bedIpEndpoint,
             TimeSpan updateDataPeriod,
             TimeSpan timeout,
             float maxAngleX, 
@@ -30,25 +31,31 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// Адрес, по которому можно подключиться к кровати
         /// </summary>
         [NotNull]
-        public IPEndPoint BedIPEndpoint { get; }
-        
+        [JsonProperty("BedIPEndpoint")]
+        public string BedIPEndpoint { get; }
+
         /// <summary>
         /// Таймаут операций
         /// </summary>
+        [JsonProperty("Timeout")]
         public TimeSpan Timeout { get; }
-        
+
         /// <inheritdoc />
+        [JsonProperty("MaxAngleX")]
         public float MaxAngleX { get; }
 
         /// <inheritdoc />
+        [JsonProperty("CyclesCount")]
         public short CyclesCount { get; }
 
         /// <inheritdoc />
+        [JsonProperty("MovementFrequency")]
         public float MovementFrequency { get; }
 
         /// <summary>
         /// Период обмена сообщениями с устройством
         /// </summary>
+        [JsonProperty("UpdateDataPeriod")]
         public TimeSpan UpdateDataPeriod { get; }
     }
 }
