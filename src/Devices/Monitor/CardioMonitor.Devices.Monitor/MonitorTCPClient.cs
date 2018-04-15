@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace CardioMonitor.Devices.Monitor
 {
+    [Obsolete("Нигде не используется.")]
     public class MonitorTCPClient
     {
         public delegate void ReceiveDataCallback();

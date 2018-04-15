@@ -1,6 +1,6 @@
 ﻿namespace CardioMonitor.Devices.Monitor.Infrastructure
 {
-    public interface IMonitorControllerConfigBuilder
+    public interface IMonitorControllerConfigBuilder : IDeviceControllerConfigBuilder
     {
         IMonitorControllerConfig Build(string jsonConfig);
     }

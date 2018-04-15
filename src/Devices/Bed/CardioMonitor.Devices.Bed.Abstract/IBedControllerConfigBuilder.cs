@@ -1,6 +1,6 @@
 ﻿namespace CardioMonitor.Devices.Bed.Infrastructure
 {
-    public interface IBedControllerConfigBuilder
+    public interface IBedControllerConfigBuilder : IDeviceControllerConfigBuilder
     {
         IBedControllerConfig Build(
             float maxAngleX,
