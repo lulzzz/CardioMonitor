@@ -30,7 +30,7 @@ namespace CardioMonitor.Devices.Monitor
         /// <remarks>
         /// NotNull помечено специально, чтобы анализатор не ругался. В каждом методе должны быть провеки методом <see cref="AssertInitParams"/>
         /// </remarks>
-        [NotNull] private MitarMonitorControlerInitParams _initParams;
+        [NotNull] private MitarMonitorControlerConfig _initParams;
 
         [NotNull] private readonly IWorkerController _workerController;
 
@@ -92,14 +92,14 @@ namespace CardioMonitor.Devices.Monitor
         public bool IsConnected { get; private set; }
 
 
-        public void Init(IMonitorControllerInitParams initParams)
+        public void Init(IMonitorControllerConfig initParams)
         {
             if (initParams == null) throw new ArgumentNullException(nameof(initParams));
 
-            var mitarInitParams = initParams as MitarMonitorControlerInitParams;
+            var mitarInitParams = initParams as MitarMonitorControlerConfig;
             _initParams = mitarInitParams ??
                           throw new ArgumentException(
-                              $"{nameof(initParams)} должен быть типа {typeof(MitarMonitorControlerInitParams)}");
+                              $"{nameof(initParams)} должен быть типа {typeof(MitarMonitorControlerConfig)}");
         }
 
         public async Task ConnectAsync()

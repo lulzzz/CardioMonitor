@@ -10,7 +10,7 @@ namespace CardioMonitor.Devices.Bed.Fake
     public class FakeBedController : IBedController
     {
         private readonly IWorkerController _workerController;
-        private FakeDeviceInitParams _initParams;
+        private FakeDeviceConfig _config;
         private Worker _worker;
         private const float MaxAngleX = 31.5f;
         private const short IterationsCountOnMaxAngleX = 40;
@@ -40,29 +40,29 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public bool IsConnected { get; private set; }
 
-        public void Init(IBedControllerInitParams initParams)
+        public void Init(IBedControllerConfig config)
         {
-            if (!(initParams is FakeDeviceInitParams localParms)) throw new ArgumentException();
+            if (!(config is FakeDeviceConfig localParms)) throw new ArgumentException();
 
-            _initParams = localParms;
+            _config = localParms;
             Init();
         }
 
         public Task ConnectAsync()
         {
             IsConnected = true;
-            _worker = _workerController.StartWorker(_initParams.UpdateDataPeriod, WorkMethod);
+            _worker = _workerController.StartWorker(_config.UpdateDataPeriod, WorkMethod);
             
-            return Task.Delay(_initParams.ConenctDelay);
+            return Task.Delay(_config.ConenctDelay);
         }
 
         private void Init()
         {
             _cycleDuration = GetCycleDuration();
-            _sessionDuration = TimeSpan.FromTicks(_cycleDuration.Ticks * _initParams.CyclesCount);
+            _sessionDuration = TimeSpan.FromTicks(_cycleDuration.Ticks * _config.CyclesCount);
             _iterationsCount = GetIterationsCount();
 
-            _checkPointsCount = (short)Math.Round(CheckPointsCountOnMaxAngleX * _initParams.MaxAngleX / MaxAngleX);
+            _checkPointsCount = (short)Math.Round(CheckPointsCountOnMaxAngleX * _config.MaxAngleX / MaxAngleX);
             _checkPointIterationNumber = new List<short>(_checkPointsCount);
 
             var iterationPerCheckPoint = _iterationsCount / _checkPointsCount;
@@ -79,35 +79,35 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         private TimeSpan GetCycleDuration()
         {
-            var ticks = (long)Math.Round(_initParams.CycleWithMaxAngleDuration.Ticks / MaxAngleX * _initParams.MaxAngleX);
+            var ticks = (long)Math.Round(_config.CycleWithMaxAngleDuration.Ticks / MaxAngleX * _config.MaxAngleX);
             return TimeSpan.FromTicks(ticks);
         }
 
         private short GetIterationsCount()
         {
-            return (short)Math.Round(IterationsCountOnMaxAngleX / MaxAngleX * _initParams.MaxAngleX);
+            return (short)Math.Round(IterationsCountOnMaxAngleX / MaxAngleX * _config.MaxAngleX);
         }
 
         private void WorkMethod()
         {
-            _elapsedTime += _initParams.UpdateDataPeriod;
+            _elapsedTime += _config.UpdateDataPeriod;
         }
 
         public Task DisconnectAsync()
         {
             IsConnected = false;
             _workerController.CloseWorker(_worker);
-            return Task.Delay(_initParams.DisconnectDelay);
+            return Task.Delay(_config.DisconnectDelay);
         }
 
         public Task ExecuteCommandAsync(BedControlCommand command)
         {
-            return Task.Delay(_initParams.DefaultDelay);
+            return Task.Delay(_config.DefaultDelay);
         }
 
         public async Task<TimeSpan> GetCycleDurationAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
+            await Task.Delay(_config.DefaultDelay);
 
             return _cycleDuration;
         }
@@ -115,26 +115,26 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public async Task<short> GetCyclesCountAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
-            return _initParams.CyclesCount;
+            await Task.Delay(_config.DefaultDelay);
+            return _config.CyclesCount;
         }
 
         public async Task<short> GetCurrentCycleNumberAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
+            await Task.Delay(_config.DefaultDelay);
             return (short)(Math.Round((double)_elapsedTime.Ticks / _cycleDuration.Ticks)+1);
         }
 
         public async Task<short> GetIterationsCountAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
+            await Task.Delay(_config.DefaultDelay);
             return _iterationsCount;
         }
 
 
         public async Task<short> GetCurrentIterationAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
+            await Task.Delay(_config.DefaultDelay);
             return GetCurrentIteration();
         }
 
@@ -152,7 +152,7 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public async Task<short> GetNextIterationNumberForPressureMeasuringAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
+            await Task.Delay(_config.DefaultDelay);
             var currentIteation = GetCurrentIteration();
             var temp = _checkPointIterationNumber.FirstOrDefault(x => x >= currentIteation);
             return temp == default(short)
@@ -162,7 +162,7 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public async Task<short> GetNextIterationNumberForCommonParamsMeasuringAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
+            await Task.Delay(_config.DefaultDelay);
             var currentIteation = GetCurrentIteration();
             var temp = _checkPointIterationNumber.FirstOrDefault(x => x >= currentIteation);
             return temp == default(short)
@@ -172,7 +172,7 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public async Task<short> GetNextIterationNumberForEcgMeasuringAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
+            await Task.Delay(_config.DefaultDelay);
             var currentIteation = GetCurrentIteration();
             var temp = _checkPointIterationNumber.FirstOrDefault(x => x >= currentIteation);
             return temp == default(short)
@@ -182,13 +182,13 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public async Task<TimeSpan> GetRemainingTimeAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
+            await Task.Delay(_config.DefaultDelay);
             return _sessionDuration - _elapsedTime;
         }
 
         public async Task<TimeSpan> GetElapsedTimeAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
+            await Task.Delay(_config.DefaultDelay);
             return _elapsedTime;
         }
 
@@ -204,25 +204,25 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public async Task<float> GetAngleXAsync()
         {
-            await Task.Delay(_initParams.DefaultDelay);
+            await Task.Delay(_config.DefaultDelay);
             var cycleElapsedTime = GetCycleElapsedTime();
             if (cycleElapsedTime.Ticks >= _cycleDuration.Ticks / 2)
             {
 
-                return (float) (_initParams.MaxAngleX * (_cycleDuration.Ticks - cycleElapsedTime.Ticks) /
+                return (float) (_config.MaxAngleX * (_cycleDuration.Ticks - cycleElapsedTime.Ticks) /
                                 _cycleDuration.Ticks);
             }
 
-            return (float) (_initParams.MaxAngleX * cycleElapsedTime.Ticks / _cycleDuration.Ticks);
+            return (float) (_config.MaxAngleX * cycleElapsedTime.Ticks / _cycleDuration.Ticks);
         }
 
         public Guid DeviceId => FakeInversionTableDeviceId.DeviceId;
         public Guid DeviceTypeId => InversionTableDeviceTypeId.DeviceTypeId;
     }
 
-    public class FakeDeviceInitParams : IBedControllerInitParams
+    public class FakeDeviceConfig : IBedControllerConfig
     {
-        public double MaxAngleX { get; }
+        public float MaxAngleX { get; }
         public short CyclesCount { get; }
         public float MovementFrequency { get; }
         public TimeSpan UpdateDataPeriod { get; }

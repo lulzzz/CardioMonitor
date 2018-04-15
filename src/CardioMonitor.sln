@@ -80,7 +80,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EventBus", "EventBus", "{07
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Markeli.Utils.EventBus.Contracts", "Infrastructure\EventBus\Markeli.Utils.EventBus.Contracts\Markeli.Utils.EventBus.Contracts.csproj", "{B3B0A272-B23B-4880-A481-87C6B8DB27ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Markeli.Utils.EventBus.Local", "Infrastructure\EventBus\Markeli.Utils.EventBus.Local\Markeli.Utils.EventBus.Local.csproj", "{77604705-A316-45DA-A11F-B6A91751AE29}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Markeli.Utils.EventBus.Local", "Infrastructure\EventBus\Markeli.Utils.EventBus.Local\Markeli.Utils.EventBus.Local.csproj", "{77604705-A316-45DA-A11F-B6A91751AE29}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Bed.UnitTests", "..\tests\UnitTests\CardioMonitor.Devices.Bed.UnitTests\CardioMonitor.Devices.Bed.UnitTests.csproj", "{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -282,6 +284,14 @@ Global
 		{77604705-A316-45DA-A11F-B6A91751AE29}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77604705-A316-45DA-A11F-B6A91751AE29}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77604705-A316-45DA-A11F-B6A91751AE29}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -322,6 +332,7 @@ Global
 		{07CAB435-770B-4D02-9770-64FBEC4BD8B4} = {950B6A1C-CFA8-49B9-81A9-398402EA1D17}
 		{B3B0A272-B23B-4880-A481-87C6B8DB27ED} = {07CAB435-770B-4D02-9770-64FBEC4BD8B4}
 		{77604705-A316-45DA-A11F-B6A91751AE29} = {07CAB435-770B-4D02-9770-64FBEC4BD8B4}
+		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB} = {A5037BBA-6297-4556-B2B9-F09E8989543C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B85A60A8-F00A-42AB-8D26-94EB30E55851}

@@ -19,11 +19,11 @@ namespace CardioMonitor.Devices
         /// <returns></returns>
         IBedController CreateBedController();
 
-        IBedControllerInitParams CreateBedControllerInitParams(float maxAngleX, short cyclesCount, float movementFrequency);
+        IBedControllerConfig CreateBedControllerInitParams(float maxAngleX, short cyclesCount, float movementFrequency);
 
         IMonitorController CreateMonitorController();
         
-        IMonitorControllerInitParams CreateMonitorControllerInitParams();
+        IMonitorControllerConfig CreateMonitorControllerInitParams();
 
         /// <summary>
         /// Возвращает время, через которое будет осуществляться попытка переподключения к устройству

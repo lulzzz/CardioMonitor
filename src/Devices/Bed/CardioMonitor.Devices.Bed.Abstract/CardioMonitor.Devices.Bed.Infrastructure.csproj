@@ -46,7 +46,8 @@
     <Compile Include="BedSessionInfo.cs" />
     <Compile Include="BedStatus.cs" />
     <Compile Include="IBedController.cs" />
-    <Compile Include="IBedControllerInitParams.cs" />
+    <Compile Include="IBedControllerConfig.cs" />
+    <Compile Include="IBedControllerConfigBuilder.cs" />
     <Compile Include="InversionTableDeviceTypeId.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReverseFlag.cs" />

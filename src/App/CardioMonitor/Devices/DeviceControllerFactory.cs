@@ -35,9 +35,9 @@ namespace CardioMonitor.Devices
             return new BedUDPController(_workerController);
         }
 
-        public IBedControllerInitParams CreateBedControllerInitParams(float maxAngleX, short cyclesCount, float movementFrequency)
+        public IBedControllerConfig CreateBedControllerInitParams(float maxAngleX, short cyclesCount, float movementFrequency)
         {
-            return new BedUdpControllerInitParams(new IPEndPoint(new IPAddress(1),1 ),
+            return new BedUdpControllerConfig(new IPEndPoint(new IPAddress(1),1 ),
                 //todo fix this
                 TimeSpan.FromMilliseconds(500),
                 TimeSpan.FromSeconds(2),
@@ -54,9 +54,9 @@ namespace CardioMonitor.Devices
             return null; //new OldMonitorController();
         }
 
-        public IMonitorControllerInitParams CreateMonitorControllerInitParams()
+        public IMonitorControllerConfig CreateMonitorControllerInitParams()
         {
-            return new MitarMonitorControlerInitParams(
+            return new MitarMonitorControlerConfig(
                 TimeSpan.FromMilliseconds(500),
                 TimeSpan.FromSeconds(2),
                 20,

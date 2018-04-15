@@ -19,8 +19,8 @@ namespace CardioMonitor.Devices.Monitor.Infrastructure
         /// <summary>
         /// Выполняет инициализацию контроллера
         /// </summary>
-        /// <param name="initParams"></param>
-        void Init([NotNull] IMonitorControllerInitParams initParams);
+        /// <param name="config"></param>
+        void Init([NotNull] IMonitorControllerConfig config);
 
         /// <summary>
         /// Асинхронно подключается к устройству

@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CRC8Calculator.cs" />
-    <Compile Include="MitarMonitorControlerInitParams.cs" />
+    <Compile Include="MitarMonitorControlerConfig.cs" />
     <Compile Include="MitarMonitorController.cs" />
     <Compile Include="MitarMonitorDataParser.cs" />
     <Compile Include="MitarMonitorDeviceId.cs" />

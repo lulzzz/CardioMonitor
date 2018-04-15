@@ -6,10 +6,10 @@ namespace CardioMonitor.Devices.Monitor
     /// <summary>
     /// Параметры подкючения к монитору МИТАР
     /// </summary>
-    public class MitarMonitorControlerInitParams : IMonitorControllerInitParams
+    public class MitarMonitorControlerConfig : IMonitorControllerConfig
     {
 
-        public MitarMonitorControlerInitParams(
+        public MitarMonitorControlerConfig(
             TimeSpan updateDataPeriod,
             TimeSpan timeout,
             int monitorBroadcastUdpPort,

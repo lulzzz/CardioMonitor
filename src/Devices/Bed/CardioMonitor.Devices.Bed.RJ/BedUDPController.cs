@@ -23,7 +23,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// NotNull помечено специально, чтобы анализатор не ругался. В каждом методе должны быть провеки методом <see cref="AssertInitParams"/>
         /// </remarks>
         [NotNull] 
-        private BedUdpControllerInitParams _initParams;
+        private BedUdpControllerConfig _initParams;
 
         [CanBeNull]
         private UdpClient _udpClient;
@@ -69,11 +69,11 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         public bool IsConnected { get; private set; }
         
-        public void Init([NotNull] IBedControllerInitParams initParams)
+        public void Init([NotNull] IBedControllerConfig initParams)
         {
             if (initParams == null) throw new ArgumentNullException(nameof(initParams));
-            var udpControllerInitParams = initParams as BedUdpControllerInitParams;
-            _initParams = udpControllerInitParams ?? throw new InvalidOperationException($"Необходимо передать объект типа {typeof(BedUdpControllerInitParams)}");
+            var udpControllerInitParams = initParams as BedUdpControllerConfig;
+            _initParams = udpControllerInitParams ?? throw new InvalidOperationException($"Необходимо передать объект типа {typeof(BedUdpControllerConfig)}");
         }
 
         public async Task ConnectAsync()

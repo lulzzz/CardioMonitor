@@ -8,9 +8,9 @@ namespace CardioMonitor.Devices.Bed.UDP
     /// <summary>
     /// Параметры инициализации контроллера, взаимодействующего с кроватью по протоколу UDP
     /// </summary>
-    public class BedUdpControllerInitParams : IBedControllerInitParams
+    public class BedUdpControllerConfig : IBedControllerConfig
     {
-        public BedUdpControllerInitParams(
+        public BedUdpControllerConfig(
             [NotNull] IPEndPoint bedIpEndpoint,
             TimeSpan updateDataPeriod,
             TimeSpan timeout,
@@ -38,7 +38,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         public TimeSpan Timeout { get; }
         
         /// <inheritdoc />
-        public double MaxAngleX { get; }
+        public float MaxAngleX { get; }
 
         /// <inheritdoc />
         public short CyclesCount { get; }

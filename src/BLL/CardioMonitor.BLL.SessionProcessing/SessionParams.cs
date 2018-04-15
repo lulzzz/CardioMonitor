@@ -22,12 +22,12 @@ namespace CardioMonitor.BLL.SessionProcessing
         /// <summary>
         /// Параметры инициализации контроллера кровати
         /// </summary>
-        public IBedControllerInitParams BedControllerInitParams { get; }
+        public IBedControllerConfig BedControllerConfig { get; }
         
         /// <summary>
         /// Параметры инициализации контроллера монитора
         /// </summary>
-        public IMonitorControllerInitParams MonitorControllerInitParams { get; }
+        public IMonitorControllerConfig MonitorControllerConfig { get; }
         
         /// <summary>
         /// Количество попыток накачки при старте
@@ -50,16 +50,16 @@ namespace CardioMonitor.BLL.SessionProcessing
         public SessionParams(
             short cycleCount, 
             TimeSpan updateDataPeriod, 
-            IBedControllerInitParams bedControllerInitParams, 
-            IMonitorControllerInitParams monitorControllerInitParams,
+            IBedControllerConfig bedControllerConfig, 
+            IMonitorControllerConfig monitorControllerConfig,
             short pumpingNumberOfAttemptsOnStartAndFinish, 
             short pumpingNumberOfAttemptsOnProcessing, 
             TimeSpan? deviceReconnectionTimeout = null)
         {
             CycleCount = cycleCount;
             UpdateDataPeriod = updateDataPeriod;
-            BedControllerInitParams = bedControllerInitParams;
-            MonitorControllerInitParams = monitorControllerInitParams;
+            BedControllerConfig = bedControllerConfig;
+            MonitorControllerConfig = monitorControllerConfig;
             PumpingNumberOfAttemptsOnStartAndFinish = pumpingNumberOfAttemptsOnStartAndFinish;
             PumpingNumberOfAttemptsOnProcessing = pumpingNumberOfAttemptsOnProcessing;
             DeviceReconnectionTimeout = deviceReconnectionTimeout;

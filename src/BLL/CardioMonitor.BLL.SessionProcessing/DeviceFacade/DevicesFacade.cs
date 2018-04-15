@@ -179,7 +179,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             _logger?.Trace($"{GetType().Name}: начато создание pipeline...");
             var sessionInfoProvider = new SessionProcessingInfoProvider(
                 _bedController, 
-                _startParams.BedControllerInitParams.Timeout);
+                _startParams.BedControllerConfig.Timeout);
             sessionInfoProvider.SetLogger(_logger);
             var sessionInfoProvidingBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
@@ -187,7 +187,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
             var iterationProvider = new IterationParamsProvider(
                 _bedController,
-                _startParams.BedControllerInitParams.Timeout);
+                _startParams.BedControllerConfig.Timeout);
             iterationProvider.SetLogger(_logger);
             var iterationProvidingBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
@@ -195,7 +195,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
             var angleReciever = new AngleReciever(
                 bedController,
-                _startParams.BedControllerInitParams.Timeout);
+                _startParams.BedControllerConfig.Timeout);
             angleReciever.SetLogger(_logger);
             var anlgeRecieveBlock =
                 new TransformBlock<CycleProcessingContext, CycleProcessingContext>(context =>
@@ -221,7 +221,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             var pressureParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pressureParamsProvider.ProcessAsync(context));
 
-            var commonParamsProvider = new CommonPatientParamsProvider(monitorController, _startParams.MonitorControllerInitParams.Timeout);
+            var commonParamsProvider = new CommonPatientParamsProvider(monitorController, _startParams.MonitorControllerConfig.Timeout);
             commonParamsProvider.SetLogger(_logger);
             var commonParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => commonParamsProvider.ProcessAsync(context));
@@ -770,7 +770,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             {
                 _logger?.Info($"{GetType().Name}: вызван старт сеанса");
                 _logger?.Trace($"{GetType().Name}: инициализация контроллера инверсионного стола");
-                _bedController.Init(_startParams.BedControllerInitParams);
+                _bedController.Init(_startParams.BedControllerConfig);
                 _logger?.Trace($"{GetType().Name}: подключение к инверсионному столу");
                 await _bedController
                     .ConnectAsync()
@@ -782,7 +782,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     .ConfigureAwait(false);
 
                 _logger?.Trace($"{GetType().Name}: инициализация контроллера кардиомонитора");
-                _monitorController.Init(_startParams.MonitorControllerInitParams);
+                _monitorController.Init(_startParams.MonitorControllerConfig);
                 _logger?.Trace($"{GetType().Name}: подключение к кардиомонитору");
                 await _monitorController
                     .ConnectAsync()

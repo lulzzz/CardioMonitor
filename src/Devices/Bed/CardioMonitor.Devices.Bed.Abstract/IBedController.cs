@@ -39,11 +39,11 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// <summary>
         /// Инициализирует контроллер
         /// </summary>
-        /// <param name="initParams">Параметры инициализации</param>
+        /// <param name="config">Параметры инициализации</param>
         /// <remarks>
         /// Необходимо выполнять инициализацию перед всеми действиями
         /// </remarks>
-        void Init(IBedControllerInitParams initParams);
+        void Init(IBedControllerConfig config);
         
         /// <summary>
         /// Устанавливает подключение к инверсионному столу

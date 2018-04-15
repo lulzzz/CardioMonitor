@@ -164,8 +164,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Devices\Configuration\DeviceConfiguration.cs" />
+    <Compile Include="Devices\Configuration\DeviceConfigurationMapper.cs" />
+    <Compile Include="Devices\Configuration\DeviceConfigurationService.cs" />
     <Compile Include="Devices\Configuration\DeviceInfo.cs" />
     <Compile Include="Devices\Configuration\IDeviceConfigurationService.cs" />
+    <Compile Include="Devices\Data\DeviceConfigurationContext.cs" />
+    <Compile Include="Devices\Data\DeviceConfigurationContextFactory.cs" />
+    <Compile Include="Devices\Data\DeviceConfigurationEfConfig.cs" />
+    <Compile Include="Devices\Data\DeviceConfigurationEntity.cs" />
+    <Compile Include="Devices\Data\IDeviceConfigurationContextFactory.cs" />
     <Compile Include="Devices\DeviceControllerFactory.cs" />
     <Compile Include="Devices\IDeviceControllerFactory.cs" />
     <Compile Include="EventHandlers\Patients\PatientAddedEventHandler.cs" />
@@ -309,6 +316,7 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Devices\Data\Scrypts\init_1_0_0.sql" />
     <Content Include="Resources\Entypo-license.txt" />
     <Content Include="Resources\WindowsIcons-license.txt" />
     <None Include="app.config">
@@ -375,6 +383,10 @@
       <Project>{BAE2B28A-93F6-40A9-852C-2BADD360E4FD}</Project>
       <Name>CardioMonitor.Devices.Bed.Infrastructure</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Devices\Bed\CardioMonitor.Devices.Bed.Fake\CardioMonitor.Devices.Bed.Fake.csproj">
+      <Project>{D72BA3E3-1055-4602-97DE-8A1C3555CCF7}</Project>
+      <Name>CardioMonitor.Devices.Bed.Fake</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Devices\Bed\CardioMonitor.Devices.Bed.RJ\CardioMonitor.Devices.Bed.UDP.csproj">
       <Project>{7b951bc1-b035-41ae-b43a-8dd69adf51f3}</Project>
       <Name>CardioMonitor.Devices.Bed.UDP</Name>
@@ -386,6 +398,10 @@
     <ProjectReference Include="..\..\Devices\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
       <Project>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</Project>
       <Name>CardioMonitor.Devices</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Devices\Monitor\CardioMonitor.Devices.Monitor.Fake\CardioMonitor.Devices.Monitor.Fake.csproj">
+      <Project>{0CDD0798-75A2-400A-ADC1-8C2EDA709F1C}</Project>
+      <Name>CardioMonitor.Devices.Monitor.Fake</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Devices\Monitor\CardioMonitor.Devices.Monitor.Infrastructure\CardioMonitor.Devices.Monitor.Infrastructure.csproj">
       <Project>{E773219C-F1DA-42A3-8E80-68BEDAC3E4F8}</Project>

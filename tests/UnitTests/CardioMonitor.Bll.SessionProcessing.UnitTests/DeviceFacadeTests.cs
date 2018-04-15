@@ -17,9 +17,9 @@ namespace CardioMonitor.Bll.SessionProcessing.UnitTests
 
         public DeviceFacadeTests()
         {
-            var bedInitParams = new Mock<IBedControllerInitParams>();
+            var bedInitParams = new Mock<IBedControllerConfig>();
             bedInitParams.Setup(x => x.Timeout).Returns(TimeSpan.FromSeconds(30));
-            var monitorInitParams = new Mock<IMonitorControllerInitParams>();
+            var monitorInitParams = new Mock<IMonitorControllerConfig>();
             bedInitParams.Setup(x => x.Timeout).Returns(TimeSpan.FromSeconds(30));
             _startParams = 
                 new SessionParams(

@@ -1,7 +1,7 @@
 ﻿namespace CardioMonitor.Devices.Data
 {
-    public interface IDeviceConfigurationConfigrContextFactory
+    internal interface IDeviceConfigurationContextFactory
     {
-        
+        DeviceConfigurationContext Create();
     }
 }

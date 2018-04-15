@@ -53,7 +53,7 @@
     <Compile Include="BedRegisterPosition.cs" />
     <Compile Include="BedRegisterValues.cs" />
     <Compile Include="BedUDPController.cs" />
-    <Compile Include="BedUdpControllerInitParams.cs" />
+    <Compile Include="BedUdpControllerConfig.cs" />
     <Compile Include="InversionTableV2UdpDeviceId.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
