@@ -8,7 +8,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
     /// <remarks>
     /// Параметры могут отличаться в зависимости от способ подключения к устройству
     /// </remarks>
-    public interface IBedControllerConfig
+    public interface IBedControllerConfig : IDeviceControllerConfig
     {
         /// <summary>
         /// Максимальный угол кровати по оси Х, до которой она будет подниматься

@@ -44,6 +44,7 @@
     <Compile Include="DeviceConnectionException.cs" />
     <Compile Include="DeviceProcessingException.cs" />
     <Compile Include="IDeviceController.cs" />
+    <Compile Include="IDeviceControllerConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

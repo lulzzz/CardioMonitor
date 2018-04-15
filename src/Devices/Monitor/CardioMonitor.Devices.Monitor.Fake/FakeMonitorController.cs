@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Monitor.Infrastructure;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 namespace CardioMonitor.Devices.Monitor.Fake
@@ -64,32 +63,5 @@ namespace CardioMonitor.Devices.Monitor.Fake
 
         public Guid DeviceId => FakeMonitorDeviceId.DeviceId;
         public Guid DeviceTypeId => MonitorDeviceTypeId.DeviceTypeId;
-    }
-
-    public class FakeCardioMonitorConfig : IMonitorControllerConfig
-    {
-        public FakeCardioMonitorConfig(
-            TimeSpan updateDataPeriod, 
-            TimeSpan timeout, 
-            TimeSpan defaultDelay, 
-            TimeSpan pumpingDelay)
-        {
-            UpdateDataPeriod = updateDataPeriod;
-            Timeout = timeout;
-            DefaultDelay = defaultDelay;
-            PumpingDelay = pumpingDelay;
-        }
-
-        [JsonProperty("UpdateDataPeriod")]
-        public TimeSpan UpdateDataPeriod { get; }
-
-        [JsonProperty("Timeout")]
-        public TimeSpan Timeout { get; }
-
-        [JsonProperty("DefaultDelay")]
-        public TimeSpan DefaultDelay { get; }
-
-        [JsonProperty("PumpingDelay")]
-        public TimeSpan PumpingDelay { get;  }
     }
 }

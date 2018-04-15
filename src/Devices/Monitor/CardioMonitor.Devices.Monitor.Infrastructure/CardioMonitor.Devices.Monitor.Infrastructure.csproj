@@ -47,6 +47,7 @@
     <Compile Include="ECGIterationNumber.cs" />
     <Compile Include="IMonitorController.cs" />
     <Compile Include="IMonitorControllerConfig.cs" />
+    <Compile Include="IMonitorControllerConfigBuilder.cs" />
     <Compile Include="MonitorDeviceTypeId.cs" />
     <Compile Include="PatientCommonParams.cs" />
     <Compile Include="PatientEcgParams.cs" />

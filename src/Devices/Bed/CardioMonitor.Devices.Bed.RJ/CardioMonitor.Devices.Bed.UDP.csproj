@@ -57,6 +57,7 @@
     <Compile Include="BedRegisterValues.cs" />
     <Compile Include="BedUDPController.cs" />
     <Compile Include="BedUdpControllerConfig.cs" />
+    <Compile Include="BedUdpControllerConfigBuilder.cs" />
     <Compile Include="InversionTableV2UdpDeviceId.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -64,6 +65,10 @@
     <ProjectReference Include="..\..\..\Infrastructure\CardioMonitor.Infrastructure.Workers\CardioMonitor.Infrastructure.Workers.csproj">
       <Project>{060dd75d-d142-47f9-a949-fdb171cde123}</Project>
       <Name>CardioMonitor.Infrastructure.Workers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\Infrastructure\CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj">
+      <Project>{60422aeb-3748-4b0f-928e-689b1378a5ee}</Project>
+      <Name>CardioMonitor.Infrastructure</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
       <Project>{c8ee2e87-12dd-43e4-bab0-04e09de9a651}</Project>

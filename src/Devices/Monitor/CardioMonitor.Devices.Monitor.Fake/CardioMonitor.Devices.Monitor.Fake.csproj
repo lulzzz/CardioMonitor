@@ -44,6 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FakeCardioMonitorConfig.cs" />
+    <Compile Include="FakeMonitorControllerConfigBuilder.cs" />
     <Compile Include="FakeMonitorDeviceId.cs" />
     <Compile Include="FakeMonitorController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
