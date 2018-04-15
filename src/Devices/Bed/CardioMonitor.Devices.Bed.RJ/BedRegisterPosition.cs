@@ -10,6 +10,6 @@
         public static byte CurrentIterationPosition = 39;
         public static byte RemainingTimePosition = 46;
         public static byte ElapsedTimePosition = 48;
-        public static byte BedTargetAngleXPosition = 50;
+        public static byte BedTargetAngleXPosition = 186;
     }
 }

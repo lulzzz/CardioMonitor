@@ -67,9 +67,10 @@ namespace CardioMonitor.Devices.Bed.UDP
             values.CurrentCycle = _messageData[CurrentCyclePosition];
             values.RemainingTime = TimeSpan.FromSeconds(GetValuesFromBytes(_messageData[RemainingTimePosition],_messageData[RemainingTimePosition + 1]));
             values.ElapsedTime =   TimeSpan.FromSeconds(GetValuesFromBytes(_messageData[ElapsedTimePosition],_messageData[ElapsedTimePosition + 1]));
-            values.BedTargetAngleX = GetHalfValuesFromBytes(_messageData[BedTargetAngleXPosition],
-                _messageData[BedTargetAngleXPosition + 1]);
-            //todo здесь распаковываем пакет и заносим полученные значения
+            values.BedTargetAngleX = GetHalfValuesFromBytes(_messageData[BedTargetAngleXPosition + 1],
+                _messageData[BedTargetAngleXPosition ]); //Здесь тоже измененный порядок байт - todo подумать как его красиво реверсить
+           
+            //values.BedR
 
             return values;
         }
@@ -88,9 +89,17 @@ namespace CardioMonitor.Devices.Bed.UDP
             message[5] = registerAddress; 
             message[6] = messageData[0];
             message[7] = messageData[1];
-            byte[] messageForCRC = new byte[message.Length - 3];
-            message.CopyTo(messageForCRC, 1);
-            var crc = BedMessageCRC16.GetCRC16(messageForCRC);  //расчет контрольной суммы без маркера пакета
+            byte[] messageForCRC = new byte[message.Length - 2];
+
+            for (int i = 0; i < messageForCRC.Length; i++)
+            {
+                messageForCRC[i] = message[i];
+            }
+            var crc = BitConverter.GetBytes(BedMessageCRC16.GetCRC16(messageForCRC));
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(crc);
+            }
             message[8] = crc[0];
             message[9] = crc[1];
             return message;
@@ -116,11 +125,17 @@ namespace CardioMonitor.Devices.Bed.UDP
             //затем данные и 2 байта CRC16
             if (inputMessage.Length != 4 + messageLength * 2 + 2)  throw new ArgumentException("Неверный размер пакета");
             
-            byte[] messageForCRC = new byte[inputMessage.Length - 3]; //CRC считаем для пакета кроме заголовка и самой суммы
-            inputMessage.CopyTo(messageForCRC, 1);
-            var crc = BedMessageCRC16.GetCRC16(messageForCRC);
+            byte[] messageForCRC = new byte[inputMessage.Length - 2]; //CRC считаем для пакета кроме самой суммы
+
+            for (int i = 0; i < messageForCRC.Length; i++)
+            {
+                messageForCRC[i] = inputMessage[i];
+            }
+            var crcCalc = BedMessageCRC16.GetCRC16(messageForCRC);
+            var crcReal =
+                (ushort) (inputMessage[inputMessage.Length - 2] * 256 + inputMessage[inputMessage.Length - 1]);
             
-            if (crc[0] != inputMessage[inputMessage.Length - 2] || crc[1] != inputMessage[inputMessage.Length - 1])
+            if (crcReal != crcCalc)
             {
                 throw new ArgumentException("Неверная контрольная сумма");
             }
