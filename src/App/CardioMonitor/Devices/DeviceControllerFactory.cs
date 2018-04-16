@@ -37,13 +37,13 @@ namespace CardioMonitor.Devices
 
         public IBedControllerConfig CreateBedControllerInitParams(float maxAngleX, short cyclesCount, float movementFrequency)
         {
-            return new BedUdpControllerConfig(new IPEndPoint(new IPAddress(1),1 ),
+            return null;/*new BedUdpControllerConfig(new IPEndPoint(new IPAddress(1),1 ),
                 //todo fix this
                 TimeSpan.FromMilliseconds(500),
                 TimeSpan.FromSeconds(2),
                 maxAngleX,
                 cyclesCount, 
-                movementFrequency);
+                movementFrequency);*/
         }
 
         

@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
              d:DataContext="{d:DesignInstance Type=viewModel:PatientSessionsViewModel}"
-             xmlns:busy="clr-namespace:CardioMonitor.Ui.Controls"
+             xmlns:controls="clr-namespace:CardioMonitor.Ui.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              mc:Ignorable="d" 
         d:DesignHeight="300" d:DesignWidth="800">
     <UserControl.Resources>
@@ -16,7 +16,7 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
-    <busy:BusyIndicator
+    <controls:BusyIndicator
         Style="{DynamicResource BusyIndicatorStylekey}"
         IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
         Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
@@ -99,8 +99,11 @@
                     FontSize="11"/>
         </StackPanel>
     </Grid>
-    </busy:BusyIndicator>
+    </controls:BusyIndicator>
 </UserControl>
+
+    
+    
 
     
     

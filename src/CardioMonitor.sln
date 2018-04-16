@@ -84,6 +84,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Markeli.Utils.EventBus.Loca
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Bed.UnitTests", "..\tests\UnitTests\CardioMonitor.Devices.Bed.UnitTests\CardioMonitor.Devices.Bed.UnitTests.csproj", "{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.WpfModule", "Devices\CardioMonitor.Devices.WpfModule\CardioMonitor.Devices.WpfModule.csproj", "{D7B49E75-519C-46DF-9EE2-D0060C917E3F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Bed.Fake.WpfModule", "Devices\Bed\CardioMonitor.Devices.Bed.Fake.WpfModule\CardioMonitor.Devices.Bed.Fake.WpfModule.csproj", "{772C631D-E158-4D9C-849B-9960D8841082}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Infrastructure.WpfCommon", "Infrastructure\CardioMonitor.Infrastructure.WpfCommon\CardioMonitor.Infrastructure.WpfCommon.csproj", "{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Monitor|Any CPU = Debug_Monitor|Any CPU
@@ -292,6 +298,30 @@ Global
 		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7B49E75-519C-46DF-9EE2-D0060C917E3F}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7B49E75-519C-46DF-9EE2-D0060C917E3F}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{D7B49E75-519C-46DF-9EE2-D0060C917E3F}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7B49E75-519C-46DF-9EE2-D0060C917E3F}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{D7B49E75-519C-46DF-9EE2-D0060C917E3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7B49E75-519C-46DF-9EE2-D0060C917E3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7B49E75-519C-46DF-9EE2-D0060C917E3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7B49E75-519C-46DF-9EE2-D0060C917E3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{772C631D-E158-4D9C-849B-9960D8841082}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{772C631D-E158-4D9C-849B-9960D8841082}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{772C631D-E158-4D9C-849B-9960D8841082}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{772C631D-E158-4D9C-849B-9960D8841082}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{772C631D-E158-4D9C-849B-9960D8841082}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{772C631D-E158-4D9C-849B-9960D8841082}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{772C631D-E158-4D9C-849B-9960D8841082}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{772C631D-E158-4D9C-849B-9960D8841082}.Release|Any CPU.Build.0 = Release|Any CPU
+		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -333,6 +363,9 @@ Global
 		{B3B0A272-B23B-4880-A481-87C6B8DB27ED} = {07CAB435-770B-4D02-9770-64FBEC4BD8B4}
 		{77604705-A316-45DA-A11F-B6A91751AE29} = {07CAB435-770B-4D02-9770-64FBEC4BD8B4}
 		{BF65A169-0558-4EAF-A7CF-8E13EC88ACAB} = {A5037BBA-6297-4556-B2B9-F09E8989543C}
+		{D7B49E75-519C-46DF-9EE2-D0060C917E3F} = {3785A7E4-5B35-4DEB-8598-A4941126F9F0}
+		{772C631D-E158-4D9C-849B-9960D8841082} = {5E743ABF-6E8E-4CE2-87F8-A851DC3F7906}
+		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C} = {950B6A1C-CFA8-49B9-81A9-398402EA1D17}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B85A60A8-F00A-42AB-8D26-94EB30E55851}

@@ -80,6 +80,10 @@
       <Project>{7b951bc1-b035-41ae-b43a-8dd69adf51f3}</Project>
       <Name>CardioMonitor.Devices.Bed.UDP</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\src\Devices\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
+      <Project>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</Project>
+      <Name>CardioMonitor.Devices</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

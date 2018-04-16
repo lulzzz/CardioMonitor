@@ -4,9 +4,4 @@
     {
         
     }
-
-    public interface IDeviceControllerConfigBuilder
-    {
-
-    }
 }

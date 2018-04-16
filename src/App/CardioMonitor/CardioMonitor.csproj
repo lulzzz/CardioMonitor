@@ -203,13 +203,8 @@
     <Compile Include="Settings\SettingsConstants.cs" />
     <Compile Include="Settings\SettingsManager.cs" />
     <Compile Include="Threading\ThreadAssistant.cs" />
-    <Compile Include="Ui\Communication\AccessMode.cs" />
     <Compile Include="Files\FilesManager.cs" />
-    <Compile Include="Ui\Controls\BusyIndicator.cs" />
-    <Compile Include="Ui\Converters\InvertedBooleanToVisibilityConverter.cs" />
     <Compile Include="Ui\MessageHelper.cs" />
-    <Compile Include="Ui\Base\Notifier.cs" />
-    <Compile Include="Ui\Base\SimpleCommand.cs" />
     <Compile Include="Ui\SimpleInjectorPageCreator.cs" />
     <Compile Include="Ui\StoryboardIds.cs" />
     <Compile Include="Ui\ViewModel\MainWindowViewModel.cs" />
@@ -414,6 +409,10 @@
     <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure.Workers\CardioMonitor.Infrastructure.Workers.csproj">
       <Project>{060dd75d-d142-47f9-a949-fdb171cde123}</Project>
       <Name>CardioMonitor.Infrastructure.Workers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure.WpfCommon\CardioMonitor.Infrastructure.WpfCommon.csproj">
+      <Project>{35d71b96-b40c-4240-a1ea-d5d21e4d5a4c}</Project>
+      <Name>CardioMonitor.Infrastructure.WpfCommon</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj">
       <Project>{60422AEB-3748-4B0F-928E-689B1378A5EE}</Project>

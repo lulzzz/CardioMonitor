@@ -6,10 +6,10 @@
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Patients"
              d:DataContext="{d:DesignInstance Type=viewModel:PatientViewModel}"
-             xmlns:busy="clr-namespace:CardioMonitor.Ui.Controls"
+             xmlns:controls1="clr-namespace:CardioMonitor.Ui.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="400">
-    <busy:BusyIndicator
+    <controls1:BusyIndicator
         Style="{DynamicResource BusyIndicatorStylekey}"
         IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
         Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
@@ -77,5 +77,6 @@
                     Command="{Binding SaveCommand}"/>
         </StackPanel>
         </Grid>
-    </busy:BusyIndicator>
+    </controls1:BusyIndicator>
 </UserControl>
+

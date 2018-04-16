@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace CardioMonitor.Ui.Converters
+namespace CardioMonitor.Infrastructure.WpfCommon.Converters
 {
     public class InvertedBooleanToVisibilityConverter : IValueConverter
     {

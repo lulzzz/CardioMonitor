@@ -1,17 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</ProjectGuid>
+    <ProjectGuid>{D7B49E75-519C-46DF-9EE2-D0060C917E3F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CardioMonitor.Devices</RootNamespace>
-    <AssemblyName>CardioMonitor.Devices</AssemblyName>
+    <RootNamespace>CardioMonitor.Devices.WpfModule</RootNamespace>
+    <AssemblyName>CardioMonitor.Devices.WpfModule</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -41,19 +40,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DeviceConnectionException.cs" />
-    <Compile Include="DeviceProcessingException.cs" />
-    <Compile Include="IDeviceController.cs" />
-    <Compile Include="IDeviceControllerConfig.cs" />
-    <Compile Include="IDeviceControllerConfigBuilder.cs" />
+    <Compile Include="IWpfDeviceModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
+      <Project>{c8ee2e87-12dd-43e4-bab0-04e09de9a651}</Project>
+      <Name>CardioMonitor.Devices</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

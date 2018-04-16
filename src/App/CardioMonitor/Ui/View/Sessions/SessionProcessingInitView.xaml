@@ -7,13 +7,13 @@
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
              d:DataContext="{d:DesignInstance Type=viewModel:SessionProcessingInitViewModel}"
-             xmlns:busy="clr-namespace:CardioMonitor.Ui.Controls"
+             xmlns:controls="clr-namespace:CardioMonitor.Ui.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="400">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
     </UserControl.Resources>
-    <busy:BusyIndicator
+    <controls:BusyIndicator
         Style="{DynamicResource BusyIndicatorStylekey}"
         IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
         Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
@@ -135,5 +135,6 @@
                     Command="{Binding StartSessionCommand}"/>
         </StackPanel>
     </Grid>
-    </busy:BusyIndicator>
+    </controls:BusyIndicator>
 </UserControl>
+

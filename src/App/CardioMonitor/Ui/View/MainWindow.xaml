@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:iconPacks1="http://metro.mahapps.com/winfx/xaml/iconpacks"
     xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel"
-    xmlns:converters="clr-namespace:CardioMonitor.Ui.Converters"
+    xmlns:converters="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Converters;assembly=CardioMonitor.Infrastructure.WpfCommon"
     Title="Cardio monitor" 
     Height="350" 
     Width="925"
