@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -47,16 +50,8 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="UserControl1.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Compile Include="FadeDeviceControllerConfigViewModel.cs" />
     <Compile Include="Properties\Annotations.cs" />
-    <Compile Include="UserControl1.xaml.cs">
-      <DependentUpon>UserControl1.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -76,10 +71,25 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Infrastructure\CardioMonitor.Infrastructure.WpfCommon\CardioMonitor.Infrastructure.WpfCommon.csproj">
+      <Project>{35d71b96-b40c-4240-a1ea-d5d21e4d5a4c}</Project>
+      <Name>CardioMonitor.Infrastructure.WpfCommon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\CardioMonitor.Devices.WpfModule\CardioMonitor.Devices.WpfModule.csproj">
+      <Project>{D7B49E75-519C-46DF-9EE2-D0060C917E3F}</Project>
+      <Name>CardioMonitor.Devices.WpfModule</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CardioMonitor.Devices.Bed.Fake\CardioMonitor.Devices.Bed.Fake.csproj">
+      <Project>{d72ba3e3-1055-4602-97de-8a1c3555ccf7}</Project>
+      <Name>CardioMonitor.Devices.Bed.Fake</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

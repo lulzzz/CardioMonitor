@@ -19,5 +19,7 @@ namespace CardioMonitor.Ui
         public static readonly Guid PatientSessionsPageId = Guid.Parse("f24cdb8b-bc86-45e7-b495-38d54eb7db1f");
 
         public static readonly Guid SessionsPageId = Guid.Parse("c9c57648-d8e8-4afd-9ed4-272b9172565c");
+
+        public static readonly Guid DevicesPageId = Guid.Parse("fa9b1197-e8d7-4e97-9fe9-e0e68f782605");
     }
 }
