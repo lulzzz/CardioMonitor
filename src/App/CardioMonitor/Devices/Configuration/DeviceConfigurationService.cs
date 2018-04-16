@@ -23,50 +23,28 @@ namespace CardioMonitor.Devices.Configuration
         private readonly ICollection<DeviceInfo> _supportedCardioMonitors;
 
 
-        private readonly HashSet<Guid> _supportedInversionTablesIds;
+        private readonly HashSet<Guid> _registeredDeviceIds;//_supportedInversionTablesIds;
 
-        private readonly HashSet<Guid> _supportedCardioMonitorsIds;
+        private readonly HashSet<Guid> _registeredDeviceTypeIds;//_supportedCardioMonitorsIds;
 
         public DeviceConfigurationService(IDeviceConfigurationContextFactory contextFactory)
         {
             _contextFactory = contextFactory;
-            _supportedInversionTables = new List<DeviceInfo>
-            {
-                new DeviceInfo
-                {
-                    Name = "Эмулятор инверсионного стола",
-                    DeviceId = FakeInversionTableDeviceId.DeviceId
-                },
-                new DeviceInfo
-                {
-                    Name = "Инверсионный стол v2",
-                    DeviceId = InversionTableV2UdpDeviceId.DeviceId
-                },
-            };
-            _supportedInversionTablesIds = new HashSet<Guid>(_supportedInversionTables.Select(x => x.DeviceId));
-            _supportedCardioMonitors = new List<DeviceInfo>
-            {
-                new DeviceInfo
-                {
-                    Name = "Эмулятор кардио монитора",
-                    DeviceId = FakeMonitorDeviceId.DeviceId
-                },
-                new DeviceInfo
-                {
-                    Name = "Митар 01 «Р-Д»",
-                    DeviceId = MitarMonitorDeviceId.DeviceId
-                },
-            };
-            _supportedCardioMonitorsIds = new HashSet<Guid>(_supportedInversionTables.Select(x => x.DeviceId));
+            _registeredDeviceIds = new HashSet<Guid>();
+            _registeredDeviceTypeIds = new HashSet<Guid>();
         }
 
-        public async Task<ICollection<DeviceConfiguration>> GetMonitorsConfigurationsAsync()
+        public void RegisterDevice(DeviceRegistrationInfo info)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<ICollection<DeviceConfiguration>> GetConfigurationsAsync()
         {
             using (var context = _contextFactory.Create())
             {
                 var result = await context.DeviceConfigurations.AsNoTracking()
-                    .Where(x => x.DeviceTypeId == MonitorDeviceTypeId.DeviceTypeId
-                                && _supportedCardioMonitorsIds.Contains(x.DeviceId))
+                    .Where(x => _registeredDeviceIds.Contains(x.DeviceId))
                     .ToListAsync()
                     .ConfigureAwait(false);
 
@@ -77,14 +55,13 @@ namespace CardioMonitor.Devices.Configuration
             }
         }
 
-      
-        public async Task<ICollection<DeviceConfiguration>> GetInversionTablesConfigurationsAsync()
+        public Task<ICollection<DeviceConfiguration>> GetConfigurationsAsync(Guid deviceTypeId)
         {
             using (var context = _contextFactory.Create())
             {
                 var result = await context.DeviceConfigurations.AsNoTracking()
-                    .Where(x => x.DeviceTypeId == InversionTableDeviceTypeId.DeviceTypeId
-                                && _supportedInversionTablesIds.Contains(x.DeviceId))
+                    .Where(x => _registeredDeviceIds.Contains(x.DeviceId)
+                            && x.DeviceTypeId == deviceTypeId)
                     .ToListAsync()
                     .ConfigureAwait(false);
 
@@ -95,12 +72,8 @@ namespace CardioMonitor.Devices.Configuration
             }
         }
 
-        public Task<ICollection<DeviceInfo>> GetRegisterdMonitorsAsync()
-        {
-            return Task.FromResult(_supportedCardioMonitors);
-        }
-
-        public Task<ICollection<DeviceInfo>> GetRegisteredInversionTablesAsync()
+        
+        public Task<ICollection<DeviceInfo>> GetRegisteredDevicesAsync()
         {
             return Task.FromResult(_supportedInversionTables);
         }
@@ -111,7 +84,7 @@ namespace CardioMonitor.Devices.Configuration
             {
                 var result = await context.DeviceConfigurations.AsNoTracking()
                     .FirstOrDefaultAsync(x => x.ConfigId == configId
-                                && _supportedInversionTablesIds.Contains(x.DeviceId))
+                                && _registeredDeviceIds.Contains(x.DeviceId))
                     .ConfigureAwait(false);
 
                 return result?.ToDomain();

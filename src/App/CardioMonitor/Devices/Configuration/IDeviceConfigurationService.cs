@@ -7,9 +7,10 @@ namespace CardioMonitor.Devices.Configuration
     public interface IDeviceConfigurationService
     {
         void RegisterDevice(DeviceRegistrationInfo info);
-        Task<ICollection<DeviceInfo>> GetRegisteredDevicesAsync();
 
-        ICollection<DeviceTypeInfo> GetRegisteredDevices(Guid deviceTypeId);
+        ICollection<DeviceInfo> GetRegisteredDevicesTypes();
+
+        ICollection<DeviceInfo> GetRegisteredDevices(Guid deviceTypeId);
 
         Task<ICollection<DeviceConfiguration>> GetConfigurationsAsync();
 

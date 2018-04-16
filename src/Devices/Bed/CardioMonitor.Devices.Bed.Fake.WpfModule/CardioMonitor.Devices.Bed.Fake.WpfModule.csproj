@@ -86,10 +86,20 @@
       <Project>{D7B49E75-519C-46DF-9EE2-D0060C917E3F}</Project>
       <Name>CardioMonitor.Devices.WpfModule</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
+      <Project>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</Project>
+      <Name>CardioMonitor.Devices</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CardioMonitor.Devices.Bed.Fake\CardioMonitor.Devices.Bed.Fake.csproj">
       <Project>{d72ba3e3-1055-4602-97de-8a1c3555ccf7}</Project>
       <Name>CardioMonitor.Devices.Bed.Fake</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="FakeDeviceControllerConfigViewModelStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
