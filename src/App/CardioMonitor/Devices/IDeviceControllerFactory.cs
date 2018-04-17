@@ -13,24 +13,16 @@ namespace CardioMonitor.Devices
     /// </remarks>
     public interface IDeviceControllerFactory
     {
+        void RegisterDevice(Guid deviceId, Type controllerType, Type configBuilderType);
+
         /// <summary>
-        /// Возвращает контроллер для взаимодействия с кроватью
+        /// Создает контроллер взаимодействия с устройством на основе конфига
         /// </summary>
+        /// <param name="configId"></param>
         /// <returns></returns>
-        IBedController CreateBedController();
-
-        IBedControllerConfig CreateBedControllerInitParams(float maxAngleX, short cyclesCount, float movementFrequency);
-
-        IMonitorController CreateMonitorController();
-        
-        IMonitorControllerConfig CreateMonitorControllerInitParams();
-
-        /// <summary>
-        /// Возвращает время, через которое будет осуществляться попытка переподключения к устройству
-        /// </summary>
         /// <remarks>
-        /// Если null, то переподключения не будет
+        /// Конфиг получается из <see cref="Configuration.IDeviceConfigurationService"/>
         /// </remarks>
-        TimeSpan? GetDeviceReconnectionTimeout();
+        IDeviceController CreateDeviceController(Guid configId);
     }
 }

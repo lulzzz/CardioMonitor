@@ -1,11 +1,17 @@
 ﻿using System;
 
-namespace CardioMonitor.Devices.Configuration
+namespace CardioMonitor.Devices
 {
     public class DeviceInfo
     {
-        public string Name { get; set; }
+        public DeviceInfo(string name, Guid deviceId)
+        {
+            Name = name;
+            DeviceId = deviceId;
+        }
 
-        public Guid DeviceId { get; set; }
+        public string Name { get; }
+
+        public Guid DeviceId { get;  }
     }
 }
