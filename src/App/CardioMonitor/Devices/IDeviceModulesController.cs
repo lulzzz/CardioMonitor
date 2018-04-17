@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.WpfModule;
@@ -13,10 +14,7 @@ namespace CardioMonitor.Devices
 
         void RegisterDevice(WpfDeviceModule module);
 
-        IDeviceControllerConfigViewModel GetViewModel(Guid deviceId);
-
-        IDeviceControllerConfigBuilder GetConfigBuilder(Guid deviceId);
-
+        T GetViewModel<T>(Guid deviceId) where T: class, IDeviceControllerConfigViewModel;
         
         ICollection<DeviceTypeInfo> GetRegisteredDevicesTypes();
 
@@ -55,28 +53,24 @@ namespace CardioMonitor.Devices
             if (module == null) throw new ArgumentNullException(nameof(module));
             if (!_deviceTypeModules.ContainsKey(module.DeviceTypeId)) throw new InvalidOperationException($"Device type with Id {module.DeviceTypeId} not registered");
 
+
+            if (!((IList) module.DeviceControllerConfigViewModel.GetInterfaces()).Contains(typeof(IDeviceControllerConfigViewModel)))
+                throw new InvalidOperationException($"type must implement {nameof(IDeviceControllerConfigViewModel)}");
+
             _deviceModules[module.DeviceId] = module;
             _deviceConfigurationService.RegisterDevice(module.DeviceId);
             _deviceControllerFactory.RegisterDevice(module.DeviceId, module.DeviceControllerType, module.DeviceControllerConfigBuilder);
         }
 
-        public IDeviceControllerConfigViewModel GetViewModel(Guid deviceId)
+        public T GetViewModel<T>(Guid deviceId) where T: class, IDeviceControllerConfigViewModel
         {
             if (!_deviceModules.ContainsKey(deviceId)) throw new ArgumentException($"No device with id {deviceId}");
 
             var module = _deviceModules[deviceId];
 
-            return _container.GetInstance(module.DeviceControllerConfigViewModel) as IDeviceControllerConfigViewModel;
+            return _container.GetInstance(module.DeviceControllerConfigViewModel) as T;
         }
 
-        public IDeviceControllerConfigBuilder GetConfigBuilder(Guid deviceId)
-        {
-            if (!_deviceModules.ContainsKey(deviceId)) throw new ArgumentException($"No device with id {deviceId}");
-
-            var module = _deviceModules[deviceId];
-
-            return _container.GetInstance(module.DeviceControllerConfigBuilder) as IDeviceControllerConfigBuilder;
-        }
 
         public ICollection<DeviceTypeInfo> GetRegisteredDevicesTypes()
         {
