@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace CardioMonitor.Devices.Configuration
 {
     public interface IDeviceConfigurationService
     {
-        void RegisterDevice(DeviceRegistrationInfo info);
-
-        ICollection<DeviceInfo> GetRegisteredDevicesTypes();
-
-        ICollection<DeviceInfo> GetRegisteredDevices(Guid deviceTypeId);
+        void RegisterDevice(Guid deviceId);
+        void RegisterDevices([NotNull] Guid[] deviceIds);
 
         Task<ICollection<DeviceConfiguration>> GetConfigurationsAsync();
 
