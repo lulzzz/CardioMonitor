@@ -1,4 +1,5 @@
-﻿using Markeli.Storyboards;
+﻿using System;
+using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
@@ -7,6 +8,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public int PatientId { get; set; }
 
         public bool IsAutopumpingEnabled { get; set; }
+
+        public Guid MonitorConfigId { get; set; }
+
+        public Guid InverstionTableConfigId { get; set; }
 
         /// <summary>
         /// Максимальный угол кровати по оси Х, до которой она будет подниматься

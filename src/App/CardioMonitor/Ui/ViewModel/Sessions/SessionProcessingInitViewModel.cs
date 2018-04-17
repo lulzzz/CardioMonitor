@@ -273,7 +273,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private async Task StartSessionAsync()
         {
             await PageTransitionRequested.InvokeAsync(this,
-                new TransitionRequest(PageIds.SessionProcessingPageId, new SessionProcessingPageConetxt
+                new TransitionRequest(PageIds.SessionProcessingPageId, new SessionProcessingPageConext
                 {
                     PatientId = SelectedPatient.PatientId,
                     MaxAngleX = MaxAngleX,

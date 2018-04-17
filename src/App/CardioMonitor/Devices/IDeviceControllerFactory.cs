@@ -14,16 +14,16 @@ namespace CardioMonitor.Devices
         /// <summary>
         /// Создает контроллер взаимодействия с устройством на основе конфига
         /// </summary>
-        /// <param name="configId"></param>
+        /// <param name="deviceId"></param>
         /// <returns></returns>
         /// <remarks>
         /// Конфиг получается из <see cref="Configuration.IDeviceConfigurationService"/>
         /// </remarks>
         [NotNull]
-        Task<T> CreateDeviceControllerAsync<T>(Guid configId)
+        T CreateDeviceController<T>(Guid deviceId)
             where T : class, IDeviceController;
 
-        Task<T> CreateDeviceControllerConfigBuilderAsync<T>(Guid configId)
+        T CreateDeviceControllerConfigBuilder<T>(Guid deviceId)
             where T : class, IDeviceControllerConfigBuilder;
     }
 }

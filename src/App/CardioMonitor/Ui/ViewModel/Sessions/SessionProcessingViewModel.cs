@@ -6,6 +6,9 @@ using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.Devices;
+using CardioMonitor.Devices.Bed.Infrastructure;
+using CardioMonitor.Devices.Configuration;
+using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Infrastructure.Workers;
@@ -32,6 +35,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     {
         #region Поля
 
+        private SessionProcessingPageConext _context;
 
         private Patient _patient;
         private SessionModel _session;
@@ -54,6 +58,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private readonly IDeviceControllerFactory _deviceControllerFactory;
 
         [NotNull] private readonly IWorkerController _workerController;
+
+        [NotNull] private readonly IDeviceConfigurationService _deviceConfigurationService;
 
         private bool _isResultSaved;
 
@@ -254,32 +260,83 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 case SessionStatus.Suspended:
                     await ResumeAsync().ConfigureAwait(true);
                     break;
-                default:/*
+                default:
                     _isResultSaved = false;
-                    var bedInitParams =
-                        _deviceControllerFactory.CreateBedControllerInitParams(_maxAngle, _repeatCount, _frequency);
-                    var monitorInitParams = _deviceControllerFactory.CreateMonitorControllerInitParams();
+
+                    var context = _context;
+
+                    var bedController = await GetInitializedBedControllerAsync(context)
+                        .ConfigureAwait(true);
+
+                    var monitorController = await GetInitializedMonitorControllerAsync(context)
+                        .ConfigureAwait(true);
 
                     var startParams = new SessionParams(
                         _repeatCount,
                         //todo в параметры
                         TimeSpan.FromMilliseconds(300),
-                        bedInitParams,
+                        bedControllerConfig,
                         monitorInitParams,
                         PumpingNumberOfAttemptsOnStartAndFinish,
                         PumpingNumberOfAttemptsOnProcessing,
                         _deviceControllerFactory.GetDeviceReconnectionTimeout());
 
-                    var bedController = _deviceControllerFactory.CreateBedController();
                     var monitorController = _deviceControllerFactory.CreateMonitorController();
                     Init(
                         startParams,
                         bedController,
                         monitorController,
                         _workerController);
-                    await StartAsync().ConfigureAwait(true);*/
+                    await StartAsync().ConfigureAwait(true);
                     break;
             }
+        }
+
+        private async Task<IBedController> GetInitializedBedControllerAsync(SessionProcessingPageConext context)
+        {
+            var bedSavedConfig = await
+                _deviceConfigurationService
+                    .GetDeviceConfigurationAsync(context.InverstionTableConfigId)
+                    .ConfigureAwait(true);
+
+            var bedControllerConfigBuilder = _deviceControllerFactory
+                .CreateDeviceControllerConfigBuilder<IBedControllerConfigBuilder>(
+                    context.InverstionTableConfigId);
+
+            var bedController =
+                _deviceControllerFactory
+                    .CreateDeviceController<IBedController>(context.InverstionTableConfigId);
+
+            var bedInitConfig = bedControllerConfigBuilder.Build(
+                context.MaxAngleX,
+                context.CyclesCount,
+                context.MovementFrequency,
+                bedSavedConfig.ParamsJson);
+            bedController.Init(bedInitConfig);
+
+            return bedController;
+        }
+
+        private async Task<IMonitorController> GetInitializedMonitorControllerAsync(SessionProcessingPageConext context)
+        {
+            var monitorSavedConfig = await
+                _deviceConfigurationService
+                    .GetDeviceConfigurationAsync(context.MonitorConfigId)
+                    .ConfigureAwait(true);
+
+            var monitorControllerConfigBuilder = _deviceControllerFactory
+                .CreateDeviceControllerConfigBuilder<IMonitorControllerConfigBuilder>(
+                    context.InverstionTableConfigId);
+
+            var monitorController =
+                _deviceControllerFactory
+                    .CreateDeviceController<IMonitorController>(context.InverstionTableConfigId);
+
+            var bedInitConfig = monitorControllerConfigBuilder.Build(
+                monitorSavedConfig.ParamsJson);
+            monitorController.Init(bedInitConfig);
+
+            return monitorController;
         }
 
         /// <summary>
@@ -356,6 +413,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task OpenAsync(IStoryboardPageContext context)
         {
+            if (!(context is SessionProcessingPageConext temp)) throw new ArgumentException($"Context must be {typeof(SessionProcessingPageConext)}");
+            _context = temp;
             return Task.CompletedTask;
         }
 
@@ -371,6 +430,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task ReturnAsync(IStoryboardPageContext context)
         {
+            if (!(context is SessionProcessingPageConext temp)) throw new ArgumentException($"Context must be {typeof(SessionProcessingPageConext)}");
+            _context = temp;
+
             return Task.CompletedTask;
         }
 
