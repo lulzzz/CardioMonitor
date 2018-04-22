@@ -26,7 +26,7 @@
         public short HeartRate { get; set; }
 
         /// <summary>
-        /// Частотат дыхания (ЧД)
+        /// Частота дыхания (ЧД)
         /// </summary>
         public short RepsirationRate { get; set; }
 
