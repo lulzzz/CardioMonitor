@@ -19,7 +19,7 @@ ALTER TABLE public."Version"
 
 CREATE TABLE public."Patients"
 (
-  "Id" integer NOT NULL,
+  "Id" serial  NOT NULL,
   "LastName" text,
   "FirstName" text,
   "PatronymicName" text,
@@ -33,25 +33,6 @@ ALTER TABLE public."Patients"
   OWNER TO postgres;
 
 
--- Table: public."Treatments"
-
--- DROP TABLE public."Treatments";
-
-CREATE TABLE public."Treatments"
-(
-  "Id" integer NOT NULL,
-  "PatientId" integer,
-  "StartDate" date,
-  CONSTRAINT "Treatmens_PK" PRIMARY KEY ("Id"),
-  CONSTRAINT "Treatment_Patieint_FK" FOREIGN KEY ("PatientId")
-      REFERENCES public."Patients" ("Id") MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE public."Treatments"
-  OWNER TO postgres;
 
 -- Table: public."Sessions"
 
@@ -59,13 +40,13 @@ ALTER TABLE public."Treatments"
 
 CREATE TABLE public."Sessions"
 (
-  "Id" integer NOT NULL,
+  "Id" serial  NOT NULL,
   "DateTime" date,
   "Status" smallint,
-  "TreatmentId" integer,
+  "PatientId" integer,
   CONSTRAINT "Session_PK" PRIMARY KEY ("Id"),
-  CONSTRAINT "Session_Treatment_FK" FOREIGN KEY ("TreatmentId")
-      REFERENCES public."Treatments" ("Id") MATCH SIMPLE
+  CONSTRAINT "Session_Patient_FK" FOREIGN KEY ("PatientId")
+      REFERENCES public."Patients" ("Id") MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
@@ -80,7 +61,7 @@ ALTER TABLE public."Sessions"
 
 CREATE TABLE public."SessionCycles"
 (
-  "Id" integer NOT NULL,
+  "Id" serial  NOT NULL,
   "CycleNumber" integer,
   "SessionId" integer,
   CONSTRAINT "SessionCycle_PK" PRIMARY KEY ("Id"),
@@ -100,7 +81,7 @@ ALTER TABLE public."SessionCycles"
 
 CREATE TABLE public."PatientParams"
 (
-  "Id" bigint NOT NULL,
+  "Id" bigserial NOT NULL,
   "Iteration" integer,
   "InclinationAngle" double precision,
   "HeartRate" smallint,
@@ -120,7 +101,26 @@ WITH (
 );
 ALTER TABLE public."PatientParams"
   OWNER TO postgres;
-GRANT ALL ON TABLE public."PatientParams" TO postgres;
+
+-- Table: public."DeviceConfigurations"
+
+-- DROP TABLE public."DeviceConfigurations";
+
+CREATE TABLE public."DeviceConfigurations"
+(
+    "ConfigId" uuid NOT NULL,
+    "ConfigName" text NOT NULL,
+    "DeviceId" uuid NOT NULL,
+    "DeviceTypeId" uuid NOT NULL,
+    "ParamsJson" json,
+    PRIMARY KEY ("ConfigId")
+)
+WITH (
+    OIDS = FALSE
+);
+
+ALTER TABLE public."DeviceConfigurations"
+    OWNER to postgres;
 
 INSERT INTO public."Version"(
             version)
