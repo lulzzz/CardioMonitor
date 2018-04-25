@@ -11,28 +11,16 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
     public interface IBedControllerConfig : IDeviceControllerConfig
     {
         /// <summary>
-        /// Максимальный угол кровати по оси Х, до которой она будет подниматься
-        /// </summary>
-        float MaxAngleX { get; }
-        
-        /// <summary>
-        /// Количество циклов (повторений)
-        /// </summary>
-        short CyclesCount { get; }
-        
-        /// <summary>
-        /// Частота движения
-        /// </summary>
-        float MovementFrequency { get; }
-        
-        /// <summary>
-        /// Период опроса устройства
-        /// </summary>
-        TimeSpan UpdateDataPeriod { get; }
-        
-        /// <summary>
         /// Таймаут операций
         /// </summary>
         TimeSpan Timeout { get; }
+        
+        /// <summary>
+        /// Время, через которое будет осуществляться попытка переподключения к устройству
+        /// </summary>
+        /// <remarks>
+        /// Если null, то переподключения не будет
+        /// </remarks>
+        TimeSpan? DeviceReconnectionTimeout { get; }
     }
 }

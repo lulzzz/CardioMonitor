@@ -166,8 +166,8 @@
     <Compile Include="Devices\Configuration\DeviceConfiguration.cs" />
     <Compile Include="Devices\Configuration\DeviceConfigurationMapper.cs" />
     <Compile Include="Devices\Configuration\DeviceConfigurationService.cs" />
-    <Compile Include="Devices\Configuration\DeviceInfo.cs" />
-    <Compile Include="Devices\Configuration\DeviceTypeInfo.cs" />
+    <Compile Include="Devices\DeviceInfo.cs" />
+    <Compile Include="Devices\DeviceTypeInfo.cs" />
     <Compile Include="Devices\Configuration\IDeviceConfigurationService.cs" />
     <Compile Include="Devices\Data\DeviceConfigurationContext.cs" />
     <Compile Include="Devices\Data\DeviceConfigurationContextFactory.cs" />
@@ -218,7 +218,7 @@
     <Compile Include="Ui\ViewModel\Sessions\SessionProcessingInitPageContext.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionProcessingInitViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\PatientSessionsPageContext.cs" />
-    <Compile Include="Ui\ViewModel\Sessions\SessionProcessingPageConetxt.cs" />
+    <Compile Include="Ui\ViewModel\Sessions\SessionProcessingPageConext.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionProcessingViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionsViewModel.cs" />
     <Compile Include="Ui\ViewModel\ExtendedStoryboard.cs" />

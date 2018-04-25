@@ -248,17 +248,16 @@ namespace CardioMonitor.Devices.Monitor
         }
 
 
-        public async Task DisconnectAsync()
+        public Task DisconnectAsync()
         {
-            AssertConnection();
             try
             {
-
-                await Task.Yield();
-                _stream.Dispose();
+                _workerController.CloseWorker(_syncWorker);
+                _stream?.Dispose();
                 _stream = null;
-                _tcpClient.Dispose();
+                _tcpClient?.Dispose();
                 _tcpClient = null;
+                return Task.CompletedTask;
             }
             catch (SocketException e)
             {

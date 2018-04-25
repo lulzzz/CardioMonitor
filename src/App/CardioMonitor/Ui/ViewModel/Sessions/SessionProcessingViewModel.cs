@@ -264,7 +264,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     _isResultSaved = false;
 
                     var context = _context;
-
+                    //todo remove init
                     var bedController = await GetInitializedBedControllerAsync(context)
                         .ConfigureAwait(true);
 
@@ -272,7 +272,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         .ConfigureAwait(true);
 
                     var startParams = new SessionParams(
-                        _repeatCount,
+                        context.CyclesCount,
                         //todo в параметры
                         TimeSpan.FromMilliseconds(300),
                         bedControllerConfig,
@@ -280,13 +280,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         PumpingNumberOfAttemptsOnStartAndFinish,
                         PumpingNumberOfAttemptsOnProcessing,
                         _deviceControllerFactory.GetDeviceReconnectionTimeout());
-
-                    var monitorController = _deviceControllerFactory.CreateMonitorController();
+                    
                     Init(
                         startParams,
                         bedController,
                         monitorController,
-                        _workerController);
+                        _workerController,
+                        _logger);
                     await StartAsync().ConfigureAwait(true);
                     break;
             }

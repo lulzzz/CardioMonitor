@@ -7,7 +7,6 @@ namespace CardioMonitor.Devices.Monitor.Infrastructure
     /// </summary>
     public interface IMonitorControllerConfig : IDeviceControllerConfig
     {
-        
         /// <summary>
         /// Период обмена сообщениями с устройством
         /// </summary>
@@ -17,5 +16,13 @@ namespace CardioMonitor.Devices.Monitor.Infrastructure
         /// Таймаут операций
         /// </summary>
         TimeSpan Timeout { get; }
+        
+        /// <summary>
+        /// Время, через которое будет осуществляться попытка переподключения к устройству
+        /// </summary>
+        /// <remarks>
+        /// Если null, то переподключения не будет
+        /// </remarks>
+        TimeSpan? DeviceReconnectionTimeout { get; }
     }
 }

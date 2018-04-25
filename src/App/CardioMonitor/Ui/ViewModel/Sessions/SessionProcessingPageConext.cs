@@ -3,7 +3,7 @@ using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
-    public class SessionProcessingPageConetxt : IStoryboardPageContext
+    public class SessionProcessingPageConext : IStoryboardPageContext
     {
         public int PatientId { get; set; }
 

@@ -40,7 +40,9 @@ namespace CardioMonitor.Devices.Bed.UDP
         [JsonProperty("Timeout")]
         public TimeSpan Timeout { get; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Максимальный угол кровати по оси Х, до которой она будет подниматься
+        /// </summary>
         [JsonProperty("MaxAngleX")]
         public float MaxAngleX { get; }
 
@@ -57,5 +59,23 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// </summary>
         [JsonProperty("UpdateDataPeriod")]
         public TimeSpan UpdateDataPeriod { get; }
+
+
+        float MaxAngleX { get; }
+
+        /// <summary>
+        /// Количество циклов (повторений)
+        /// </summary>
+        short CyclesCount { get; }
+
+        /// <summary>
+        /// Частота движения
+        /// </summary>
+        float MovementFrequency { get; }
+
+        /// <summary>
+        /// Период опроса устройства
+        /// </summary>
+        TimeSpan UpdateDataPeriod { get; }
     }
 }

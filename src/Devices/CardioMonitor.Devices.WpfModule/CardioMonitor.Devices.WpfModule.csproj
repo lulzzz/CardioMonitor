@@ -41,7 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IDeviceControllerConfigViewModel.cs" />
-    <Compile Include="IWpfDeviceModule.cs" />
+    <Compile Include="WpfDeviceModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

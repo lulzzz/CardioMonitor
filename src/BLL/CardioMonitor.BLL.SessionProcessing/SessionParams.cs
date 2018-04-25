@@ -39,13 +39,6 @@ namespace CardioMonitor.BLL.SessionProcessing
         /// </summary>
         public short PumpingNumberOfAttemptsOnProcessing { get; }
 
-        /// <summary>
-        /// Время, через которое будет осуществляться попытка переподключения к устройству
-        /// </summary>
-        /// <remarks>
-        /// Если null, то переподключения не будет
-        /// </remarks>
-        public TimeSpan? DeviceReconnectionTimeout { get; }
         
         public SessionParams(
             short cycleCount, 
