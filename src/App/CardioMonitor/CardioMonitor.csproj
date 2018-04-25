@@ -167,6 +167,7 @@
     <Compile Include="Devices\Configuration\DeviceConfigurationMapper.cs" />
     <Compile Include="Devices\Configuration\DeviceConfigurationService.cs" />
     <Compile Include="Devices\DeviceInfo.cs" />
+    <Compile Include="Devices\DeviceModulesController.cs" />
     <Compile Include="Devices\DeviceTypeInfo.cs" />
     <Compile Include="Devices\Configuration\IDeviceConfigurationService.cs" />
     <Compile Include="Devices\Data\DeviceConfigurationContext.cs" />
@@ -222,6 +223,9 @@
     <Compile Include="Ui\ViewModel\Sessions\SessionProcessingViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionsViewModel.cs" />
     <Compile Include="Ui\ViewModel\ExtendedStoryboard.cs" />
+    <Compile Include="Ui\View\Devices\DevicesView.xaml.cs">
+      <DependentUpon>DevicesView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Ui\View\Patients\PatientsView.xaml.cs">
       <DependentUpon>PatientsView.xaml</DependentUpon>
     </Compile>
@@ -266,6 +270,10 @@
     <Page Include="Resources\IconsNonShared.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Ui\View\Devices\DevicesView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Ui\View\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
