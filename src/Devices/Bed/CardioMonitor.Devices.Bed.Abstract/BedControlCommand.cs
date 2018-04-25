@@ -20,11 +20,6 @@
         /// <summary>
         /// Экстренная остановка
         /// </summary>
-        EmergencyStop = 3,
-        
-        /// <summary>
-        /// Выполнить калибровку (выравнивание кровати относительно горизонта)
-        /// </summary>
-        Callibrate = 4
+        EmergencyStop = 3             
     }
 }

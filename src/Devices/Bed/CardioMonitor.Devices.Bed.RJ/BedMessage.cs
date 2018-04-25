@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Bed.Infrastructure;
@@ -49,30 +50,122 @@ namespace CardioMonitor.Devices.Bed.UDP
             _idDevice = 1;
         }
 
+        /// <summary>
+        /// Сообщение для установки блокировки кровати на время измерения показателей с КМ
+        /// </summary>
+        /// <param name="isBlock"> установить/снять блокировку </param>
+        /// <returns></returns>
+        public byte[] SetBedBlockMessage(bool isBlock)
+        {
+            return GetWriteRegisterMessage(BedBlockPosition, isBlock ? new byte[] {0x00, 0x01} : new byte[] {0x00, 0x00});
+        }
+
+        
+        
+        public byte[] GetBedCommandMessage(BedControlCommand command) //todo а не слишком ли высокий уровень абстракции я сюда спустил?
+        {
+            switch (command)
+            {
+                case BedControlCommand.Start:
+                case BedControlCommand.Pause:
+                {
+                    return GetWriteRegisterMessage(BedMovingPosition, new byte[] {0x00, 0xAA});
+                }
+                case BedControlCommand.EmergencyStop:
+                {
+                    return GetWriteRegisterMessage(BedMovingPosition, new byte[] {0x00, 0xAB});
+                }
+                case BedControlCommand.Reverse:
+                {
+                    return GetWriteRegisterMessage(BedMovingPosition, new byte[] {0x00, 0xAC});
+                }
+                default:
+                {
+                    throw new ArgumentException("Unknow type of command");
+                }
+            }
+        }
+
+        public byte[] SetFreqValueMessage(float freqValue)
+        {
+            var floatToByte = Half.GetBytes((Half) freqValue);
+            return GetWriteRegisterMessage(BedFreqPosition, floatToByte);
+        }
+
+        public byte[] SetMaxAngleValueMessage(float maxAngleValue)
+        {
+            var floatToByte = Half.GetBytes((Half) maxAngleValue);
+            return GetWriteRegisterMessage(BedMaxAnglePosition, floatToByte);
+        }
+
+        public byte[] SetCycleCountValueMessage(byte cycleCountValue)
+        {
+            return GetWriteRegisterMessage(BedCycleCountPosition, new byte[] {0x00, cycleCountValue});
+        }
+
+        private byte[] GetWriteRegisterMessage(byte regNum, byte[] messageToWrite)
+        {
+            return PackageMessage(BedMessageEventType.Write,regNum,messageToWrite);
+        }
 
         public  byte[] GetAllRegisterMessage()
         {
             return PackageMessage(BedMessageEventType.ReadAll, 0 ,new byte[]{0x00, 0x80});
         }
 
-        public BedRegisterValues SetAllRegisterValues(byte[] receiveMessage)
+        public BedRegisterValues GetAllRegisterValues(byte[] receiveMessage)
         {
             UnPackageMessage(receiveMessage);
             if (_messageData.Length < 255) throw new IndexOutOfRangeException();
-            var values = new BedRegisterValues();
-            //byte[] forFreqBytes = new byte[2];
-           // _messageData.CopyTo(forFreqBytes,30);
-           // values.Frequency = Half.ToHalf(forFreqBytes,0);  //todo проверка перевода во float - скорее всего запрос частоты будет не нужен
-            values.BedStatus = (BedStatus)_messageData[BedStatusPosition];
-            values.CurrentCycle = _messageData[CurrentCyclePosition];
-            values.RemainingTime = TimeSpan.FromSeconds(GetValuesFromBytes(_messageData[RemainingTimePosition],_messageData[RemainingTimePosition + 1]));
-            values.ElapsedTime =   TimeSpan.FromSeconds(GetValuesFromBytes(_messageData[ElapsedTimePosition],_messageData[ElapsedTimePosition + 1]));
-            values.BedTargetAngleX = GetHalfValuesFromBytes(_messageData[BedTargetAngleXPosition + 1],
-                _messageData[BedTargetAngleXPosition ]); //Здесь тоже измененный порядок байт - todo подумать как его красиво реверсить
+            var values = new BedRegisterValues
+            {
+                BedStatus = GetBedStatus(_messageData[BedStatusPosition]),
+                CurrentCycle = _messageData[CurrentCyclePosition],
+                RemainingTime = TimeSpan.FromSeconds(GetValuesFromBytes(_messageData[RemainingTimePosition],
+                    _messageData[RemainingTimePosition + 1])),
+                ElapsedTime = TimeSpan.FromSeconds(GetValuesFromBytes(_messageData[ElapsedTimePosition],
+                    _messageData[ElapsedTimePosition + 1])),
+                BedTargetAngleX = GetHalfValuesFromBytes(_messageData[BedTargetAngleXPosition + 1],
+                    _messageData[BedTargetAngleXPosition])
+            };
            
+
+            //Здесь тоже измененный порядок байт - todo подумать как его красиво реверсить
+
             //values.BedR
 
             return values;
+        }
+
+        private BedStatus GetBedStatus(byte input)
+        {
+            switch (input)
+            {
+                case 0xAA:
+                {
+                    return BedStatus.SessionStarted;
+                }
+                case 0xAB:
+                {
+                    return BedStatus.EmergencyStop;
+                }
+                case 0xAC:
+                {
+                    return BedStatus.Reverse;
+                }
+                case 0xAD:
+                {
+                    return BedStatus.Pause;
+                }
+                case 0xAE:
+                {
+                    return BedStatus.Ready;
+                }
+                default:
+                {
+                    return BedStatus.Unknown;
+                }
+            } 
         }
         
         /// <summary>

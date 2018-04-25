@@ -139,6 +139,42 @@ namespace CardioMonitor.Devices.Bed.UDP
             if (_config == null)throw new InvalidOperationException($"Контроллер не инициализирован. Необходимо сначала вызвать метод {nameof(Init)}");
         }
         
+        
+        /// <summary>
+        /// Отправить стартовые параметры на кровать перед запуском
+        /// </summary>
+        private async Task SetInitParamsAsync()
+        {
+            AssertConnection();
+            if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
+            await Task.Yield();
+            BedMessage message = new BedMessage();
+            var sendMessage =  message.SetMaxAngleValueMessage(_config.MaxAngleX);
+            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+            //todo здесь лучше сделать паузу ~100mc 
+            sendMessage =  message.SetFreqValueMessage(_config.MovementFrequency);
+            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+            //todo здесь лучше сделать паузу ~100mc 
+            sendMessage =  message.SetCycleCountValueMessage((byte)_config.CyclesCount);
+            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+        }
+
+        /// <summary>
+        /// Установить/снять блокировку кровати (на время измерения с КМ)
+        /// </summary>
+        /// <param name="isBlock"></param>
+        /// <returns></returns>
+        /// <exception cref="DeviceConnectionException"></exception>
+        public async Task SetBedBlock(bool isBlock)
+        {
+            AssertConnection();
+            if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
+            await Task.Yield();
+            BedMessage message = new BedMessage();
+            var sendMessage = message.SetBedBlockMessage(isBlock);
+            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+        }
+        
         /// <summary>
         /// Обновляет значения регистров с кровати
         /// </summary>
@@ -154,7 +190,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             var getAllRegister = message.GetAllRegisterMessage();
             await _udpClient.SendAsync(getAllRegister, getAllRegister.Length);
             var receiveMessage = await _udpClient.ReceiveAsync();
-            _registerValues = message.SetAllRegisterValues(receiveMessage.Buffer);
+            _registerValues = message.GetAllRegisterValues(receiveMessage.Buffer);
         }
         
         /// <summary>
@@ -201,8 +237,12 @@ namespace CardioMonitor.Devices.Bed.UDP
         {
             RiseExceptions();
             AssertConnection();
-
+            if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
             await Task.Yield();
+            BedMessage message = new BedMessage();
+            var sendMessage =  message.GetBedCommandMessage(command);
+            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+           
         }
 
         private void RiseExceptions()
@@ -254,7 +294,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             RiseExceptions();
             AssertRegisterIsNull();
             await Task.Yield();
-            return  (short)_config.CyclesCount;
+            return  _config.CyclesCount;
         }
 
         public async Task<short> GetCurrentCycleNumberAsync()

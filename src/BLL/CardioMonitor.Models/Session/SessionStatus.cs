@@ -25,10 +25,13 @@
         /// Приостановлен
         /// </summary>
         Suspended,
-        
+        /// <summary>
+        /// Запущен реверс
+        /// </summary>
+        Reverse,
         /// <summary>
         /// Экстренно остановлен
         /// </summary>
-        EmergencyStopped,
+        EmergencyStopped
     }
 }

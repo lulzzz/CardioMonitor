@@ -15,28 +15,38 @@
         /// </summary>
         Ready = 0,
         
-        /// <summary>
-        /// Подготовка к запуску
-        /// </summary>
-        Preparing = 1, 
-        
-        /// <summary>
+       /// <summary>
         ///  Сеанс запущен
         /// </summary>
-        SessionStarted = 2,
+        SessionStarted = 1,
+        
+        /// <summary>
+        /// Экстренная остановка
+        /// </summary>
+        EmergencyStop = 2,
+        
+        /// <summary>
+        /// Запущен реверс
+        /// </summary>
+        Reverse = 3,
+        
+        /// <summary>
+        /// Пауза
+        /// </summary>
+        Pause = 4,
         
         /// <summary>
         /// Блокировка при старте с ПК
         /// </summary>
-        BlockedFromPC = 3,
+        BlockedFromPC = 5,
         
         /// <summary>
         /// Ошибка на устройстве
         /// </summary>
-        Error = 5,
+        Error = 6,
         /// <summary>
         ///  Устройство не готово (ожидание завершения возвращения)
         /// </summary>
-        NotReady = 6
+        NotReady = 7
     }
 }

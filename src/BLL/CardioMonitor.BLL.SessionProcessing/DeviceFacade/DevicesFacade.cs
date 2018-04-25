@@ -572,7 +572,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         }
 
         /// <summary>
-        /// Вызывает действия для указанного параметр только один раз
+        /// Вызывает действия для указанного параметра только один раз
         /// </summary>
         /// <param name="contextParams"></param>
         /// <param name="action"></param>
@@ -775,11 +775,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 await _bedController
                     .ConnectAsync()
                     .ConfigureAwait(false);
-                // выполнить калиборвку относительно горизонта
-                _logger?.Trace($"{GetType().Name}: калибровка инверсионного стола");
-                await _bedController
-                    .ExecuteCommandAsync(BedControlCommand.Callibrate)
-                    .ConfigureAwait(false);
+               
 
                 _logger?.Trace($"{GetType().Name}: инициализация контроллера кардиомонитора");
                 _monitorController.Init(_startParams.MonitorControllerConfig);
