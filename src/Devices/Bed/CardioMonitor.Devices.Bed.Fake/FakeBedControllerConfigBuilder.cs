@@ -12,7 +12,7 @@ namespace CardioMonitor.Devices.Bed.Fake
 
             var config = JsonConvert.DeserializeObject<FakeBedControllerConfig>(jsonConfig);
 
-            return new FakeBedControllerConfig(maxAngleX, cyclesCount, movementFrequency, config.UpdateDataPeriod, config.Timeout);
+            return new FakeBedControllerConfig(maxAngleX, cyclesCount, movementFrequency, config.UpdateDataPeriod, config.Timeout, config.DeviceReconnectionTimeout);
         }
     }
 }

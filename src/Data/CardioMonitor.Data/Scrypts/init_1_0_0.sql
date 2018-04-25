@@ -101,7 +101,26 @@ WITH (
 );
 ALTER TABLE public."PatientParams"
   OWNER TO postgres;
-GRANT ALL ON TABLE public."PatientParams" TO postgres;
+
+-- Table: public."DeviceConfigurations"
+
+-- DROP TABLE public."DeviceConfigurations";
+
+CREATE TABLE public."DeviceConfigurations"
+(
+    "ConfigId" uuid NOT NULL,
+    "ConfigName" text COLLATE pg_catalog."default" NOT NULL,
+    "DeviceId" uuid NOT NULL,
+    "DeviceTypeId" uuid NOT NULL,
+    "ParamsJson" json,
+    CONSTRAINT "DeviceConfigurations_pkey" PRIMARY KEY ("ConfigId")
+)
+WITH (
+    OIDS = FALSE
+)
+
+ALTER TABLE public."DeviceConfigurations"
+    OWNER to postgres;
 
 INSERT INTO public."Version"(
             version)

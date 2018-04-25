@@ -12,12 +12,13 @@ namespace CardioMonitor.Devices.Bed.UDP
 
             var config = JsonConvert.DeserializeObject<BedUdpControllerConfig>(jsonConfig);
 
-            return new BedUdpControllerConfig(config.BedIPEndpoint,
+            return new BedUdpControllerConfig(config.BedIpEndpoint,
                 config.UpdateDataPeriod, 
                 config.Timeout,
                 maxAngleX, 
                 cyclesCount, 
-                movementFrequency);
+                movementFrequency,
+                config.DeviceReconnectionTimeout);
         }
     }
 }

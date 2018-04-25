@@ -1,7 +1,6 @@
 ﻿using System;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace CardioMonitor.Devices.Monitor
 {
@@ -23,7 +22,7 @@ namespace CardioMonitor.Devices.Monitor
             MonitorBroadcastUdpPort = monitorBroadcastUdpPort;
             MonitorTcpPort = monitorTcpPort;
             DeviceReconnectionTimeout = deviceReconnectionTimeout;
-            //todo нужно еще задавать IP
+            //todo нужно еще задавать IP //todo is it true?
         }
 
         /// <summary>

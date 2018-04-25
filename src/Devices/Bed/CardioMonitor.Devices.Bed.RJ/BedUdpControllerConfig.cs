@@ -17,12 +17,14 @@ namespace CardioMonitor.Devices.Bed.UDP
             TimeSpan timeout,
             float maxAngleX, 
             short cyclesCount, 
-            float frequency)
+            float frequency, 
+            TimeSpan? deviceReconnectionTimeout = null)
         {
-            BedIPEndpoint = bedIpEndpoint ?? throw new ArgumentNullException(nameof(bedIpEndpoint));
+            BedIpEndpoint = bedIpEndpoint ?? throw new ArgumentNullException(nameof(bedIpEndpoint));
             MaxAngleX = maxAngleX;
             CyclesCount = cyclesCount;
             MovementFrequency = frequency;
+            DeviceReconnectionTimeout = deviceReconnectionTimeout;
             Timeout = timeout;
             UpdateDataPeriod = updateDataPeriod;
         }
@@ -31,8 +33,8 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// Адрес, по которому можно подключиться к кровати
         /// </summary>
         [NotNull]
-        [JsonProperty("BedIPEndpoint")]
-        public string BedIPEndpoint { get; }
+        [JsonProperty("BedIpEndpoint")]
+        public string BedIpEndpoint { get; }
 
         /// <summary>
         /// Таймаут операций
@@ -47,15 +49,10 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <summary>
         /// Максимальный угол кровати по оси Х, до которой она будет подниматься
         /// </summary>
-        [JsonProperty("MaxAngleX")]
         public float MaxAngleX { get; }
-
-        /// <inheritdoc />
-        [JsonProperty("CyclesCount")]
+        
         public short CyclesCount { get; }
-
-        /// <inheritdoc />
-        [JsonProperty("MovementFrequency")]
+        
         public float MovementFrequency { get; }
 
         /// <summary>

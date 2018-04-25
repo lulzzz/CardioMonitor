@@ -10,12 +10,14 @@ namespace CardioMonitor.Devices.Monitor.Fake
             TimeSpan updateDataPeriod, 
             TimeSpan timeout, 
             TimeSpan defaultDelay, 
-            TimeSpan pumpingDelay)
+            TimeSpan pumpingDelay, 
+            TimeSpan? deviceReconnectionTimeout = null)
         {
             UpdateDataPeriod = updateDataPeriod;
             Timeout = timeout;
             DefaultDelay = defaultDelay;
             PumpingDelay = pumpingDelay;
+            DeviceReconnectionTimeout = deviceReconnectionTimeout;
         }
 
         [JsonProperty("UpdateDataPeriod")]
@@ -23,6 +25,10 @@ namespace CardioMonitor.Devices.Monitor.Fake
 
         [JsonProperty("Timeout")]
         public TimeSpan Timeout { get; }
+
+        /// <inheritdoc />
+        [JsonProperty("DeviceReconnectionTimeout")]
+        public TimeSpan? DeviceReconnectionTimeout { get; }
 
         [JsonProperty("DefaultDelay")]
         public TimeSpan DefaultDelay { get; }
