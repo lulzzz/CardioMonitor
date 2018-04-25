@@ -314,7 +314,6 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Devices\Data\Scrypts\init_1_0_0.sql" />
     <Content Include="Resources\Entypo-license.txt" />
     <Content Include="Resources\WindowsIcons-license.txt" />
     <None Include="app.config">

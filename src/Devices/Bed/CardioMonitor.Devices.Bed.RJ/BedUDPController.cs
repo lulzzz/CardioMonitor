@@ -90,7 +90,7 @@ namespace CardioMonitor.Devices.Bed.UDP
                 _udpClient = new UdpClient();
 
 
-                var endPoint = IpEndPointParser.Parse(_config.BedIPEndpoint);
+                var endPoint = IpEndPointParser.Parse(_config.BedIpEndpoint);
                 _udpClient.Connect(endPoint);
                 await UpdateRegistersValueAsync()
                     .ConfigureAwait(false);

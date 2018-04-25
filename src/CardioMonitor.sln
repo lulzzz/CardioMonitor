@@ -51,11 +51,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.BLL.Mappers",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{A5037BBA-6297-4556-B2B9-F09E8989543C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scrypts", "scrypts", "{467A2E62-1F73-4D37-8CF6-2E4A40F95272}"
-	ProjectSection(SolutionItems) = preProject
-		drop_all.sql = drop_all.sql
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Integrations", "Integrations", "{5AA0AAFD-1B20-49A8-98FE-ED54808240D6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Data.EF.IntegrationsTests", "..\tests\IntegrationTests\CardioMonitor.Data.EF.IntegrationsTests\CardioMonitor.Data.EF.IntegrationsTests.csproj", "{30D57049-A4F5-4CA7-A5BD-DBD9FFAD5A64}"
