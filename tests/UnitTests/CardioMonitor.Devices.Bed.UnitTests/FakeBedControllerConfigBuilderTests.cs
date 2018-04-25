@@ -29,7 +29,7 @@ namespace CardioMonitor.Devices.Bed.UnitTests
 
             var builder = new FakeBedControllerConfigBuilder();
 
-            var config = builder.Build(maxAngle, cyclesCount, movementFrequency, jsonConfig);
+            var config = builder.Build(maxAngle, cyclesCount, movementFrequency, jsonConfig) as FakeBedControllerConfig;
 
             Assert.Equal(maxAngle, config.MaxAngleX);
             Assert.Equal(cyclesCount, config.CyclesCount);

@@ -46,8 +46,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             IBedControllerConfig bedControllerConfig, 
             IMonitorControllerConfig monitorControllerConfig,
             short pumpingNumberOfAttemptsOnStartAndFinish, 
-            short pumpingNumberOfAttemptsOnProcessing, 
-            TimeSpan? deviceReconnectionTimeout = null)
+            short pumpingNumberOfAttemptsOnProcessing)
         {
             CycleCount = cycleCount;
             UpdateDataPeriod = updateDataPeriod;
@@ -55,7 +54,6 @@ namespace CardioMonitor.BLL.SessionProcessing
             MonitorControllerConfig = monitorControllerConfig;
             PumpingNumberOfAttemptsOnStartAndFinish = pumpingNumberOfAttemptsOnStartAndFinish;
             PumpingNumberOfAttemptsOnProcessing = pumpingNumberOfAttemptsOnProcessing;
-            DeviceReconnectionTimeout = deviceReconnectionTimeout;
         }
     }
 }

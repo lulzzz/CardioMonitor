@@ -233,7 +233,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             IFilesManager filesRepository,
             ISessionsService sessionsService,
             [NotNull] IDeviceControllerFactory deviceControllerFactory,
-            [NotNull] IWorkerController workerController) 
+            [NotNull] IWorkerController workerController, 
+            [NotNull] IDeviceConfigurationService deviceConfigurationService) 
         {
 
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -241,10 +242,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _deviceControllerFactory = deviceControllerFactory ?? throw new ArgumentNullException(nameof(deviceControllerFactory));
             _workerController = workerController;
+            _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
 
             //todo for what?
            // Session = new SessionModel();
-            _logger = logger;
         }
 
         /// <summary>
@@ -264,22 +265,30 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     _isResultSaved = false;
 
                     var context = _context;
-                    //todo remove init
-                    var bedController = await GetInitializedBedControllerAsync(context)
+
+                    var bedController =
+                        _deviceControllerFactory
+                            .CreateDeviceController<IBedController>(context.InverstionTableConfigId);
+                    var bedControllerConfig = await GetBedControllerInitConfigAsync(context)
                         .ConfigureAwait(true);
 
-                    var monitorController = await GetInitializedMonitorControllerAsync(context)
-                        .ConfigureAwait(true);
+
+                    var monitorController =
+                        _deviceControllerFactory
+                            .CreateDeviceController<IMonitorController>(context.InverstionTableConfigId);
+
+                    var monitorInitConfig = await
+                        GetMonitorControllerInitConfigAsync(context)
+                            .ConfigureAwait(true);
 
                     var startParams = new SessionParams(
                         context.CyclesCount,
                         //todo в параметры
                         TimeSpan.FromMilliseconds(300),
                         bedControllerConfig,
-                        monitorInitParams,
-                        PumpingNumberOfAttemptsOnStartAndFinish,
-                        PumpingNumberOfAttemptsOnProcessing,
-                        _deviceControllerFactory.GetDeviceReconnectionTimeout());
+                        monitorInitConfig,
+                        context.PumpingNumberOfAttemptsOnStartAndFinish,
+                        context.PumpingNumberOfAttemptsOnProcessing);
                     
                     Init(
                         startParams,
@@ -292,7 +301,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
-        private async Task<IBedController> GetInitializedBedControllerAsync(SessionProcessingPageConext context)
+        private async Task<IBedControllerConfig> GetBedControllerInitConfigAsync(SessionProcessingPageConext context)
         {
             var bedSavedConfig = await
                 _deviceConfigurationService
@@ -303,21 +312,15 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 .CreateDeviceControllerConfigBuilder<IBedControllerConfigBuilder>(
                     context.InverstionTableConfigId);
 
-            var bedController =
-                _deviceControllerFactory
-                    .CreateDeviceController<IBedController>(context.InverstionTableConfigId);
 
-            var bedInitConfig = bedControllerConfigBuilder.Build(
+            return bedControllerConfigBuilder.Build(
                 context.MaxAngleX,
                 context.CyclesCount,
                 context.MovementFrequency,
                 bedSavedConfig.ParamsJson);
-            bedController.Init(bedInitConfig);
-
-            return bedController;
         }
 
-        private async Task<IMonitorController> GetInitializedMonitorControllerAsync(SessionProcessingPageConext context)
+        private async Task<IMonitorControllerConfig> GetMonitorControllerInitConfigAsync(SessionProcessingPageConext context)
         {
             var monitorSavedConfig = await
                 _deviceConfigurationService
@@ -328,15 +331,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 .CreateDeviceControllerConfigBuilder<IMonitorControllerConfigBuilder>(
                     context.InverstionTableConfigId);
 
-            var monitorController =
-                _deviceControllerFactory
-                    .CreateDeviceController<IMonitorController>(context.InverstionTableConfigId);
 
-            var bedInitConfig = monitorControllerConfigBuilder.Build(
+            return monitorControllerConfigBuilder.Build(
                 monitorSavedConfig.ParamsJson);
-            monitorController.Init(bedInitConfig);
-
-            return monitorController;
         }
 
         /// <summary>

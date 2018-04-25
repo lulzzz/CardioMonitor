@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -439,12 +438,5 @@ namespace CardioMonitor.BLL.SessionProcessing
             SessionStatus = SessionStatus.TerminatedOnError;
         }
         #endregion
-    }
-
-    public class CycleData
-    {
-        public short CycleNumber { get; set; }
-
-        public ObservableCollection<CheckPointParams> CycleParams { get; set; }
     }
 }

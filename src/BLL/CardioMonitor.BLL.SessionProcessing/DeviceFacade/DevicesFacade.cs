@@ -511,7 +511,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private async Task ReconnectToInversionTableAsync()
         {
             if (_monitorController.IsConnected) return;
-            if (_startParams.DeviceReconnectionTimeout == null) return;
+            if (_startParams.BedControllerConfig.DeviceReconnectionTimeout == null) return;
             
             if (Monitor.TryEnter(_monitorRecconectionSyncObject))
             {
@@ -520,7 +520,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 {
                     if (_monitorController.IsConnected) return;
                     await _monitorController.DisconnectAsync().ConfigureAwait(false);
-                    await Task.Delay(_startParams.DeviceReconnectionTimeout.Value).ConfigureAwait(false);
+                    await Task.Delay(_startParams.BedControllerConfig.DeviceReconnectionTimeout.Value).ConfigureAwait(false);
                     await _monitorController.ConnectAsync().ConfigureAwait(false);
                     _logger?.Info($"{GetType().Name}: установлено подключение к инверсионному столу");
                 }
@@ -544,7 +544,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private async Task ReconnectToMonitorAsync()
         { 
             if (_bedController.IsConnected) return;
-            if (_startParams.DeviceReconnectionTimeout == null) return;
+            if (_startParams.MonitorControllerConfig.DeviceReconnectionTimeout == null) return;
             
             if (Monitor.TryEnter(_inversionTableRecconectionSyncObject))
             {
@@ -553,7 +553,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     _logger?.Info($"{GetType().Name}: повторное подключение к кардиомонитору...");
                     if (_bedController.IsConnected) return;
                     await _bedController.DisconnectAsync().ConfigureAwait(false);
-                    await Task.Delay(_startParams.DeviceReconnectionTimeout.Value).ConfigureAwait(false);
+                    await Task.Delay(_startParams.MonitorControllerConfig.DeviceReconnectionTimeout.Value).ConfigureAwait(false);
                     await _bedController.ConnectAsync().ConfigureAwait(false);
                     _logger?.Info($"{GetType().Name}: установлено подключение к кардиомонитору");
                 }

@@ -11,13 +11,15 @@ namespace CardioMonitor.Devices.Bed.Fake
             short cyclesCount, 
             float movementFrequency, 
             TimeSpan updateDataPeriod, 
-            TimeSpan timeout)
+            TimeSpan timeout,
+            TimeSpan? deviceReconnectionTimeout = null)
         {
             MaxAngleX = maxAngleX;
             CyclesCount = cyclesCount;
             MovementFrequency = movementFrequency;
             UpdateDataPeriod = updateDataPeriod;
             Timeout = timeout;
+            DeviceReconnectionTimeout = deviceReconnectionTimeout;
         }
 
 
@@ -30,5 +32,9 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         [JsonProperty("Timeout")]
         public TimeSpan Timeout { get;  }
+
+        /// <inheritdoc />
+        [JsonProperty("DeviceReconnectionTimeout")]
+        public TimeSpan? DeviceReconnectionTimeout { get; }
     }
 }

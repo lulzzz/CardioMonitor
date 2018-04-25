@@ -228,6 +228,8 @@ namespace CardioMonitor.Devices.Bed.Fake
         public TimeSpan UpdateDataPeriod { get; }
         public TimeSpan Timeout { get; }
 
+        public TimeSpan? DeviceReconnectionTimeout { get; }
+
         public TimeSpan ConenctDelay { get; set; }
 
         public TimeSpan DisconnectDelay { get; set; }
