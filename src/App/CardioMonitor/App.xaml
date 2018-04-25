@@ -219,36 +219,6 @@
                         </Setter>
                     </Style>
 
-                    <Style x:Key="FakeDeviceControllerConfigViewModelStyle"
-                           TargetType="{x:Type local:FadeDeviceControllerConfigViewModel}">
-
-                        <Setter Property="Control.Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type local:FadeDeviceControllerConfigViewModel}">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto"/>
-                                            <RowDefinition Height="Auto"/>
-                                        </Grid.RowDefinitions>
-                                        <TextBox Grid.Row="0"
-                                                 Text="{Binding UpdateDataPeriodMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                                 HorizontalAlignment="Center"
-                                                 Width="350"
-                                                 Controls:TextBoxHelper.Watermark="Период обновления данных, мс"
-                                                 Controls:TextBoxHelper.UseFloatingWatermark="True"
-                                                 Margin="10"/>
-                                        <TextBox Grid.Row="1"
-                                                 Text="{Binding TimeoutMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                                                 HorizontalAlignment="Center"
-                                                 Width="350"
-                                                 Controls:TextBoxHelper.Watermark="Таймаут, мс"
-                                                 Controls:TextBoxHelper.UseFloatingWatermark="True"
-                                                 Margin="10"/>
-                                    </Grid>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
                 </ResourceDictionary>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

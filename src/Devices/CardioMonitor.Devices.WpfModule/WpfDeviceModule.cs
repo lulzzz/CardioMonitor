@@ -10,7 +10,8 @@ namespace CardioMonitor.Devices.WpfModule
             string deviceName, 
             Type deviceControllerType, 
             Type deviceControllerConfigBuilder, 
-            Type deviceControllerConfigViewModel)
+            Type deviceControllerConfigViewModel,
+            Type deviceControllerConfigView)
         {
             if (String.IsNullOrWhiteSpace(deviceName)) throw new ArgumentNullException(nameof(deviceName));
 
@@ -20,6 +21,7 @@ namespace CardioMonitor.Devices.WpfModule
             DeviceControllerType = deviceControllerType ?? throw new ArgumentNullException(nameof(deviceControllerType));
             DeviceControllerConfigBuilder = deviceControllerConfigBuilder ?? throw new ArgumentNullException(nameof(deviceControllerConfigBuilder));
             DeviceControllerConfigViewModel = deviceControllerConfigViewModel ?? throw new ArgumentNullException(nameof(deviceControllerConfigViewModel));
+            DeviceControllerConfigView = deviceControllerConfigView ?? throw new ArgumentNullException(nameof(deviceControllerConfigView));
         }
 
         public Guid DeviceId { get; }
@@ -32,6 +34,7 @@ namespace CardioMonitor.Devices.WpfModule
         public Type DeviceControllerConfigBuilder { get; }
 
         public Type DeviceControllerConfigViewModel { get; }
+        public Type DeviceControllerConfigView { get; }
     }
 
     public class DeviceTypeModule
