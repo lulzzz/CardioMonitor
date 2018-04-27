@@ -20,6 +20,8 @@ namespace CardioMonitor.Ui.ViewModel.Devices
         [NotNull]
         private readonly ILogger _logger;
 
+        [NotNull] private readonly IUiInvoker _uiInvoker;
+
         private ICommand _addCommand;
         private ICommand _removeCommand;
         private ICommand _saveCommand;
@@ -49,11 +51,12 @@ namespace CardioMonitor.Ui.ViewModel.Devices
         public DeviceConfigsViewModel(
             [NotNull] ILogger logger,
             [NotNull] IDeviceConfigurationService configurationService,
-            [NotNull] IDeviceModulesController deviceModulesController)
+            [NotNull] IDeviceModulesController deviceModulesController, [NotNull] IUiInvoker uiInvoker)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
             _deviceModulesController = deviceModulesController ?? throw new ArgumentNullException(nameof(deviceModulesController));
+            _uiInvoker = uiInvoker;
 
             _deviceTypes = new Dictionary<Guid, DeviceTypeInfo>();
             _deviceInfos = new Dictionary<Guid, DeviceInfo>();
@@ -254,7 +257,11 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                     var view = _deviceModulesController.GetView(savedConfig.DeviceId);
                     var viewModel = _deviceModulesController.GetViewModel(savedConfig.DeviceId);
                     viewModel.SetConfigJson(savedConfig.ParamsJson);
-                    view.DataContext = viewModel;
+                    _uiInvoker.Invoke(() =>
+                    {
+
+                        view.DataContext = viewModel;
+                    });
 
                     var deviceViewModel = new DeviceConfigViewModel(
                         savedConfig.ConfigId,
@@ -308,7 +315,11 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                     .ConfigureAwait(false);
 
                 var view = _deviceModulesController.GetView(context.DeviceId);
-                view.DataContext = viewModel;
+                _uiInvoker.Invoke(() =>
+                {
+
+                    view.DataContext = viewModel;
+                });
 
                 var deviceViewModel = new DeviceConfigViewModel(
                     deviceConfig.ConfigId,
@@ -387,9 +398,9 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             return Task.CompletedTask;
         }
 
-        public event Func<object, Task> PageCanceled;
-        public event Func<object, Task> PageCompleted;
-        public event Func<object, Task> PageBackRequested;
+        public event Func<TransitionEvent, Task> PageCanceled;
+        public event Func<TransitionEvent, Task> PageCompleted;
+        public event Func<TransitionEvent, Task> PageBackRequested;
         public event Func<object, TransitionRequest, Task> PageTransitionRequested;
 
         #endregion

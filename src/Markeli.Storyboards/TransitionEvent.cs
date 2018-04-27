@@ -3,9 +3,9 @@ using JetBrains.Annotations;
 
 namespace Markeli.Storyboards
 {
-    public class TrasitionEvent
+    public class TransitionEvent
     {
-        public TrasitionEvent(
+        public TransitionEvent(
             [NotNull] object sender, 
             [CanBeNull] IStoryboardPageContext context = null)
         {

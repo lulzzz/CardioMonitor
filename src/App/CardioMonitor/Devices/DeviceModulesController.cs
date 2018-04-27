@@ -6,6 +6,7 @@ using System.Windows.Controls;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.WpfModule;
 using JetBrains.Annotations;
+using Markeli.Storyboards;
 using SimpleInjector;
 
 namespace CardioMonitor.Devices
@@ -17,15 +18,18 @@ namespace CardioMonitor.Devices
         private readonly Dictionary<Guid, WpfDeviceModule> _deviceModules;
         private readonly Dictionary<Guid, DeviceTypeModule> _deviceTypeModules;
         private readonly IDeviceControllerFactory _deviceControllerFactory;
+        private readonly IUiInvoker _uiInvoker;
 
         public DeviceModulesController(
             [NotNull] Container container,
             [NotNull] IDeviceConfigurationService deviceConfigurationService,
-            [NotNull] IDeviceControllerFactory deviceControllerFactory)
+            [NotNull] IDeviceControllerFactory deviceControllerFactory,
+            [NotNull] IUiInvoker uiInvoker)
         {
             _container = container ?? throw new ArgumentNullException(nameof(container));
             _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
             _deviceControllerFactory = deviceControllerFactory ?? throw new ArgumentNullException(nameof(deviceControllerFactory));
+            _uiInvoker = uiInvoker ?? throw new ArgumentNullException(nameof(uiInvoker));
             _deviceModules = new Dictionary<Guid, WpfDeviceModule>();
             _deviceTypeModules = new Dictionary<Guid, DeviceTypeModule>();
         }
@@ -56,7 +60,7 @@ namespace CardioMonitor.Devices
 
             var module = _deviceModules[deviceId];
 
-            return _container.GetInstance(module.DeviceControllerConfigViewModel) as IDeviceControllerConfigViewModel;
+            return _uiInvoker.Invoke(() =>_container.GetInstance(module.DeviceControllerConfigViewModel) as IDeviceControllerConfigViewModel);
         }
 
         public UserControl GetView(Guid deviceId) 
@@ -65,7 +69,7 @@ namespace CardioMonitor.Devices
 
             var module = _deviceModules[deviceId];
 
-            return _container.GetInstance(module.DeviceControllerConfigView) as UserControl;
+            return _uiInvoker.Invoke(() =>_container.GetInstance(module.DeviceControllerConfigView) as UserControl);
         }
 
         public ICollection<DeviceTypeInfo> GetRegisteredDevicesTypes()

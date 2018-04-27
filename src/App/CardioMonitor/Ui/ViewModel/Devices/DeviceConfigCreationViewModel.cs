@@ -135,14 +135,13 @@ namespace CardioMonitor.Ui.ViewModel.Devices
         {
 
             return PageCompleted?.InvokeAsync(
-                this,
-                new DeviceConfigsViewModelPageContext
+                new TransitionEvent(this, new DeviceConfigsViewModelPageContext
                 {
                     ConfigName = ConfigName,
                     DeviceId = SelectedDevice.Id,
                     DeviceTypeId = SelectedDeviceType.Id,
                     IsAdded = false
-                });
+                }));
         }
 
         #region IStoryboardViewModel
@@ -196,9 +195,9 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             return Task.CompletedTask;
         }
 
-        public event Func<object, Task> PageCanceled;
-        public event Func<object, Task> PageCompleted;
-        public event Func<object, Task> PageBackRequested;
+        public event Func<TransitionEvent, Task> PageCanceled;
+        public event Func<TransitionEvent, Task> PageCompleted;
+        public event Func<TransitionEvent, Task> PageBackRequested;
         public event Func<object, TransitionRequest, Task> PageTransitionRequested;
 
         #endregion

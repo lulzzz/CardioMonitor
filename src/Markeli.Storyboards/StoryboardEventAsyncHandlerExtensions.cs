@@ -5,7 +5,7 @@ namespace Markeli.Storyboards
 {
     public static class StoryboardEventAsyncHandlerExtensions
     {
-        public static Task InvokeAsync(this Func<object, Task> handler, object arg)
+        public static Task InvokeAsync(this Func<TransitionEvent, Task> handler, TransitionEvent arg)
         {
             if (handler == null)
             {
@@ -17,7 +17,7 @@ namespace Markeli.Storyboards
 
             for (var i = 0; i < invocationList.Length; i++)
             {
-                handlerTasks[i] = ((Func<object, Task>)invocationList[i])(arg);
+                handlerTasks[i] = ((Func<TransitionEvent, Task>)invocationList[i])(arg);
             }
 
             return Task.WhenAll(handlerTasks);

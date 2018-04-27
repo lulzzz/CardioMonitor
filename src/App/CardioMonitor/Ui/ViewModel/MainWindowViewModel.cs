@@ -226,7 +226,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 viewModel: typeof(DeviceConfigCreationViewModel),
                 isStartPage: false);
 
-            deviceConfigStoryboard.RegisterTransition(PageIds.DevicesPageId, PageIds.DeviceCreationPageId, PageTransitionTrigger.Completed);
+            deviceConfigStoryboard.RegisterTransition(PageIds.DeviceCreationPageId, PageIds.DevicesPageId, PageTransitionTrigger.Completed);
 
             var settingsStoryboard = new ExtendedStoryboard(
                 StoryboardIds.SettingsStoryboardId,

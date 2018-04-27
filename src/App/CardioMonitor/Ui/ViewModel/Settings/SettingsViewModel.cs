@@ -367,11 +367,11 @@ namespace CardioMonitor.Ui.ViewModel.Settings
             return Task.CompletedTask;
         }
 
-        public event Func<object, Task> PageCanceled;
+        public event Func<TransitionEvent, Task> PageCanceled;
 
-        public event Func<object, Task> PageCompleted;
+        public event Func<TransitionEvent, Task> PageCompleted;
 
-        public event Func<object, Task> PageBackRequested;
+        public event Func<TransitionEvent, Task> PageBackRequested;
 
         public event Func<object, TransitionRequest, Task> PageTransitionRequested;
 

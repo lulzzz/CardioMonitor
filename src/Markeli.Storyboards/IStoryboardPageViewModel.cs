@@ -22,12 +22,12 @@ namespace Markeli.Storyboards
 
         Task CloseAsync();
 
-        event Func<TrasitionEvent, Task> PageCanceled;
+        event Func<TransitionEvent, Task> PageCanceled;
 
-        event Func<TrasitionEvent, Task> PageCompleted;
+        event Func<TransitionEvent, Task> PageCompleted;
 
-        event Func<TrasitionEvent, Task> PageBackRequested;
+        event Func<TransitionEvent, Task> PageBackRequested;
 
-        event Func<TrasitionEvent, TransitionRequest, Task> PageTransitionRequested;
+        event Func<object, TransitionRequest, Task> PageTransitionRequested;
     }
 }
