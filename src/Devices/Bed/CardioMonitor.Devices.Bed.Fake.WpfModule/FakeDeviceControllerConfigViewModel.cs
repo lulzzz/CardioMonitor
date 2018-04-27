@@ -64,7 +64,7 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
         }
         private int _reconnectionTimeoutSec;
 
-        public bool CanGetConfig => this[String.Empty] == String.Empty;
+        public bool CanGetConfig => String.IsNullOrEmpty(Error);
 
         public string GetConfigJson()
         {
@@ -88,6 +88,7 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
             {
                 TimeoutMs = DefaultTimeoutMs;
                 UpdateDataPeriodMs = DefaultUpdateDataPeriodMs;
+                NeedReconnect = false;
                 return;
             }
             var config = JsonConvert.DeserializeObject<FakeBedControllerConfig>(jsonConfig);
