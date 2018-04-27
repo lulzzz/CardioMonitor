@@ -134,13 +134,15 @@ namespace CardioMonitor.Ui.ViewModel.Devices
         private Task SaveAsync()
         {
 
-            return PageCompleted?.InvokeAsync(new DeviceConfigsViewModelPageContext
-            {
-                ConfigName = ConfigName,
-                DeviceId = SelectedDevice.Id,
-                DeviceTypeId = SelectedDeviceType.Id,
-                IsAdded = false
-            });
+            return PageCompleted?.InvokeAsync(
+                this,
+                new DeviceConfigsViewModelPageContext
+                {
+                    ConfigName = ConfigName,
+                    DeviceId = SelectedDevice.Id,
+                    DeviceTypeId = SelectedDeviceType.Id,
+                    IsAdded = false
+                });
         }
 
         #region IStoryboardViewModel

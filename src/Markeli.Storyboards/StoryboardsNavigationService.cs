@@ -150,15 +150,16 @@ namespace Markeli.Storyboards
             });
         }
 
-        private async Task ViewModelOnPageCompleted(object sender)
+        private async Task ViewModelOnPageCompleted([NotNull] TrasitionEvent trasitionEvent)
         {
-            if (!(sender is IStoryboardPageViewModel viewModel))
+            if (trasitionEvent == null) throw new ArgumentNullException(nameof(trasitionEvent));
+            if (!(trasitionEvent.Sender is IStoryboardPageViewModel))
                 throw new InvalidOperationException("Incorrect request of transition");
             
-            await HandleViewModelTransitionsAsync(viewModel, PageTransitionTrigger.Completed).ConfigureAwait(false);
+            await HandleViewModelTransitionsAsync(trasitionEvent.Sender, PageTransitionTrigger.Completed, trasitionEvent.Context).ConfigureAwait(false);
         }
 
-        private Task HandleViewModelTransitionsAsync(object sender, PageTransitionTrigger trigger)
+        private Task HandleViewModelTransitionsAsync(object sender, PageTransitionTrigger trigger, IStoryboardPageContext context = null)
         {
             return _invoker.InvokeAsync(async () =>
             {
@@ -171,18 +172,25 @@ namespace Markeli.Storyboards
                 if (storyboard == null) throw new InvalidOperationException("Storyboard not found");
 
                 var destinationPageId = storyboard.GetDestinationPage(viewModel.PageId, trigger);
-                await GoToPageAsync(destinationPageId, storyboard.StoryboardId).ConfigureAwait(true);
+                await GoToPageAsync(destinationPageId, storyboard.StoryboardId, context).ConfigureAwait(true);
             });
         }
 
-        private Task ViewModelOnPageCanceled(object sender)
+        private Task ViewModelOnPageCanceled([NotNull] TrasitionEvent trasitionEvent)
         {
-            return HandleViewModelTransitionsAsync(sender, PageTransitionTrigger.Canceled);
+            if (trasitionEvent == null) throw new ArgumentNullException(nameof(trasitionEvent));
+            if (!(trasitionEvent.Sender is IStoryboardPageViewModel))
+                throw new InvalidOperationException("Incorrect request of transition");
+            return HandleViewModelTransitionsAsync(trasitionEvent.Sender, PageTransitionTrigger.Canceled, trasitionEvent.Context);
         }
 
-        private Task ViewModelOnPageBackRequested(object sender)
+        private Task ViewModelOnPageBackRequested([NotNull] TrasitionEvent trasitionEvent)
         {
-            return HandleViewModelTransitionsAsync(sender, PageTransitionTrigger.Back);
+            if (trasitionEvent == null) throw new ArgumentNullException(nameof(trasitionEvent));
+            if (!(trasitionEvent.Sender is IStoryboardPageViewModel))
+                throw new InvalidOperationException("Incorrect request of transition");
+
+            return HandleViewModelTransitionsAsync(trasitionEvent.Sender, PageTransitionTrigger.Back, trasitionEvent.Context);
         }
 
         public Task GoToPageAsync(Guid pageId, Guid? storyboardId = null, IStoryboardPageContext pageContext = null)
