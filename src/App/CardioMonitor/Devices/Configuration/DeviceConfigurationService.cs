@@ -98,16 +98,17 @@ namespace CardioMonitor.Devices.Configuration
 
             using (var context = _contextFactory.Create())
             {
-                var result = await context.DeviceConfigurations.AsNoTracking()
+                var result = await context.DeviceConfigurations
                     .FirstOrDefaultAsync(x => x.ConfigId == config.ConfigId
                                               && _registeredDeviceIds.Contains(x.DeviceId))
                     .ConfigureAwait(false);
 
                 if (result == null) throw new ArgumentException();
-
-                var entity = config.ToEntity();
-                context.DeviceConfigurations.Attach(entity);
-                context.Entry(entity).State = EntityState.Modified;
+                
+                result.DeviceId = config.DeviceId;
+                result.ConfigId = config.ConfigId;
+                result.DeviceTypeId = config.DeviceTypeId;
+                result.ParamsJson = config.ParamsJson;
 
                 await context.SaveChangesAsync();
             }

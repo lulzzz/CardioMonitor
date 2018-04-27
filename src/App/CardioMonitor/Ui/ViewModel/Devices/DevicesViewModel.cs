@@ -20,7 +20,9 @@ namespace CardioMonitor.Ui.ViewModel.Devices
         public DeviceConfigViewModel(
             Guid configId,
             [NotNull] string deviceConfigName,
+            Guid deviceTypeId,
             [NotNull] string deviceTypeName,
+            Guid deviceId,
             [NotNull] string deviceName,
             [NotNull] UIElement configView,
             [NotNull] IDeviceControllerConfigViewModel configViewModel)
@@ -31,9 +33,13 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             _configView = configView ?? throw new ArgumentNullException(nameof(configView));
             _configViewModel = configViewModel ?? throw new ArgumentNullException(nameof(configViewModel));
             ConfigId = configId;
+            DeviceTypeId = deviceTypeId;
+            DeviceId = deviceId;
         }
 
         public Guid ConfigId { get; }
+        public Guid DeviceTypeId { get; }
+        public Guid DeviceId { get; }
 
         public string DeviceTypeName
         {
@@ -202,21 +208,72 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             }
         }
 
-        private Task SaveConfigAsync()
+        private async Task SaveConfigAsync()
         {
-            var config = SelectedDeviceConfig.ConfigViewModel.GetConfigJson();
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Сохранение изменений...";
+                var selectedDeviceConfig = SelectedDeviceConfig;
+                var jsonConfig = selectedDeviceConfig.ConfigViewModel.GetConfigJson();
 
-            _configurationService.GetConfigurationsAsync()
+                var deviceConfiguration = new DeviceConfiguration
+                {
+                    ConfigId = selectedDeviceConfig.ConfigId,
+                    ConfigName = selectedDeviceConfig.DeviceConfigName,
+                    DeviceId = selectedDeviceConfig.DeviceId,
+                    DeviceTypeId = selectedDeviceConfig.DeviceTypeId,
+                    ParamsJson = jsonConfig
+                };
+
+                await _configurationService
+                    .EditDeviceConfigurationAsync(deviceConfiguration)
+                    .ConfigureAwait(true);
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"{GetType().Name}: ошибка сохранения изменений конфигурации устройства. Причина: {e.Message}", e);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка сохранения изменений конфигурации").ConfigureAwait(false);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
-        private Task AddConfigAsync()
+        private async Task AddConfigAsync()
         {
-            return Task.CompletedTask;
+            var handler = PageTransitionRequested;
+            if (handler == null) return;
+            await handler.Invoke(
+                this,
+                new TransitionRequest(PageIds.DeviceCreationPageId, null))
+                .ConfigureAwait(true);
         }
 
-        private Task RemoveConfigAsync()
+        private async Task RemoveConfigAsync()
         {
-            return Task.CompletedTask;
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Удаление конфигурации...";
+
+                await _configurationService
+                    .DeleteDeviceConfigurationAsync(SelectedDeviceConfig.ConfigId)
+                    .ConfigureAwait(true);
+
+                DeviceConfigs.Remove(SelectedDeviceConfig);
+                SelectedDeviceConfig = null;
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"{GetType().Name}: ошибка удаления конфигурации. Причина: {e.Message}", e);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления конфигурации");
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private async Task InitPageAsync() {
@@ -266,7 +323,9 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                     var deviceViewModel = new DeviceConfigViewModel(
                         savedConfig.ConfigId,
                         savedConfig.ConfigName,
+                        savedConfig.DeviceTypeId,
                         _deviceTypes[savedConfig.DeviceTypeId].Name,
+                        savedConfig.DeviceId,
                         _deviceInfos[savedConfig.DeviceId].Name,
                         view,
                         viewModel);
@@ -293,6 +352,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             {
                 IsBusy = true;
                 BusyMessage = "Добавление новой конфигурации со значениями по умолчанию...";
+                context.IsAdded = true;
 
                 var viewModel = _deviceModulesController.GetViewModel(context.DeviceId);
 
@@ -316,8 +376,10 @@ namespace CardioMonitor.Ui.ViewModel.Devices
 
                 var deviceViewModel = new DeviceConfigViewModel(
                     deviceConfig.ConfigId,
-                    deviceConfig.ConfigName,
+                    deviceConfig.ConfigName, 
+                    deviceConfig.DeviceTypeId,
                     _deviceTypes[deviceConfig.DeviceTypeId].Name,
+                    deviceConfig.DeviceId,
                     _deviceInfos[deviceConfig.DeviceId].Name,
                     view,
                     viewModel);
@@ -325,6 +387,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 DeviceConfigs.Add(deviceViewModel);
 
                 SelectedDeviceConfig = deviceViewModel;
+
             }
             catch (Exception e)
             {

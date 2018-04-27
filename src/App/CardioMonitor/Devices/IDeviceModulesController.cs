@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using CardioMonitor.Devices.WpfModule;
 
 namespace CardioMonitor.Devices
@@ -12,7 +13,7 @@ namespace CardioMonitor.Devices
         void RegisterDevice(WpfDeviceModule module);
 
         IDeviceControllerConfigViewModel GetViewModel(Guid deviceId);
-        UIElement GetView(Guid deviceId);
+        UserControl GetView(Guid deviceId);
 
         ICollection<DeviceTypeInfo> GetRegisteredDevicesTypes();
 
