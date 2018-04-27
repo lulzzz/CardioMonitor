@@ -12,17 +12,24 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.View.Devices
 {
     /// <summary>
     /// Interaction logic for DeviceConfigCreationView.xaml
     /// </summary>
-    public partial class DeviceConfigCreationView : UserControl
+    public partial class DeviceConfigCreationView : IStoryboardPageView
     {
         public DeviceConfigCreationView()
         {
             InitializeComponent();
+        }
+
+        public IStoryboardPageViewModel ViewModel
+        {
+            get => DataContext as IStoryboardPageViewModel;
+            set => DataContext = value;
         }
     }
 }

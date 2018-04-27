@@ -5,9 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.Ui.Base;
+using CardioMonitor.Ui.View.Devices;
 using CardioMonitor.Ui.View.Patients;
 using CardioMonitor.Ui.View.Sessions;
 using CardioMonitor.Ui.View.Settings;
+using CardioMonitor.Ui.ViewModel.Devices;
 using CardioMonitor.Ui.ViewModel.Patients;
 using CardioMonitor.Ui.ViewModel.Sessions;
 using CardioMonitor.Ui.ViewModel.Settings;
@@ -207,6 +209,25 @@ namespace CardioMonitor.Ui.ViewModel{
 
             sessionProcessingStoryboard.RegisterTransition(PageIds.SessionProcessingPageId, PageIds.SessionProcessingInitPageId, PageTransitionTrigger.Back);
 
+            var deviceConfigStoryboard = new ExtendedStoryboard(
+                StoryboardIds.DevicesStoryboardId,
+                "Устройства",
+                new PackIconOcticons { Kind = PackIconOcticonsKind.Rocket });
+
+            deviceConfigStoryboard.RegisterPage(
+                PageIds.DevicesPageId,
+                view: typeof(DeviceConfigsView),
+                viewModel: typeof(DeviceConfigsViewModel),
+                isStartPage: true);
+
+            deviceConfigStoryboard.RegisterPage(
+                PageIds.DeviceCreationPageId,
+                view: typeof(DeviceConfigCreationView),
+                viewModel: typeof(DeviceConfigCreationViewModel),
+                isStartPage: false);
+
+            deviceConfigStoryboard.RegisterTransition(PageIds.DevicesPageId, PageIds.DeviceCreationPageId, PageTransitionTrigger.Completed);
+
             var settingsStoryboard = new ExtendedStoryboard(
                 StoryboardIds.SettingsStoryboardId,
                 "Настройки",
@@ -221,6 +242,7 @@ namespace CardioMonitor.Ui.ViewModel{
             _storyboardsNavigationService.RegisterStoryboard(patientsStoryboard);
             _storyboardsNavigationService.RegisterStoryboard(sessionsStoryboard);
             _storyboardsNavigationService.RegisterStoryboard(sessionProcessingStoryboard);
+            _storyboardsNavigationService.RegisterStoryboard(deviceConfigStoryboard);
             _storyboardsNavigationService.RegisterStoryboard(settingsStoryboard);
 
             _storyboardsNavigationService.SetStoryboardPageCreator(pageCreator);
@@ -238,7 +260,8 @@ namespace CardioMonitor.Ui.ViewModel{
             {
                 patientsStoryboard,
                 sessionsStoryboard,
-                sessionProcessingStoryboard
+                sessionProcessingStoryboard,
+                deviceConfigStoryboard
             });
             
             OptionsStoryboards = new ObservableCollection<ExtendedStoryboard>(new []

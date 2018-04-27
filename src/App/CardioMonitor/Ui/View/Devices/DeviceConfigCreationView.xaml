@@ -16,9 +16,17 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ComboBox 
+        <TextBlock 
+            HorizontalAlignment="Center"
             Grid.Row="0"
+            Margin="10,10,10,0"
+            FontWeight="Bold"
+            FontSize="12"
+            Text="Добавление новой конфигурации"/>
+        <ComboBox 
+            Grid.Row="1"
             Width="350"
             Margin="0 10 0 0"
             mah:TextBoxHelper.ClearTextButton="False"
@@ -29,7 +37,7 @@
             SelectedItem="{Binding SelectedDeviceType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}">
         </ComboBox>
         <ComboBox 
-            Grid.Row="1"
+            Grid.Row="2"
             Width="350"
             Margin="0 10 0 0"
             mah:TextBoxHelper.ClearTextButton="False"
@@ -39,9 +47,7 @@
             ItemsSource="{Binding Devices, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
             SelectedItem="{Binding SelectedDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}">
         </ComboBox>
-        
-
-        <TextBox Grid.Row="2"
+        <TextBox Grid.Row="3"
                  Text="{Binding ConfigName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
                  HorizontalAlignment="Center"
                  Width="350"
@@ -49,7 +55,7 @@
                  mah:TextBoxHelper.Watermark="Название конфигурации"
                  mah:TextBoxHelper.UseFloatingWatermark="True"/>
         <Button
-            Grid.Row="3"
+            Grid.Row="4"
             Content="Добавить"
             Width="150"
             Margin="10"

@@ -77,13 +77,13 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             get => _selectedDeviceType;
             set
             {
-                if (Equals(_selectedDevice, value)) return;
+                if (Equals(_selectedDeviceType, value)) return;
                 _selectedDeviceType = value;
                 RisePropertyChanged(nameof(SelectedDeviceType));
                 RisePropertyChanged(nameof(SaveCommand));
-                if (_selectedDevice == null) return;
+                if (_selectedDeviceType == null) return;
 
-                var devices = _deviceModulesController.GetRegisteredDevices(_selectedDevice.Id);
+                var devices = _deviceModulesController.GetRegisteredDevices(_selectedDeviceType.Id);
 
                 var devicesInfos = new List<DeviceInfoElement>(devices.Count);
                 foreach (var deviceInfo in devices)

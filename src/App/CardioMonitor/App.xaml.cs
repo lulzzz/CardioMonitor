@@ -6,8 +6,15 @@ using CardioMonitor.BLL.CoreServices.Sessions;
 using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.Data.Ef.Context;
 using CardioMonitor.Devices;
+using CardioMonitor.Devices.Bed.Fake.WpfModule;
+using CardioMonitor.Devices.Bed.Infrastructure;
+using CardioMonitor.Devices.Configuration;
+using CardioMonitor.Devices.Data;
+using CardioMonitor.Devices.Monitor.Infrastructure;
+using CardioMonitor.Devices.WpfModule;
 using CardioMonitor.EventHandlers.Patients;
 using CardioMonitor.Files;
+using CardioMonitor.Infrastructure;
 using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui;
@@ -34,7 +41,6 @@ namespace CardioMonitor
 
         public App()
         {
-            //todo add startup window
             var container = Bootstrap();
             var mainWindowViewModel = container.GetInstance<MainWindowViewModel>();
             var mainWindow = new MainWindow(mainWindowViewModel);
@@ -52,6 +58,7 @@ namespace CardioMonitor
             RegisterServices(container);
             RegisterEventBus(container);
             RegisterPatientEventsHandlers(container);
+            InitDevices(container);
             // throw exception, incorrect seleted lifycycles for disposable objects
             // container.Verify();
 
@@ -102,6 +109,9 @@ namespace CardioMonitor
         private static void RegisterDevices(Container container)
         {
             container.Register<IDeviceControllerFactory, DeviceControllerFactory>(Lifestyle.Singleton);
+            container.Register<IDeviceConfigurationService, DeviceConfigurationService>(Lifestyle.Singleton);
+            container.Register<IDeviceModulesController, DeviceModulesController>(Lifestyle.Singleton);
+            container.Register<IDeviceConfigurationContextFactory>(() => new DeviceConfigurationContextFactory("CardioMonitorContext"), Lifestyle.Singleton);
         }
 
         private static void RegisterServices(Container container)
@@ -122,6 +132,19 @@ namespace CardioMonitor
             container.Register<PatientAddedEventHandler>();
             container.Register<PatientChangedEventHandler>();
             container.Register<PatientDeletedEventHandler>();
+        }
+
+        private static void InitDevices(Container container)
+        {
+            var modulesController = container.GetInstance<IDeviceModulesController>();
+            RegisterSupportedDevices(modulesController);
+            modulesController.RegisterDevice(FakeDeviceControllerModule.Module);
+        }
+
+        private static void RegisterSupportedDevices(IDeviceModulesController controller)
+        {
+            controller.RegisterDeviceType(new DeviceTypeModule("Инверсионный стол", InversionTableDeviceTypeId.DeviceTypeId));
+            controller.RegisterDeviceType(new DeviceTypeModule("Кардиомонитор", MonitorDeviceTypeId.DeviceTypeId));
         }
     }
 }

@@ -31,7 +31,7 @@ namespace CardioMonitor.Devices
         }
 
 
-        public void Register([NotNull] DeviceTypeModule module)
+        public void RegisterDeviceType([NotNull] DeviceTypeModule module)
         {
             if (module == null) throw new ArgumentNullException(nameof(module));
             _deviceTypeModules[module.DeviceTypeId] = module;

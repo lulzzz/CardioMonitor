@@ -8,7 +8,7 @@ namespace CardioMonitor.Devices
 {
     public interface IDeviceModulesController
     {
-        void Register(DeviceTypeModule module);
+        void RegisterDeviceType(DeviceTypeModule module);
 
         void RegisterDevice(WpfDeviceModule module);
 

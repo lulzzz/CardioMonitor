@@ -6,7 +6,7 @@ namespace CardioMonitor.Devices.Data
     {
         public DeviceConfigurationEfConfig()
         {
-            ToTable("DeviceConfigirations").HasKey(x => x.ConfigId);
+            ToTable("DeviceConfigurations").HasKey(x => x.ConfigId);
 
             Property(x => x.ConfigName).HasColumnName("ConfigName");
             Property(x => x.DeviceId).HasColumnName("DeviceId");
