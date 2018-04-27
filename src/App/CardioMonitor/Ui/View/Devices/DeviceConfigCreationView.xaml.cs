@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace CardioMonitor.Ui.View.Devices
 {
     /// <summary>
-    /// Interaction logic for DevicesView.xaml
+    /// Interaction logic for DeviceConfigCreationView.xaml
     /// </summary>
-    public partial class DevicesView : UserControl
+    public partial class DeviceConfigCreationView : UserControl
     {
-        public DevicesView()
+        public DeviceConfigCreationView()
         {
             InitializeComponent();
         }

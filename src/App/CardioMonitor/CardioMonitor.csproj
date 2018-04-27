@@ -210,7 +210,10 @@
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\SimpleInjectorPageCreator.cs" />
     <Compile Include="Ui\StoryboardIds.cs" />
-    <Compile Include="Ui\ViewModel\Devices\DevicesViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Devices\DeviceConfigsViewModelPageContext.cs" />
+    <Compile Include="Ui\ViewModel\Devices\DeviceConfigViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Devices\DeviceConfigCreationViewModel.cs" />
+    <Compile Include="Ui\ViewModel\Devices\DeviceConfigsViewModel.cs" />
     <Compile Include="Ui\ViewModel\MainWindowViewModel.cs" />
     <Compile Include="Ui\PageIds.cs" />
     <Compile Include="Ui\ViewModel\Patients\PatientPageContext.cs" />
@@ -223,8 +226,11 @@
     <Compile Include="Ui\ViewModel\Sessions\SessionProcessingViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionsViewModel.cs" />
     <Compile Include="Ui\ViewModel\ExtendedStoryboard.cs" />
-    <Compile Include="Ui\View\Devices\DevicesView.xaml.cs">
-      <DependentUpon>DevicesView.xaml</DependentUpon>
+    <Compile Include="Ui\View\Devices\DeviceConfigCreationView.xaml.cs">
+      <DependentUpon>DeviceConfigCreationView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Ui\View\Devices\DeviceConfigsView.xaml.cs">
+      <DependentUpon>DeviceConfigsView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\View\Patients\PatientsView.xaml.cs">
       <DependentUpon>PatientsView.xaml</DependentUpon>
@@ -271,7 +277,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Ui\View\Devices\DevicesView.xaml">
+    <Page Include="Ui\View\Devices\DeviceConfigCreationView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Ui\View\Devices\DeviceConfigsView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

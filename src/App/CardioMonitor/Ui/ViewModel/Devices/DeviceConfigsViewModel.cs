@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Configuration;
-using CardioMonitor.Devices.WpfModule;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using Markeli.Storyboards;
@@ -15,106 +13,40 @@ using DeviceTypeInfo = CardioMonitor.Devices.DeviceTypeInfo;
 
 namespace CardioMonitor.Ui.ViewModel.Devices
 {
-    public class DeviceConfigViewModel: Notifier
+    public class DeviceConfigsViewModel: Notifier, IStoryboardPageViewModel
     {
-        public DeviceConfigViewModel(
-            Guid configId,
-            [NotNull] string deviceConfigName,
-            Guid deviceTypeId,
-            [NotNull] string deviceTypeName,
-            Guid deviceId,
-            [NotNull] string deviceName,
-            [NotNull] UIElement configView,
-            [NotNull] IDeviceControllerConfigViewModel configViewModel)
-        {
-            _deviceTypeName = deviceTypeName ?? throw new ArgumentNullException(nameof(deviceTypeName));
-            _deviceName = deviceName ?? throw new ArgumentNullException(nameof(deviceName));
-            _deviceConfigName = deviceConfigName ?? throw new ArgumentNullException(nameof(deviceConfigName));
-            _configView = configView ?? throw new ArgumentNullException(nameof(configView));
-            _configViewModel = configViewModel ?? throw new ArgumentNullException(nameof(configViewModel));
-            ConfigId = configId;
-            DeviceTypeId = deviceTypeId;
-            DeviceId = deviceId;
-        }
-
-        public Guid ConfigId { get; }
-        public Guid DeviceTypeId { get; }
-        public Guid DeviceId { get; }
-
-        public string DeviceTypeName
-        {
-            get => _deviceTypeName;
-            set
-            {
-                _deviceTypeName = value;
-                RisePropertyChanged(nameof(DeviceTypeName));
-            }
-        }
-        private string _deviceTypeName;
-
-        public string DeviceName
-        {
-            get => _deviceName;
-            set
-            {
-                _deviceName = value;
-                RisePropertyChanged(nameof(DeviceName));
-            }
-        }
-        private string _deviceName;
-
-        public string DeviceConfigName
-        {
-            get => _deviceConfigName;
-            set
-            {
-                _deviceConfigName = value;
-                RisePropertyChanged(nameof(DeviceConfigName));
-            }
-        }
-        private string _deviceConfigName;
-
-        public UIElement ConfigView
-        {
-            get => _configView;
-            set
-            {
-                _configView = value;
-                RisePropertyChanged(nameof(ConfigView));
-            }
-        }
-        private UIElement _configView;
-
-
-        public IDeviceControllerConfigViewModel ConfigViewModel
-        {
-            get => _configViewModel; set
-            {
-                _configViewModel = value;
-                RisePropertyChanged(nameof(ConfigViewModel));
-            }
-        }
-        private IDeviceControllerConfigViewModel _configViewModel;
-    }
-
-    public class DevicesViewModel: Notifier, IStoryboardPageViewModel
-    {
+        #region Fields
+        
+        [NotNull]
         private readonly ILogger _logger;
 
+        private ICommand _addCommand;
+        private ICommand _removeCommand;
+        private ICommand _saveCommand;
 
         private ObservableCollection<DeviceConfigViewModel> _deviceConfigs;
 
         private DeviceConfigViewModel _selectedDeviceConfig;
 
+        [NotNull]
         private readonly IDeviceConfigurationService _configurationService;
 
+        [NotNull]
         private readonly IDeviceModulesController _deviceModulesController;
 
+        [NotNull]
         private readonly Dictionary<Guid, DeviceTypeInfo> _deviceTypes;
 
+        [NotNull]
         private readonly Dictionary<Guid, DeviceInfo> _deviceInfos;
 
-        public DevicesViewModel(
+
+        private string _busyMessage;
+        private bool _isBusy;
+        #endregion
+
+
+        public DeviceConfigsViewModel(
             [NotNull] ILogger logger,
             [NotNull] IDeviceConfigurationService configurationService,
             [NotNull] IDeviceModulesController deviceModulesController)
@@ -126,11 +58,9 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             _deviceTypes = new Dictionary<Guid, DeviceTypeInfo>();
             _deviceInfos = new Dictionary<Guid, DeviceInfo>();
         }
+        
 
-
-        private ICommand _addCommand;
-        private ICommand _removeCommand;
-        private ICommand _saveCommand;
+        #region Properties
 
         public ObservableCollection<DeviceConfigViewModel> DeviceConfigs
         {
@@ -160,7 +90,6 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 RisePropertyChanged(nameof(IsBusy));
             }
         }
-        private bool _isBusy;
 
         public string BusyMessage
         {
@@ -171,7 +100,12 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 RisePropertyChanged(nameof(BusyMessage));
             }
         }
-        private string _busyMessage;
+
+
+        #endregion
+
+        #region Commands
+
 
         public ICommand SaveCommand
         {
@@ -207,6 +141,8 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 });
             }
         }
+
+        #endregion
 
         private async Task SaveConfigAsync()
         {
@@ -346,7 +282,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             }
         }
 
-        private async Task AddConfigWithDefaultValuesAsync([NotNull] DevicesViewModelPageContext context)
+        private async Task AddConfigWithDefaultValuesAsync([NotNull] DeviceConfigsViewModelPageContext context)
         {
             try
             {
@@ -430,7 +366,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
 
         public Task ReturnAsync(IStoryboardPageContext context)
         {
-            if (!(context is DevicesViewModelPageContext localContext)) return Task.CompletedTask;
+            if (!(context is DeviceConfigsViewModelPageContext localContext)) return Task.CompletedTask;
             if (localContext.IsAdded) return Task.CompletedTask;
 
             Task.Factory.StartNew(async () => 
@@ -457,16 +393,5 @@ namespace CardioMonitor.Ui.ViewModel.Devices
         public event Func<object, TransitionRequest, Task> PageTransitionRequested;
 
         #endregion
-    }
-
-    public class DevicesViewModelPageContext : IStoryboardPageContext
-    {
-        public bool IsAdded { get; set; }
-
-        public Guid DeviceId { get; set; }
-
-        public Guid DeviceTypeId { get; set; }
-
-        public string ConfigName { get; set; }
     }
 }
