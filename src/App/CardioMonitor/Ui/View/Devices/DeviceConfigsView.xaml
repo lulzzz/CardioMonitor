@@ -103,7 +103,7 @@
                     Grid.Row="1"
                     Margin="10,0"
                     HorizontalAlignment="Stretch"
-                    VerticalAlignment="Stretch"
+                    VerticalAlignment="Top"
                     Content="{Binding SelectedDeviceConfig.ConfigView}"/>
                 <StackPanel
                     Grid.Row="2"
