@@ -1,4 +1,6 @@
-﻿namespace CardioMonitor.Devices.WpfModule
+﻿using System;
+
+namespace CardioMonitor.Devices.WpfModule
 {
     public interface IDeviceControllerConfigViewModel
     {
@@ -7,5 +9,11 @@
         string GetConfigJson();
 
         void SetConfigJson(string jsonConfig);
+
+        event EventHandler CanSaveChanged;
+
+        bool IsDataChanged { get; }
+
+        void ResetDataChanges();
     }
 }

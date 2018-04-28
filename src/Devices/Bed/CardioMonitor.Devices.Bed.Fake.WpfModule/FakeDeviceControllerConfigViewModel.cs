@@ -11,9 +11,24 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
         IDeviceControllerConfigViewModel,
         IDataErrorInfo
     {
+        #region Constants
 
         private const int DefaultTimeoutMs = 10000;
         private const int DefaultUpdateDataPeriodMs = 500;
+
+        #endregion
+
+        #region Fields
+
+        private int _updateDataPeriodMs;
+        private int _timeoutMs;
+        private bool _needReconnect;
+        private int _reconnectionTimeoutSec;
+        private bool _isDataChanged;
+
+        #endregion
+
+        #region Properties
 
         public int UpdateDataPeriodMs
         {
@@ -23,9 +38,9 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 _updateDataPeriodMs = value;
                 RisePropertyChanged(nameof(UpdateDataPeriodMs));
                 RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = false;
             }
         }
-        private int _updateDataPeriodMs;
 
 
         public int TimeoutMs
@@ -36,9 +51,9 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 _timeoutMs = value;
                 RisePropertyChanged(nameof(TimeoutMs));
                 RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = false;
             }
         }
-        private int _timeoutMs;
 
         public bool NeedReconnect
         {
@@ -48,9 +63,9 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 _needReconnect = value;
                 RisePropertyChanged(nameof(NeedReconnect));
                 RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = false;
             }
         }
-        private bool _needReconnect;
 
         public int ReconnectionTimeoutSec
         {
@@ -60,11 +75,39 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 _reconnectionTimeoutSec = value;
                 RisePropertyChanged(nameof(ReconnectionTimeoutSec));
                 RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = false;
             }
         }
-        private int _reconnectionTimeoutSec;
 
         public bool CanGetConfig => String.IsNullOrEmpty(Error);
+
+
+        public bool IsDataChanged
+        {
+            get => _isDataChanged;
+            private set
+            {
+                var oldValue = _isDataChanged;
+                _isDataChanged = value;
+                if (oldValue != value)
+                {
+                    CanSaveChanged?.Invoke(this, EventArgs.Empty);
+                }
+            }}
+
+        #endregion
+
+        #region Events
+
+        public event EventHandler CanSaveChanged;
+
+        #endregion
+
+        public void ResetDataChanges()
+        {
+            IsDataChanged = false;
+        }
+
 
         public string GetConfigJson()
         {
@@ -78,7 +121,6 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 TimeSpan.FromMilliseconds(UpdateDataPeriodMs),
                 TimeSpan.FromMilliseconds(TimeoutMs), 
                 reconnectionTimeout);
-
             return JsonConvert.SerializeObject(config);
         }
 
@@ -99,7 +141,11 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
             {
                 ReconnectionTimeoutSec = config.DeviceReconnectionTimeout.Value.Seconds;
             }
+
+            IsDataChanged = false;
         }
+
+        #region Validation
 
         public string this[string columnName]
         {
@@ -133,5 +179,8 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
         }
 
         public string Error => this[String.Empty];
+
+
+        #endregion
     }
 }

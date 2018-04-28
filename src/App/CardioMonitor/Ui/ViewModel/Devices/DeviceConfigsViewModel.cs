@@ -45,6 +45,9 @@ namespace CardioMonitor.Ui.ViewModel.Devices
 
         private string _busyMessage;
         private bool _isBusy;
+
+        private bool _isConfigSelected;
+
         #endregion
 
 
@@ -78,8 +81,19 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             get => _selectedDeviceConfig;
             set
             {
+                if (_selectedDeviceConfig?.ConfigViewModel != null)
+                {
+                    _selectedDeviceConfig.ConfigViewModel.CanSaveChanged -= ValidateCanSaveCommand;
+                }
                 _selectedDeviceConfig = value;
+                if (_selectedDeviceConfig?.ConfigViewModel != null)
+                {
+                    _selectedDeviceConfig.ConfigViewModel.CanSaveChanged += ValidateCanSaveCommand;
+                }
                 RisePropertyChanged(nameof(SelectedDeviceConfig));
+                RisePropertyChanged(nameof(SaveCommand));
+                RisePropertyChanged(nameof(RemoveCommand));
+                RisePropertyChanged(nameof(IsConfigSelected));
             }
         }
 
@@ -104,6 +118,17 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             }
         }
 
+        public bool IsConfigSelected
+        {
+            get => _isConfigSelected;
+            set
+            {
+                _isConfigSelected = value; 
+                RisePropertyChanged(nameof(IsConfigSelected));
+            }
+        }
+
+
 
         #endregion
 
@@ -116,7 +141,9 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             {
                 return _saveCommand ?? (_saveCommand = new SimpleCommand
                 {
-                    CanExecuteDelegate = x => SelectedDeviceConfig?.ConfigViewModel != null && SelectedDeviceConfig.ConfigViewModel.CanGetConfig,
+                    CanExecuteDelegate = x => SelectedDeviceConfig?.ConfigViewModel != null 
+                                              && SelectedDeviceConfig.ConfigViewModel.IsDataChanged 
+                                              && SelectedDeviceConfig.ConfigViewModel.CanGetConfig,
                     ExecuteDelegate = async x => await SaveConfigAsync().ConfigureAwait(true)
                 });
             }
@@ -146,6 +173,11 @@ namespace CardioMonitor.Ui.ViewModel.Devices
         }
 
         #endregion
+
+        private void ValidateCanSaveCommand(object sender, EventArgs args)
+        {
+            RisePropertyChanged(nameof(SaveCommand));
+        }
 
         private async Task SaveConfigAsync()
         {
@@ -219,7 +251,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             try
             {
                 IsBusy = true;
-                BusyMessage = "Загрузка конфигураций";
+                BusyMessage = "Загрузка конфигураций...";
                 var deviceTypes = _deviceModulesController.GetRegisteredDevicesTypes();
                 foreach (var deviceTypeInfo in deviceTypes)
                 {

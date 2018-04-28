@@ -31,7 +31,7 @@
             Margin="0 10 0 0"
             mah:TextBoxHelper.ClearTextButton="False"
             mah:TextBoxHelper.UseFloatingWatermark="True"
-            mah:TextBoxHelper.Watermark="Выберитие тип устройства"
+            mah:TextBoxHelper.Watermark="Тип устройства"
             DisplayMemberPath="Name"
             ItemsSource="{Binding DeviceTypes, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
             SelectedItem="{Binding SelectedDeviceType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}">
@@ -42,7 +42,7 @@
             Margin="0 10 0 0"
             mah:TextBoxHelper.ClearTextButton="False"
             mah:TextBoxHelper.UseFloatingWatermark="True"
-            mah:TextBoxHelper.Watermark="Выберитие устройство"
+            mah:TextBoxHelper.Watermark="Название устройства"
             DisplayMemberPath="Name"
             ItemsSource="{Binding Devices, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
             SelectedItem="{Binding SelectedDevice, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}">
