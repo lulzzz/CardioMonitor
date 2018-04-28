@@ -85,6 +85,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Bed.F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Infrastructure.WpfCommon", "Infrastructure\CardioMonitor.Infrastructure.WpfCommon\CardioMonitor.Infrastructure.WpfCommon.csproj", "{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CardioMonitor.Devices.Monitor.Fake.WpfModule", "Devices\Monitor\CardioMonitor.Devices.Monitor.Fake.WpfModule\CardioMonitor.Devices.Monitor.Fake.WpfModule.csproj", "{B74EAE91-2299-4E2C-BFD7-328BD33AA80C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Monitor|Any CPU = Debug_Monitor|Any CPU
@@ -317,6 +319,14 @@ Global
 		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B74EAE91-2299-4E2C-BFD7-328BD33AA80C}.Debug_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{B74EAE91-2299-4E2C-BFD7-328BD33AA80C}.Debug_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{B74EAE91-2299-4E2C-BFD7-328BD33AA80C}.Debug_No_Monitor|Any CPU.ActiveCfg = Debug|Any CPU
+		{B74EAE91-2299-4E2C-BFD7-328BD33AA80C}.Debug_No_Monitor|Any CPU.Build.0 = Debug|Any CPU
+		{B74EAE91-2299-4E2C-BFD7-328BD33AA80C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B74EAE91-2299-4E2C-BFD7-328BD33AA80C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B74EAE91-2299-4E2C-BFD7-328BD33AA80C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B74EAE91-2299-4E2C-BFD7-328BD33AA80C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -361,6 +371,7 @@ Global
 		{D7B49E75-519C-46DF-9EE2-D0060C917E3F} = {3785A7E4-5B35-4DEB-8598-A4941126F9F0}
 		{772C631D-E158-4D9C-849B-9960D8841082} = {5E743ABF-6E8E-4CE2-87F8-A851DC3F7906}
 		{35D71B96-B40C-4240-A1EA-D5D21E4D5A4C} = {950B6A1C-CFA8-49B9-81A9-398402EA1D17}
+		{B74EAE91-2299-4E2C-BFD7-328BD33AA80C} = {7B5F4E41-2C23-40FE-BF2D-97DD957DA14C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B85A60A8-F00A-42AB-8D26-94EB30E55851}

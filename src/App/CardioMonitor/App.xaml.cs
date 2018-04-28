@@ -10,6 +10,7 @@ using CardioMonitor.Devices.Bed.Fake.WpfModule;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.Data;
+using CardioMonitor.Devices.Monitor.Fake.WpfModule;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Devices.WpfModule;
 using CardioMonitor.EventHandlers.Patients;
@@ -138,7 +139,8 @@ namespace CardioMonitor
         {
             var modulesController = container.GetInstance<IDeviceModulesController>();
             RegisterSupportedDevices(modulesController);
-            modulesController.RegisterDevice(FakeDeviceControllerModule.Module);
+            modulesController.RegisterDevice(FakeBedControllerModule.Module);
+            modulesController.RegisterDevice(FakeMonitorControllerModule.Module);
         }
 
         private static void RegisterSupportedDevices(IDeviceModulesController controller)

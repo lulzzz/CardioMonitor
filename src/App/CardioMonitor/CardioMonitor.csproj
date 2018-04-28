@@ -422,6 +422,10 @@
       <Project>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</Project>
       <Name>CardioMonitor.Devices</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Devices\Monitor\CardioMonitor.Devices.Monitor.Fake.WpfModule\CardioMonitor.Devices.Monitor.Fake.WpfModule.csproj">
+      <Project>{b74eae91-2299-4e2c-bfd7-328bd33aa80c}</Project>
+      <Name>CardioMonitor.Devices.Monitor.Fake.WpfModule</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Devices\Monitor\CardioMonitor.Devices.Monitor.Fake\CardioMonitor.Devices.Monitor.Fake.csproj">
       <Project>{0CDD0798-75A2-400A-ADC1-8C2EDA709F1C}</Project>
       <Name>CardioMonitor.Devices.Monitor.Fake</Name>

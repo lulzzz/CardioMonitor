@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{772C631D-E158-4D9C-849B-9960D8841082}</ProjectGuid>
+    <ProjectGuid>{B74EAE91-2299-4E2C-BFD7-328BD33AA80C}</ProjectGuid>
     <OutputType>library</OutputType>
-    <RootNamespace>CardioMonitor.Devices.Bed.Fake.WpfModule</RootNamespace>
-    <AssemblyName>CardioMonitor.Devices.Bed.Fake.WpfModule</AssemblyName>
+    <RootNamespace>CardioMonitor.Devices.Monitor.Fake.WpfModule</RootNamespace>
+    <AssemblyName>CardioMonitor.Devices.Monitor.Fake.WpfModule</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -59,12 +59,11 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FakeBedControllerConfigViewModel.cs" />
-    <Compile Include="FakeBedControllerConfigView.xaml.cs">
-      <DependentUpon>FakeBedControllerConfigView.xaml</DependentUpon>
-    </Compile>
     <Compile Include="FakeBedControllerModule.cs" />
-    <Compile Include="Properties\Annotations.cs" />
+    <Compile Include="FakeMonitorControllerConfigView.xaml.cs">
+      <DependentUpon>FakeMonitorControllerConfigView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FakeMonitorControllerConfigViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -96,26 +95,22 @@
       <Name>CardioMonitor.Infrastructure.WpfCommon</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\CardioMonitor.Devices.WpfModule\CardioMonitor.Devices.WpfModule.csproj">
-      <Project>{D7B49E75-519C-46DF-9EE2-D0060C917E3F}</Project>
+      <Project>{d7b49e75-519c-46df-9ee2-d0060c917e3f}</Project>
       <Name>CardioMonitor.Devices.WpfModule</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
-      <Project>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</Project>
-      <Name>CardioMonitor.Devices</Name>
+    <ProjectReference Include="..\CardioMonitor.Devices.Monitor.Fake\CardioMonitor.Devices.Monitor.Fake.csproj">
+      <Project>{0cdd0798-75a2-400a-adc1-8c2eda709f1c}</Project>
+      <Name>CardioMonitor.Devices.Monitor.Fake</Name>
     </ProjectReference>
-    <ProjectReference Include="..\CardioMonitor.Devices.Bed.Abstract\CardioMonitor.Devices.Bed.Infrastructure.csproj">
-      <Project>{bae2b28a-93f6-40a9-852c-2badd360e4fd}</Project>
-      <Name>CardioMonitor.Devices.Bed.Infrastructure</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\CardioMonitor.Devices.Bed.Fake\CardioMonitor.Devices.Bed.Fake.csproj">
-      <Project>{d72ba3e3-1055-4602-97de-8a1c3555ccf7}</Project>
-      <Name>CardioMonitor.Devices.Bed.Fake</Name>
+    <ProjectReference Include="..\CardioMonitor.Devices.Monitor.Infrastructure\CardioMonitor.Devices.Monitor.Infrastructure.csproj">
+      <Project>{e773219c-f1da-42a3-8e80-68bedac3e4f8}</Project>
+      <Name>CardioMonitor.Devices.Monitor.Infrastructure</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="FakeBedControllerConfigView.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="FakeMonitorControllerConfigView.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

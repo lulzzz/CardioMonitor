@@ -16,11 +16,11 @@ using System.Windows.Shapes;
 namespace CardioMonitor.Devices.Bed.Fake.WpfModule
 {
     /// <summary>
-    /// Interaction logic for FakeDeviceControllerConfigView.xaml
+    /// Interaction logic for FakeBedControllerConfigView.xaml
     /// </summary>
-    public partial class FakeDeviceControllerConfigView : UserControl
+    public partial class FakeBedControllerConfigView : UserControl
     {
-        public FakeDeviceControllerConfigView()
+        public FakeBedControllerConfigView()
         {
             InitializeComponent();
         }
