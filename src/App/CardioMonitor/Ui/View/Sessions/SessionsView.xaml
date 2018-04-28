@@ -31,20 +31,9 @@
         <DataGrid x:Name="SessionsDG"
                   x:FieldModifier="private"
                   Grid.Row="1"
-                  BorderBrush="{DynamicResource AccentColorBrush}"
                   ItemsSource="{Binding SessionInfos}"
                   SelectedItem="{Binding SelectedSessionInfo}"
-                  BorderThickness="2"
-                  RenderOptions.ClearTypeHint="Enabled"
-                  TextOptions.TextFormattingMode="Display"
-                  AutoGenerateColumns="False" 
-                  GridLinesVisibility="All"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserResizeRows="False"
-                  CanUserReorderColumns="False"
-                  SelectionUnit="FullRow"
-                  IsReadOnly="True"
+                  Style="{DynamicResource CmDataGrid}"
                   ColumnWidth="*">
             <DataGrid.Columns>
 
@@ -66,32 +55,25 @@
                 </Style>
             </DataGrid.RowStyle>
         </DataGrid>
-        <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Center">
-            <Button x:Name="StartTreatmentSessinB"
+            <StackPanel Grid.Row="2"
+                    Style="{DynamicResource CmBottomPanel}">
+                <Button x:Name="StartTreatmentSessinB"
                     x:FieldModifier="private"
                     Command="{Binding StartSessionCommand}"
                     Content="Начать сеанс"
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"/>
+                    Style="{DynamicResource CmCommandButton}"/>
             <Button x:Name="DeleteTreatmentSessionB"
                     x:FieldModifier="private"
                     Command="{Binding DeleteSessionCommand}"
                     CommandParameter="{Binding ElementName=SessionsDG, Path=SelectedItem}"
                     Content="Удалить "
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"/>
+                    Style="{DynamicResource CmCommandButton}"/>
             <Button x:Name="OpenTreatmentSessionDataB"
                     x:FieldModifier="private"
                     Command="{Binding ShowResultsCommand}"
                     CommandParameter="{Binding ElementName=SessionsDG, Path=SelectedItem}"
                     Content="Открыть результаты"
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"/>
+                    Style="{DynamicResource CmCommandButton}"/>
         </StackPanel>
     </Grid>
     </controls:BusyIndicator>

@@ -7,17 +7,24 @@
              xmlns:viewModels="clr-namespace:CardioMonitor.Ui.ViewModel.Devices"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:controls="clr-namespace:CardioMonitor.Ui.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             xmlns:converters="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Converters;assembly=CardioMonitor.Infrastructure.WpfCommon"
              d:DataContext="{d:DesignInstance Type=viewModels:DeviceConfigsViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
+    </UserControl.Resources>
 
     <controls:BusyIndicator
         Style="{DynamicResource BusyIndicatorStylekey}"
         IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
         Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
-        <Grid>
+        <Grid
+            Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid
@@ -28,44 +35,49 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <TextBlock 
-                HorizontalAlignment="Center"
                 Grid.Row="0"
-                Margin="10,10,10,0"
-                FontWeight="Bold"
-                FontSize="12"
-                Text="Сохраненные конфигурации устройств"/>
+                Text="Сохраненные конфигурации устройств"
+                    Style="{DynamicResource CmPageHeader}"/>
                 <ListBox
-                Margin="10"
                 Grid.Row="1"
                 DisplayMemberPath="DeviceConfigName"
                 ItemsSource="{Binding DeviceConfigs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                SelectedItem="{Binding SelectedDeviceConfig, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                SelectedItem="{Binding SelectedDeviceConfig, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{DynamicResource CmListBox}"/>
                 <StackPanel
-                HorizontalAlignment="Center"
-                Orientation="Horizontal"
-                Grid.Row="2">
+                Grid.Row="2"
+                    Style="{DynamicResource CmBottomPanel}">
                     <Button 
                     Content="Добавить"
                     Command="{Binding AddCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                    Margin="10"
-                    Width="150"/>
+                        Style="{DynamicResource CmCommandButton}"/>
                     <Button 
                     Content="Удалить"
                     Command="{Binding RemoveCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                    Margin="10"
-                    Width="150"/>
+                        Style="{DynamicResource CmCommandButton}"/>
                 </StackPanel>
             </Grid>
             <Grid
-            Grid.Column="1">
+                Grid.Column="2"
+                Visibility="{Binding IsConfigSelected, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource InvertedBooleanToVisibilityConverter}}">
+                <TextBlock
+                    Text="Выберите конфигурацию из списка или добавьте новую"
+                    FontSize="16"
+                    TextAlignment="Center"
+                    HorizontalAlignment="Center"
+                    Style="{DynamicResource CmLabel}"/>
+            </Grid>
+            <Grid
+                Grid.Column="2"
+                Margin="0,34,0,0"
+                Visibility="{Binding IsConfigSelected, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Grid Row="0"
-                  Margin="10">
+                     Margin="10">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -73,43 +85,33 @@
                     </Grid.RowDefinitions>
                     <TextBox Grid.Row="0"
                          Text="{Binding SelectedDeviceConfig.DeviceTypeName, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                         HorizontalAlignment="Center"
-                         Width="350"
                          IsReadOnly="True"
                          mah:TextBoxHelper.Watermark="Тип устройства"
-                         mah:TextBoxHelper.UseFloatingWatermark="True"
-                         Margin="0, 10"/>
+                             Style="{DynamicResource CmCenteredTextBox}"/>
                     <TextBox Grid.Row="1"
                          Text="{Binding SelectedDeviceConfig.DeviceName, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                         HorizontalAlignment="Center"
-                         Width="350"
                          IsReadOnly="True"
                          mah:TextBoxHelper.Watermark="Название устройства"
-                         mah:TextBoxHelper.UseFloatingWatermark="True"/>
+                             Style="{DynamicResource CmCenteredTextBox}"/>
 
                     <TextBox Grid.Row="2"
                          Text="{Binding SelectedDeviceConfig.DeviceConfigName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                         HorizontalAlignment="Center"
-                         Width="350"
-                         Margin="10"
                          mah:TextBoxHelper.Watermark="Название конфигурации"
-                         mah:TextBoxHelper.UseFloatingWatermark="True"/>
+                             Style="{DynamicResource CmCenteredTextBox}"/>
                 </Grid>
                 <ContentPresenter
-                Grid.Row="1"
-                Margin="10,0"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                Content="{Binding SelectedDeviceConfig.ConfigView}"/>
+                    Grid.Row="1"
+                    Margin="10,0"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Stretch"
+                    Content="{Binding SelectedDeviceConfig.ConfigView}"/>
                 <StackPanel
-                HorizontalAlignment="Center"
-                Orientation="Horizontal"
-                Grid.Row="3">
+                    Grid.Row="2"
+                    Style="{DynamicResource CmBottomPanel}">
                     <Button 
-                    Content="Сохранить"
-                    Command="{Binding SaveCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                    Margin="10"
-                    Width="150"/>
+                        Content="Сохранить"
+                        Command="{Binding SaveCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        Style="{DynamicResource CmCommandButton}"/>
                 </StackPanel>
             </Grid>
         </Grid>

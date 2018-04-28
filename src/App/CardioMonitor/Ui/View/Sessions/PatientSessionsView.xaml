@@ -22,38 +22,22 @@
         Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
         <Grid
             Margin="10">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel Margin="0, 10, 0, 10"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <TextBlock Text="{Binding PatientName}"
-                       FontSize="16"
-                       FontWeight="Bold">
+                       Style="{DynamicResource CmPageHeader}">
             </TextBlock>
-        </StackPanel>
-       
-        <DataGrid x:Name="SessionsDG"
+
+            <DataGrid x:Name="SessionsDG"
                   x:FieldModifier="private"
                   Grid.Row="1"
-                  BorderBrush="{DynamicResource AccentColorBrush}"
                   ItemsSource="{Binding SessionInfos}"
                   SelectedItem="{Binding SelectedSessionInfo}"
-                  BorderThickness="2"
-                  RenderOptions.ClearTypeHint="Enabled"
-                  TextOptions.TextFormattingMode="Display"
-                  AutoGenerateColumns="False" 
-                  GridLinesVisibility="All"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserResizeRows="False"
-                  CanUserReorderColumns="False"
-                  SelectionUnit="FullRow"
-                  IsReadOnly="True"
-                  ColumnWidth="*">
+                      ColumnWidth="*"
+                  Style="{DynamicResource CmDataGrid}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Дата сеанса"
                                     Binding="{Binding DateTime, StringFormat='{}{0:dd.MM.yyyy}'}"/>
@@ -72,31 +56,24 @@
             </DataGrid.RowStyle>
         </DataGrid>
         <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Center">
+                    Style="{DynamicResource CmBottomPanel}">
             <Button x:Name="StartTreatmentSessinB"
                     x:FieldModifier="private"
                     Command="{Binding StartSessionCommand}"
                     Content="Начать сеанс"
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"/>
+                    Style="{DynamicResource CmCommandButton}"/>
             <Button x:Name="DeleteTreatmentSessionB"
                     x:FieldModifier="private"
                     Command="{Binding DeleteSessionCommand}"
                     CommandParameter="{Binding ElementName=SessionsDG, Path=SelectedItem}"
                     Content="Удалить "
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"/>
+                    Style="{DynamicResource CmCommandButton}"/>
             <Button x:Name="OpenTreatmentSessionDataB"
                     x:FieldModifier="private"
                     Command="{Binding ShowResultsCommand}"
                     CommandParameter="{Binding ElementName=SessionsDG, Path=SelectedItem}"
                     Content="Открыть результаты"
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"/>
+                    Style="{DynamicResource CmCommandButton}"/>
         </StackPanel>
     </Grid>
     </controls:BusyIndicator>

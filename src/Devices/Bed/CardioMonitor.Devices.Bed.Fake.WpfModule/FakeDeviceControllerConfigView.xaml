@@ -8,6 +8,10 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=local:FakeDeviceControllerConfigViewModel}"
              d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
     <Grid VerticalAlignment="Center"
           HorizontalAlignment="Center">
         <Grid.RowDefinitions>
@@ -18,33 +22,24 @@
         </Grid.RowDefinitions>
         <TextBox Grid.Row="0"
             Text="{Binding UpdateDataPeriodMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-            HorizontalAlignment="Center"
-            Width="350"
             mah:TextBoxHelper.Watermark="Период обновления данных, мс"
-            mah:TextBoxHelper.UseFloatingWatermark="True"
-            Margin="10"/>
+                 Style="{DynamicResource CmCenteredTextBox}"/>
         <TextBox Grid.Row="1"
             Text="{Binding TimeoutMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-            HorizontalAlignment="Center"
-            Width="350"
             mah:TextBoxHelper.Watermark="Таймаут, мс"
-            mah:TextBoxHelper.UseFloatingWatermark="True"
-            Margin="10"/>
+                 Style="{DynamicResource CmCenteredTextBox}"/>
 
         <mah:ToggleSwitch 
             Grid.Row="2"
-            HorizontalAlignment="Right"
-            Margin="10"
             IsChecked="{Binding NeedReconnect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             OffLabel="Не переподключаться"
-            OnLabel="Переподключаться" ContentDirection="LeftToRight" />
+            OnLabel="Переподключаться" 
+            Style="{DynamicResource CmSettingsToggleSwitch}"/>
 
         <TextBox Grid.Row="3"
                  Text="{Binding ReconnectionTimeoutSec, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                 HorizontalAlignment="Center"
-                 Width="350"
                  mah:TextBoxHelper.Watermark="Таймаут перед повторынм подключением, с"
-                 mah:TextBoxHelper.UseFloatingWatermark="True"
-                 Margin="10"/>
+                 Style="{DynamicResource CmCenteredTextBox}"
+                 Visibility="{Binding NeedReconnect, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}"/>
     </Grid>
 </UserControl>

@@ -47,25 +47,13 @@
                     <KeyBinding Command="{Binding PatientSearchCommand}" CommandParameter="{Binding ElementName=SearTB, Path=Text}" Key="Enter"/>
                 </TextBox.InputBindings>
             </TextBox>
-            <DataGrid x:Name="PatientsDG"
+            <DataGrid x:Name="PatientsDg"
                   Grid.Row="1"
                   ItemsSource="{Binding Patients}"
                   SelectedIndex="{Binding SelectedPatientIndex}"
                   SelectedItem="{Binding SelectedPatient}"
-                  BorderBrush="{DynamicResource AccentColorBrush}"
-                  BorderThickness="2"
-                  RenderOptions.ClearTypeHint="Enabled"
-                  TextOptions.TextFormattingMode="Display"
-                  AutoGenerateColumns="False" 
-                  GridLinesVisibility="All"
-                  SelectionMode="Single"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserResizeRows="False"
-                  CanUserReorderColumns="False"
-                  SelectionUnit="FullRow"
-                  IsReadOnly="True"
-                  ColumnWidth="*">
+                  Style="{DynamicResource CmDataGrid}"
+                      ColumnWidth="*">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ИД"
                                     Binding="{Binding Id}"/>
@@ -80,62 +68,36 @@
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Grid.Row="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Center">
+                    Style="{DynamicResource CmBottomPanel}">
                 <Button x:Name="AddPatientB"
                     x:FieldModifier="private"
                     Command="{Binding AddNewPatientCommand}"
                     Content="Добавить"
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"/>
+                    Style="{DynamicResource CmCommandButton}"/>
                 <Button x:Name="EditPatientB"
                     x:FieldModifier="private"
                     Command="{Binding EditPatientCommand}"
-                    CommandParameter="{Binding ElementName=PatientsDG, Path=SelectedItem}"
+                    CommandParameter="{Binding ElementName=PatientsDg, Path=SelectedItem}"
                     Content="Редактровать "
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"/>
+                    Style="{DynamicResource CmCommandButton}"/>
                 <Button x:Name="DeletePatientB"
                     x:FieldModifier="private"
                     Command="{Binding DeletePatientCommnad}"
-                    CommandParameter="{Binding ElementName=PatientsDG, Path=SelectedItem}"
+                    CommandParameter="{Binding ElementName=PatientsDg, Path=SelectedItem}"
                     Content="Удалить "
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"/>
-                <Button x:Name="OpenPatinetB"
-                    x:FieldModifier="private"
-                    Visibility="Collapsed"
-                    Content="Открыть курсы"
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"
-                    Command="{Binding OpenPatientCommand}"
-                    CommandParameter="{Binding ElementName=PatientsDG, Path=SelectedItem}"/>
+                    Style="{DynamicResource CmCommandButton}"/>
+
                 <Button x:Name="OpenSessionsB"
                     x:FieldModifier="private"
                     Content="Открыть сеансы"
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"
-                    Command="{Binding OpenSessionsCommand}"/>
-                <Button x:Name="OpenTreatmentResultsB"
-                    x:FieldModifier="private"
-                    Visibility="Collapsed"
-                    Content="Открыть результаты"
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"
-                    Command="{Binding ShowResultsCommand}"/>
+                    Command="{Binding OpenSessionsCommand}"
+                    Style="{DynamicResource CmCommandButton}"/>
+
                 <Button x:Name="OpenFileResultsB"
                     x:FieldModifier="private"
                     Content="Открыть файл"
-                    Width="150"
-                    Margin="10"
-                    FontSize="11"
-                    Command="{Binding OpenSessionCommand}"/>
+                    Command="{Binding OpenSessionCommand}"
+                    Style="{DynamicResource CmCommandButton}"/>
             </StackPanel>
         </Grid>
     </controls1:BusyIndicator>

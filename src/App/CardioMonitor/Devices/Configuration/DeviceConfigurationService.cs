@@ -118,7 +118,7 @@ namespace CardioMonitor.Devices.Configuration
         { 
             using (var context = _contextFactory.Create())
             {
-                var result = await context.DeviceConfigurations.AsNoTracking()
+                var result = await context.DeviceConfigurations
                     .FirstOrDefaultAsync(x => x.ConfigId == confidId
                                               && _registeredDeviceIds.Contains(x.DeviceId))
                     .ConfigureAwait(false);

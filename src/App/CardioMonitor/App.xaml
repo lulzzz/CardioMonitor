@@ -161,8 +161,7 @@
                     <Style BasedOn="{StaticResource CleanWindowButtonCommandsStyleKey}" TargetType="{x:Type Controls:WindowButtonCommands}" />
                     <Style BasedOn="{StaticResource CleanWindowCommandsStyleKey}" TargetType="{x:Type Controls:WindowCommands}" />
                    
-                    <Style 
-                        x:Key="BusyIndicatorStylekey"
+                    <Style  x:Key="BusyIndicatorStylekey"
                         TargetType="{x:Type controls:BusyIndicator}">
                         <Setter Property="Control.IsTabStop" Value="false"/>
                         <Setter Property="Control.BorderBrush" Value="{x:Null}"/>
@@ -217,6 +216,111 @@
                                 </ControlTemplate>
                             </Setter.Value>
                         </Setter>
+                    </Style>
+
+                    <Style x:Key="CmPageHeader"
+                           BasedOn="{StaticResource {x:Type TextBlock}}"
+                           TargetType="{x:Type TextBlock}">
+                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="FontSize" Value="16"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="Margin" Value="10"/>
+                    </Style>
+
+                    <Style x:Key="CmLabel"
+                           BasedOn="{StaticResource {x:Type TextBlock}}"
+                           TargetType="{x:Type TextBlock}">
+                        <Setter Property="HorizontalAlignment" Value="Left"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="FontSize" Value="12"/>
+                        <Setter Property="Margin" Value="10"/>
+                        <Setter Property="TextWrapping" Value="Wrap"/>
+                    </Style>
+
+                    <Style x:Key="CmCenteredTextBox"
+                           BasedOn="{StaticResource {x:Type TextBox}}"
+                           TargetType="{x:Type TextBox}">
+                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="Controls:TextBoxHelper.UseFloatingWatermark" Value="True"/>
+                        <Setter Property="Width" Value="350"/>
+                        <Setter Property="Margin" Value="10"/>
+                    </Style>
+                    
+                    <Style x:Key="CmBottomPanel"
+                           TargetType="{x:Type StackPanel}">
+                        <Setter Property="Orientation" Value="Horizontal"/>
+                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                    </Style>
+
+                    <Style x:Key="CmCommandButton"
+                           BasedOn="{StaticResource {x:Type Button}}"
+                           TargetType="{x:Type Button}">
+                        <Setter Property="Width" Value="150"/>
+                        <Setter Property="Margin" Value="10"/>
+                        <Setter Property="FontSize" Value="11"/>
+                    </Style>
+
+                    <Style x:Key="CmDataGrid"
+                           BasedOn="{StaticResource {x:Type DataGrid}}"
+                           TargetType="{x:Type DataGrid}">
+                        <Setter Property="BorderThickness" Value="2"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource AccentColorBrush}"/>
+                        <Setter Property="RenderOptions.ClearTypeHint" Value="Enabled"/>
+                        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+                        <Setter Property="AutoGenerateColumns" Value="False"/>
+                        <Setter Property="GridLinesVisibility" Value="All"/>
+                        <Setter Property="SelectionMode" Value="Single"/>
+                        <Setter Property="CanUserAddRows" Value="False"/>
+                        <Setter Property="CanUserDeleteRows" Value="False"/>
+                        <Setter Property="CanUserResizeRows" Value="False"/>
+                        <Setter Property="CanUserReorderColumns" Value="False"/>
+                        <Setter Property="IsReadOnly" Value="True"/>
+                        <Setter Property="Margin" Value="10"/>
+                    </Style>
+
+                    <Style x:Key="CmListBox"
+                           BasedOn="{StaticResource {x:Type ListBox}}"
+                           TargetType="{x:Type ListBox}">
+                        <Setter Property="BorderThickness" Value="2"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource AccentColorBrush}"/>
+                        <Setter Property="RenderOptions.ClearTypeHint" Value="Enabled"/>
+                        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+                        <Setter Property="SelectionMode" Value="Single"/>
+                        <Setter Property="Margin" Value="10"/>
+                    </Style>
+
+                    <Style x:Key="CmComboBox"
+                           BasedOn="{StaticResource VirtualisedMetroComboBox}"
+                           TargetType="{x:Type ComboBox}">
+                        <Setter Property="Margin" Value="0 10 0 10"/>
+                        <Setter Property="Controls:TextBoxHelper.UseFloatingWatermark" Value="True"/>
+                        <Setter Property="Width" Value="350"/>
+                        <Setter Property="IsEditable" Value="True"/>
+                        <Setter Property="MaxDropDownHeight" Value="125"/>
+                    </Style>
+                    
+                    <Style x:Key="CmNumericUpDown"
+                           BasedOn="{StaticResource {x:Type Controls:NumericUpDown}}"
+                           TargetType="{x:Type Controls:NumericUpDown}">
+                        <Setter Property="Width" Value="350"/>
+                        <Setter Property="Delay" Value="1000"/>
+                        <Setter Property="TextAlignment" Value="Left"/>
+                        <Setter Property="Speedup" Value="False"/>
+                        <Setter Property="Margin" Value="10"/>
+                        <Setter Property="Controls:TextBoxHelper.UseFloatingWatermark" Value="True"/>
+                        <Setter Property="Controls:TextBoxHelper.WatermarkAlignment" Value="Left"/>
+                    </Style>
+
+                    <Style x:Key="CmSettingsToggleSwitch"
+                           BasedOn="{StaticResource {x:Type Controls:ToggleSwitch}}"
+                           TargetType="{x:Type Controls:ToggleSwitch}">
+                        <Setter Property="Margin" Value="10"/>
+                        <Setter Property="ContentDirection" Value="LeftToRight"/>
+                        <Setter Property="HorizontalAlignment" Value="Right"/>
+
                     </Style>
 
                 </ResourceDictionary>

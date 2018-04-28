@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:system="clr-namespace:System;assembly=mscorlib"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="600"
              xmlns:sessionProcessing="clr-namespace:CardioMonitor.BLL.SessionProcessing;assembly=CardioMonitor.BLL.SessionProcessing"
@@ -11,21 +10,8 @@
 
     <TabControl>
         <TabItem Header="Параметры">
-            <DataGrid BorderBrush="{DynamicResource AccentColorBrush}"
-                      ItemsSource="{Binding CycleParams}"
-                      BorderThickness="2"
-                      Style="{DynamicResource AzureDataGrid}"
-                      RenderOptions.ClearTypeHint="Enabled"
-                      TextOptions.TextFormattingMode="Display"
-                      AutoGenerateColumns="False" 
-                      GridLinesVisibility="All"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      CanUserResizeRows="False"
-                      CanUserReorderColumns="False"
-                      SelectionUnit="FullRow"
-                      IsReadOnly="True"
-                      CanUserSortColumns="False"
+            <DataGrid ItemsSource="{Binding CycleParams}"
+                      Style="{DynamicResource CmDataGrid}"
                       ColumnWidth="*">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Угол наклона кровати"

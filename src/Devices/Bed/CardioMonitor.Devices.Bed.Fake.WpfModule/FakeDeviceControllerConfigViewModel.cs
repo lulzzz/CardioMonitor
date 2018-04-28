@@ -38,7 +38,7 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 _updateDataPeriodMs = value;
                 RisePropertyChanged(nameof(UpdateDataPeriodMs));
                 RisePropertyChanged(nameof(CanGetConfig));
-                IsDataChanged = false;
+                IsDataChanged = true;
             }
         }
 
@@ -51,7 +51,7 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 _timeoutMs = value;
                 RisePropertyChanged(nameof(TimeoutMs));
                 RisePropertyChanged(nameof(CanGetConfig));
-                IsDataChanged = false;
+                IsDataChanged = true;
             }
         }
 
@@ -63,7 +63,7 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 _needReconnect = value;
                 RisePropertyChanged(nameof(NeedReconnect));
                 RisePropertyChanged(nameof(CanGetConfig));
-                IsDataChanged = false;
+                IsDataChanged = true;
             }
         }
 
@@ -75,7 +75,7 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 _reconnectionTimeoutSec = value;
                 RisePropertyChanged(nameof(ReconnectionTimeoutSec));
                 RisePropertyChanged(nameof(CanGetConfig));
-                IsDataChanged = false;
+                IsDataChanged = true;
             }
         }
 
@@ -102,6 +102,13 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
         public event EventHandler CanSaveChanged;
 
         #endregion
+
+        public FakeDeviceControllerConfigViewModel()
+        {
+            NeedReconnect = false;
+            UpdateDataPeriodMs = DefaultUpdateDataPeriodMs;
+            TimeoutMs = DefaultTimeoutMs;
+        }
 
         public void ResetDataChanges()
         {

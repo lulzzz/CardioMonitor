@@ -48,6 +48,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
 
         private bool _isConfigSelected;
 
+
         #endregion
 
 
@@ -118,17 +119,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             }
         }
 
-        public bool IsConfigSelected
-        {
-            get => _isConfigSelected;
-            set
-            {
-                _isConfigSelected = value; 
-                RisePropertyChanged(nameof(IsConfigSelected));
-            }
-        }
-
-
+        public bool IsConfigSelected => SelectedDeviceConfig != null;
 
         #endregion
 
@@ -200,6 +191,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 await _configurationService
                     .EditDeviceConfigurationAsync(deviceConfiguration)
                     .ConfigureAwait(true);
+                selectedDeviceConfig.ConfigViewModel.ResetDataChanges();
             }
             catch (Exception e)
             {
@@ -346,26 +338,25 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                     .AddDeviceConfigurationAsync(deviceConfig)
                     .ConfigureAwait(false);
 
-                var view = _deviceModulesController.GetView(context.DeviceId);
                 _uiInvoker.Invoke(() =>
                 {
-
+                    var view = _deviceModulesController.GetView(context.DeviceId);
                     view.DataContext = viewModel;
+                    var deviceViewModel = new DeviceConfigViewModel(
+                        deviceConfig.ConfigId,
+                        deviceConfig.ConfigName,
+                        deviceConfig.DeviceTypeId,
+                        _deviceTypes[deviceConfig.DeviceTypeId].Name,
+                        deviceConfig.DeviceId,
+                        _deviceInfos[deviceConfig.DeviceId].Name,
+                        view,
+                        viewModel);
+
+                    DeviceConfigs.Add(deviceViewModel);
+
+                    SelectedDeviceConfig = deviceViewModel;
                 });
-
-                var deviceViewModel = new DeviceConfigViewModel(
-                    deviceConfig.ConfigId,
-                    deviceConfig.ConfigName, 
-                    deviceConfig.DeviceTypeId,
-                    _deviceTypes[deviceConfig.DeviceTypeId].Name,
-                    deviceConfig.DeviceId,
-                    _deviceInfos[deviceConfig.DeviceId].Name,
-                    view,
-                    viewModel);
-
-                DeviceConfigs.Add(deviceViewModel);
-
-                SelectedDeviceConfig = deviceViewModel;
+;
 
             }
             catch (Exception e)

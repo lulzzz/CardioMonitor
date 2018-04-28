@@ -7,7 +7,7 @@
              d:DataContext="{d:DesignInstance Type=viewModel:SessionDataViewModel}"
              xmlns:controls="clr-namespace:CardioMonitor.Ui.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="500">
+             d:DesignHeight="700" d:DesignWidth="1000">
     <controls:BusyIndicator
         Style="{DynamicResource BusyIndicatorStylekey}"
         IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
@@ -21,39 +21,23 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Margin="0, 10, 0, 10"
-                    Orientation="Horizontal"
+        <StackPanel Orientation="Horizontal"
                     HorizontalAlignment="Center">
             <TextBlock Text="{Binding PatientName}"
-                   FontSize="16"
-                   FontWeight="Bold">
+                   Style="{DynamicResource CmPageHeader}">
             </TextBlock>
-            <TextBlock Text="Дата сеанса:"
-                       Margin="25,0"
-                       FontSize="16"
-                       FontWeight="Bold"/>
+                <TextBlock Text="Дата сеанса:"
+                           Margin="25,10,10,10"
+                           Style="{DynamicResource CmPageHeader}"/>
             <TextBlock DataContext="{Binding Session}"
                        Text="{Binding DateTime, StringFormat='{}{0:dd.MM.yyyy}'}"
-                       FontSize="16"
-                       FontWeight="Bold"/>
+                       
+                       Style="{DynamicResource CmPageHeader}"/>
         </StackPanel>
         <DataGrid Grid.Row="1"
-                  Margin="0,10,0,10"
                   ItemsSource="{Binding Patients}"
-                  BorderBrush="{DynamicResource AccentColorBrush}"
-                  BorderThickness="2"
-                  RenderOptions.ClearTypeHint="Enabled"
-                  TextOptions.TextFormattingMode="Display"
-                  AutoGenerateColumns="False" 
-                  GridLinesVisibility="All"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserResizeRows="False"
-                  CanUserReorderColumns="False"
-                  SelectionUnit="FullRow"
-                  CanUserSortColumns="False"
-                  IsReadOnly="True"
-                  ColumnWidth="*">
+                  Style="{DynamicResource CmDataGrid}"
+                  Margin="10">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Фамилия"
                                     Binding="{Binding LastName}"/>
@@ -68,23 +52,10 @@
             </DataGrid.Columns>
         </DataGrid>
         <DataGrid Grid.Row="2"
-                  BorderBrush="{DynamicResource AccentColorBrush}"
                   DataContext="{Binding Session}"
                   ItemsSource="{Binding PatientParams}"
-                  BorderThickness="2"
-                  Style="{DynamicResource AzureDataGrid}"
-                  RenderOptions.ClearTypeHint="Enabled"
-                  TextOptions.TextFormattingMode="Display"
-                  AutoGenerateColumns="False" 
-                  GridLinesVisibility="All"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserResizeRows="False"
-                  CanUserReorderColumns="False"
-                  SelectionUnit="FullRow"
-                  IsReadOnly="{Binding IsReadOnly}"
-                  CanUserSortColumns="False"
-                  ColumnWidth="*">
+                  Style="{DynamicResource CmDataGrid}"
+                  Margin="10">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Угол наклона кровати"
                                     Binding="{Binding InclinationAngle}"/>
@@ -102,19 +73,15 @@
                                     Binding="{Binding AverageArterialPressure}"/>
             </DataGrid.Columns>
         </DataGrid>
-        <Button x:Name="SaveB"
-                Command="{Binding SaveCommand}"
+            <StackPanel
                 Grid.Row="3"
-                Content="Сохранить в файл"
-                FontSize="12"
-                Width="250"
-                Margin="10"></Button>
-        <TextBlock Grid.Row="4"
-                   FontSize="14"
-                   Text=""
-                   Margin="10"
-                   TextAlignment="Center"></TextBlock>
-    </Grid>
+                Style="{DynamicResource CmBottomPanel}">
+                <Button x:Name="SaveB"
+                        Command="{Binding SaveCommand}"
+                        Content="Сохранить в файл"
+                        Style="{DynamicResource CmCommandButton}"></Button>
+            </StackPanel>
+        </Grid>
     </controls:BusyIndicator>
 </UserControl>
 
