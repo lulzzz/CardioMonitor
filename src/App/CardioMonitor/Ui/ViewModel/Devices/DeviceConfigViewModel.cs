@@ -6,8 +6,14 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.Ui.ViewModel.Devices
 {
-    public class DeviceConfigViewModel: Notifier
+    public class DeviceConfigViewModel : Notifier, IDisposable
     {
+        private string _deviceTypeName;
+        private string _deviceName;
+        private UIElement _configView;
+        private IDeviceControllerConfigViewModel _configViewModel;
+        private bool _isDataChanged;
+
         public DeviceConfigViewModel(
             Guid configId,
             [NotNull] string deviceConfigName,
@@ -26,7 +32,15 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             ConfigId = configId;
             DeviceTypeId = deviceTypeId;
             DeviceId = deviceId;
+            _configViewModel.OnDataChanged += ConfigViewModelOnOnDataChanged;
         }
+
+        private void ConfigViewModelOnOnDataChanged(object sender, EventArgs eventArgs)
+        {
+            OnDataChanged?.Invoke(sender, eventArgs);
+        }
+
+        public event EventHandler OnDataChanged;
 
         public Guid ConfigId { get; }
         public Guid DeviceTypeId { get; }
@@ -41,7 +55,6 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 RisePropertyChanged(nameof(DeviceTypeName));
             }
         }
-        private string _deviceTypeName;
 
         public string DeviceName
         {
@@ -52,7 +65,6 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 RisePropertyChanged(nameof(DeviceName));
             }
         }
-        private string _deviceName;
 
         public string DeviceConfigName
         {
@@ -61,8 +73,10 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             {
                 _deviceConfigName = value;
                 RisePropertyChanged(nameof(DeviceConfigName));
+                IsDataChanged = true;
             }
         }
+
         private string _deviceConfigName;
 
         public UIElement ConfigView
@@ -74,17 +88,42 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 RisePropertyChanged(nameof(ConfigView));
             }
         }
-        private UIElement _configView;
 
 
         public IDeviceControllerConfigViewModel ConfigViewModel
         {
-            get => _configViewModel; set
+            get => _configViewModel;
+            set
             {
                 _configViewModel = value;
                 RisePropertyChanged(nameof(ConfigViewModel));
             }
         }
-        private IDeviceControllerConfigViewModel _configViewModel;
+
+        public bool IsDataChanged
+        {
+            get => _isDataChanged;
+            set
+            {
+                _isDataChanged = value;
+                RisePropertyChanged(nameof(IsDataChanged));
+                OnDataChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public void ResetDataChanges()
+        {
+            IsDataChanged = false;
+            ConfigViewModel?.ResetDataChanges();
+        }
+
+        public void Dispose()
+        {
+            if (ConfigViewModel != null)
+            {
+                ConfigViewModel.OnDataChanged -= ConfigViewModelOnOnDataChanged;
+            }
+        }
     }
+
 }

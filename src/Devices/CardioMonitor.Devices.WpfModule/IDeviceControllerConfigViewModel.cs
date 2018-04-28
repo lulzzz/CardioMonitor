@@ -10,7 +10,7 @@ namespace CardioMonitor.Devices.WpfModule
 
         void SetConfigJson(string jsonConfig);
 
-        event EventHandler CanSaveChanged;
+        event EventHandler OnDataChanged;
 
         bool IsDataChanged { get; }
 

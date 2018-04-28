@@ -87,11 +87,13 @@ namespace CardioMonitor.Devices
 
         public ICollection<DeviceInfo> GetRegisteredDevices(Guid deviceTypeId)
         {
-            var result = new List<DeviceInfo>(_deviceTypeModules.Count);
-            foreach (var deviceType in _deviceModules.Values)
+            var result = new List<DeviceInfo>(0);
+            foreach (var device in _deviceModules.Values)
             {
+                if (device.DeviceTypeId != deviceTypeId) continue;
+                
                 result.Add(
-                    new DeviceInfo(deviceType.DeviceName, deviceType.DeviceId));
+                    new DeviceInfo(device.DeviceName, device.DeviceId));
             }
 
             return result;

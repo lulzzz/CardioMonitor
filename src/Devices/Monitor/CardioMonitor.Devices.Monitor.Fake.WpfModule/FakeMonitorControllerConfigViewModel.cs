@@ -118,7 +118,7 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
                 _isDataChanged = value;
                 if (oldValue != value)
                 {
-                    CanSaveChanged?.Invoke(this, EventArgs.Empty);
+                    OnDataChanged?.Invoke(this, EventArgs.Empty);
                 }
             }}
 
@@ -126,7 +126,7 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
 
         #region Events
 
-        public event EventHandler CanSaveChanged;
+        public event EventHandler OnDataChanged;
 
         #endregion
 

@@ -45,10 +45,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
 
         private string _busyMessage;
         private bool _isBusy;
-
-        private bool _isConfigSelected;
-
-
+        
         #endregion
 
 
@@ -84,12 +81,12 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             {
                 if (_selectedDeviceConfig?.ConfigViewModel != null)
                 {
-                    _selectedDeviceConfig.ConfigViewModel.CanSaveChanged -= ValidateCanSaveCommand;
+                    _selectedDeviceConfig.OnDataChanged -= ValidateOnDataCommand;
                 }
                 _selectedDeviceConfig = value;
                 if (_selectedDeviceConfig?.ConfigViewModel != null)
                 {
-                    _selectedDeviceConfig.ConfigViewModel.CanSaveChanged += ValidateCanSaveCommand;
+                    _selectedDeviceConfig.OnDataChanged += ValidateOnDataCommand;
                 }
                 RisePropertyChanged(nameof(SelectedDeviceConfig));
                 RisePropertyChanged(nameof(SaveCommand));
@@ -133,7 +130,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 return _saveCommand ?? (_saveCommand = new SimpleCommand
                 {
                     CanExecuteDelegate = x => SelectedDeviceConfig?.ConfigViewModel != null 
-                                              && SelectedDeviceConfig.ConfigViewModel.IsDataChanged 
+                                              && (SelectedDeviceConfig.ConfigViewModel.IsDataChanged || SelectedDeviceConfig.IsDataChanged)
                                               && SelectedDeviceConfig.ConfigViewModel.CanGetConfig,
                     ExecuteDelegate = async x => await SaveConfigAsync().ConfigureAwait(true)
                 });
@@ -165,7 +162,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
 
         #endregion
 
-        private void ValidateCanSaveCommand(object sender, EventArgs args)
+        private void ValidateOnDataCommand(object sender, EventArgs args)
         {
             RisePropertyChanged(nameof(SaveCommand));
         }
@@ -191,7 +188,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 await _configurationService
                     .EditDeviceConfigurationAsync(deviceConfiguration)
                     .ConfigureAwait(true);
-                selectedDeviceConfig.ConfigViewModel.ResetDataChanges();
+                selectedDeviceConfig.ResetDataChanges();
             }
             catch (Exception e)
             {
