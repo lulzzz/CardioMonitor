@@ -11,7 +11,7 @@ namespace CardioMonitor.Infrastructure
             var ep = endPoint.Split(':');
             if (ep.Length < 2) throw new FormatException("Invalid endpoint format");
             IPAddress ip;
-            if (ep.Length > 2)
+            if (ep.Length > 2 )
             {
                 if (!IPAddress.TryParse(string.Join(":", ep, 0, ep.Length - 1), out ip))
                 {
@@ -31,6 +31,20 @@ namespace CardioMonitor.Infrastructure
                 throw new FormatException("Invalid port");
             }
             return new IPEndPoint(ip, port);
-        } 
+        }
+
+        public static bool TryParse(string endPoint, out IPEndPoint result)
+        {
+            try
+            {
+                result = Parse(endPoint);
+                return true;
+            }
+            catch
+            {
+                result = null;
+                return false;
+            }
+        }
     }
 }

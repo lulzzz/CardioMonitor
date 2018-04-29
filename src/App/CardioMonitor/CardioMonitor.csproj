@@ -410,6 +410,10 @@
       <Project>{7b951bc1-b035-41ae-b43a-8dd69adf51f3}</Project>
       <Name>CardioMonitor.Devices.Bed.UDP</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Devices\Bed\CardioMonitor.Devices.Bed.Udp.WpfModule\CardioMonitor.Devices.Bed.Udp.WpfModule.csproj">
+      <Project>{6d146c45-a747-4324-92a4-97470f194999}</Project>
+      <Name>CardioMonitor.Devices.Bed.Udp.WpfModule</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Devices\Bed\CardioMonitor.Devices.Bed.Usb\CardioMonitor.Devices.Bed.Usb.csproj">
       <Project>{11C9D72E-FE6A-4186-BDBA-3232DFFB7CF8}</Project>
       <Name>CardioMonitor.Devices.Bed.Usb</Name>
@@ -433,6 +437,10 @@
     <ProjectReference Include="..\..\Devices\Monitor\CardioMonitor.Devices.Monitor.Infrastructure\CardioMonitor.Devices.Monitor.Infrastructure.csproj">
       <Project>{E773219C-F1DA-42A3-8E80-68BEDAC3E4F8}</Project>
       <Name>CardioMonitor.Devices.Monitor.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Devices\Monitor\Cardiomonitor.Devices.Monitor.Mitar.WpfModule\Cardiomonitor.Devices.Monitor.Mitar.WpfModule.csproj">
+      <Project>{e357cf52-7460-4c86-b7a5-acc0f83adcab}</Project>
+      <Name>Cardiomonitor.Devices.Monitor.Mitar.WpfModule</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Devices\Monitor\CardioMonitor.Devices.Monitor\CardioMonitor.Devices.Monitor.csproj">
       <Project>{A14D3CF8-670B-47B2-BD4A-9B14F87A032E}</Project>

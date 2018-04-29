@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Cardiomonitor.Devices.Monitor.Mitar.WpfModule;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreServices.Patients;
@@ -9,6 +10,7 @@ using CardioMonitor.Data.Ef.Context;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Fake.WpfModule;
 using CardioMonitor.Devices.Bed.Infrastructure;
+using CardioMonitor.Devices.Bed.Udp.WpfModule;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.Data;
 using CardioMonitor.Devices.Monitor.Fake.WpfModule;
@@ -55,7 +57,9 @@ namespace CardioMonitor
             var modules = new List<WpfDeviceModule>
             {
                 FakeBedControllerModule.Module,
-                FakeMonitorControllerModule.Module
+                FakeMonitorControllerModule.Module,
+                MitarMonitorControllerModule.Module,
+                UdpInversionTableControllerModule.Module
             };
 
             RegisterInfrastructure(container);
