@@ -18,7 +18,7 @@ namespace CardioMonitor.Devices.Bed.Fake
                 movementFrequency, 
                 config.UpdateDataPeriod, 
                 config.Timeout, 
-                config.ConenctDelay,
+                config.ConnectDelay,
                 config.DisconnectDelay,
                 config.DefaultDelay,
                 config.CycleWithMaxAngleDuration,
