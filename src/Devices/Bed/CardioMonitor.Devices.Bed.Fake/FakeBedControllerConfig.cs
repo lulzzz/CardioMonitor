@@ -1,6 +1,5 @@
 ﻿using System;
 using CardioMonitor.Devices.Bed.Infrastructure;
-using Newtonsoft.Json;
 
 namespace CardioMonitor.Devices.Bed.Fake
 {
@@ -23,7 +22,7 @@ namespace CardioMonitor.Devices.Bed.Fake
             MovementFrequency = movementFrequency;
             UpdateDataPeriod = updateDataPeriod;
             Timeout = timeout;
-            ConenctDelay = connectDelay;
+            ConnectDelay = connectDelay;
             DisconnectDelay = disconnectDelay;
             DefaultDelay = defaultdelay;
             CycleWithMaxAngleDuration = cyclesWithMaxAngleDuration;
@@ -34,27 +33,20 @@ namespace CardioMonitor.Devices.Bed.Fake
         public float MaxAngleX { get;  }
         public short CyclesCount { get;  }
         public float MovementFrequency { get;  }
-
-        [JsonProperty("UpdateDataPeriod")]
+        
         public TimeSpan UpdateDataPeriod { get;  }
-
-        [JsonProperty("Timeout")]
+        
         public TimeSpan Timeout { get;  }
 
         /// <inheritdoc />
-        [JsonProperty("DeviceReconnectionTimeout")]
         public TimeSpan? DeviceReconnectionTimeout { get; }
-
-        [JsonProperty("ConenctDelay")]
-        public TimeSpan ConenctDelay { get; }
-
-        [JsonProperty("DisconnectDelay")]
+        
+        public TimeSpan ConnectDelay { get; }
+        
         public TimeSpan DisconnectDelay { get; }
-
-        [JsonProperty("DefaultDelay")]
+        
         public TimeSpan DefaultDelay { get;  }
-
-        [JsonProperty("CycleWithMaxAngleDuration")]
+        
         public TimeSpan CycleWithMaxAngleDuration { get; }
     }
 }

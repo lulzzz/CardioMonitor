@@ -98,6 +98,10 @@
       <Project>{d7b49e75-519c-46df-9ee2-d0060c917e3f}</Project>
       <Name>CardioMonitor.Devices.WpfModule</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
+      <Project>{C8EE2E87-12DD-43E4-BAB0-04E09DE9A651}</Project>
+      <Name>CardioMonitor.Devices</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CardioMonitor.Devices.Monitor.Fake\CardioMonitor.Devices.Monitor.Fake.csproj">
       <Project>{0cdd0798-75a2-400a-adc1-8c2eda709f1c}</Project>
       <Name>CardioMonitor.Devices.Monitor.Fake</Name>

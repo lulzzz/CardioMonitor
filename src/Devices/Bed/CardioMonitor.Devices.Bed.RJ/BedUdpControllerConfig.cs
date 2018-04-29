@@ -33,17 +33,14 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// Адрес, по которому можно подключиться к кровати
         /// </summary>
         [NotNull]
-        [JsonProperty("BedIpEndpoint")]
         public string BedIpEndpoint { get; }
 
         /// <summary>
         /// Таймаут операций
         /// </summary>
-        [JsonProperty("Timeout")]
         public TimeSpan Timeout { get; }
 
         /// <inheritdoc />
-        [JsonProperty("Timeout")]
         public TimeSpan? DeviceReconnectionTimeout { get; }
 
         /// <summary>
@@ -58,7 +55,6 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <summary>
         /// Период обмена сообщениями с устройством
         /// </summary>
-        [JsonProperty("UpdateDataPeriod")]
         public TimeSpan UpdateDataPeriod { get; }
         
     }

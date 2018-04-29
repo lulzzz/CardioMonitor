@@ -126,6 +126,7 @@ namespace CardioMonitor
             {
                 container.Register(module.DeviceControllerType);
                 container.Register(module.DeviceControllerConfigBuilder);
+                container.Register(module.DeviceControllerConfigViewModel);
             }
         }
 

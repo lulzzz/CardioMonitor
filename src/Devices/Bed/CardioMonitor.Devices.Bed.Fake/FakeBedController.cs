@@ -53,7 +53,7 @@ namespace CardioMonitor.Devices.Bed.Fake
             IsConnected = true;
             _worker = _workerController.StartWorker(_config.UpdateDataPeriod, WorkMethod);
             
-            return Task.Delay(_config.ConenctDelay);
+            return Task.Delay(_config.ConnectDelay);
         }
 
         private void Init()

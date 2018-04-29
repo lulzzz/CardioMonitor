@@ -30,9 +30,12 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
         private int _reconnectionTimeoutSec;
         private bool _isDataChanged;
 
+        private FakeMonitorControllerConfigBuilder _configBuilder;
+
         #endregion
 
         #region Properties
+
 
         public int DelayMs
         {
@@ -129,9 +132,10 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
         public event EventHandler OnDataChanged;
 
         #endregion
-
-        public FakeMonitorControllerConfigViewModel()
+        
+        public FakeMonitorControllerConfigViewModel(FakeMonitorControllerConfigBuilder configBuilder)
         {
+            _configBuilder = configBuilder ?? throw new ArgumentNullException(nameof(configBuilder));
             NeedReconnect = false;
             UpdateDataPeriodMs = DefaultUpdateDataPeriodMs;
             TimeoutMs = DefaultTimeoutMs;
@@ -156,7 +160,7 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
                 TimeSpan.FromMilliseconds(DelayMs),
                 TimeSpan.FromMilliseconds(PumpingDelayMs),
                 reconnectionTimeout);
-            return JsonConvert.SerializeObject(config);
+            return _configBuilder.Build(config);
         }
 
         public void SetConfigJson(string jsonConfig)
@@ -168,7 +172,7 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
                 NeedReconnect = false;
                 return;
             }
-            var config = JsonConvert.DeserializeObject<FakeCardioMonitorConfig>(jsonConfig);
+            var config = _configBuilder.Build(jsonConfig) as FakeCardioMonitorConfig;
             TimeoutMs = config.Timeout.Milliseconds;
             UpdateDataPeriodMs = config.UpdateDataPeriod.Milliseconds;
             NeedReconnect = config.DeviceReconnectionTimeout.HasValue;

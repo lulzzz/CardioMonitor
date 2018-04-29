@@ -297,10 +297,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
 
                 var bedControllerConfig = bedControllerConfigBuilder.Build(
+                    bedSavedConfig.ParamsJson,
                     context.MaxAngleX,
                     context.CyclesCount,
-                    context.MovementFrequency,
-                    bedSavedConfig.ParamsJson);
+                    context.MovementFrequency);
 
                 var bedController =
                     _deviceControllerFactory

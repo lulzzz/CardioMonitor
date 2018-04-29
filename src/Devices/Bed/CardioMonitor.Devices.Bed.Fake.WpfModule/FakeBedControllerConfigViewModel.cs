@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using CardioMonitor.Devices.Bed.Fake.WpfModule.Annotations;
 using CardioMonitor.Devices.WpfModule;
 using CardioMonitor.Ui.Base;
 using Newtonsoft.Json;
@@ -36,6 +37,8 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
         private int _cycleWithMaxAngelDurationSec;
 
         private bool _isDataChanged;
+
+        private readonly FakeBedControllerConfigBuilder _configBuilder;
 
         #endregion
 
@@ -162,7 +165,13 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
 
         #endregion
 
-        public FakeBedControllerConfigViewModel()
+        public FakeBedControllerConfigViewModel([NotNull] FakeBedControllerConfigBuilder configBuilder)
+        {
+            _configBuilder = configBuilder ?? throw new ArgumentNullException(nameof(configBuilder));
+            SetDefaultValues();
+        }
+
+        private void SetDefaultValues()
         {
             NeedReconnect = false;
             UpdateDataPeriodMs = DefaultUpdateDataPeriodMs;
@@ -195,31 +204,29 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 TimeSpan.FromMilliseconds(DelayMs),
                 TimeSpan.FromSeconds(CycleWithMaxAngelDurationSec),
                 reconnectionTimeout);
-            return JsonConvert.SerializeObject(config);
+            return _configBuilder.Build(config);
         }
 
         public void SetConfigJson(string jsonConfig)
         {
             if (String.IsNullOrWhiteSpace(jsonConfig))
             {
-                TimeoutMs = DefaultTimeoutMs;
-                UpdateDataPeriodMs = DefaultUpdateDataPeriodMs;
-                NeedReconnect = false;
+                SetDefaultValues();
                 return;
             }
-            var config = JsonConvert.DeserializeObject<FakeBedControllerConfig>(jsonConfig);
-            TimeoutMs = config.Timeout.Milliseconds;
-            UpdateDataPeriodMs = config.UpdateDataPeriod.Milliseconds;
+            var config = _configBuilder.Build(jsonConfig) as FakeBedControllerConfig;
+            TimeoutMs = (int)config.Timeout.TotalMilliseconds;
+            UpdateDataPeriodMs = (int)config.UpdateDataPeriod.TotalMilliseconds;
             NeedReconnect = config.DeviceReconnectionTimeout.HasValue;
             if (config.DeviceReconnectionTimeout.HasValue)
             {
-                ReconnectionTimeoutSec = config.DeviceReconnectionTimeout.Value.Seconds;
+                ReconnectionTimeoutSec = (int)config.DeviceReconnectionTimeout.Value.TotalSeconds;
             }
 
-            DelayMs = config.DefaultDelay.Milliseconds;
-            ConnectDelayMs = config.ConenctDelay.Milliseconds;
-            DisconnectDelayMs = config.DisconnectDelay.Milliseconds;
-            CycleWithMaxAngelDurationSec = config.CycleWithMaxAngleDuration.Seconds;
+            DelayMs = (int)config.DefaultDelay.TotalMilliseconds;
+            ConnectDelayMs = (int)config.ConnectDelay.TotalMilliseconds;
+            DisconnectDelayMs = (int)config.DisconnectDelay.TotalMilliseconds;
+            CycleWithMaxAngelDurationSec = (int)config.CycleWithMaxAngleDuration.TotalSeconds;
 
 
             IsDataChanged = false;

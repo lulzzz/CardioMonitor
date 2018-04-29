@@ -3,9 +3,12 @@
     public interface IBedControllerConfigBuilder : IDeviceControllerConfigBuilder
     {
         IBedControllerConfig Build(
-            float maxAngleX,
-            short cyclesCount,
-            float movementFrequency,
-            string jsonConfig);
+            string jsonConfig,
+            float maxAngleX = 0f,
+            short cyclesCount = 0,
+            float movementFrequency = 0f);
+
+
+        string Build(IBedControllerConfig config);
     }
 }
