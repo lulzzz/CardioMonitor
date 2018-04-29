@@ -65,6 +65,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         [NotNull] private readonly IWorkerController _workerController;
 
         [NotNull] private readonly IDeviceConfigurationService _deviceConfigurationService;
+        [NotNull] private readonly IPatientsService _patientsService;
         [NotNull] private readonly IUiInvoker _uiInvoker;
 
         private bool _isResultSaved;
@@ -102,7 +103,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// <remarks>
         /// Лайфхак для отображения пациента в таблице
         /// </remarks>
-        public ObservableCollection<Patient> Patients => (null != Patient)
+        public ObservableCollection<Patient> Patients => null != Patient
             ? new ObservableCollection<Patient> {Patient}
             : new ObservableCollection<Patient>();
 
@@ -252,6 +253,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] IDeviceControllerFactory deviceControllerFactory,
             [NotNull] IWorkerController workerController, 
             [NotNull] IDeviceConfigurationService deviceConfigurationService,
+            [NotNull] IPatientsService patientsService,
                 [NotNull] IUiInvoker uiInvoker) 
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -260,6 +262,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _deviceControllerFactory = deviceControllerFactory ?? throw new ArgumentNullException(nameof(deviceControllerFactory));
             _workerController = workerController;
             _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
+            _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _uiInvoker = uiInvoker ?? throw new ArgumentNullException(nameof(uiInvoker));
 
             StartButtonText = _startText;
@@ -475,6 +478,28 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             //Session = new SessionModel();
         }
 
+        private async Task InternalOpenAsync(SessionProcessingPageConext context)
+        {
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Подготовка сеанса...";
+                var patient = await _patientsService.GetPatientAsync(context.PatientId).ConfigureAwait(false);
+
+                _uiInvoker.Invoke(() => { Patient = patient;});
+            }
+            catch (Exception e)
+            {
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка подготовки сеанса").ConfigureAwait(false);
+                _logger.Error($"{GetType().Name}: Ошибка открытия страницы выполнения сеанса. Причина: {e.Message}", e);
+            }
+            finally
+            {
+                IsBusy = false;
+                BusyMessage = String.Empty;
+            }
+        }
+
         #region IStoryboardPageViewModel
 
         public Guid PageId { get; set; }
@@ -484,6 +509,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             if (!(context is SessionProcessingPageConext temp)) throw new ArgumentException($"Context must be {typeof(SessionProcessingPageConext)}");
             _context = temp;
+            Task.Factory.StartNew(async () => await InternalOpenAsync(_context).ConfigureAwait(false));
             return Task.CompletedTask;
         }
 
