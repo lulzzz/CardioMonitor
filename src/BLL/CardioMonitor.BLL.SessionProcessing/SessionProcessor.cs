@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,10 +30,17 @@ namespace CardioMonitor.BLL.SessionProcessing
         [CanBeNull] 
         private SessionParams _startParams;
 
-        [CanBeNull]
+
+        /// <summary>
+        /// Всегда устанавливается при инициализации
+        /// </summary>
+        [NotNull]
         private IDevicesFacade _devicesFacade;
-        
-        
+
+        [NotNull]
+        private IUiInvoker _uiInvoker;
+
+
         [NotNull]
         private readonly object _cycleDataLocker = new object();
 
@@ -160,17 +168,6 @@ namespace CardioMonitor.BLL.SessionProcessing
 
         #endregion
         
-        #region Rise events 
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void RisePropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        #endregion
-
         #region public methods
 
         public void Init(
@@ -178,21 +175,23 @@ namespace CardioMonitor.BLL.SessionProcessing
             [NotNull] IBedController bedController,
             [NotNull] IMonitorController monitorController,
             [NotNull] IWorkerController workerController,
-            [NotNull] ILogger logger)
+            [NotNull] ILogger logger,
+            [NotNull] IUiInvoker uiInvoker)
         {
             if (bedController == null) throw new ArgumentNullException(nameof(bedController));
             if (monitorController == null) throw new ArgumentNullException(nameof(monitorController));
             if (workerController == null) throw new ArgumentNullException(nameof(workerController));
+            if (uiInvoker == null) throw new ArgumentNullException(nameof(uiInvoker));
 
             _startParams = startParams ?? throw new ArgumentNullException(nameof(startParams));
-            
+
             _devicesFacade = new DevicesFacade(
                 startParams,
                 bedController,
                 monitorController,
                 workerController,
                 logger);
-            
+
             _devicesFacade.OnException += OnException;
             _devicesFacade.OnException += HandleOnException;
             _devicesFacade.OnSessionErrorStop += OnSessionErrorStop;
@@ -212,16 +211,32 @@ namespace CardioMonitor.BLL.SessionProcessing
             _devicesFacade.OnCurrentAngleXRecieved += HandleOnCurrentAngleXRecieved;
             _devicesFacade.OnCommonPatientParamsRecieved += HandleOnCommonPatientParamsRecieved;
             _devicesFacade.OnPatientPressureParamsRecieved += HandleOnPatientPressureParamsRecieved;
-            
-            PatientParamsPerCycles = new List<CycleData>(startParams.CycleCount);
+
+            var temp = new List<CycleData>(startParams.CycleCount);
+            for (var index = 0; index < startParams.CycleCount; index++)
+            {
+                temp.Add(new CycleData
+                {
+                    CycleNumber = (short) (index + 1),
+                    CycleParams = new ObservableCollection<CheckPointParams>()
+                });
+            }
+
+            _uiInvoker = uiInvoker;
+            _uiInvoker.Invoke(() =>
+            {
+                PatientParamsPerCycles = temp;
+            });
             _isInitialized = true;
         }
-        
+
         public Task StartAsync()
         {
             AssureInitialization();
-            
-            SessionStatus = SessionStatus.InProgress;
+
+            _uiInvoker.Invoke(() => {
+                SessionStatus = SessionStatus.InProgress;
+            });
             return _devicesFacade.StartAsync();
         }
 
@@ -233,24 +248,27 @@ namespace CardioMonitor.BLL.SessionProcessing
         public Task EmeregencyStopAsync()
         {
             AssureInitialization();
-            
-            SessionStatus = SessionStatus.EmergencyStopped;
+
+
+            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.EmergencyStopped; });
             return _devicesFacade.EmergencyStopAsync();
         }
 
         public Task PauseAsync()
         {
             AssureInitialization();
-            
-            SessionStatus = SessionStatus.Suspended;
+
+
+            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.Suspended; });
             return _devicesFacade.PauseAsync();
         }
 
         public Task ResumeAsync()
         {
             AssureInitialization();
-            
-            SessionStatus = SessionStatus.InProgress;
+
+
+            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.InProgress; });
             return _devicesFacade.StartAsync();
         }
 
@@ -308,10 +326,14 @@ namespace CardioMonitor.BLL.SessionProcessing
         {
             // это поле задается в методе Init
             if (_startParams == null) throw new InvalidOperationException($"Необходимо сначала выполнить {nameof(Init)}");
-            
-            CurrentCycleNumber = completedCycleNumber == _startParams.CycleCount
-                ? completedCycleNumber
-                : (short)(completedCycleNumber + 1);
+
+
+            _uiInvoker.Invoke(() =>
+            {
+                CurrentCycleNumber = completedCycleNumber == _startParams.CycleCount
+                    ? completedCycleNumber
+                    : (short) (completedCycleNumber + 1);
+            });
         }
 
         private void HandleOnException(object sender, [NotNull] SessionProcessingException exception)
@@ -328,7 +350,7 @@ namespace CardioMonitor.BLL.SessionProcessing
                     var iterationNumber = exception.IterationNumber;
                     if (iterationNumber == null || cycleNumber == null) return;
 
-                    var checkPoint = PatientParamsPerCycles[cycleNumber.Value]
+                    var checkPoint = PatientParamsPerCycles[cycleNumber.Value-1]
                         .CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
                     if (checkPoint == null) return;
                     checkPoint.HandleErrorOnCommoParamsProcessing();
@@ -341,7 +363,7 @@ namespace CardioMonitor.BLL.SessionProcessing
                     var iterationNumber = exception.IterationNumber;
                     if (iterationNumber == null || cycleNumber == null) return;
 
-                    var checkPoint = PatientParamsPerCycles[cycleNumber.Value]
+                    var checkPoint = PatientParamsPerCycles[cycleNumber.Value-1]
                         .CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
                     if (checkPoint == null) return;
                     checkPoint.HandleErrorOnPressureParamsProcessing();
@@ -356,21 +378,26 @@ namespace CardioMonitor.BLL.SessionProcessing
         {
             lock (_cycleDataLocker)
             {
-                var cycleNumber = patientPressureParams.CycleNumber;
-                var iterationNumber = patientPressureParams.IterationNumber;
-                var inclinationAngle = patientPressureParams.InclinationAngle;
-                
-                var checkPoint = PatientParamsPerCycles[cycleNumber].CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber);
-                if (checkPoint == null)
-                {
-                    checkPoint = new CheckPointParams(
-                        cycleNumber, 
-                        iterationNumber,
-                        inclinationAngle);
-                    PatientParamsPerCycles[cycleNumber].CycleParams.Add(checkPoint);
-                }
 
-                checkPoint.SetPressureParams(patientPressureParams);
+                _uiInvoker.Invoke(() =>
+                {
+                    var cycleNumber = patientPressureParams.CycleNumber;
+                    var iterationNumber = patientPressureParams.IterationNumber;
+                    var inclinationAngle = patientPressureParams.InclinationAngle;
+
+                    var checkPoint = PatientParamsPerCycles[cycleNumber - 1].CycleParams
+                        .FirstOrDefault(x => x.IterationNumber == iterationNumber);
+                    if (checkPoint == null)
+                    {
+                        checkPoint = new CheckPointParams(
+                            cycleNumber,
+                            iterationNumber,
+                            inclinationAngle);
+                        PatientParamsPerCycles[cycleNumber - 1].CycleParams.Add(checkPoint);
+                    }
+
+                    checkPoint.SetPressureParams(patientPressureParams);
+                });
             }
         }
 
@@ -380,63 +407,81 @@ namespace CardioMonitor.BLL.SessionProcessing
         {
             lock (_cycleDataLocker)
             {
-                var cycleNumber = commonPatientParams.CycleNumber;
-                var iterationNumber = commonPatientParams.IterationNumber;
-
-                var inclinationAngle = commonPatientParams.InclinationAngle;
-                
-                var checkPoint = PatientParamsPerCycles[cycleNumber].CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber);
-                if (checkPoint == null)
+                _uiInvoker.Invoke(() =>
                 {
-                    checkPoint = new CheckPointParams(
-                        cycleNumber, 
-                        iterationNumber, 
-                        inclinationAngle);
-                    PatientParamsPerCycles[cycleNumber].CycleParams.Add(checkPoint);
-                }
-                checkPoint.SetCommonParams(commonPatientParams);
+                    var cycleNumber = commonPatientParams.CycleNumber;
+                    var iterationNumber = commonPatientParams.IterationNumber;
+
+                    var inclinationAngle = commonPatientParams.InclinationAngle;
+
+                    var checkPoint = PatientParamsPerCycles[cycleNumber - 1].CycleParams
+                        .FirstOrDefault(x => x.IterationNumber == iterationNumber);
+                    if (checkPoint == null)
+                    {
+                        checkPoint = new CheckPointParams(
+                            cycleNumber,
+                            iterationNumber,
+                            inclinationAngle);
+                        PatientParamsPerCycles[cycleNumber - 1].CycleParams.Add(checkPoint);
+                    }
+
+                    checkPoint.SetCommonParams(commonPatientParams);
+                });
             }
         }
 
         private void HandleOnCurrentAngleXRecieved(object sender, float value)
         {
-            CurrentXAngle = value;
+            _uiInvoker.Invoke(() => { CurrentXAngle = value; });
         }
         
         private void HandleOnRemainingTimeChanged(object sender, TimeSpan timeSpan)
         {
-            RemainingTime = timeSpan;
+            _uiInvoker.Invoke(() => { RemainingTime = timeSpan; });
         }
 
         private void HandleOnElapsedTimeChanged(object sender, TimeSpan timeSpan)
         {
-            ElapsedTime = timeSpan;
+            _uiInvoker.Invoke(() => { ElapsedTime = timeSpan; });
         }
         
         private void HandleOnPausedFromDevice(object sender, EventArgs eventArgs)
         {
-            SessionStatus = SessionStatus.Suspended;
+            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.Suspended; });
         }
 
         private void HandleOnEmeregencyStoppedFromDevice(object sender, EventArgs eventArgs)
         {
-            SessionStatus = SessionStatus.EmergencyStopped;
+            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.EmergencyStopped; });
         }
 
         private void HandleOnResumedFromDevice(object sender, EventArgs eventArgs)
         {
-            SessionStatus = SessionStatus.InProgress;
+            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.InProgress; });
         }
 
         private void HandleOnSessionCompleted(object sender, EventArgs eventArgs)
         {
-            SessionStatus = SessionStatus.Completed;
+            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.Completed; });
         }
 
         private void HandleOnSessionErrorStop(object sender, Exception exception)
         {
-            SessionStatus = SessionStatus.TerminatedOnError;
+            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.TerminatedOnError; });
         }
+
+        #endregion
+
+
+        #region Rise events 
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void RisePropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
         #endregion
     }
 }

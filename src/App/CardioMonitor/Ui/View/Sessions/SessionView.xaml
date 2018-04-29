@@ -72,11 +72,17 @@
             <Grid.Resources>
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
             </Grid.Resources>
+            <TextBlock
+                Text="Все готово. Для начала сеанса нажмите кнопку Старт"
+                FontSize="16"
+                HorizontalAlignment="Center"
+                Style="{DynamicResource CmLabel}"/>
             <TabControl
-                ItemsSource="{Binding PatientParamsPerCycles}"
+                ItemsSource="{Binding PatientParamsPerCycles, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                SelectedIndex="{Binding SelectedCycleTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 TabStripPlacement="Left"
                 controls:TabControlHelper.Underlined="TabItems"
-                DisplayMemberPath="{Binding CycleNumber}">
+                DisplayMemberPath="CycleNumber">
 
                 <TabControl.ContentTemplate>
                     <DataTemplate>
@@ -100,14 +106,14 @@
                 VerticalAlignment="Center">
                 <!--Старт-->
                 <ToggleButton x:Name="StartSessionB"
-                              Command="{Binding StartCommand}"
-                              Content="{Binding StartButtonText}"
+                              Command="{Binding StartCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                              Content="{Binding StartButtonText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                               Width="250"
                               Height="55"
                               FontSize="12"/>
                 <!--Реверс-->
                 <Button x:Name="ReverseSessionB"
-                        Command="{Binding ReverseCommand}"
+                        Command="{Binding ReverseCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                         FontSize="12"
                         Content="Реверс"
                         Width="250"
@@ -120,7 +126,7 @@
                 VerticalAlignment="Center">
                 <!--Экстренная остановка-->
                 <Button x:Name="EmergencyStopB"
-                        Command="{Binding EmergencyStopCommand}"
+                        Command="{Binding EmergencyStopCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                         Width="250"
                         Margin="10,0,10,0"
                         MinHeight="55"
@@ -164,7 +170,7 @@
                     <Border Grid.Column="1"
                             BorderBrush="{DynamicResource AccentColorBrush}"
                             BorderThickness="2">
-                        <TextBlock Text="{Binding CurrentXAngle, StringFormat='{}{0:0.0°}'}"
+                            <TextBlock Text="{Binding CurrentXAngle, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:0.0°}'}"
                                    VerticalAlignment="Center"
                                    FontSize="20"
                                    Margin="5"/>
@@ -190,7 +196,7 @@
                     <Border Grid.Column="1"
                             BorderBrush="{DynamicResource AccentColorBrush}"
                             BorderThickness="2">
-                        <TextBlock Text="{Binding ElapsedTime, StringFormat='{}{0:mm\\:ss}'}"
+                            <TextBlock Text="{Binding ElapsedTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:mm\\:ss}'}"
                                    VerticalAlignment="Center"
                                    FontSize="20"
                                    Margin="5"/>
@@ -216,7 +222,7 @@
                     <Border Grid.Column="1"
                             BorderBrush="{DynamicResource AccentColorBrush}"
                             BorderThickness="2">
-                        <TextBlock Text="{Binding RemainingTime, StringFormat='{}{0:mm\\:ss}'}"
+                            <TextBlock Text="{Binding RemainingTime, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:mm\\:ss}'}"
                                    VerticalAlignment="Center"
                                    FontSize="20"
                                    Margin="5"/>

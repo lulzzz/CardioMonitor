@@ -88,7 +88,8 @@ namespace CardioMonitor
 
             container.Register<IStoryboardPageCreator, SimpleInjectorPageCreator>(Lifestyle.Transient);
             container.Register<StoryboardsNavigationService>(Lifestyle.Singleton);
-            container.Register<IUiInvoker, WpfUiInvoker>(Lifestyle.Singleton);
+            container.Register<Infrastructure.IUiInvoker, WpfUiInvoker>(Lifestyle.Singleton);
+            container.Register<Markeli.Storyboards.IUiInvoker, WpfUiInvoker>(Lifestyle.Singleton);
         }
 
         private static ICardioSettings GetSettings()

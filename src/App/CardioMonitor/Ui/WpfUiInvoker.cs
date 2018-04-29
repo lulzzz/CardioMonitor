@@ -5,7 +5,7 @@ using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui
 {
-    public class WpfUiInvoker : IUiInvoker
+    public class WpfUiInvoker : IUiInvoker, Infrastructure.IUiInvoker
     {
         public void Invoke(Action action)
         {
