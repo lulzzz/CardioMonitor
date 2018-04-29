@@ -16,6 +16,11 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
         private const int DefaultTimeoutMs = 10000;
         private const int DefaultUpdateDataPeriodMs = 500;
 
+        private const int DefaultConnectDelayMs = 1000;
+        private const int DefaultDisconnectDelayMs = 1000;
+        private const int DefaultDelayMs = 1000;
+        private const int DefaultCycleWithMaxAngelDurationSec = 600;
+
         #endregion
 
         #region Fields
@@ -24,11 +29,65 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
         private int _timeoutMs;
         private bool _needReconnect;
         private int _reconnectionTimeoutSec;
+        
+        private int _connectDelayMs;
+        private int _disconnectDelayMs;
+        private int _delayMs;
+        private int _cycleWithMaxAngelDurationSec;
+
         private bool _isDataChanged;
 
         #endregion
 
         #region Properties
+
+        public int ConnectDelayMs
+        {
+            get => _connectDelayMs;
+            set
+            {
+                _connectDelayMs = value;
+                RisePropertyChanged(nameof(ConnectDelayMs));
+                RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = true;
+            }
+        }
+
+        public int DisconnectDelayMs
+        {
+            get => _disconnectDelayMs;
+            set
+            {
+                _disconnectDelayMs = value;
+                RisePropertyChanged(nameof(DisconnectDelayMs));
+                RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = true;
+            }
+        }
+
+        public int DelayMs
+        {
+            get => _delayMs;
+            set
+            {
+                _delayMs = value;
+                RisePropertyChanged(nameof(DelayMs));
+                RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = true;
+            }
+        }
+
+        public int CycleWithMaxAngelDurationSec
+        {
+            get => _cycleWithMaxAngelDurationSec;
+            set
+            {
+                _cycleWithMaxAngelDurationSec = value;
+                RisePropertyChanged(nameof(CycleWithMaxAngelDurationSec));
+                RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = true;
+            }
+        }
 
         public int UpdateDataPeriodMs
         {
@@ -108,6 +167,10 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
             NeedReconnect = false;
             UpdateDataPeriodMs = DefaultUpdateDataPeriodMs;
             TimeoutMs = DefaultTimeoutMs;
+            DelayMs = DefaultDelayMs;
+            ConnectDelayMs = DefaultConnectDelayMs;
+            DisconnectDelayMs = DefaultDisconnectDelayMs;
+            CycleWithMaxAngelDurationSec = DefaultCycleWithMaxAngelDurationSec;
         }
 
         public void ResetDataChanges()
@@ -127,6 +190,10 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 default(float),
                 TimeSpan.FromMilliseconds(UpdateDataPeriodMs),
                 TimeSpan.FromMilliseconds(TimeoutMs), 
+                TimeSpan.FromMilliseconds(ConnectDelayMs),
+                TimeSpan.FromMilliseconds(DisconnectDelayMs),
+                TimeSpan.FromMilliseconds(DelayMs),
+                TimeSpan.FromSeconds(CycleWithMaxAngelDurationSec),
                 reconnectionTimeout);
             return JsonConvert.SerializeObject(config);
         }
@@ -149,6 +216,12 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 ReconnectionTimeoutSec = config.DeviceReconnectionTimeout.Value.Seconds;
             }
 
+            DelayMs = config.DefaultDelay.Milliseconds;
+            ConnectDelayMs = config.ConenctDelay.Milliseconds;
+            DisconnectDelayMs = config.DisconnectDelay.Milliseconds;
+            CycleWithMaxAngelDurationSec = config.CycleWithMaxAngleDuration.Seconds;
+
+
             IsDataChanged = false;
         }
 
@@ -158,18 +231,46 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
         {
             get
             {
-                if (String.IsNullOrEmpty(columnName) || Equals(columnName, nameof(TimeoutMs)))
+                if (String.IsNullOrEmpty(columnName) || Equals(columnName, nameof(DelayMs)))
                 {
-                    if (TimeoutMs < 0)
+                    if (DelayMs < 0)
                     {
                         return "Необходимо задать целое положительное число";
                     }
                 }
-                if (String.IsNullOrEmpty(columnName) || Equals(columnName, nameof(UpdateDataPeriodMs)))
+                if (String.IsNullOrEmpty(columnName) || Equals(columnName, nameof(DisconnectDelayMs)))
                 {
-                    if (UpdateDataPeriodMs < 0)
+                    if (DisconnectDelayMs < 0)
                     {
                         return "Необходимо задать целое положительное число";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || Equals(columnName, nameof(ConnectDelayMs)))
+                {
+                    if (ConnectDelayMs < 0)
+                    {
+                        return "Необходимо задать целое положительное число";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || Equals(columnName, nameof(CycleWithMaxAngelDurationSec)))
+                {
+                    if (CycleWithMaxAngelDurationSec < 180)
+                    {
+                        return "Длительность эмуляции не может быть меньше 3 минут";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || Equals(columnName, nameof(TimeoutMs)))
+                {
+                    if (TimeoutMs < 100)
+                    {
+                        return "Должен быть не меньше 100 мс";
+                    }
+                }
+                if (String.IsNullOrEmpty(columnName) || Equals(columnName, nameof(UpdateDataPeriodMs)))
+                {
+                    if (UpdateDataPeriodMs <= 300)
+                    {
+                        return "Должно быть не меньше 300 мс";
                     }
                 }
 
@@ -181,6 +282,7 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                         return "Необходимо задать целое положительное число";
                     }
                 }
+
                 return String.Empty;
             }
         }

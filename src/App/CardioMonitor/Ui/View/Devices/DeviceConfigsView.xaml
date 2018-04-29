@@ -99,12 +99,15 @@
                          mah:TextBoxHelper.Watermark="Название конфигурации"
                              Style="{DynamicResource CmCenteredTextBox}"/>
                 </Grid>
-                <ContentPresenter
+                <ScrollViewer
                     Grid.Row="1"
                     Margin="10,0"
-                    HorizontalAlignment="Stretch"
-                    VerticalAlignment="Top"
-                    Content="{Binding SelectedDeviceConfig.ConfigView}"/>
+                    VerticalScrollBarVisibility="Auto">
+                    <ContentPresenter
+                        HorizontalAlignment="Stretch"
+                        VerticalAlignment="Top"
+                        Content="{Binding SelectedDeviceConfig.ConfigView}"/>
+                </ScrollViewer>
                 <StackPanel
                     Grid.Row="2"
                     Style="{DynamicResource CmBottomPanel}">

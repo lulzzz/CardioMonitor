@@ -10,7 +10,7 @@ namespace CardioMonitor.Devices.Bed.Fake
     public class FakeBedController : IBedController
     {
         private readonly IWorkerController _workerController;
-        private FakeDeviceConfig _config;
+        private FakeBedControllerConfig _config;
         private Worker _worker;
         private const float MaxAngleX = 31.5f;
         private const short IterationsCountOnMaxAngleX = 40;
@@ -42,7 +42,7 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public void Init(IBedControllerConfig config)
         {
-            if (!(config is FakeDeviceConfig localParms)) throw new ArgumentException();
+            if (!(config is FakeBedControllerConfig localParms)) throw new ArgumentException();
 
             _config = localParms;
             Init();
@@ -218,25 +218,5 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public Guid DeviceId => FakeInversionTableDeviceId.DeviceId;
         public Guid DeviceTypeId => InversionTableDeviceTypeId.DeviceTypeId;
-    }
-
-    public class FakeDeviceConfig : IBedControllerConfig
-    {
-        public float MaxAngleX { get; }
-        public short CyclesCount { get; }
-        public float MovementFrequency { get; }
-        public TimeSpan UpdateDataPeriod { get; }
-        public TimeSpan Timeout { get; }
-
-        public TimeSpan? DeviceReconnectionTimeout { get; }
-
-        public TimeSpan ConenctDelay { get; set; }
-
-        public TimeSpan DisconnectDelay { get; set; }
-
-        public TimeSpan DefaultDelay { get; set; }
-
-        public TimeSpan CycleWithMaxAngleDuration { get; set; }
-       
     }
 }

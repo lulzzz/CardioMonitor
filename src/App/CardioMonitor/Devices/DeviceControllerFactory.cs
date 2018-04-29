@@ -57,7 +57,7 @@ namespace CardioMonitor.Devices
             if (!_deviceControllers.ContainsKey(deviceId)) throw new InvalidOperationException($"Device with Id {deviceId} not registered");
 
             var deviceInfo = _deviceControllers[deviceId];
-            return _container.GetInstance(deviceInfo.Item1) as T;
+            return _container.GetInstance(deviceInfo.Item2) as T;
         }
     }
 }

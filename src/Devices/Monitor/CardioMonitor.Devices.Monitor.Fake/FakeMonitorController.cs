@@ -10,6 +10,11 @@ namespace CardioMonitor.Devices.Monitor.Fake
         private FakeCardioMonitorConfig _config;
         private Random _randomizer;
 
+        public FakeMonitorController()
+        {
+            _randomizer = new Random();
+        }
+
         public void Dispose()
         {
         }

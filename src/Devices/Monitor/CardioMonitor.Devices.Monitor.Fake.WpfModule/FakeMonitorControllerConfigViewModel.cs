@@ -177,6 +177,8 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
                 ReconnectionTimeoutSec = config.DeviceReconnectionTimeout.Value.Seconds;
             }
 
+            DelayMs = config.DefaultDelay.Milliseconds;
+            PumpingDelayMs = config.PumpingDelay.Milliseconds;
             IsDataChanged = false;
         }
 

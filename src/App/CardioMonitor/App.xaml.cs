@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreServices.Patients;
@@ -51,15 +52,22 @@ namespace CardioMonitor
         private static Container Bootstrap()
         {
             var container = new Container();
+            var modules = new List<WpfDeviceModule>
+            {
+                FakeBedControllerModule.Module,
+                FakeMonitorControllerModule.Module
+            };
 
             RegisterInfrastructure(container);
             RegisterLogger(container);
             RegisterViewModels(container);
-            RegisterDevices(container);
+            RegisterDevices(container, modules);
             RegisterServices(container);
             RegisterEventBus(container);
             RegisterPatientEventsHandlers(container);
-            InitDevices(container);
+
+
+            InitDevices(container, modules);
             // throw exception, incorrect seleted lifycycles for disposable objects
             // container.Verify();
 
@@ -107,12 +115,18 @@ namespace CardioMonitor
             container.Register<SettingsViewModel>(Lifestyle.Transient);
         }
 
-        private static void RegisterDevices(Container container)
+        private static void RegisterDevices(Container container, ICollection<WpfDeviceModule> modules)
         {
             container.Register<IDeviceControllerFactory, DeviceControllerFactory>(Lifestyle.Singleton);
             container.Register<IDeviceConfigurationService, DeviceConfigurationService>(Lifestyle.Singleton);
             container.Register<IDeviceModulesController, DeviceModulesController>(Lifestyle.Singleton);
             container.Register<IDeviceConfigurationContextFactory>(() => new DeviceConfigurationContextFactory("CardioMonitorContext"), Lifestyle.Singleton);
+
+            foreach (var module in modules)
+            {
+                container.Register(module.DeviceControllerType);
+                container.Register(module.DeviceControllerConfigBuilder);
+            }
         }
 
         private static void RegisterServices(Container container)
@@ -135,12 +149,15 @@ namespace CardioMonitor
             container.Register<PatientDeletedEventHandler>();
         }
 
-        private static void InitDevices(Container container)
+        private static void InitDevices(Container container, ICollection<WpfDeviceModule> modules)
         {
             var modulesController = container.GetInstance<IDeviceModulesController>();
             RegisterSupportedDevices(modulesController);
-            modulesController.RegisterDevice(FakeBedControllerModule.Module);
-            modulesController.RegisterDevice(FakeMonitorControllerModule.Module);
+
+            foreach (var module in modules)
+            {
+                modulesController.RegisterDevice(module);
+            }
         }
 
         private static void RegisterSupportedDevices(IDeviceModulesController controller)

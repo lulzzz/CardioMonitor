@@ -253,79 +253,97 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         private async Task StartButtonClickAsync()
         {
-            switch (SessionStatus)
+            var actionName = String.Empty;
+            try
             {
-                case SessionStatus.InProgress:
-                    await PauseAsync().ConfigureAwait(true);
-                    break;
-                case SessionStatus.Suspended:
-                    await ResumeAsync().ConfigureAwait(true);
-                    break;
-                default:
-                    _isResultSaved = false;
-
-                    var context = _context;
-
-                    var bedSavedConfig = await
-                        _deviceConfigurationService
-                            .GetDeviceConfigurationAsync(context.InverstionTableConfigId)
-                            .ConfigureAwait(true);
-
-                    var bedControllerConfigBuilder = _deviceControllerFactory
-                        .CreateDeviceControllerConfigBuilder<IBedControllerConfigBuilder>(
-                            bedSavedConfig.DeviceId);
-
-
-                    var bedControllerConfig = bedControllerConfigBuilder.Build(
-                        context.MaxAngleX,
-                        context.CyclesCount,
-                        context.MovementFrequency,
-                        bedSavedConfig.ParamsJson);
-
-                    var bedController =
-                        _deviceControllerFactory
-                            .CreateDeviceController<IBedController>(bedSavedConfig.DeviceId);
-
-
-
-                    var monitorSavedConfig = await
-                        _deviceConfigurationService
-                            .GetDeviceConfigurationAsync(context.MonitorConfigId)
-                            .ConfigureAwait(true);
-
-                    var monitorControllerConfigBuilder = _deviceControllerFactory
-                        .CreateDeviceControllerConfigBuilder<IMonitorControllerConfigBuilder>(
-                            monitorSavedConfig.DeviceId);
-
-
-                    var monitorInitConfig = monitorControllerConfigBuilder.Build(
-                        monitorSavedConfig.ParamsJson);
-
-                    var monitorController =
-                        _deviceControllerFactory
-                            .CreateDeviceController<IMonitorController>(monitorSavedConfig.DeviceId);
-                    
-
-                    var startParams = new SessionParams(
-                        context.CyclesCount,
-                        //todo в параметры
-                        TimeSpan.FromMilliseconds(300),
-                        bedControllerConfig,
-                        monitorInitConfig,
-                        context.PumpingNumberOfAttemptsOnStartAndFinish,
-                        context.PumpingNumberOfAttemptsOnProcessing);
-                    
-                    Init(
-                        startParams,
-                        bedController,
-                        monitorController,
-                        _workerController,
-                        _logger);
-                    await StartAsync().ConfigureAwait(true);
-                    break;
+                switch (SessionStatus)
+                {
+                    case SessionStatus.InProgress:
+                        actionName = "паузы";
+                        await PauseAsync().ConfigureAwait(true);
+                        break;
+                    case SessionStatus.Suspended:
+                        actionName = "продолжения";
+                        await ResumeAsync().ConfigureAwait(true);
+                        break;
+                    default:
+                        actionName = "старта";
+                        await InitAsync().ConfigureAwait(true);
+                        await StartAsync().ConfigureAwait(true);
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                await MessageHelper.Instance.ShowMessageAsync($"Ошибка {actionName} сеанса").ConfigureAwait(true);
+                _logger.Error($"{GetType().Name}: Ошибка {actionName} сеанса. Причина: {e.Message}", e);
             }
         }
-        
+
+        private async Task InitAsync()
+        {
+                _isResultSaved = false;
+
+                var context = _context;
+
+                var bedSavedConfig = await
+                    _deviceConfigurationService
+                        .GetDeviceConfigurationAsync(context.InverstionTableConfigId)
+                        .ConfigureAwait(true);
+
+                var bedControllerConfigBuilder = _deviceControllerFactory
+                    .CreateDeviceControllerConfigBuilder<IBedControllerConfigBuilder>(
+                        bedSavedConfig.DeviceId);
+
+
+                var bedControllerConfig = bedControllerConfigBuilder.Build(
+                    context.MaxAngleX,
+                    context.CyclesCount,
+                    context.MovementFrequency,
+                    bedSavedConfig.ParamsJson);
+
+                var bedController =
+                    _deviceControllerFactory
+                        .CreateDeviceController<IBedController>(bedSavedConfig.DeviceId);
+
+
+
+                var monitorSavedConfig = await
+                    _deviceConfigurationService
+                        .GetDeviceConfigurationAsync(context.MonitorConfigId)
+                        .ConfigureAwait(true);
+
+                var monitorControllerConfigBuilder = _deviceControllerFactory
+                    .CreateDeviceControllerConfigBuilder<IMonitorControllerConfigBuilder>(
+                        monitorSavedConfig.DeviceId);
+
+
+                var monitorInitConfig = monitorControllerConfigBuilder.Build(
+                    monitorSavedConfig.ParamsJson);
+
+                var monitorController =
+                    _deviceControllerFactory
+                        .CreateDeviceController<IMonitorController>(monitorSavedConfig.DeviceId);
+
+
+                var startParams = new SessionParams(
+                    context.CyclesCount,
+                    //todo в параметры
+                    TimeSpan.FromMilliseconds(300),
+                    bedControllerConfig,
+                    monitorInitConfig,
+                    context.PumpingNumberOfAttemptsOnStartAndFinish,
+                    context.PumpingNumberOfAttemptsOnProcessing);
+
+                Init(
+                    startParams,
+                    bedController,
+                    monitorController,
+                    _workerController,
+                    _logger);
+
+        }
+
         /// <summary>
         /// Завершает сенас
         /// </summary>
