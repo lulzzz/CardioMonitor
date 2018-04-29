@@ -72,44 +72,51 @@
                 Margin="0,34,0,0"
                 Visibility="{Binding IsConfigSelected, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <Grid Row="0"
-                     Margin="10">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBox Grid.Row="0"
-                         Text="{Binding SelectedDeviceConfig.DeviceTypeName, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                         IsReadOnly="True"
-                         mah:TextBoxHelper.Watermark="Тип устройства"
-                             Style="{DynamicResource CmCenteredTextBox}"/>
-                    <TextBox Grid.Row="1"
-                         Text="{Binding SelectedDeviceConfig.DeviceName, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                         IsReadOnly="True"
-                         mah:TextBoxHelper.Watermark="Название устройства"
-                             Style="{DynamicResource CmCenteredTextBox}"/>
-
-                    <TextBox Grid.Row="2"
-                         Text="{Binding SelectedDeviceConfig.DeviceConfigName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-                         mah:TextBoxHelper.Watermark="Название конфигурации"
-                             Style="{DynamicResource CmCenteredTextBox}"/>
-                </Grid>
                 <ScrollViewer
-                    Grid.Row="1"
+                    Grid.Row="0"
                     Margin="10,0"
                     VerticalScrollBarVisibility="Auto">
-                    <ContentPresenter
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Top"
-                        Content="{Binding SelectedDeviceConfig.ConfigView}"/>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid Row="0"
+                              Margin="10">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBox Grid.Row="0"
+                                     Text="{Binding SelectedDeviceConfig.DeviceTypeName, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                     IsReadOnly="True"
+                                     mah:TextBoxHelper.Watermark="Тип устройства"
+                                     Style="{DynamicResource CmCenteredTextBox}"/>
+                            <TextBox Grid.Row="1"
+                                     Text="{Binding SelectedDeviceConfig.DeviceName, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                                     IsReadOnly="True"
+                                     mah:TextBoxHelper.Watermark="Название устройства"
+                                     Style="{DynamicResource CmCenteredTextBox}"/>
+
+                            <TextBox Grid.Row="2"
+                                     Text="{Binding SelectedDeviceConfig.DeviceConfigName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                                     mah:TextBoxHelper.Watermark="Название конфигурации"
+                                     Style="{DynamicResource CmCenteredTextBox}"/>
+                        </Grid>
+                        <ContentPresenter
+                            Grid.Row="1"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Top"
+                            Content="{Binding SelectedDeviceConfig.ConfigView}"/>
+                    </Grid>
+
                 </ScrollViewer>
                 <StackPanel
-                    Grid.Row="2"
+                    Grid.Row="1"
                     Style="{DynamicResource CmBottomPanel}">
                     <Button 
                         Content="Сохранить"
