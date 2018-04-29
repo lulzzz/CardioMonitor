@@ -266,20 +266,45 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
                     var context = _context;
 
+                    var bedSavedConfig = await
+                        _deviceConfigurationService
+                            .GetDeviceConfigurationAsync(context.InverstionTableConfigId)
+                            .ConfigureAwait(true);
+
+                    var bedControllerConfigBuilder = _deviceControllerFactory
+                        .CreateDeviceControllerConfigBuilder<IBedControllerConfigBuilder>(
+                            bedSavedConfig.DeviceId);
+
+
+                    var bedControllerConfig = bedControllerConfigBuilder.Build(
+                        context.MaxAngleX,
+                        context.CyclesCount,
+                        context.MovementFrequency,
+                        bedSavedConfig.ParamsJson);
+
                     var bedController =
                         _deviceControllerFactory
-                            .CreateDeviceController<IBedController>(context.InverstionTableConfigId);
-                    var bedControllerConfig = await GetBedControllerInitConfigAsync(context)
-                        .ConfigureAwait(true);
+                            .CreateDeviceController<IBedController>(bedSavedConfig.DeviceId);
 
+
+
+                    var monitorSavedConfig = await
+                        _deviceConfigurationService
+                            .GetDeviceConfigurationAsync(context.MonitorConfigId)
+                            .ConfigureAwait(true);
+
+                    var monitorControllerConfigBuilder = _deviceControllerFactory
+                        .CreateDeviceControllerConfigBuilder<IMonitorControllerConfigBuilder>(
+                            monitorSavedConfig.DeviceId);
+
+
+                    var monitorInitConfig = monitorControllerConfigBuilder.Build(
+                        monitorSavedConfig.ParamsJson);
 
                     var monitorController =
                         _deviceControllerFactory
-                            .CreateDeviceController<IMonitorController>(context.InverstionTableConfigId);
-
-                    var monitorInitConfig = await
-                        GetMonitorControllerInitConfigAsync(context)
-                            .ConfigureAwait(true);
+                            .CreateDeviceController<IMonitorController>(monitorSavedConfig.DeviceId);
+                    
 
                     var startParams = new SessionParams(
                         context.CyclesCount,
@@ -300,42 +325,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     break;
             }
         }
-
-        private async Task<IBedControllerConfig> GetBedControllerInitConfigAsync(SessionProcessingPageConext context)
-        {
-            var bedSavedConfig = await
-                _deviceConfigurationService
-                    .GetDeviceConfigurationAsync(context.InverstionTableConfigId)
-                    .ConfigureAwait(true);
-
-            var bedControllerConfigBuilder = _deviceControllerFactory
-                .CreateDeviceControllerConfigBuilder<IBedControllerConfigBuilder>(
-                    context.InverstionTableConfigId);
-
-
-            return bedControllerConfigBuilder.Build(
-                context.MaxAngleX,
-                context.CyclesCount,
-                context.MovementFrequency,
-                bedSavedConfig.ParamsJson);
-        }
-
-        private async Task<IMonitorControllerConfig> GetMonitorControllerInitConfigAsync(SessionProcessingPageConext context)
-        {
-            var monitorSavedConfig = await
-                _deviceConfigurationService
-                    .GetDeviceConfigurationAsync(context.MonitorConfigId)
-                    .ConfigureAwait(true);
-
-            var monitorControllerConfigBuilder = _deviceControllerFactory
-                .CreateDeviceControllerConfigBuilder<IMonitorControllerConfigBuilder>(
-                    context.InverstionTableConfigId);
-
-
-            return monitorControllerConfigBuilder.Build(
-                monitorSavedConfig.ParamsJson);
-        }
-
+        
         /// <summary>
         /// Завершает сенас
         /// </summary>

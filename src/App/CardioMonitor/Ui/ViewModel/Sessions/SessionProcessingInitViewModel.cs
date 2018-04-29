@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.SessionProcessing;
+using CardioMonitor.Devices.Bed.Infrastructure;
+using CardioMonitor.Devices.Configuration;
+using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.EventHandlers.Patients;
 using CardioMonitor.Events.Patients;
 using CardioMonitor.Ui.Base;
@@ -31,13 +35,42 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         #endregion
 
+        #region Fields
+
+        [NotNull]
+        private readonly IDeviceConfigurationService _configurationService;
         private readonly ISessionParamsValidator _sessionParamsValidator;
         private readonly IPatientsService _patientsService;
         private readonly ILogger _logger;
         private ICommand _startCommand;
+
         private bool _isValid;
 
         private int? _previouslySelectedPatientIdFromContext;
+
+        private IReadOnlyList<PatientFullName> _patients;
+        private PatientFullName _selectedPatient;
+
+        private float _maxAngleX;
+        private short _cyclesCount;
+        private double _movementFrequency;
+        private bool _isAutopumpingEnabled;
+        private short _pumpingNumberOfAttemptsOnStartAndFinish;
+        private short _pumpingNumberOfAttemptsOnProcessing;
+        private bool _isBusy;
+        private string _busyMessage;
+
+        private ObservableCollection<DeviceConfigInfo> _monitorConfigs;
+        private DeviceConfigInfo _selectedMonitorConfig;
+
+        private ObservableCollection<DeviceConfigInfo> bedControllerConfigs;
+        private DeviceConfigInfo _selectedBedControllerConfig;
+        
+
+        #endregion
+
+        #region Properties
+
 
         public IReadOnlyList<PatientFullName> Patients
         {
@@ -50,9 +83,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 RisePropertyChanged(nameof(Patients));
             }
         }
-        private IReadOnlyList<PatientFullName> _patients;
 
-        private PatientFullName _selectedPatient;
 
         public PatientFullName SelectedPatient
         {
@@ -83,7 +114,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
 
         }
-        private float _maxAngleX;
 
         /// <summary>
         /// Количество циклов (повторений)
@@ -100,7 +130,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
 
         }
-        private short _cyclesCount;
 
         /// <summary>
         /// Частота движения
@@ -117,7 +146,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
 
         }
-        private double _movementFrequency;
 
         /// <summary>
         /// Частота движения
@@ -134,7 +162,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
 
         }
-        private bool _isAutopumpingEnabled;
 
         /// <summary>
         /// Количество попыток накачки при старте и финише
@@ -150,7 +177,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 RisePropertyChanged(nameof(StartSessionCommand));
             }
         }
-        private short _pumpingNumberOfAttemptsOnStartAndFinish;
 
         /// <summary>
         /// Количество попыток накачики в процессе выполнения сеанса
@@ -166,7 +192,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 RisePropertyChanged(nameof(StartSessionCommand));
             }
         }
-        private short _pumpingNumberOfAttemptsOnProcessing;
 
         public bool IsBusy
         {
@@ -177,7 +202,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 RisePropertyChanged(nameof(IsBusy));
             }
         }
-        private bool _isBusy;
 
         public string BusyMessage
         {
@@ -188,8 +212,50 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 RisePropertyChanged(nameof(BusyMessage));
             }
         }
-        private string _busyMessage;
 
+        public ObservableCollection<DeviceConfigInfo> MonitorConfigs
+        {
+            get => _monitorConfigs;
+            set
+            {
+                _monitorConfigs = value; 
+                RisePropertyChanged(nameof(MonitorConfigs));
+            }
+        }
+
+        public DeviceConfigInfo SelectedMonitorConfig
+        {
+            get => _selectedMonitorConfig;
+            set
+            {
+                _selectedMonitorConfig = value;
+                RisePropertyChanged(nameof(SelectedMonitorConfig));
+            }
+        }
+
+        public ObservableCollection<DeviceConfigInfo> BedControllerConfigs
+        {
+            get => bedControllerConfigs;
+            set
+            {
+                bedControllerConfigs = value;
+                RisePropertyChanged(nameof(BedControllerConfigs));
+            }
+        }
+
+        public DeviceConfigInfo SelectedBedControllerConfig
+        {
+            get => _selectedBedControllerConfig;
+            set
+            {
+                _selectedBedControllerConfig = value;
+                RisePropertyChanged(nameof(SelectedBedControllerConfig));
+            }
+        }
+
+        #endregion
+
+        #region Commands
 
         public ICommand StartSessionCommand
         {
@@ -202,6 +268,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 });
             }
         }
+
+        #endregion
 
         #region DefaultValues
 
@@ -242,7 +310,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] IEventBus eventBus,
             [NotNull] PatientAddedEventHandler patientAddedEventHandler,
             [NotNull] PatientChangedEventHandler patientChangedEventHandler,
-            [NotNull] PatientDeletedEventHandler patientDeletedEvent)
+            [NotNull] PatientDeletedEventHandler patientDeletedEvent,
+            [NotNull] IDeviceConfigurationService configurationService)
         {
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -251,6 +320,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _patientAddedEventHandler = patientAddedEventHandler ?? throw new ArgumentNullException(nameof(patientAddedEventHandler));
             _patientChangedEventHandler = patientChangedEventHandler ?? throw new ArgumentNullException(nameof(patientChangedEventHandler));
             _patientDeletedEventHandler = patientDeletedEvent ?? throw new ArgumentNullException(nameof(patientDeletedEvent));
+            _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
 
             _patientAddedEventHandler.PatientAdded += (sender, args) => _isPatienListChanged = true;
             _patientChangedEventHandler.PatientChanged += (sender, args) => _isPatienListChanged = true;
@@ -281,23 +351,31 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     IsAutopumpingEnabled = IsAutopumpingEnabled,
                     MovementFrequency = (float)MovementFrequency,
                     PumpingNumberOfAttemptsOnProcessing = PumpingNumberOfAttemptsOnProcessing,
-                    PumpingNumberOfAttemptsOnStartAndFinish = PumpingNumberOfAttemptsOnStartAndFinish
+                    PumpingNumberOfAttemptsOnStartAndFinish = PumpingNumberOfAttemptsOnStartAndFinish,
+                    InverstionTableConfigId = SelectedBedControllerConfig.Id,
+                    MonitorConfigId = SelectedMonitorConfig.Id
                 })).ConfigureAwait(true);
         }
 
-        private Task InitPageAsync(IStoryboardPageContext context)
+        private async Task InitPageAsync(IStoryboardPageContext context, bool updateDevices)
         {
             if (!(context is SessionProcessingInitPageContext pageContext)) throw new ArgumentException("Incorrect argument");
             SetDefaultValues();
             if (_previouslySelectedPatientIdFromContext == pageContext.PatientId 
                 && Patients != null
-                && !_isPatienListChanged) return Task.CompletedTask;
+                && !_isPatienListChanged) return;
             var temp = this[String.Empty];
-            return LoadPatientsAsync(pageContext.PatientId);
+            if (updateDevices)
+            {
+                await LoadDevicesAsync().ConfigureAwait(false);
+            }
+            await LoadPatientsAsync(pageContext.PatientId).ConfigureAwait(false);
         }
 
         private void SetDefaultValues()
         {
+            SelectedBedControllerConfig = null;
+            SelectedMonitorConfig = null;
             SelectedPatient = null;
             MaxAngleX = SessionParamsConstants.DefaultMaxXAngle;
             CyclesCount = SessionParamsConstants.DefaultCyclesCount;
@@ -306,6 +384,59 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             PumpingNumberOfAttemptsOnStartAndFinish =
                 SessionParamsConstants.DefaultPumpingNumberOfAttemptsOnStartAndFinish;
             IsAutopumpingEnabled = true;
+        }
+
+        private async Task LoadDevicesAsync()
+        {
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Загрузка конфигураций устройств...";
+                var monitorConfigs = await _configurationService
+                    .GetConfigurationsAsync(MonitorDeviceTypeId.DeviceTypeId)
+                    .ConfigureAwait(false);
+
+                MonitorConfigs = new ObservableCollection<DeviceConfigInfo>(monitorConfigs.Select(x =>
+                    new DeviceConfigInfo
+                    {
+                        Id = x.ConfigId,
+                        Name = x.ConfigName
+                    }));
+                if (SelectedMonitorConfig != null)
+                {
+                    SelectedMonitorConfig =
+                        MonitorConfigs.FirstOrDefault(x => x.Id == SelectedMonitorConfig.Id);
+
+                }
+
+                var bedControllersConfigs = await _configurationService
+                    .GetConfigurationsAsync(InversionTableDeviceTypeId.DeviceTypeId)
+                    .ConfigureAwait(false);
+                BedControllerConfigs = new ObservableCollection<DeviceConfigInfo>(bedControllersConfigs.Select(x =>
+                    new DeviceConfigInfo
+                    {
+                        Id = x.ConfigId,
+                        Name = x.ConfigName
+                    }));
+
+                if (SelectedBedControllerConfig != null)
+                {
+                    SelectedBedControllerConfig =
+                        BedControllerConfigs.FirstOrDefault(x => x.Id == SelectedBedControllerConfig.Id);
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"{GetType().Name}: ошибка получение конфигурации устройств. Причина: {e.Message}", e);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки конфигураций устройств...")
+                    .ConfigureAwait(false);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private async Task LoadPatientsAsync(int? selectedPatientId = null)
@@ -347,7 +478,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _patientChangedEventHandler.Subscribe();
             _patientDeletedEventHandler.Subscribe();
 
-            Task.Factory.StartNew(async () => await InitPageAsync(context).ConfigureAwait(false)).ConfigureAwait(false);
+            Task.Factory.StartNew(async () => await InitPageAsync(context, true).ConfigureAwait(false)).ConfigureAwait(false);
             return Task.CompletedTask;
         }
 
@@ -363,7 +494,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task ReturnAsync(IStoryboardPageContext context)
         {
-            Task.Factory.StartNew(async () => await InitPageAsync(context).ConfigureAwait(false)).ConfigureAwait(false);
+            Task.Factory.StartNew(async () => await InitPageAsync(context, false).ConfigureAwait(false)).ConfigureAwait(false);
             return Task.CompletedTask;
         }
 
@@ -390,6 +521,15 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             get
             {
+                if ((String.IsNullOrEmpty(columnName) || columnName == nameof(SelectedMonitorConfig)) && SelectedMonitorConfig == null)
+                {
+                    return "Нужно выбрать конфигурация контроллера кардиомонитора";
+                }
+                if ((String.IsNullOrEmpty(columnName) || columnName == nameof(SelectedBedControllerConfig)) && SelectedBedControllerConfig == null)
+                {
+                    return "Нужно выбрать конфигурация контроллера инверсионного стола";
+                }
+
                 if ((String.IsNullOrEmpty(columnName) || columnName == nameof(SelectedPatient)) && SelectedPatient == null)
                 {
                     return "Нужно выбрать пациента";
@@ -449,5 +589,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public bool IsValid => String.IsNullOrEmpty(this[String.Empty]);
 
         #endregion
+
+        public class DeviceConfigInfo
+        {
+            public Guid Id { get; set; }
+
+            public string Name { get; set; }
+        }
     }
 }

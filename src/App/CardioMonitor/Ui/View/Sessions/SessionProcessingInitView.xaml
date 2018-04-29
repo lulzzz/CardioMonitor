@@ -30,50 +30,66 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <TextBlock Text="Параметры сеанса"
                    Style="{DynamicResource CmPageHeader}"/>
             <ComboBox
-            Grid.Row="1"
-            mah:TextBoxHelper.Watermark="Пациент"
-            DisplayMemberPath="Name"
-            ItemsSource="{Binding Patients}"
-            SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-            Style="{DynamicResource CmComboBox}" />
+                Grid.Row="0"
+                mah:TextBoxHelper.Watermark="Пациент"
+                DisplayMemberPath="Name"
+                ItemsSource="{Binding Patients}"
+                SelectedItem="{Binding SelectedPatient, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                Style="{DynamicResource CmComboBox}" />
+            <ComboBox
+                Grid.Row="1"
+                mah:TextBoxHelper.Watermark="Конфигурация контроллера кардиомонитора"
+                DisplayMemberPath="Name"
+                ItemsSource="{Binding MonitorConfigs}"
+                SelectedItem="{Binding SelectedMonitorConfig, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                Style="{DynamicResource CmComboBox}" />
+            <ComboBox
+                Grid.Row="2"
+                mah:TextBoxHelper.Watermark="Конфигурация контроллера инверсионного стола"
+                DisplayMemberPath="Name"
+                ItemsSource="{Binding BedControllerConfigs}"
+                SelectedItem="{Binding SelectedBedControllerConfig, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                Style="{DynamicResource CmComboBox}" />
             <mah:NumericUpDown 
-            Grid.Row="2"
-            mah:TextBoxHelper.Watermark="Количество повторений"
-            Maximum="{Binding MaxCyclesCount}"
-            Minimum="{Binding MinCyclesCount}"
-            NumericInputMode="Numbers"
-            Value="{Binding CyclesCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-            Style="{DynamicResource CmNumericUpDown}"/>
+                Grid.Row="4"
+                mah:TextBoxHelper.Watermark="Количество повторений"
+                Maximum="{Binding MaxCyclesCount}"
+                Minimum="{Binding MinCyclesCount}"
+                NumericInputMode="Numbers"
+                Value="{Binding CyclesCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                Style="{DynamicResource CmNumericUpDown}"/>
             <mah:NumericUpDown 
-            Grid.Row="3"
-            mah:TextBoxHelper.Watermark="Максимальный угол, °"
-            Maximum="{Binding MaxValueMaxXAngle}"
-            Minimum="{Binding MinValueMaxXAngle}"
-            Interval="{Binding MaxXAngleStep}"
-            NumericInputMode="Decimal"
-            Value="{Binding MaxAngleX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-            Style="{DynamicResource CmNumericUpDown}" />
-            <mah:NumericUpDown 
-            Grid.Row="4"
-            mah:TextBoxHelper.Watermark="Частота, Гц"
-            Maximum="{Binding MaxMovementFrequency}"
-            Minimum="{Binding MinMovementFrequency}"
-            Interval="{Binding MovementFrequencyStep}"
-            NumericInputMode="Decimal"
-            Value="{Binding MovementFrequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
-            Style="{DynamicResource CmNumericUpDown}" />
-            <mah:ToggleSwitch 
                 Grid.Row="5"
+                mah:TextBoxHelper.Watermark="Максимальный угол, °"
+                Maximum="{Binding MaxValueMaxXAngle}"
+                Minimum="{Binding MinValueMaxXAngle}"
+                Interval="{Binding MaxXAngleStep}"
+                NumericInputMode="Decimal"
+                Value="{Binding MaxAngleX, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                Style="{DynamicResource CmNumericUpDown}" />
+            <mah:NumericUpDown 
+                Grid.Row="6"
+                mah:TextBoxHelper.Watermark="Частота, Гц"
+                Maximum="{Binding MaxMovementFrequency}"
+                Minimum="{Binding MinMovementFrequency}"
+                Interval="{Binding MovementFrequencyStep}"
+                NumericInputMode="Decimal"
+                Value="{Binding MovementFrequency, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                Style="{DynamicResource CmNumericUpDown}" />
+            <mah:ToggleSwitch 
+                Grid.Row="7"
                 IsChecked="{Binding IsAutopumpingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 OffLabel="Автонакачка отключена"
                 OnLabel="Автонакачка включена" 
                 Style="{DynamicResource CmSettingsToggleSwitch}"/>
             <mah:NumericUpDown 
-                Grid.Row="6"
+                Grid.Row="8"
                 mah:TextBoxHelper.Watermark="Повторные попытки накачки при старте и финише"
                 Maximum="{Binding MaxPumpingNumberOfAttemptsOnStartAndFinish}"
                 Minimum="{Binding MinPumpingNumberOfAttemptsOnStartAndFinish}"
@@ -83,7 +99,7 @@
                 Visibility="{Binding IsAutopumpingEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}, ValidatesOnDataErrors=True}"
                 Style="{DynamicResource CmNumericUpDown}"/>
             <mah:NumericUpDown 
-                Grid.Row="7"
+                Grid.Row="9"
                 mah:TextBoxHelper.Watermark="Повторные попытки накачки в промежуточных точках"
                 Maximum="{Binding MaxPumpingNumberOfAttemptsOnProcessing}"
                 Minimum="{Binding MinPumpingNumberOfAttemptsOnProcessing}"
@@ -92,7 +108,7 @@
                 Value="{Binding PumpingNumberOfAttemptsOnProcessing, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                 Visibility="{Binding IsAutopumpingEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}, ValidatesOnDataErrors=True}"  
                 Style="{DynamicResource CmNumericUpDown}"/>
-            <StackPanel Grid.Row="8"
+            <StackPanel Grid.Row="10"
                     Style="{DynamicResource CmBottomPanel}">
                 <Button Content="Начать сеанс"
                     Command="{Binding StartSessionCommand}"
