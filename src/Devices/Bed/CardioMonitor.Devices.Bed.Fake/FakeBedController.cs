@@ -122,7 +122,7 @@ namespace CardioMonitor.Devices.Bed.Fake
         public async Task<short> GetCurrentCycleNumberAsync()
         {
             await Task.Delay(_config.DefaultDelay);
-            return (short)(Math.Round((double)_elapsedTime.Ticks / _cycleDuration.Ticks)+1);
+            return Math.Min((short)(Math.Round((double)_elapsedTime.Ticks / _cycleDuration.Ticks)+1), _config.CyclesCount);
         }
 
         public async Task<short> GetIterationsCountAsync()
@@ -135,7 +135,7 @@ namespace CardioMonitor.Devices.Bed.Fake
         public async Task<short> GetCurrentIterationAsync()
         {
             await Task.Delay(_config.DefaultDelay);
-            return GetCurrentIteration();
+            return Math.Min(GetCurrentIteration(), _iterationsCount);
         }
 
         private short GetCurrentIteration()
