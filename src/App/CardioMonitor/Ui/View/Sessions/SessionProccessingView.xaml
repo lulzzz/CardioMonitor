@@ -78,30 +78,25 @@
             <Grid.Resources>
                 <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.AnimatedTabControl.xaml" />
             </Grid.Resources>
-            <TextBlock
-                Text="Все готово. Для начала сеанса нажмите кнопку Старт"
+                <TextBlock
+                Text="Все готово. Для начала сеанса нажмите кнопку СТАРТ"
                 FontSize="16"
                 HorizontalAlignment="Center"
                 Style="{DynamicResource CmLabel}"
                 Visibility="{Binding IsSessionStarted, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"/>
-                <ScrollViewer
-                    VerticalScrollBarVisibility="Auto"
-                    Visibility="{Binding IsSessionStarted, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <TabControl
+                <controls:MetroAnimatedSingleRowTabControl
                         ItemsSource="{Binding PatientParamsPerCycles, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                         SelectedIndex="{Binding SelectedCycleTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         TabStripPlacement="Left"
                         controls:TabControlHelper.Underlined="TabItems"
                         DisplayMemberPath="CycleNumber">
-
-                        <TabControl.ContentTemplate>
-                            <DataTemplate>
-                                <sessionViews:SessionCycleView
+                    <TabControl.ContentTemplate>
+                        <DataTemplate>
+                            <sessionViews:SessionCycleView
                                     d:DataContext="{d:DesignInstance Type=sessionProcessing:CycleData}"/>
-                            </DataTemplate>
-                        </TabControl.ContentTemplate>
-                    </TabControl>
-                </ScrollViewer>
+                        </DataTemplate>
+                    </TabControl.ContentTemplate>
+                </controls:MetroAnimatedSingleRowTabControl>
             </Grid>
         <!--Блок управления и текущие показатели  -->
         <Grid Grid.Row="3"
