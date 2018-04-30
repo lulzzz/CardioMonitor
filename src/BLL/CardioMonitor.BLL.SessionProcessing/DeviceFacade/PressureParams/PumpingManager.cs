@@ -24,11 +24,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
 
         private ILogger _logger;
 
-        public PumpingManager([NotNull] IMonitorController monitorController)
+        public PumpingManager([NotNull] IMonitorController monitorController,
+            TimeSpan pumpingTimeout)
         {
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
             
-            _pumpingTimeout = new TimeSpan(0, 0, 8);
+            _pumpingTimeout = pumpingTimeout;
         }
 
         public async Task<CycleProcessingContext> ProcessAsync(CycleProcessingContext context)

@@ -29,11 +29,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         private ILogger _logger;
 
         public PatientPressureParamsProvider(
-            [NotNull] IMonitorController monitorController)
+            [NotNull] IMonitorController monitorController,
+            TimeSpan operationsTimeout)
         {
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
             
-            _updatePatientParamTimeout = new TimeSpan(0, 0, 8);
+            _updatePatientParamTimeout = operationsTimeout;
             
         }
 
