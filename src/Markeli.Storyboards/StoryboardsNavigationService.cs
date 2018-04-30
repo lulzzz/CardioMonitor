@@ -334,6 +334,7 @@ namespace Markeli.Storyboards
                 var canClose = await viewModel.CanCloseAsync().ConfigureAwait(true);
                 if (!canClose) return null;
             }
+            
 
             var lastPageFromStoryboard =  _activeInnerStoryboardPageInfo.IsStartPage
                 ? _journal.LastOrDefault(x =>
@@ -362,8 +363,7 @@ namespace Markeli.Storyboards
                 {
                     var previousPage = _activeStoryboard.ActivePage;
                     var viewModel = previousPage.ViewModel;
-                    var canClose = await viewModel.CanCloseAsync().ConfigureAwait(true);
-                    if (!canClose) return null;
+                    // can close called early
 
                     viewModel.PageBackRequested -= ViewModelOnPageBackRequested;
                     viewModel.PageCanceled -= ViewModelOnPageCanceled;
@@ -371,6 +371,8 @@ namespace Markeli.Storyboards
                     viewModel.PageTransitionRequested -= ViewModelOnPageTransitionRequested;
 
                     await viewModel.CloseAsync().ConfigureAwait(true);
+                    _activeStoryboard.ActivePage = null;
+                    
                 }
             }
 
