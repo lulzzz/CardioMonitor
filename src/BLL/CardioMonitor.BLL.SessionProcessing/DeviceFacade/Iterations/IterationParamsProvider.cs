@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
@@ -17,12 +18,14 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
         [NotNull] private readonly IBedController _bedController;
         private readonly TimeSpan _bedControllerTimeout;
         private ILogger _logger;
+        private readonly object _lockObject;
 
         public IterationParamsProvider([NotNull] IBedController bedController, 
             TimeSpan bedControllerTimeout)
         {
             _bedController = bedController;
             _bedControllerTimeout = bedControllerTimeout;
+            _lockObject = new object();
         }
 
         public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
@@ -35,6 +38,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
             
             try
             {
+                if (!Monitor.TryEnter(_lockObject))
+                {
+                    _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. Новый запрос не будет выполнен");
+                    return context;
+                }
+
                 _logger?.Trace($"{GetType().Name}: запрос текущей итерации...");
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
                 var currentIteration = await timeoutPolicy
@@ -100,6 +109,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                             e.Message,
                             e,
                             cycleNumber)));
+            }
+            finally
+            {
+                if (Monitor.IsEntered(_lockObject))
+                {
+                    Monitor.Exit(_lockObject);
+                }
             }
             return context;
         }

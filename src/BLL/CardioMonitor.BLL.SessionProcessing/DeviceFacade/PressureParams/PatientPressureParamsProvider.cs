@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints;
@@ -27,6 +28,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         private readonly IMonitorController _monitorController;
 
         private ILogger _logger;
+        private readonly object _lockObject;
 
         public PatientPressureParamsProvider(
             [NotNull] IMonitorController monitorController,
@@ -35,7 +37,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
             
             _updatePatientParamTimeout = operationsTimeout;
-            
+            _lockObject = new object();
+
         }
 
         public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
@@ -53,6 +56,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
            
             try
             {
+                if (!Monitor.TryEnter(_lockObject))
+                {
+                    _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. Новый запрос не будет выполнен");
+                    return context;
+                }
+
                 _logger?.Trace($"{GetType().Name}: запрос показателей давления");
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
                 param = await timeoutPolicy.ExecuteAsync(
@@ -95,6 +104,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             }
             finally
             {
+                if (Monitor.IsEntered(_lockObject))
+                {
+                    Monitor.Exit(_lockObject);
+                }
                 if (param == null)
                 {
                     param = GetDefaultParams();

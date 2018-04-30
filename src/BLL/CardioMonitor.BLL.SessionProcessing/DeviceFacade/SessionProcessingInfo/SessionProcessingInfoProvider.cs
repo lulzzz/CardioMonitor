@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
@@ -21,17 +22,25 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
 
         private readonly TimeSpan _bedControllerTimeout;
         private ILogger _logger;
-        
+        private readonly object _lockObject;
+
         public SessionProcessingInfoProvider([NotNull] IBedController bedController, TimeSpan bedControllerTimeout)
         {
             _bedController = bedController ?? throw new ArgumentNullException(nameof(bedController));
             _bedControllerTimeout = bedControllerTimeout;
+            _lockObject = new object();
         }
 
         public async Task<CycleProcessingContext> ProcessAsync(CycleProcessingContext context)
         {
             try
             {
+                if (!Monitor.TryEnter(_lockObject))
+                {
+                    _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. Новый запрос не будет выполнен");
+                    return context;
+                }
+
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
 
                 _logger?.Trace($"{GetType().Name}: запрос прошедшего времени");
@@ -97,7 +106,14 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
                         new SessionProcessingException(SessionProcessingErrorCodes.InversionTableProcessingError,
                             ex.Message,
                             ex)));
-               
+
+            }
+            finally
+            {
+                if (Monitor.IsEntered(_lockObject))
+                {
+                    Monitor.Exit(_lockObject);
+                }
             }
 
             return context;
