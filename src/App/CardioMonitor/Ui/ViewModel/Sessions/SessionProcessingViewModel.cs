@@ -11,9 +11,7 @@ using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Files;
-using CardioMonitor.Infrastructure.Threading;
 using CardioMonitor.Infrastructure.Workers;
-using CardioMonitor.Threading;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
@@ -33,9 +31,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     {
         #region Constants
 
-        private readonly string _startText = "Старт";
-        private readonly string _pauseText = "Пауза";
-        private readonly string _resumeText = "Продолжить";
+        private readonly string _startText = "СТАРТ";
+        private readonly string _pauseText = "ПАУЗА";
+        private readonly string _resumeText = "ПРОДОЛЖИТЬ";
 
         #endregion
 
@@ -45,12 +43,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private Patient _patient;
         private SessionModel _session;
-
-        private short _repeatCount;
+        
 
         private string _startButtonText;
-        private int _periodSeconds;
-        private int _periodNumber;
 
         private ICommand _startCommand;
         private ICommand _reverseCommand;
@@ -127,9 +122,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 //            }
 //        }
 
-
-
-
         /// <summary>
         /// Текст кнопки старт
         /// </summary>
@@ -138,11 +130,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _startButtonText;
             set
             {
-                if (value != _startButtonText)
-                {
-                    _startButtonText = value;
-                    RisePropertyChanged(nameof(StartButtonText));
-                }
+                if (value == _startButtonText) return;
+                _startButtonText = value;
+                RisePropertyChanged(nameof(StartButtonText));
             }
         }
 
@@ -155,7 +145,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 RisePropertyChanged(nameof(SelectedCycleTab));
             }
         }
-
 
         public bool IsBusy
         {
@@ -182,14 +171,22 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public string ExecutionStatus
         {
-            get { return _executionStatus; }
+            get => _executionStatus;
             set
             {
-                if (value != _executionStatus)
-                {
-                    _executionStatus = value;
-                    RisePropertyChanged("ExecutionStatus");
-                }
+                if (value == _executionStatus) return;
+                _executionStatus = value;
+                RisePropertyChanged(nameof(ExecutionStatus));
+            }
+        }
+
+        public bool IsSessionStarted
+        {
+            get => _isSessionStarted;
+            set
+            {
+                _isSessionStarted = value;
+                RisePropertyChanged(nameof(IsSessionStarted));
             }
         }
 
@@ -302,6 +299,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         await InitAsync().ConfigureAwait(true);
                         await StartAsync().ConfigureAwait(true);
                         StartButtonText = _pauseText;
+                        IsSessionStarted = true;
                         break;
                 }
             }
@@ -475,6 +473,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             Patient = null;
             RemainingTime = TimeSpan.Zero;
             ElapsedTime = TimeSpan.Zero;
+            IsSessionStarted = false;
+
             //Session = new SessionModel();
         }
 
@@ -484,13 +484,17 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = true;
                 BusyMessage = "Подготовка сеанса...";
-                var patient = await _patientsService.GetPatientAsync(context.PatientId).ConfigureAwait(false);
+                var patient = await _patientsService.GetPatientAsync(context.PatientId).ConfigureAwait(true);
 
-                _uiInvoker.Invoke(() => { Patient = patient;});
+                _uiInvoker.Invoke(() =>
+                {
+                    Patient = patient;
+                    IsSessionStarted = false;
+                });
             }
             catch (Exception e)
             {
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка подготовки сеанса").ConfigureAwait(false);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка подготовки сеанса").ConfigureAwait(true);
                 _logger.Error($"{GetType().Name}: Ошибка открытия страницы выполнения сеанса. Причина: {e.Message}", e);
             }
             finally

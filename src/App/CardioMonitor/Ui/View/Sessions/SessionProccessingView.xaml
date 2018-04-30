@@ -10,9 +10,15 @@
              xmlns:sessionProcessing="clr-namespace:CardioMonitor.BLL.SessionProcessing;assembly=CardioMonitor.BLL.SessionProcessing"
 
              xmlns:controls1="clr-namespace:CardioMonitor.Ui.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             xmlns:converters="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Converters;assembly=CardioMonitor.Infrastructure.WpfCommon"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="1000"
              d:DataContext="{d:DesignInstance  Type=sessionViewModels:SessionProcessingViewModel}">
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+
     <controls1:BusyIndicator
         Style="{DynamicResource BusyIndicatorStylekey}"
         IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
@@ -76,22 +82,27 @@
                 Text="Все готово. Для начала сеанса нажмите кнопку Старт"
                 FontSize="16"
                 HorizontalAlignment="Center"
-                Style="{DynamicResource CmLabel}"/>
-            <TabControl
-                ItemsSource="{Binding PatientParamsPerCycles, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                SelectedIndex="{Binding SelectedCycleTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                TabStripPlacement="Left"
-                controls:TabControlHelper.Underlined="TabItems"
-                DisplayMemberPath="CycleNumber">
+                Style="{DynamicResource CmLabel}"
+                Visibility="{Binding IsSessionStarted, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"/>
+                <ScrollViewer
+                    VerticalScrollBarVisibility="Auto"
+                    Visibility="{Binding IsSessionStarted, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TabControl
+                        ItemsSource="{Binding PatientParamsPerCycles, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        SelectedIndex="{Binding SelectedCycleTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        TabStripPlacement="Left"
+                        controls:TabControlHelper.Underlined="TabItems"
+                        DisplayMemberPath="CycleNumber">
 
-                <TabControl.ContentTemplate>
-                    <DataTemplate>
-                        <sessionViews:SessionCycleView
-                            d:DataContext="{d:DesignInstance Type=sessionProcessing:CycleData}"/>
-                    </DataTemplate>
-                </TabControl.ContentTemplate>
-            </TabControl>
-        </Grid>
+                        <TabControl.ContentTemplate>
+                            <DataTemplate>
+                                <sessionViews:SessionCycleView
+                                    d:DataContext="{d:DesignInstance Type=sessionProcessing:CycleData}"/>
+                            </DataTemplate>
+                        </TabControl.ContentTemplate>
+                    </TabControl>
+                </ScrollViewer>
+            </Grid>
         <!--Блок управления и текущие показатели  -->
         <Grid Grid.Row="3"
               Margin="10">

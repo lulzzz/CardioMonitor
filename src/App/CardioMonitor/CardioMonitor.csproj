@@ -254,8 +254,8 @@
     </Compile>
     <Compile Include="Ui\ViewModel\Sessions\PatientSessionsViewModel.cs" />
     <Compile Include="Ui\ViewModel\Sessions\SessionDataViewModel.cs" />
-    <Compile Include="Ui\View\Sessions\SessionView.xaml.cs">
-      <DependentUpon>SessionView.xaml</DependentUpon>
+    <Compile Include="Ui\View\Sessions\SessionProccessingView.xaml.cs">
+      <DependentUpon>SessionProccessingView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\View\Sessions\SessionDataView.xaml.cs">
       <DependentUpon>SessionDataView.xaml</DependentUpon>
@@ -318,7 +318,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Ui\View\Sessions\SessionView.xaml">
+    <Page Include="Ui\View\Sessions\SessionProccessingView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
