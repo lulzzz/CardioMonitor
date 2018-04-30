@@ -13,7 +13,7 @@ namespace CardioMonitor.Devices.Bed.UDP
     {
         Read = 3, //запрос на чтение данных
         Write = 6, //запрос на запись данных
-        ReadAll = 13,
-        WriteAll = 16
+        ReadAll = 0x13,
+        WriteAll = 0x16
     }
 }
