@@ -177,6 +177,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             [NotNull] IMonitorController monitorController)
         {
             _logger?.Trace($"{GetType().Name}: начато создание pipeline...");
+            _logger?.Debug($"{GetType().Name}: таймаут операций с инверсионным столом - {_startParams.BedControllerConfig.Timeout}");
+            _logger?.Debug($"{GetType().Name}: таймаут операций с кардиомонитором - {_startParams.MonitorControllerConfig.Timeout}");
+
             var sessionInfoProvider = new SessionProcessingInfoProvider(
                 _bedController, 
                 _startParams.BedControllerConfig.Timeout);
@@ -209,19 +212,25 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
             var mainBroadcastBlock = new BroadcastBlock<CycleProcessingContext>(context => context);
 
-            var pumpingManager = new PumpingManager(_monitorController);
+            var pumpingManager = new PumpingManager(
+                _monitorController,
+                _startParams.MonitorControllerConfig.Timeout);
             pumpingManager.SetLogger(_logger);
             var pupmingManagerBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pumpingManager.ProcessAsync(context));
             var forcedCommandPupmingManagerBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pumpingManager.ProcessAsync(context));
 
-            var pressureParamsProvider = new PatientPressureParamsProvider(monitorController);
+            var pressureParamsProvider = new PatientPressureParamsProvider(
+                monitorController,
+                _startParams.MonitorControllerConfig.Timeout);
             pressureParamsProvider.SetLogger(_logger);
             var pressureParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pressureParamsProvider.ProcessAsync(context));
 
-            var commonParamsProvider = new CommonPatientParamsProvider(monitorController, _startParams.MonitorControllerConfig.Timeout);
+            var commonParamsProvider = new CommonPatientParamsProvider(
+                monitorController, 
+                _startParams.MonitorControllerConfig.Timeout);
             commonParamsProvider.SetLogger(_logger);
             var commonParamsProviderBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => commonParamsProvider.ProcessAsync(context));
@@ -372,8 +381,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     }
                     _logger?.Trace($"{GetType().Name}: ошибка в Pipeline: " +
                                    $"итерация {exceptionParams.Exception.IterationNumber}, " +
-                                   $"сенас {exceptionParams.Exception.CycleNumber} " +
-                                   $"код ошибки {exceptionParams.Exception.ErrorCode}" +
+                                   $"сенас {exceptionParams.Exception.CycleNumber}, " +
+                                   $"код ошибки {exceptionParams.Exception.ErrorCode}, " +
                                    $"причина: {exceptionParams.Exception.Message}",
                         exceptionParams.Exception);
                     RiseOnce(exceptionParams, () => OnException?.Invoke(this, exceptionParams.Exception));
