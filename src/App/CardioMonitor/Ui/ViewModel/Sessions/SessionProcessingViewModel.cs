@@ -363,7 +363,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             var startParams = new SessionParams(
                 context.CyclesCount,
                 //todo в параметры
-                TimeSpan.FromMilliseconds(300),
+                TimeSpan.FromMilliseconds(1000),
                 bedControllerConfig,
                 monitorInitConfig,
                 context.PumpingNumberOfAttemptsOnStartAndFinish,
