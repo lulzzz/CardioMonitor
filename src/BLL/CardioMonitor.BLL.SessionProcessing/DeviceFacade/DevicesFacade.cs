@@ -459,7 +459,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         _logger?.Trace($"{GetType().Name}: остановка синхронизатора сессии");
                         _cycleProcessingSynchronizer.Stop();
                     }
-                    //todo придумать, как определять, что закончился цикл, что надо снять показатели в последнем 0
                     
                     if (_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber ||
                           isSessionCompleted)
