@@ -10,6 +10,7 @@ using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
 using Markeli.Utils.Logging;
+using ToastNotifications.Messages;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
@@ -21,6 +22,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private SessionWithPatientInfo _selectedSessionInfo;
         private ObservableCollection<SessionWithPatientInfo> _sessionInfos;
 
+        [NotNull]
+        private readonly ToastNotifications.Notifier _notifier;
+
         private ICommand _startSessionCommand;
         private ICommand _deleteSessionCommand;
         private ICommand _showResultsCommand;
@@ -28,11 +32,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public SessionsViewModel(
             ISessionsService sessionsService, 
             IPatientsService patientsService,
-            [NotNull] ILogger logger)
+            [NotNull] ILogger logger,
+            [NotNull] ToastNotifications.Notifier notifier)
         {
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _patientsService = patientsService;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _notifier = notifier;
         }
 
         
@@ -151,12 +157,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     .DeleteAsync(sessionInfo.Id)
                     .ConfigureAwait(true);
                 SessionInfos.Remove(sessionInfo);
+                _notifier.ShowError("Сеанс удален");
             }
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: Ошибка удаления сеанса с Id {sessionInfo.Id}. Причина: {ex.Message}",
                     ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления сеанса").ConfigureAwait(true);
+                _notifier.ShowError("Ошибка удаления сеанса");
             }
             finally
             {
@@ -175,27 +182,29 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     await  _patientsService
                         .GetPatientAsync(SelectedSessionInfo.PatientId)
                         .ConfigureAwait(true);
+
+                await PageTransitionRequested.InvokeAsync(
+                        this,
+                        new TransitionRequest(
+                            PageIds.SessionDataViewingPageId,
+                            new SessionDataViewingPageContext
+                            {
+                                PatientId = patient.Id,
+                                SessionId = SelectedSessionInfo.Id
+                            }))
+                    .ConfigureAwait(true);
             }
             catch (Exception e)
             {
-                await MessageHelper.Instance.ShowMessageAsync(e.Message, "Cardio Monitor").ConfigureAwait(true);
-                return;
+                _notifier.ShowError("Ошибка подготовка данных");
+                _logger.Error($"{GetType().Name}: ошибка подготовка данных для отображения результатов сеанса. Причина: {e.Message}", e);
             }
             finally
             {
                 IsBusy = false;
             }
 
-            await PageTransitionRequested.InvokeAsync(
-                    this,
-                    new TransitionRequest(
-                        PageIds.SessionDataViewingPageId,
-                        new SessionDataViewingPageContext
-                        {
-                            PatientId = patient.Id,
-                            SessionId = SelectedSessionInfo.Id
-                        }))
-                .ConfigureAwait(true);
+          
         }
 
         public void Clear()
@@ -226,15 +235,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 _logger.Error($"{GetType().Name}: Ошибка загрузки сеансов. Причина: {ex.Message}",
                     ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сеансов");
+                _notifier.ShowError("Ошибка загрузки сеансов");
             }
             finally
             {
                 IsBusy = false;
             }
-
-           
-
         }
 
         #region IStoryboardPageViewModel

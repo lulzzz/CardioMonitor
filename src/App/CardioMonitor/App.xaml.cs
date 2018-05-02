@@ -173,8 +173,8 @@ namespace CardioMonitor
                     cfg.PositionProvider = new WindowPositionProvider(
                         parentWindow: Current.MainWindow,
                         corner: Corner.TopRight,
-                        offsetX: 10,
-                        offsetY: 10);
+                        offsetX: 20,
+                        offsetY: 20);
 
                     cfg.LifetimeSupervisor = new TimeAndCountBasedLifetimeSupervisor(
                         notificationLifetime: TimeSpan.FromSeconds(10),

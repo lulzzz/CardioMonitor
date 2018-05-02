@@ -8,12 +8,13 @@ using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Files;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
+using JetBrains.Annotations;
 using Markeli.Storyboards;
 using Markeli.Utils.Logging;
+using ToastNotifications.Messages;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
-    //todo view later
     public class SessionDataViewModel : Notifier, IStoryboardPageViewModel
     {
         private readonly ILogger _logger;
@@ -24,18 +25,22 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _saveCommand;
         private readonly ISessionsService _sessionsService;
         private readonly IPatientsService _patientsService;
+        [NotNull]
+        private readonly ToastNotifications.Notifier _notifier;
 
         public SessionDataViewModel(
             ISessionsService sessionsService, 
             IPatientsService patientsService,
             ILogger logger,
-            IFilesManager filesRepository)
+            IFilesManager filesRepository, 
+            [NotNull] ToastNotifications.Notifier notifier)
         {
             _sessionsService = sessionsService;
             _patientsService = patientsService;
 
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
+            _notifier = notifier;
 
             IsReadOnly = true;
         }
@@ -146,11 +151,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 BusyMessage = "Сохранение в файл...";
                 _filesRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
                 await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionDataViewModel_FileSaved);
+                _notifier.ShowSuccess("Сеанс успешно сохранен");
             }
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: Ошибка сохранения сессии в файл. Причина: {ex.Message}", ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка сохранения сессии в файл").ConfigureAwait(true);
+                _notifier.ShowError("Ошибка сохранения сеанса в файл");
             }
             finally
             {
@@ -192,8 +198,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
             catch (Exception ex)
             {
-                _logger.Error($"{GetType().Name}: Ошибка загрузки сессии. Причина: {ex.Message}", ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сессии").ConfigureAwait(true);
+                _logger.Error($"{GetType().Name}: Ошибка загрузки сеанса. Причина: {ex.Message}", ex);
+                _notifier.ShowError("Ошибка загрузки сеанса");
             }
             finally
             {

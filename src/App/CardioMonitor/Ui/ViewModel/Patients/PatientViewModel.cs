@@ -12,6 +12,7 @@ using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
 using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.Logging;
+using ToastNotifications.Messages;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
 {
@@ -28,13 +29,17 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         private ICommand _saveCommand;
         private readonly IEventBus _eventBus;
 
+        private readonly ToastNotifications.Notifier _notifier;
+
         public PatientViewModel(
             ILogger logger, 
-            IPatientsService patientsService, [NotNull] IEventBus eventBus)
+            IPatientsService patientsService, [NotNull] IEventBus eventBus, 
+            [NotNull] ToastNotifications.Notifier notifier)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
+            _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
         }
 
         public EventHandler MoveBackwardEvent { get; set; }
@@ -192,6 +197,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                         await _eventBus
                             .PublishAsync(new PatientAddedEvent())
                             .ConfigureAwait(true);
+                        _notifier.ShowSuccess("Добавлен новый пользователь");
                         break;
                     case AccessMode.Edit:
                         operationName = "редактировании";
@@ -202,11 +208,11 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                         await _eventBus
                             .PublishAsync(new PatientChangedEvent(Patient.Id))
                             .ConfigureAwait(true);
+                        _notifier.ShowSuccess("Данные отредактированы");
                         break;
                 }
 
                 IsSaved = true;
-
                 await PageCompleted.InvokeAsync(new TransitionEvent(this)).ConfigureAwait(true);
             }
             catch (ArgumentNullException ex)
@@ -214,13 +220,12 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 _logger.Error(
                     $"{GetType().Name}: Ошибка при {operationName} пациента. Причина: {Localisation.ArgumentNullExceptionMessage}",
                     ex);
-                await MessageHelper.Instance.ShowMessageAsync(Localisation.ArgumentNullExceptionMessage)
-                    .ConfigureAwait(true);
+                _notifier.ShowError(Localisation.ArgumentNullExceptionMessage);
             }
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: Ошибка при {operationName} пациента. Причина: {ex.Message}", ex);
-                await MessageHelper.Instance.ShowMessageAsync($"Ошибка при {operationName}").ConfigureAwait(true);
+                _notifier.ShowError($"Ошибка при {operationName}");
             }
             finally
             {

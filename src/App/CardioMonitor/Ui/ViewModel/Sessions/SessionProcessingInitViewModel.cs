@@ -17,6 +17,7 @@ using JetBrains.Annotations;
 using Markeli.Storyboards;
 using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.Logging;
+using ToastNotifications.Messages;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
@@ -65,7 +66,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private ObservableCollection<DeviceConfigInfo> bedControllerConfigs;
         private DeviceConfigInfo _selectedBedControllerConfig;
-        
+
+        [NotNull]
+        private readonly ToastNotifications.Notifier _notifier;
 
         #endregion
 
@@ -311,7 +314,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] PatientAddedEventHandler patientAddedEventHandler,
             [NotNull] PatientChangedEventHandler patientChangedEventHandler,
             [NotNull] PatientDeletedEventHandler patientDeletedEvent,
-            [NotNull] IDeviceConfigurationService configurationService)
+            [NotNull] IDeviceConfigurationService configurationService, 
+            [NotNull] ToastNotifications.Notifier notifier)
         {
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -321,6 +325,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _patientChangedEventHandler = patientChangedEventHandler ?? throw new ArgumentNullException(nameof(patientChangedEventHandler));
             _patientDeletedEventHandler = patientDeletedEvent ?? throw new ArgumentNullException(nameof(patientDeletedEvent));
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
+            _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
 
             _patientAddedEventHandler.PatientAdded += (sender, args) => _isPatienListChanged = true;
             _patientChangedEventHandler.PatientChanged += (sender, args) => _isPatienListChanged = true;
@@ -430,8 +435,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception e)
             {
                 _logger.Error($"{GetType().Name}: ошибка получение конфигурации устройств. Причина: {e.Message}", e);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки конфигураций устройств...")
-                    .ConfigureAwait(false);
+                _notifier.ShowError("Ошибка загрузки конфигураций устройств...");
             }
             finally
             {
@@ -458,8 +462,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception e)
             {
                 _logger.Error($"{GetType().Name}: Ошибка обновления списка пациентов. Причина: {e.Message}", e);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка обновления списка пациентов")
-                    .ConfigureAwait(true);
+                _notifier.ShowError("Ошибка обновления списка пациентов");
             }
             finally
             {

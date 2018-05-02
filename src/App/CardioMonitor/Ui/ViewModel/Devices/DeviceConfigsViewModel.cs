@@ -9,6 +9,7 @@ using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using Markeli.Storyboards;
 using Markeli.Utils.Logging;
+using ToastNotifications.Messages;
 using DeviceTypeInfo = CardioMonitor.Devices.DeviceTypeInfo;
 
 namespace CardioMonitor.Ui.ViewModel.Devices
@@ -42,6 +43,9 @@ namespace CardioMonitor.Ui.ViewModel.Devices
         [NotNull]
         private readonly Dictionary<Guid, DeviceInfo> _deviceInfos;
 
+        [NotNull]
+        private readonly ToastNotifications.Notifier _notifier;
+
 
         private string _busyMessage;
         private bool _isBusy;
@@ -52,12 +56,14 @@ namespace CardioMonitor.Ui.ViewModel.Devices
         public DeviceConfigsViewModel(
             [NotNull] ILogger logger,
             [NotNull] IDeviceConfigurationService configurationService,
-            [NotNull] IDeviceModulesController deviceModulesController, [NotNull] IUiInvoker uiInvoker)
+            [NotNull] IDeviceModulesController deviceModulesController, [NotNull] IUiInvoker uiInvoker,
+            [NotNull] ToastNotifications.Notifier notifier)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
             _deviceModulesController = deviceModulesController ?? throw new ArgumentNullException(nameof(deviceModulesController));
             _uiInvoker = uiInvoker;
+            _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
 
             _deviceTypes = new Dictionary<Guid, DeviceTypeInfo>();
             _deviceInfos = new Dictionary<Guid, DeviceInfo>();
@@ -189,11 +195,12 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                     .EditDeviceConfigurationAsync(deviceConfiguration)
                     .ConfigureAwait(true);
                 selectedDeviceConfig.ResetDataChanges();
+                _notifier.ShowSuccess("Изменения в конфигурации сохранены");
             }
             catch (Exception e)
             {
                 _logger.Error($"{GetType().Name}: ошибка сохранения изменений конфигурации устройства. Причина: {e.Message}", e);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка сохранения изменений конфигурации").ConfigureAwait(false);
+                _notifier.ShowError("Ошибка сохранения изменений конфигурации");
             }
             finally
             {
@@ -224,11 +231,12 @@ namespace CardioMonitor.Ui.ViewModel.Devices
 
                 DeviceConfigs.Remove(SelectedDeviceConfig);
                 SelectedDeviceConfig = null;
+                _notifier.ShowSuccess("Конфигурация удалена");
             }
             catch (Exception e)
             {
                 _logger.Error($"{GetType().Name}: ошибка удаления конфигурации. Причина: {e.Message}", e);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления конфигурации");
+                _notifier.ShowSuccess("Ошибка удаления конфигурации");
             }
             finally
             {
@@ -301,7 +309,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             }
             catch (Exception e)
             {
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки списка конфигураций").ConfigureAwait(true);
+                _notifier.ShowError("Ошибка загрузки списка конфигураций");
                 _logger.Error($"{GetType().Name}: ошибка загрузки списка конфигураций. Причина: {e.Message}", e);
             }
             finally
@@ -354,13 +362,12 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                     SelectedDeviceConfig = deviceViewModel;
                 });
 ;
-
+                _notifier.ShowSuccess("Новая конфигурация устройства добавлена");
             }
             catch (Exception e)
             {
                 _logger.Error($"{GetType().Name}: Ошибка добавления нового конфига. Причина: {e.Message}", e);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка добавления нового конфига")
-                    .ConfigureAwait(true);
+                _notifier.ShowError("Ошибка добавления нового конфига");
             }
             finally
             {

@@ -14,6 +14,7 @@ using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
 using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.Logging;
+using ToastNotifications.Messages;
 
 namespace CardioMonitor.Ui.ViewModel.Patients
 {
@@ -31,6 +32,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
 
         private readonly IPatientsService _patientsService;
+        [NotNull]
+        private readonly ToastNotifications.Notifier _notifier;
         [NotNull] private readonly ILogger _logger;
         private int _seletedPatientIndex;
         private Patient _selectePatient;
@@ -175,7 +178,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             [NotNull] ILogger logger,
             [NotNull] IEventBus eventBus,
             [NotNull] PatientAddedEventHandler patientAddedEventHandler,
-            [NotNull] PatientChangedEventHandler patientChangedEventHandler)
+            [NotNull] PatientChangedEventHandler patientChangedEventHandler, 
+            [NotNull] ToastNotifications.Notifier notifier)
         {
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -183,6 +187,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
             _patientAddedEventHandler = patientAddedEventHandler ?? throw new ArgumentNullException(nameof(patientAddedEventHandler));
             _patientChangedEventHandler = patientChangedEventHandler ?? throw new ArgumentNullException(nameof(patientChangedEventHandler));
+            _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
             _patientAddedEventHandler.PatientAdded += (sender, i) => _isPatientListChanged = true;
             _patientChangedEventHandler.PatientChanged += (sender, i) => _isPatientListChanged = true;
 
@@ -231,6 +236,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                 await _eventBus
                     .PublishAsync(new PatientDeletedEvent(deletedPatienId))
                     .ConfigureAwait(true);
+                _notifier.ShowSuccess("Пациент удален");
             }
             catch (Exception ex)
             {
@@ -238,7 +244,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     $"{GetType().Name}: Ошибка удаления пациента с Id {SelectedPatient?.Id}. Причина: {ex.Message}",
                     ex);
 
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления пациента.").ConfigureAwait(true);
+                _notifier.ShowError("Ошибка удаления пациента.");
             }
             finally
             {
@@ -300,7 +306,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: Ошибка обновление списка пациентов. Причина: {ex.Message}", ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка обновления списка пациентов").ConfigureAwait(true);
+                _notifier.ShowError("Ошибка обновления списка пациентов");
             }
             finally
             {

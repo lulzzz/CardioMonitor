@@ -10,6 +10,7 @@ using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
 using Markeli.Utils.Logging;
+using ToastNotifications.Messages;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
@@ -22,16 +23,21 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ObservableCollection<SessionInfo> _sessionInfos;
         private Patient _patient;
 
+        [NotNull]
+        private readonly ToastNotifications.Notifier _notifier;
+
         private ICommand _startSessionCommand;
         private ICommand _deleteSessionCommand;
         private ICommand _showResultsCommand;
 
         public PatientSessionsViewModel(
             ISessionsService sessionsService,
-            [NotNull] ILogger logger)
+            [NotNull] ILogger logger, 
+            [NotNull] ToastNotifications.Notifier notifier)
         {
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
         }
 
         public bool IsBusy
@@ -158,12 +164,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 BusyMessage = "Удаление сеанса..";
                 await _sessionsService.DeleteAsync(sessionInfo.Id).ConfigureAwait(true);
                 SessionInfos.Remove(sessionInfo);
+                _notifier.ShowSuccess("Сеанс удален");
             }
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: Ошибка удаления сеанса с Id {sessionInfo.Id}. Причина: {ex.Message}",
                     ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка удаления сеанса").ConfigureAwait(true);
+                _notifier.ShowError("Ошибка удаления сеанса");
             }
             finally
             {
@@ -212,7 +219,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: Ошибка загрузки сеансов. Причина: {ex.Message}", ex);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка загрузки сеансов").ConfigureAwait(true);
+                _notifier.ShowError("Ошибка загрузки сеансов");
             }
             finally
             {
