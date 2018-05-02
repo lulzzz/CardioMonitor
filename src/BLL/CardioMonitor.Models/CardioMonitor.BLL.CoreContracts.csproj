@@ -41,10 +41,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Patients\Events\PatientAddedEvent.cs" />
+    <Compile Include="Patients\Events\PatientChangedEvent.cs" />
+    <Compile Include="Patients\Events\PatientDeletedEvent.cs" />
     <Compile Include="Patients\IPatientsService.cs" />
     <Compile Include="Patients\Patient.cs" />
     <Compile Include="Patients\PatientFullName.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Session\Events\SessionAddedEvent.cs" />
+    <Compile Include="Session\Events\SessionChangedEvent.cs" />
+    <Compile Include="Session\Events\SessionDeletedEvent.cs" />
     <Compile Include="Session\PatientECG.cs" />
     <Compile Include="Session\ISessionsService.cs" />
     <Compile Include="Session\PatientParams.cs" />
@@ -53,6 +59,12 @@
     <Compile Include="Session\SessionCycle.cs" />
     <Compile Include="Session\SessionInfo.cs" />
     <Compile Include="Session\SessionStatus.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Infrastructure\EventBus\Markeli.Utils.EventBus.Contracts\Markeli.Utils.EventBus.Contracts.csproj">
+      <Project>{b3b0a272-b23b-4880-a481-87c6b8db27ed}</Project>
+      <Name>Markeli.Utils.EventBus.Contracts</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

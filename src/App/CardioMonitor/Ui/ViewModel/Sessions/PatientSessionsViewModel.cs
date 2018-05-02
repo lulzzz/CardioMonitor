@@ -290,10 +290,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task LeaveAsync()
         {
-            _sessionAddedEventHandler.Unsubscribe();
-            _sessionDeletedEventHandler.Unsubscribe();
-            _sessionChangedEventHandler.Unsubscribe();
-
             return Task.CompletedTask;
         }
 
@@ -313,6 +309,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task CloseAsync()
         {
+            _sessionAddedEventHandler.Unsubscribe();
+            _sessionDeletedEventHandler.Unsubscribe();
+            _sessionChangedEventHandler.Unsubscribe();
+
             return Task.CompletedTask;
         }
 

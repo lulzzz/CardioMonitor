@@ -10,11 +10,11 @@ using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.Monitor.Infrastructure;
+using CardioMonitor.EventHandlers.Devices;
 using CardioMonitor.EventHandlers.Patients;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using Markeli.Storyboards;
-using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.Logging;
 using ToastNotifications.Messages;
 
@@ -23,18 +23,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     public class SessionProcessingInitViewModel : Notifier, IStoryboardPageViewModel, IDataErrorInfo
     {
         private readonly float Tolerance = 1e-4f;
-
-        #region Events
         
-        private readonly IEventBus _eventBus;
-        private readonly PatientAddedEventHandler _patientAddedEventHandler;
-        private readonly PatientChangedEventHandler _patientChangedEventHandler;
-        private readonly PatientDeletedEventHandler _patientDeletedEventHandler;
-
-        private bool _isPatienListChanged;
-
-        #endregion
-
         #region Fields
 
         [NotNull]
@@ -44,8 +33,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private readonly ILogger _logger;
         private ICommand _startCommand;
 
-        private bool _isValid;
-
         private int? _previouslySelectedPatientIdFromContext;
 
         private IReadOnlyList<PatientFullName> _patients;
@@ -54,21 +41,38 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private float _maxAngleX;
         private short _cyclesCount;
         private double _movementFrequency;
-        private bool _isAutopumpingEnabled;
+        private bool _isAutoPumpingEnabled;
         private short _pumpingNumberOfAttemptsOnStartAndFinish;
         private short _pumpingNumberOfAttemptsOnProcessing;
         private bool _isBusy;
         private string _busyMessage;
-
+        
         private ObservableCollection<DeviceConfigInfo> _monitorConfigs;
         private DeviceConfigInfo _selectedMonitorConfig;
-
-        private ObservableCollection<DeviceConfigInfo> bedControllerConfigs;
+        
+        private ObservableCollection<DeviceConfigInfo> _bedControllerConfigs;
         private DeviceConfigInfo _selectedBedControllerConfig;
 
         [NotNull]
         private readonly ToastNotifications.Notifier _notifier;
 
+        [NotNull]
+        private readonly PatientAddedEventHandler _patientAddedEventHandler;
+        [NotNull]
+        private readonly PatientChangedEventHandler _patientChangedEventHandler;
+        [NotNull]
+        private readonly PatientDeletedEventHandler _patientDeletedEventHandler;
+
+        private bool _isPatientsListChanged;
+
+        [NotNull]
+        private readonly DeviceConfigAddedEventHandler _deviceConfigAddedEventHandler;
+        [NotNull]
+        private readonly DeviceConfigChangedEventHandler _deviceConfigChangedEventHandler;
+        [NotNull]
+        private readonly DeviceConfigDeletedEventHandler _deviceConfigDeletedEventHandler;
+
+        private bool _isDeviceConfigsListChanged;
         #endregion
 
         #region Properties
@@ -154,11 +158,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public bool IsAutopumpingEnabled
         {
-            get => _isAutopumpingEnabled;
+            get => _isAutoPumpingEnabled;
             set
             {
-                if (Equals(_isAutopumpingEnabled, value)) return;
-                _isAutopumpingEnabled = value;
+                if (Equals(_isAutoPumpingEnabled, value)) return;
+                _isAutoPumpingEnabled = value;
                 RisePropertyChanged(nameof(IsAutopumpingEnabled));
                 RisePropertyChanged(nameof(StartSessionCommand));
             }
@@ -237,10 +241,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public ObservableCollection<DeviceConfigInfo> BedControllerConfigs
         {
-            get => bedControllerConfigs;
+            get => _bedControllerConfigs;
             set
             {
-                bedControllerConfigs = value;
+                _bedControllerConfigs = value;
                 RisePropertyChanged(nameof(BedControllerConfigs));
             }
         }
@@ -309,39 +313,57 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] IPatientsService patientsService,
             [NotNull] ILogger logger,
             [NotNull] ISessionParamsValidator sessionParamsValidator,
-            [NotNull] IEventBus eventBus,
             [NotNull] PatientAddedEventHandler patientAddedEventHandler,
             [NotNull] PatientChangedEventHandler patientChangedEventHandler,
             [NotNull] PatientDeletedEventHandler patientDeletedEvent,
             [NotNull] IDeviceConfigurationService configurationService, 
-            [NotNull] ToastNotifications.Notifier notifier)
+            [NotNull] ToastNotifications.Notifier notifier,
+            [NotNull] DeviceConfigAddedEventHandler deviceConfigAddedEventHandler, 
+            [NotNull] DeviceConfigChangedEventHandler deviceConfigChangedEventHandler, 
+            [NotNull] DeviceConfigDeletedEventHandler deviceConfigDeletedEventHandler)
         {
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _sessionParamsValidator = sessionParamsValidator ?? throw new ArgumentNullException(nameof(sessionParamsValidator));
-            _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
             _patientAddedEventHandler = patientAddedEventHandler ?? throw new ArgumentNullException(nameof(patientAddedEventHandler));
             _patientChangedEventHandler = patientChangedEventHandler ?? throw new ArgumentNullException(nameof(patientChangedEventHandler));
             _patientDeletedEventHandler = patientDeletedEvent ?? throw new ArgumentNullException(nameof(patientDeletedEvent));
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
+            _deviceConfigAddedEventHandler = deviceConfigAddedEventHandler ?? throw new ArgumentNullException(nameof(deviceConfigAddedEventHandler));
+            _deviceConfigChangedEventHandler = deviceConfigChangedEventHandler ?? throw new ArgumentNullException(nameof(deviceConfigChangedEventHandler));
+            _deviceConfigDeletedEventHandler = deviceConfigDeletedEventHandler ?? throw new ArgumentNullException(nameof(deviceConfigDeletedEventHandler));
 
-            _patientAddedEventHandler.PatientAdded += (sender, args) => _isPatienListChanged = true;
-            _patientChangedEventHandler.PatientChanged += (sender, args) => _isPatienListChanged = true;
-            _patientDeletedEventHandler.PatientDeleted += (sender, args) => _isPatienListChanged = true;
+            _patientAddedEventHandler.PatientAdded += (sender, args) => _isPatientsListChanged = true;
+            _patientChangedEventHandler.PatientChanged += (sender, args) => _isPatientsListChanged = true;
+            _patientDeletedEventHandler.PatientDeleted += (sender, args) => _isPatientsListChanged = true;
 
-            _isPatienListChanged = true;
+            _isPatientsListChanged = false;
+
+            _deviceConfigAddedEventHandler.DeviceConfigAdded += (sender, args) => _isDeviceConfigsListChanged = true;
+            _deviceConfigChangedEventHandler.DeviceConfigChanged += (sender, args) => _isDeviceConfigsListChanged = true;
+            _deviceConfigDeletedEventHandler.DeviceConfigDeleted += (sender, args) => _isDeviceConfigsListChanged = true;
+
+            _isDeviceConfigsListChanged = false;
         }
 
         public void Dispose()
         {
-            _patientAddedEventHandler?.Unsubscribe();
-            _patientChangedEventHandler?.Unsubscribe();
-            _patientDeletedEventHandler?.Unsubscribe();
+            _patientAddedEventHandler.Unsubscribe();
+            _patientChangedEventHandler.Unsubscribe();
+            _patientDeletedEventHandler.Unsubscribe();
 
-            _patientAddedEventHandler?.Dispose();
-            _patientChangedEventHandler?.Dispose();
-            _patientDeletedEventHandler?.Dispose();
+            _patientAddedEventHandler.Dispose();
+            _patientChangedEventHandler.Dispose();
+            _patientDeletedEventHandler.Dispose();
+
+            _deviceConfigAddedEventHandler.Unsubscribe();
+            _deviceConfigChangedEventHandler.Unsubscribe();
+            _deviceConfigDeletedEventHandler.Unsubscribe();
+            
+            _deviceConfigAddedEventHandler.Dispose();
+            _deviceConfigChangedEventHandler.Dispose();
+            _deviceConfigDeletedEventHandler.Dispose();
         }
 
         private async Task StartSessionAsync()
@@ -361,19 +383,24 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 })).ConfigureAwait(true);
         }
 
-        private async Task InitPageAsync(IStoryboardPageContext context, bool updateDevices)
+        private async Task InitPageAsync(IStoryboardPageContext context, bool updateDevices, bool updatePatients)
         {
-            if (!(context is SessionProcessingInitPageContext pageContext)) throw new ArgumentException("Incorrect argument");
+            if (!(context is SessionProcessingInitPageContext pageContext))
+                throw new ArgumentException("Incorrect argument");
             SetDefaultValues();
-            if (_previouslySelectedPatientIdFromContext == pageContext.PatientId 
+            if (_previouslySelectedPatientIdFromContext == pageContext.PatientId
                 && Patients != null
-                && !_isPatienListChanged) return;
+                && !_isPatientsListChanged) return;
             var temp = this[String.Empty];
             if (updateDevices)
             {
                 await LoadDevicesAsync().ConfigureAwait(false);
             }
-            await LoadPatientsAsync(pageContext.PatientId).ConfigureAwait(false);
+
+            if (updatePatients)
+            {
+                await LoadPatientsAsync(pageContext.PatientId).ConfigureAwait(false);
+            }
         }
 
         private void SetDefaultValues()
@@ -429,7 +456,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         BedControllerConfigs.FirstOrDefault(x => x.Id == SelectedBedControllerConfig.Id);
                 }
 
-
+                _isDeviceConfigsListChanged = false;
             }
             catch (Exception e)
             {
@@ -456,7 +483,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 }
 
                 _previouslySelectedPatientIdFromContext = selectedPatientId;
-                _isPatienListChanged = false;
+                _isPatientsListChanged = false;
             }
             catch (Exception e)
             {
@@ -480,7 +507,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _patientChangedEventHandler.Subscribe();
             _patientDeletedEventHandler.Subscribe();
 
-            Task.Factory.StartNew(async () => await InitPageAsync(context, true).ConfigureAwait(false)).ConfigureAwait(false);
+
+            _deviceConfigAddedEventHandler.Subscribe();
+            _deviceConfigChangedEventHandler.Subscribe();
+            _deviceConfigDeletedEventHandler.Subscribe();
+
+            Task.Factory.StartNew(async () => await InitPageAsync(context, true, true).ConfigureAwait(false)).ConfigureAwait(false);
             return Task.CompletedTask;
         }
 
@@ -491,12 +523,20 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task LeaveAsync()
         {
+
             return Task.CompletedTask;
         }
 
         public Task ReturnAsync(IStoryboardPageContext context)
         {
-            Task.Factory.StartNew(async () => await InitPageAsync(context, false).ConfigureAwait(false)).ConfigureAwait(false);
+            if (_isDeviceConfigsListChanged || _isPatientsListChanged)
+            {
+                Task.Factory.StartNew(async () => await InitPageAsync(
+                        context,
+                        _isDeviceConfigsListChanged,
+                        _isPatientsListChanged)
+                    .ConfigureAwait(false));
+            }
             return Task.CompletedTask;
         }
 
@@ -507,6 +547,15 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task CloseAsync()
         {
+
+            _patientAddedEventHandler.Unsubscribe();
+            _patientChangedEventHandler.Unsubscribe();
+            _patientDeletedEventHandler.Unsubscribe();
+
+            _deviceConfigAddedEventHandler.Unsubscribe();
+            _deviceConfigChangedEventHandler.Unsubscribe();
+            _deviceConfigDeletedEventHandler.Unsubscribe();
+
             return Task.CompletedTask;
         }
 

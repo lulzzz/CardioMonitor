@@ -281,6 +281,7 @@ namespace CardioMonitor.Ui.ViewModel.Patients
         {
             _patientAddedEventHandler?.Unsubscribe();
             _patientChangedEventHandler?.Unsubscribe();
+
             _patientAddedEventHandler?.Dispose();
             _patientChangedEventHandler?.Dispose();
         }
@@ -352,6 +353,8 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         public Task CloseAsync()
         {
+            _patientAddedEventHandler.Unsubscribe();
+            _patientChangedEventHandler.Unsubscribe();
             return Task.CompletedTask;
         }
 

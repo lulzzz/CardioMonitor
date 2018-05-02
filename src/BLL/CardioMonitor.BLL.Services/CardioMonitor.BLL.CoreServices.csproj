@@ -60,6 +60,10 @@
       <Project>{a7c10e0a-c0cc-4cae-8ad4-3cd9e05528d7}</Project>
       <Name>CardioMonitor.Data.Ef</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Infrastructure\EventBus\Markeli.Utils.EventBus.Contracts\Markeli.Utils.EventBus.Contracts.csproj">
+      <Project>{b3b0a272-b23b-4880-a481-87c6b8db27ed}</Project>
+      <Name>Markeli.Utils.EventBus.Contracts</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CardioMonitor.BLL.Mappers\CardioMonitor.BLL.Mappers.csproj">
       <Project>{7b5c2e13-cdf5-4d29-b5f5-fa464b4effa8}</Project>
       <Name>CardioMonitor.BLL.Mappers</Name>
