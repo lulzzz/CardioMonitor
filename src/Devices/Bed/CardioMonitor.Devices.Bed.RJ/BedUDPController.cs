@@ -48,7 +48,7 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         private Worker _syncWorker;
 
-        private BedSessionInfo _sessionInfo;
+        private BedSessionInfo _sessionInfo = new BedSessionInfo();
 
         [NotNull]
         private readonly ConcurrentQueue<Exception> _lastExceptions;
@@ -98,6 +98,7 @@ namespace CardioMonitor.Devices.Bed.UDP
                 IsConnected = true;
                 await UpdateRegistersValueAsync()
                     .ConfigureAwait(false);
+                await SetInitParamsAsync().ConfigureAwait(false);
                 await RiseEventOnCommandFromDeviceAsync()
                     .ConfigureAwait(false);
                 _syncWorker = _workerController.StartWorker(_config.UpdateDataPeriod, async () =>
@@ -149,18 +150,31 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// </summary>
         private async Task SetInitParamsAsync()
         {
-            AssertConnection();
-            if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
-            await Task.Yield();
-            BedMessage message = new BedMessage();
-            var sendMessage =  message.SetMaxAngleValueMessage(_config.MaxAngleX);
-            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-            //todo здесь лучше сделать паузу ~100mc 
-            sendMessage =  message.SetFreqValueMessage(_config.MovementFrequency);
-            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-            //todo здесь лучше сделать паузу ~100mc 
-            sendMessage =  message.SetCycleCountValueMessage((byte)_config.CyclesCount);
-            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                AssertConnection();
+                if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
+                await Task.Yield();
+                BedMessage message = new BedMessage(BedMessageEventType.Write);
+                var sendMessage = message.SetMaxAngleValueMessage(_config.MaxAngleX);
+                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+                var receiveMessage = await _udpClient.ReceiveAsync();
+                Thread.Sleep(100);
+                //todo здесь лучше сделать паузу ~100mc 
+                sendMessage = message.SetFreqValueMessage(_config.MovementFrequency);
+                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+                receiveMessage = await _udpClient.ReceiveAsync();
+                Thread.Sleep(100);
+                //todo здесь лучше сделать паузу ~100mc 
+                //sendMessage = message.SetCycleCountValueMessage((byte) _config.CyclesCount);
+                //await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+                //receiveMessage = await _udpClient.ReceiveAsync();
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
         }
 
         /// <summary>
@@ -194,7 +208,7 @@ namespace CardioMonitor.Devices.Bed.UDP
                 //todo никакой обработки ошибок делать не надо
                 await Task.Yield();
                 //здесь короче запрос данных и их парсинг 
-                var message = new BedMessage(BedMessageEventType.ReadAll, 0);
+                var message = new BedMessage(BedMessageEventType.ReadAll);
                 var getAllRegister = message.GetAllRegisterMessage();
                 await _udpClient.SendAsync(getAllRegister, getAllRegister.Length);
                 var receiveMessage = await _udpClient.ReceiveAsync();
@@ -331,7 +345,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             RiseExceptions();
             AssertRegisterIsNull();
             await Task.Yield();
-            return _sessionInfo.GetIterationsCount();
+            return _sessionInfo.GetIterationsCount(_config.MaxAngleX);
         }
 
         public async Task<short> GetCurrentIterationAsync()

@@ -1,5 +1,6 @@
 ﻿using System;
 
+
 namespace CardioMonitor.Devices.Bed.Infrastructure
 {
     /// <summary>
@@ -21,9 +22,9 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// рассчет количества итераций в одном цикле
         /// </summary>
         /// <returns></returns>
-        public short GetIterationsCount()
+        public short GetIterationsCount(double maxAngle)
         {
-            return 0; //todo 
+            return (short)Math.Round(maxAngle / 1.5 * 2 - 3); 
         }
 
         public short GetNextIterationNumberForPressureMeasuring()
@@ -33,7 +34,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
 
         public short GetNextIterationNumberForCommonParamsMeasuring()
         {
-            return 0; //todo 
+            return 1; //todo 
         }
 
         public short GetNextIterationNumberForEcgMeasuring()

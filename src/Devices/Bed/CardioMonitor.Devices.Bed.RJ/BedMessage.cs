@@ -88,13 +88,13 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         public byte[] SetFreqValueMessage(float freqValue)
         {
-            var floatToByte = Half.GetBytes((Half) freqValue);
+            var floatToByte = Half.GetBytes((Half) freqValue).Reverse().ToArray();
             return GetWriteRegisterMessage(BedFreqPosition, floatToByte);
         }
 
         public byte[] SetMaxAngleValueMessage(float maxAngleValue)
         {
-            var floatToByte = Half.GetBytes((Half) maxAngleValue);
+            var floatToByte = Half.GetBytes((Half) maxAngleValue).Reverse().ToArray();
             return GetWriteRegisterMessage(BedMaxAnglePosition, floatToByte);
         }
 
@@ -121,6 +121,11 @@ namespace CardioMonitor.Devices.Bed.UDP
             {
                 BedStatus = GetBedStatus(_messageData[BedStatusPosition]),
                 CurrentCycle = _messageData[CurrentCyclePosition],
+                CurrentIteration = _messageData[CurrentIterationPosition],
+                MaxAngle = GetHalfValuesFromBytes(_messageData[BedMaxAnglePosition * 2 + 1],
+                _messageData[BedMaxAnglePosition * 2]),
+                Frequency = GetHalfValuesFromBytes(_messageData[BedFreqPosition * 2 + 1],
+                    _messageData[BedFreqPosition * 2]),
                 RemainingTime = TimeSpan.FromSeconds(GetValuesFromBytes(_messageData[RemainingTimePosition],
                     _messageData[RemainingTimePosition + 1])),
                 ElapsedTime = TimeSpan.FromSeconds(GetValuesFromBytes(_messageData[ElapsedTimePosition],
