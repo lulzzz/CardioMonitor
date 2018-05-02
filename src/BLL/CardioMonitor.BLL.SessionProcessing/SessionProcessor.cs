@@ -142,6 +142,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             {
                 _sessionStatus = value;
                 RisePropertyChanged(nameof(SessionStatus));
+                OnSessionStatusChanged?.Invoke(this, EventArgs.Empty);
             }
         }
 
@@ -164,6 +165,8 @@ namespace CardioMonitor.BLL.SessionProcessing
         public event EventHandler OnEmeregencyStoppedFromDevice;
         
         public event EventHandler OnReversedFromDevice;
+
+        public event EventHandler OnSessionStatusChanged; 
 
 
         #endregion

@@ -130,7 +130,8 @@
                 Grid.Column="0"
                 Orientation="Vertical"
                 VerticalAlignment="Center"
-                Margin="10,0">
+                Margin="10,0"
+                Width="262">
 
                 <!--Реверс-->
                 <Button x:Name="ManualRequest"
@@ -143,7 +144,7 @@
                               Command="{Binding StartCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                               Content="{Binding StartButtonText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                               Style="{DynamicResource CmSessionProcessingToggleButtons}"
-                              Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CompletedSessionStatusToVisibilityConverter}}"/>
+                              Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NotCompletedSessionStatusToVisibilityConverter}}"/>
                 <!--Реверс-->
                 <Button x:Name="ReverseSessionB"
                         Command="{Binding ReverseCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
@@ -154,11 +155,14 @@
                 Grid.Column="1"
                 Orientation="Vertical"
                 VerticalAlignment="Center"
-                Margin="10,10,10,0">
+                Margin="10,10,10,0"
+                Width="262">
                 <controls:ToggleSwitch 
-                    IsChecked="{Binding IsAutopumpingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    IsChecked="{Binding IsAutoPumpingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     OffLabel="Автонакачка отключена"
                     OnLabel="Автонакачка включена" 
+                    VerticalAlignment="Center"
+                    IsEnabled="{Binding IsAutoPumpingChangingEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                     Style="{DynamicResource CmSettingsToggleSwitch}"/>
                     <!--Экстренная остановка-->
                 <Button x:Name="EmergencyStopB"

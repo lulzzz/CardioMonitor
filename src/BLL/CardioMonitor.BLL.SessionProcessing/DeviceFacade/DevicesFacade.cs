@@ -60,6 +60,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         private readonly MemoryCache _processedEventsCached;
 
+        private bool _isReverseAlreadyRequested;
+
         #endregion
 
         #region Events
@@ -170,6 +172,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             
             _processedEventsCached = new MemoryCache(GetType().Name);
             _isFailedOnPumping = false;
+            _isReverseAlreadyRequested = false;
         }
 
         private void CreatePipeline(
@@ -917,10 +920,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         public Task ProcessReverseRequestAsync()
         {
+            if (_isReverseAlreadyRequested)
+            {
+                throw new InvalidOperationException("Реверс уже был запрошен ранее");
+            }
+
             try
             {
                 _logger?.Info($"{GetType().Name}: запрос реверса");
                 return InnerProcessReverseRequestAsync(false);
+
             }
             catch (SessionProcessingException e)
             {
@@ -942,17 +951,24 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             return Task.CompletedTask;
         }
 
-        private Task InnerProcessReverseRequestAsync(bool isCalledFromDevice)
+        private async Task InnerProcessReverseRequestAsync(bool isCalledFromDevice)
         {
+            if (_isReverseAlreadyRequested)
+            {
+                throw new InvalidOperationException("Реверс уже был запрошен ранее");
+            }
+
             if (!isCalledFromDevice)
             {
                 _logger?.Trace($"{GetType().Name}: отправка команды реверса инверсионному столу");
-                return _bedController
-                    .ExecuteCommandAsync(BedControlCommand.Reverse);
+                await _bedController
+                    .ExecuteCommandAsync(BedControlCommand.Reverse)
+                    .ConfigureAwait(false);
             }
-            return Task.CompletedTask;
+
+            _isReverseAlreadyRequested = true;
         }
-        
+
         public Task ForceDataCollectionRequestAsync()
         {
             if (_isStandartProcessingInProgress)

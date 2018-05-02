@@ -43,7 +43,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private Patient _patient;
         private SessionModel _session;
-        private bool _canRequestDataManual;
+        private bool _canManualDataCommandExecute;
 
         private string _startButtonText;
 
@@ -75,6 +75,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private string _busyMessage;
 
         private string _executionStatus;
+
+        private bool _isReverseAlreadyRequested;
+
+        private bool _isAutoPumpingChangingEnabled;
+
+        private bool _isAutoPumpingEnabled;
 
         #endregion
 
@@ -144,7 +150,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             get => _selectedCycleTab;
             set
             {
-                _selectedCycleTab = value; 
+                _selectedCycleTab = value;
                 RisePropertyChanged(nameof(SelectedCycleTab));
             }
         }
@@ -169,7 +175,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
-        
+
 
         public string ExecutionStatus
         {
@@ -193,17 +199,65 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         }
 
 
-        public bool CanRequestDataManual
+        public bool CanManualDataCommandExecute
         {
-            get => _canRequestDataManual;
+            get => _canManualDataCommandExecute;
             set
             {
-                _canRequestDataManual = value; 
-                RisePropertyChanged(nameof(CanRequestDataManual));
+                _canManualDataCommandExecute = value;
+                RisePropertyChanged(nameof(CanManualDataCommandExecute));
                 RisePropertyChanged(nameof(ManualRequestCommand));
             }
         }
 
+        public bool IsReverseAlreadyRequested
+        {
+            get => _isReverseAlreadyRequested;
+            set
+            {
+                _isReverseAlreadyRequested = value;
+                RisePropertyChanged(nameof(IsReverseAlreadyRequested));
+                RisePropertyChanged(nameof(ReverseCommand));
+            }
+        }
+
+
+        public bool IsAutoPumpingChangingEnabled
+        {
+            get => _isAutoPumpingChangingEnabled;
+            set
+            {
+                _isAutoPumpingChangingEnabled = value;
+                RisePropertyChanged(nameof(IsAutoPumpingChangingEnabled));
+            }
+        }
+
+
+        public bool IsAutoPumpingEnabled
+        {
+            get => _isAutoPumpingEnabled;
+            set
+            {
+                var previousValue = _isAutoPumpingEnabled;
+                _isAutoPumpingEnabled = value;
+
+                if (SessionStatus == SessionStatus.InProgress)
+                {
+
+                    try
+                    {
+                        UpdateAutoPumpingStateUnsafe(value);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.Error($"{GetType().Name}: Ошибка изменения статуса автоначки. Причина: {e.Message}");
+                        _isAutoPumpingEnabled = previousValue;
+                    }
+                }
+
+                RisePropertyChanged(nameof(IsAutoPumpingEnabled));
+            }
+        }
 
         #endregion
 
@@ -218,8 +272,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 return _startCommand ?? (_startCommand = new SimpleCommand
                 {
-                    CanExecuteDelegate = o => true,
-                    ExecuteDelegate = async o => await StartExecuteAsync().ConfigureAwait(true)
+                    CanExecuteDelegate = o => CanStartCommandExecute(),
+                    ExecuteDelegate = async o => await StartCommandExecuteAsync().ConfigureAwait(true)
                 });
             }
         }
@@ -233,8 +287,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 return _reverseCommand ?? (_reverseCommand = new SimpleCommand
                 {
-                    CanExecuteDelegate = o => true,
-                    ExecuteDelegate = async o => await ReverseButtonClickAsync().ConfigureAwait(true)
+                    CanExecuteDelegate = o => CanReverseCommandExecute(),
+                    ExecuteDelegate = async o => await ReverseCommandExecuteAsync().ConfigureAwait(true)
                 });
             }
         }
@@ -248,8 +302,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 return _emergencyStopCommand ?? (_emergencyStopCommand = new SimpleCommand
                 {
-                    CanExecuteDelegate = o => CanStartCommandExecute(),
-                    ExecuteDelegate = async o => await EmergencyStopButtonClickAsync().ConfigureAwait(true)
+                    CanExecuteDelegate = o => CanEmergencyCommandExecute(),
+                    ExecuteDelegate = async o => await EmergencyCommandExecuteAsync().ConfigureAwait(true)
                 });
             }
         }
@@ -263,8 +317,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 return _manualRequestCommand ?? (_manualRequestCommand = new SimpleCommand
                 {
-                    CanExecuteDelegate = o => CanRequestDataManual,
-                    ExecuteDelegate = async o => await ManualDataRequestAsync().ConfigureAwait(true)
+                    CanExecuteDelegate = o => CanManualDataCommandExecute,
+                    ExecuteDelegate = async o => await ManualDataCommandExecuteAsync().ConfigureAwait(true)
                 });
             }
         }
@@ -275,29 +329,45 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// ViewModel для сеанса
         /// </summary>
         public SessionProcessingViewModel(
-            [NotNull]ILogger logger,
+            [NotNull] ILogger logger,
             [NotNull] IFilesManager filesRepository,
             [NotNull] ISessionsService sessionsService,
             [NotNull] IDeviceControllerFactory deviceControllerFactory,
-            [NotNull] IWorkerController workerController, 
+            [NotNull] IWorkerController workerController,
             [NotNull] IDeviceConfigurationService deviceConfigurationService,
             [NotNull] IPatientsService patientsService,
-                [NotNull] IUiInvoker uiInvoker) 
+            [NotNull] IUiInvoker uiInvoker)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
-            _deviceControllerFactory = deviceControllerFactory ?? throw new ArgumentNullException(nameof(deviceControllerFactory));
+            _deviceControllerFactory = deviceControllerFactory ??
+                                       throw new ArgumentNullException(nameof(deviceControllerFactory));
             _workerController = workerController;
-            _deviceConfigurationService = deviceConfigurationService ?? throw new ArgumentNullException(nameof(deviceConfigurationService));
+            _deviceConfigurationService = deviceConfigurationService ??
+                                          throw new ArgumentNullException(nameof(deviceConfigurationService));
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _uiInvoker = uiInvoker ?? throw new ArgumentNullException(nameof(uiInvoker));
 
-            CanRequestDataManual = true;
+            CanManualDataCommandExecute = true;
+            IsAutoPumpingChangingEnabled = true;
             StartButtonText = _startText;
             //todo for what?
             // Session = new SessionModel();
             OnException += HandleOnException;
+            OnSessionStatusChanged += HandleSessionStatusChanged;
+        }
+
+        private void HandleSessionStatusChanged(object sender, EventArgs eventArgs)
+        {
+            RisePropertyChanged(nameof(StartCommand));
+            RisePropertyChanged(nameof(ReverseCommand));
+            RisePropertyChanged(nameof(EmergencyStopCommand));
+            RisePropertyChanged(nameof(ManualRequestCommand));
+
+            IsAutoPumpingChangingEnabled = SessionStatus == SessionStatus.InProgress
+                                           || SessionStatus == SessionStatus.Suspended
+                                           || SessionStatus == SessionStatus.NotStarted;
         }
 
         private void HandleOnException(object sender, SessionProcessingException sessionProcessingException)
@@ -311,11 +381,22 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                    || SessionStatus == SessionStatus.Suspended;
         }
 
+        private void UpdateAutoPumpingStateUnsafe(bool isAutoPumpingEnabled)
+        {
+            if (isAutoPumpingEnabled)
+            {
+                EnableAutoPumping();
+            }
+            else
+            {
+                DisableAutoPumping();
+            }
+        }
 
         /// <summary>
         /// Обрабатывает нажатие на кнопку старт/пауза
         /// </summary>
-        private async Task StartExecuteAsync()
+        private async Task StartCommandExecuteAsync()
         {
             var actionName = String.Empty;
             try
@@ -331,12 +412,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         break;
                     case SessionStatus.Suspended:
                         actionName = "продолжения";
+                        UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
                         await ResumeAsync().ConfigureAwait(true);
                         StartButtonText = _pauseText;
                         break;
                     default:
                         actionName = "старта";
                         await InitAsync().ConfigureAwait(true);
+                        UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
                         await StartAsync().ConfigureAwait(true);
                         StartButtonText = _pauseText;
                         IsSessionStarted = true;
@@ -460,16 +543,24 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 //            }
         }
 
+        private bool CanReverseCommandExecute()
+        {
+            if (IsReverseAlreadyRequested) return false;
+
+            return SessionStatus == SessionStatus.InProgress;
+        }
+
         /// <summary>
         /// Реверс
         /// </summary>
-        private async Task ReverseButtonClickAsync()
+        private async Task ReverseCommandExecuteAsync()
         {
             try
             {
                 IsBusy = true;
                 BusyMessage = "Реверс сеанса...";
                 await ReverseAsync().ConfigureAwait(true);
+                IsReverseAlreadyRequested = true;
             }
             catch (Exception e)
             {
@@ -485,10 +576,16 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         }
 
+        private bool CanEmergencyCommandExecute()
+        {
+            return SessionStatus == SessionStatus.InProgress
+                   || SessionStatus == SessionStatus.Suspended;
+        }
+
         /// <summary>
         /// Прерывает сеанс
         /// </summary>
-        private async Task EmergencyStopButtonClickAsync()
+        private async Task EmergencyCommandExecuteAsync()
         {
             try
             {
@@ -508,7 +605,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
-        private async Task ManualDataRequestAsync()
+        private async Task ManualDataCommandExecuteAsync()
         {
             try
             {
@@ -516,7 +613,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 BusyMessage = "Обновление данных для последней точки...";
 
                 await RequestManualDataUpdateAsync().ConfigureAwait(true);
-                CanRequestDataManual = false;
+                CanManualDataCommandExecute = false;
             }
             catch (Exception e)
             {
@@ -553,6 +650,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
                 _uiInvoker.Invoke(() =>
                 {
+                    IsAutoPumpingEnabled = context.IsAutopumpingEnabled;
                     Patient = patient;
                     IsSessionStarted = false;
                 });
