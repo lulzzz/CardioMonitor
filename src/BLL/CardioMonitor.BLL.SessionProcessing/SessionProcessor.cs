@@ -293,6 +293,13 @@ namespace CardioMonitor.BLL.SessionProcessing
             _devicesFacade.DisableAutoPumping();
         }
 
+        public Task RequestManualDataUpdateAsync()
+        {
+            AssureInitialization();
+
+            return _devicesFacade.ForceDataCollectionRequestAsync();
+        }
+
         public void Dispose()
         {
             if (_devicesFacade == null) return;

@@ -240,6 +240,8 @@
       <DependentUpon>PatientView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\ViewModel\Patients\PatientsViewModel.cs" />
+    <Compile Include="Ui\View\Sessions\Converters\CompletedSessionStatusToVisibilityConverter.cs" />
+    <Compile Include="Ui\View\Sessions\Converters\NotCompletedSessionStatusToVisibilityConverter.cs" />
     <Compile Include="Ui\View\Sessions\SessionProcessingInitView.xaml.cs">
       <DependentUpon>SessionProcessingInitView.xaml</DependentUpon>
     </Compile>

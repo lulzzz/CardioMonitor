@@ -11,12 +11,32 @@
 
              xmlns:controls1="clr-namespace:CardioMonitor.Ui.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              xmlns:converters="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Converters;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             xmlns:sessionStatusToStatusVisibilityConverters="clr-namespace:CardioMonitor.Ui.View.Sessions.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="1000"
              d:DataContext="{d:DesignInstance  Type=sessionViewModels:SessionProcessingViewModel}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
+        <sessionStatusToStatusVisibilityConverters:CompletedSessionStatusToVisibilityConverter x:Key="CompletedSessionStatusToVisibilityConverter"/>
+        <sessionStatusToStatusVisibilityConverters:NotCompletedSessionStatusToVisibilityConverter x:Key="NotCompletedSessionStatusToVisibilityConverter"/>
+
+        <Style x:Key="CmSessionProcessingToggleButtons"
+               TargetType="{x:Type ToggleButton}"
+               BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Height" Value="55"/>
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style x:Key="CmSessionProcessingButtons"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Height" Value="55"/>
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
     </UserControl.Resources>
 
     <controls1:BusyIndicator
@@ -109,34 +129,41 @@
             <StackPanel
                 Grid.Column="0"
                 Orientation="Vertical"
-                VerticalAlignment="Center">
-                <!--Старт-->
+                VerticalAlignment="Center"
+                Margin="10,0">
+
+                <!--Реверс-->
+                <Button x:Name="ManualRequest"
+                        Command="{Binding ManualRequestCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        Content="Обновить данные"
+                        Style="{DynamicResource CmSessionProcessingButtons}"
+                        Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CompletedSessionStatusToVisibilityConverter}}"/>
+                    <!--Старт-->
                 <ToggleButton x:Name="StartSessionB"
                               Command="{Binding StartCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                               Content="{Binding StartButtonText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                              Width="250"
-                              Height="55"
-                              FontSize="12"/>
+                              Style="{DynamicResource CmSessionProcessingToggleButtons}"
+                              Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CompletedSessionStatusToVisibilityConverter}}"/>
                 <!--Реверс-->
                 <Button x:Name="ReverseSessionB"
                         Command="{Binding ReverseCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                        FontSize="12"
                         Content="Реверс"
-                        Width="250"
-                        Height="55"
-                        Margin="0,10,0,0"/>
+                        Style="{DynamicResource CmSessionProcessingButtons}"/>
             </StackPanel>
             <StackPanel
                 Grid.Column="1"
                 Orientation="Vertical"
-                VerticalAlignment="Center">
-                <!--Экстренная остановка-->
+                VerticalAlignment="Center"
+                Margin="10,10,10,0">
+                <controls:ToggleSwitch 
+                    IsChecked="{Binding IsAutopumpingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    OffLabel="Автонакачка отключена"
+                    OnLabel="Автонакачка включена" 
+                    Style="{DynamicResource CmSettingsToggleSwitch}"/>
+                    <!--Экстренная остановка-->
                 <Button x:Name="EmergencyStopB"
                         Command="{Binding EmergencyStopCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                        Width="250"
-                        Margin="10,0,10,0"
-                        MinHeight="55"
-                        VerticalAlignment="Center">
+                        Style="{DynamicResource CmSessionProcessingButtons}">
                     <Button.Content>
                         <TextBlock Text="ЭКСТРЕННАЯ ОСТАНОВКА"
                                    FontSize="12"

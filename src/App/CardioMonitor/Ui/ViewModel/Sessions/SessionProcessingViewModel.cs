@@ -43,13 +43,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private Patient _patient;
         private SessionModel _session;
-        
+        private bool _canRequestDataManual;
 
         private string _startButtonText;
 
         private ICommand _startCommand;
         private ICommand _reverseCommand;
         private ICommand _emergencyStopCommand;
+        private ICommand _manualRequestCommand;
 
 
         private readonly ILogger _logger;
@@ -72,6 +73,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private bool _isBusy;
         private string _busyMessage;
+
+        private string _executionStatus;
 
         #endregion
 
@@ -167,7 +170,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         }
 
         
-        private string _executionStatus;
 
         public string ExecutionStatus
         {
@@ -190,6 +192,19 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+
+        public bool CanRequestDataManual
+        {
+            get => _canRequestDataManual;
+            set
+            {
+                _canRequestDataManual = value; 
+                RisePropertyChanged(nameof(CanRequestDataManual));
+                RisePropertyChanged(nameof(ManualRequestCommand));
+            }
+        }
+
+
         #endregion
 
         #region Command
@@ -204,7 +219,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 return _startCommand ?? (_startCommand = new SimpleCommand
                 {
                     CanExecuteDelegate = o => true,
-                    ExecuteDelegate = async o => await StartButtonClickAsync().ConfigureAwait(true)
+                    ExecuteDelegate = async o => await StartExecuteAsync().ConfigureAwait(true)
                 });
             }
         }
@@ -233,13 +248,29 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 return _emergencyStopCommand ?? (_emergencyStopCommand = new SimpleCommand
                 {
-                    CanExecuteDelegate = o => true,
+                    CanExecuteDelegate = o => CanStartCommandExecute(),
                     ExecuteDelegate = async o => await EmergencyStopButtonClickAsync().ConfigureAwait(true)
                 });
             }
         }
 
+        /// <summary>
+        /// Команда ручного обновления данных после завершения сеанса
+        /// </summary>
+        public ICommand ManualRequestCommand
+        {
+            get
+            {
+                return _manualRequestCommand ?? (_manualRequestCommand = new SimpleCommand
+                {
+                    CanExecuteDelegate = o => CanRequestDataManual,
+                    ExecuteDelegate = async o => await ManualDataRequestAsync().ConfigureAwait(true)
+                });
+            }
+        }
+
         #endregion
+
         /// <summary>
         /// ViewModel для сеанса
         /// </summary>
@@ -262,6 +293,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _uiInvoker = uiInvoker ?? throw new ArgumentNullException(nameof(uiInvoker));
 
+            CanRequestDataManual = true;
             StartButtonText = _startText;
             //todo for what?
             // Session = new SessionModel();
@@ -272,10 +304,18 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
         }
 
+        private bool CanStartCommandExecute()
+        {
+            return SessionStatus == SessionStatus.NotStarted
+                   || SessionStatus == SessionStatus.InProgress
+                   || SessionStatus == SessionStatus.Suspended;
+        }
+
+
         /// <summary>
         /// Обрабатывает нажатие на кнопку старт/пауза
         /// </summary>
-        private async Task StartButtonClickAsync()
+        private async Task StartExecuteAsync()
         {
             var actionName = String.Empty;
             try
@@ -311,6 +351,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             finally
             {
                 IsBusy = false;
+                BusyMessage = String.Empty;
             }
         }
 
@@ -438,6 +479,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             finally
             {
                 IsBusy = false;
+                BusyMessage = String.Empty;
             }
 
 
@@ -462,6 +504,29 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             finally
             {
                 IsBusy = false;
+                BusyMessage = String.Empty;
+            }
+        }
+
+        private async Task ManualDataRequestAsync()
+        {
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Обновление данных для последней точки...";
+
+                await RequestManualDataUpdateAsync().ConfigureAwait(true);
+                CanRequestDataManual = false;
+            }
+            catch (Exception e)
+            {
+                _logger.Error($"{GetType().Name}: Ошибка обновления данных для последней точки. Причина: {e.Message}", e);
+                await MessageHelper.Instance.ShowMessageAsync("Ошибка обновления данных для последней точки");
+            }
+            finally
+            {
+                IsBusy = false;
+                BusyMessage = String.Empty;
             }
         }
 
