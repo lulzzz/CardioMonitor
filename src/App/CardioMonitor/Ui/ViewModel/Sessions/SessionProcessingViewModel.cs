@@ -10,12 +10,14 @@ using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.Monitor.Infrastructure;
+using CardioMonitor.Events.Sessions;
 using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
+using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.Logging;
 using ToastNotifications.Core;
 using ToastNotifications.Messages;
@@ -69,6 +71,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         [NotNull]
         private readonly Notifier _notifier;
+
+        [NotNull]
+        private readonly IEventBus _eventBus;
 
         private bool _isResultSaved;
 
@@ -344,7 +349,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] IDeviceConfigurationService deviceConfigurationService,
             [NotNull] IPatientsService patientsService,
             [NotNull] IUiInvoker uiInvoker, 
-            [NotNull] Notifier notifier)
+            [NotNull] Notifier notifier, 
+            [NotNull] IEventBus eventBus)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
@@ -357,6 +363,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _uiInvoker = uiInvoker ?? throw new ArgumentNullException(nameof(uiInvoker));
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
+            _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
             CanManualDataCommandExecute = true;
             IsAutoPumpingChangingEnabled = true;
@@ -408,6 +415,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         BusyMessage = "Сохранение результатов сеанса";
                     });
                     await SaveSessionAsync().ConfigureAwait(false);
+                    
                     _notifier.ShowSuccess("Сеанс завершен успешно");
                 }
                 catch (Exception ex)
@@ -704,6 +712,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 BusyMessage = "Обновление данных для последней точки...";
 
                 await RequestManualDataUpdateAsync().ConfigureAwait(true);
+
+                await _eventBus
+                    .PublishAsync(new SessionAddedEvent())
+                    .ConfigureAwait(false);
                 CanManualDataCommandExecute = false;
             }
             catch (Exception e)

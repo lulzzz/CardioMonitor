@@ -4,9 +4,11 @@ using System.Data.Entity;
 using System.Linq;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.BLL.CoreContracts.Patients.Events;
 using CardioMonitor.BLL.Mappers;
 using CardioMonitor.Data.Ef.Context;
 using JetBrains.Annotations;
+using Markeli.Utils.EventBus.Contracts;
 
 namespace CardioMonitor.BLL.CoreServices.Patients
 {
@@ -15,19 +17,31 @@ namespace CardioMonitor.BLL.CoreServices.Patients
         [NotNull]
         private readonly ICardioMonitorContextFactory _contextFactory;
 
-        public PatientService(ICardioMonitorContextFactory contextFactory)
+        [NotNull]
+        private readonly IEventBus _eventBus;
+
+        public PatientService(ICardioMonitorContextFactory contextFactory,
+            [NotNull] IEventBus eventBus)
         {
             _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
+            _eventBus = eventBus;
         }
 
-        public async Task AddAsync([NotNull] Patient patient)
+        public async Task<int> AddAsync([NotNull] Patient patient)
         {
             if (patient == null) throw new ArgumentNullException(nameof(patient));
 
             using (var context = _contextFactory.Create())
             {
-                context.Patients.Add(patient.ToEntity());
-                await context.SaveChangesAsync().ConfigureAwait(false);
+                var entity = patient.ToEntity();
+                context.Patients.Add(entity);
+                await context
+                    .SaveChangesAsync()
+                    .ConfigureAwait(false);
+                await _eventBus
+                    .PublishAsync(new PatientAddedEvent(entity.Id))
+                    .ConfigureAwait(false);
+                return entity.Id;
             }
         }
 
@@ -107,7 +121,13 @@ namespace CardioMonitor.BLL.CoreServices.Patients
                 var entity = patient.ToEntity();
                 context.Patients.Attach(entity);
                 context.Entry(entity).State = EntityState.Modified;
-                await context.SaveChangesAsync().ConfigureAwait(false);
+                await context
+                    .SaveChangesAsync()
+                    .ConfigureAwait(false);
+
+                await _eventBus
+                    .PublishAsync(new PatientChangedEvent(entity.Id))
+                    .ConfigureAwait(false);
             }
         }
 
@@ -123,6 +143,11 @@ namespace CardioMonitor.BLL.CoreServices.Patients
                 context.Patients.Remove(patient);
                 await context
                     .SaveChangesAsync()
+                    .ConfigureAwait(false);
+
+
+                await _eventBus
+                    .PublishAsync(new PatientDeletedEvent(patientId))
                     .ConfigureAwait(false);
             }
         }

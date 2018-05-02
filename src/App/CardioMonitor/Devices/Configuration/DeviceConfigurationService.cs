@@ -5,19 +5,28 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Data;
+using CardioMonitor.Events.Devices;
 using JetBrains.Annotations;
+using Markeli.Utils.EventBus.Contracts;
 
 namespace CardioMonitor.Devices.Configuration
 {
     internal class DeviceConfigurationService : IDeviceConfigurationService
     {
+        [NotNull]
         private readonly IDeviceConfigurationContextFactory _contextFactory;
         
         private readonly HashSet<Guid> _registeredDeviceIds;
-        
-        public DeviceConfigurationService(IDeviceConfigurationContextFactory contextFactory)
+
+        [NotNull]
+        private readonly IEventBus _eventBus;
+
+        public DeviceConfigurationService(
+            [NotNull] IDeviceConfigurationContextFactory contextFactory, 
+            [NotNull] IEventBus eventBus)
         {
-            _contextFactory = contextFactory;
+            _contextFactory = contextFactory ?? throw new ArgumentNullException(nameof(contextFactory));
+            _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
             _registeredDeviceIds = new HashSet<Guid>();
         }
         
@@ -76,7 +85,7 @@ namespace CardioMonitor.Devices.Configuration
             }
         }
 
-        public Task AddDeviceConfigurationAsync([NotNull] DeviceConfiguration config)
+        public async Task<Guid> AddDeviceConfigurationAsync([NotNull] DeviceConfiguration config)
         {
             if (config == null) throw new ArgumentNullException(nameof(config));
 
@@ -88,7 +97,15 @@ namespace CardioMonitor.Devices.Configuration
 
                 context.DeviceConfigurations.Add(entity);
 
-                return context.SaveChangesAsync();
+                await context
+                    .SaveChangesAsync()
+                    .ConfigureAwait(false);
+
+                await _eventBus
+                    .PublishAsync(new DeviceConfigAddedEvent(entity.ConfigId))
+                    .ConfigureAwait(false);
+
+                return entity.ConfigId;
             }
         }
 
@@ -111,6 +128,10 @@ namespace CardioMonitor.Devices.Configuration
                 result.ParamsJson = config.ParamsJson;
 
                 await context.SaveChangesAsync();
+                
+                await _eventBus
+                    .PublishAsync(new DeviceConfigChangedEvent(config.ConfigId))
+                    .ConfigureAwait(false);
             }
         }
 
@@ -128,6 +149,10 @@ namespace CardioMonitor.Devices.Configuration
                 context.DeviceConfigurations.Remove(result);
 
                 await context.SaveChangesAsync();
+                
+                await _eventBus
+                    .PublishAsync(new DeviceConfigDeletedEvent(confidId))
+                    .ConfigureAwait(false);
             }
         }
     }

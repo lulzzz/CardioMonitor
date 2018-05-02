@@ -5,7 +5,7 @@ namespace CardioMonitor.BLL.CoreContracts.Patients
 {
     public interface IPatientsService
     {
-        Task AddAsync(Patient patient);
+        Task<int> AddAsync(Patient patient);
 
         Task<ICollection<PatientFullName>> GetPatientNamesAsync(ICollection<int> patientIds);
 

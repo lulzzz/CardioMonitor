@@ -11,7 +11,6 @@ using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.EventHandlers.Patients;
-using CardioMonitor.Events.Patients;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using Markeli.Storyboards;

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
-using CardioMonitor.Events.Patients;
+using CardioMonitor.BLL.CoreContracts.Patients.Events;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
@@ -194,9 +194,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                         await _patientsService
                             .AddAsync(Patient)
                             .ConfigureAwait(false);
-                        await _eventBus
-                            .PublishAsync(new PatientAddedEvent())
-                            .ConfigureAwait(true);
                         _notifier.ShowSuccess("Добавлен новый пользователь");
                         break;
                     case AccessMode.Edit:
@@ -205,9 +202,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                         await _patientsService
                             .EditAsync(Patient)
                             .ConfigureAwait(false);
-                        await _eventBus
-                            .PublishAsync(new PatientChangedEvent(Patient.Id))
-                            .ConfigureAwait(true);
                         _notifier.ShowSuccess("Данные отредактированы");
                         break;
                 }

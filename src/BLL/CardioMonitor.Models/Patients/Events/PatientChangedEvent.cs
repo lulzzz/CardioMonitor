@@ -1,7 +1,7 @@
 ﻿using System;
 using Markeli.Utils.EventBus.Contracts;
 
-namespace CardioMonitor.Events.Patients
+namespace CardioMonitor.BLL.CoreContracts.Patients.Events
 {
     public class PatientChangedEvent : IEvent
     {

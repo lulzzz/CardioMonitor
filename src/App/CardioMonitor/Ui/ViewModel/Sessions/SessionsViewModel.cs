@@ -224,7 +224,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = true;
                 BusyMessage = "Загрузка сеансов...";
-                var sessions = await  _sessionsService.GetAllAsync()
+                var sessions = await  _sessionsService
+                    .GetAllAsync()
                     .ConfigureAwait(true);
                 SessionInfos = sessions != null
                     ? new ObservableCollection<SessionWithPatientInfo>(sessions)

@@ -5,9 +5,11 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Configuration;
+using CardioMonitor.Events.Devices;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using Markeli.Storyboards;
+using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.Logging;
 using ToastNotifications.Messages;
 using DeviceTypeInfo = CardioMonitor.Devices.DeviceTypeInfo;
@@ -46,6 +48,8 @@ namespace CardioMonitor.Ui.ViewModel.Devices
         [NotNull]
         private readonly ToastNotifications.Notifier _notifier;
 
+        [NotNull]
+        private readonly IEventBus _eventBus;
 
         private string _busyMessage;
         private bool _isBusy;
@@ -57,13 +61,15 @@ namespace CardioMonitor.Ui.ViewModel.Devices
             [NotNull] ILogger logger,
             [NotNull] IDeviceConfigurationService configurationService,
             [NotNull] IDeviceModulesController deviceModulesController, [NotNull] IUiInvoker uiInvoker,
-            [NotNull] ToastNotifications.Notifier notifier)
+            [NotNull] ToastNotifications.Notifier notifier, 
+            [NotNull] IEventBus eventBus)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
             _deviceModulesController = deviceModulesController ?? throw new ArgumentNullException(nameof(deviceModulesController));
             _uiInvoker = uiInvoker;
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
+            _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
             _deviceTypes = new Dictionary<Guid, DeviceTypeInfo>();
             _deviceInfos = new Dictionary<Guid, DeviceInfo>();
@@ -228,7 +234,7 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                 await _configurationService
                     .DeleteDeviceConfigurationAsync(SelectedDeviceConfig.ConfigId)
                     .ConfigureAwait(true);
-
+                
                 DeviceConfigs.Remove(SelectedDeviceConfig);
                 SelectedDeviceConfig = null;
                 _notifier.ShowSuccess("Конфигурация удалена");
@@ -339,10 +345,10 @@ namespace CardioMonitor.Ui.ViewModel.Devices
                     DeviceTypeId = context.DeviceTypeId
                 };
 
-                await _configurationService
+                var configId = await _configurationService
                     .AddDeviceConfigurationAsync(deviceConfig)
                     .ConfigureAwait(false);
-
+                
                 _uiInvoker.Invoke(() =>
                 {
                     var view = _deviceModulesController.GetView(context.DeviceId);

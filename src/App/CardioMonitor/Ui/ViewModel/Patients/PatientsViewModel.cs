@@ -3,8 +3,8 @@ using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
+using CardioMonitor.BLL.CoreContracts.Patients.Events;
 using CardioMonitor.EventHandlers.Patients;
-using CardioMonitor.Events.Patients;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using CardioMonitor.Ui.Communication;
@@ -233,9 +233,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
                     .ConfigureAwait(true);
                 Patients.Remove(SelectedPatient);
                 SelectedPatient = null;
-                await _eventBus
-                    .PublishAsync(new PatientDeletedEvent(deletedPatienId))
-                    .ConfigureAwait(true);
                 _notifier.ShowSuccess("Пациент удален");
             }
             catch (Exception ex)

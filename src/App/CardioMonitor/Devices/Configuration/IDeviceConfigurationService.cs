@@ -17,7 +17,7 @@ namespace CardioMonitor.Devices.Configuration
 
         Task<DeviceConfiguration> GetDeviceConfigurationAsync(Guid configId);
 
-        Task AddDeviceConfigurationAsync(DeviceConfiguration config);
+        Task<Guid> AddDeviceConfigurationAsync(DeviceConfiguration config);
 
         Task EditDeviceConfigurationAsync(DeviceConfiguration config);
 

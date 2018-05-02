@@ -7,7 +7,9 @@ using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.Mappers;
 using CardioMonitor.Data.Ef.Context;
+using CardioMonitor.Events.Sessions;
 using JetBrains.Annotations;
+using Markeli.Utils.EventBus.Contracts;
 
 namespace CardioMonitor.BLL.CoreServices.Sessions
 {
@@ -16,23 +18,33 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
         [NotNull]
         private readonly ICardioMonitorContextFactory _factory;
 
+        [NotNull]
+        private readonly IEventBus _eventBus;
+
         public SessionsService(
-            [NotNull] ICardioMonitorContextFactory factory)
+            [NotNull] ICardioMonitorContextFactory factory, [NotNull] IEventBus eventBus)
         {
             _factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            _eventBus = eventBus;
         }
 
-        public async Task AddAsync(Session session)
+        public async Task<int> AddAsync(Session session)
         {
             if (session == null) throw new ArgumentNullException(nameof(session));
 
             using (var context = _factory.Create())
             {
-
-                context.Sessions.Add(session.ToEntity());
+                var entity = session.ToEntity();
+                context.Sessions.Add(entity);
                 await context
                     .SaveChangesAsync()
                     .ConfigureAwait(false);
+
+                await _eventBus
+                    .PublishAsync(new SessionAddedEvent(entity.Id))
+                    .ConfigureAwait(false);
+
+                return entity.Id;
             }
         }
 
@@ -128,7 +140,13 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
                 if (session == null) throw new ArgumentException();
 
                 context.Sessions.Remove(session);
-                await context.SaveChangesAsync().ConfigureAwait(false);
+                await context
+                    .SaveChangesAsync()
+                    .ConfigureAwait(false);
+
+                await _eventBus
+                    .PublishAsync(new SessionDeletedEvent(sessionId))
+                    .ConfigureAwait(false);
             }
         }
     }
