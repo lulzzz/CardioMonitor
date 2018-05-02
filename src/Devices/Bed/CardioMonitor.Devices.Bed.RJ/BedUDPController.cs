@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Infrastructure;
@@ -29,7 +30,9 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         [CanBeNull]
         private UdpClient _udpClient;
-        
+
+        static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+
 
         /// <summary>
         /// 
@@ -87,11 +90,12 @@ namespace CardioMonitor.Devices.Bed.UDP
                 while (_lastExceptions.TryDequeue(out var _))
                 {
                 }
-                _udpClient = new UdpClient();
+                _udpClient = new UdpClient(7777); //todo в конфиги
 
 
                 var endPoint = IpEndPointParser.Parse(_config.BedIpEndpoint);
                 _udpClient.Connect(endPoint);
+                IsConnected = true;
                 await UpdateRegistersValueAsync()
                     .ConfigureAwait(false);
                 await RiseEventOnCommandFromDeviceAsync()
@@ -114,7 +118,7 @@ namespace CardioMonitor.Devices.Bed.UDP
                     }
 
                 });
-                IsConnected = true;
+                
             }
             catch (SocketException e)
             {
@@ -180,17 +184,26 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// </summary>
         private async Task UpdateRegistersValueAsync()
         {
-            AssertConnection();
-            if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу"); //todo 
-            //todo здесь получение массива с регистрами и обновление результатов в _registerList
-            //todo никакой обработки ошибок делать не надо
-            await Task.Yield();
-            //здесь короче запрос данных и их парсинг 
-            var message = new BedMessage(BedMessageEventType.ReadAll, 0 );
-            var getAllRegister = message.GetAllRegisterMessage();
-            await _udpClient.SendAsync(getAllRegister, getAllRegister.Length);
-            var receiveMessage = await _udpClient.ReceiveAsync();
-            _registerValues = message.GetAllRegisterValues(receiveMessage.Buffer);
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                AssertConnection();
+                if (_udpClient == null)
+                    throw new DeviceConnectionException("Ошибка подключения к инверсионному столу"); //todo 
+                //todo здесь получение массива с регистрами и обновление результатов в _registerList
+                //todo никакой обработки ошибок делать не надо
+                await Task.Yield();
+                //здесь короче запрос данных и их парсинг 
+                var message = new BedMessage(BedMessageEventType.ReadAll, 0);
+                var getAllRegister = message.GetAllRegisterMessage();
+                await _udpClient.SendAsync(getAllRegister, getAllRegister.Length);
+                var receiveMessage = await _udpClient.ReceiveAsync();
+                _registerValues = message.GetAllRegisterValues(receiveMessage.Buffer);
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
         }
         
         /// <summary>
@@ -235,14 +248,22 @@ namespace CardioMonitor.Devices.Bed.UDP
         
         public async Task ExecuteCommandAsync(BedControlCommand command)
         {
-            RiseExceptions();
-            AssertConnection();
-            if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
-            await Task.Yield();
-            BedMessage message = new BedMessage();
-            var sendMessage =  message.GetBedCommandMessage(command);
-            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-           
+            await semaphoreSlim.WaitAsync();
+            try
+            {
+                RiseExceptions();
+                AssertConnection();
+                if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
+                await Task.Yield();
+                BedMessage message = new BedMessage(BedMessageEventType.Write);
+                var sendMessage = message.GetBedCommandMessage(command);
+                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+                var receiveMessage = await _udpClient.ReceiveAsync();
+            }
+            finally
+            {
+                semaphoreSlim.Release();
+            }
         }
 
         private void RiseExceptions()

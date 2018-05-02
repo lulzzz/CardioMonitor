@@ -213,7 +213,8 @@ namespace CardioMonitor.Devices.Bed.UDP
             _idDevice = inputMessage[1];
             _eventType = (BedMessageEventType) inputMessage[2];
             messageLength = inputMessage[3];
-            
+            if (messageLength == 0) throw new ArgumentException("В пакете нет данных");
+
             //ответный пакет это заголовок(1 байт) + ID (1) + тип (1) + размер данных в словах(1)
             //затем данные и 2 байта CRC16
             if (inputMessage.Length != 4 + messageLength * 2 + 2)  throw new ArgumentException("Неверный размер пакета");
@@ -234,7 +235,13 @@ namespace CardioMonitor.Devices.Bed.UDP
             }
             
             _messageData = new byte[messageLength * 2];
-            inputMessage.CopyTo(_messageData, 4);
+
+            if (inputMessage.Length < _messageData.Length + 4) throw new ArgumentException("Неверный размер пакета");
+
+            for (int i = 0; i < _messageData.Length; i++)
+            {
+                _messageData[i] = inputMessage[i + 4];
+            }
             
            
             
