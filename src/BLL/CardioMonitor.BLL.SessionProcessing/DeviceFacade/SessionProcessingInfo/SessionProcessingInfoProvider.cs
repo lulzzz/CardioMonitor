@@ -22,24 +22,37 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
 
         private readonly TimeSpan _bedControllerTimeout;
         private ILogger _logger;
-        private readonly object _lockObject;
+
+        private readonly SemaphoreSlim _mutex;
+        private readonly TimeSpan _blockWaitingTimeout;
 
         public SessionProcessingInfoProvider([NotNull] IBedController bedController, TimeSpan bedControllerTimeout)
         {
             _bedController = bedController ?? throw new ArgumentNullException(nameof(bedController));
             _bedControllerTimeout = bedControllerTimeout;
-            _lockObject = new object();
+
+            _mutex = new SemaphoreSlim(1);
+            // считаем стандартным период обновления данных в Pipeline 1 секунду, 
+            // если за пол секунлы этот метод не выполнился, что-то идет не так 
+            _blockWaitingTimeout = TimeSpan.FromMilliseconds(500);
         }
 
-        public async Task<CycleProcessingContext> ProcessAsync(CycleProcessingContext context)
+        public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            var isBlocked = await _mutex
+                .WaitAsync(_blockWaitingTimeout)
+                .ConfigureAwait(false);
+            if (!isBlocked)
+            {
+                _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
+                                 $"Новый запрос не будет выполнен, т.к. прошло больше {_blockWaitingTimeout.TotalMilliseconds} мс");
+                return context;
+            }
+
             try
             {
-                if (!Monitor.TryEnter(_lockObject))
-                {
-                    _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. Новый запрос не будет выполнен");
-                    return context;
-                }
 
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
 
@@ -52,7 +65,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
                 _logger?.Trace($"{GetType().Name}: запрос оставшегося времени");
                 var remainingTime = await timeoutPolicy
                     .ExecuteAsync(
-                        _bedController .GetRemainingTimeAsync)
+                        _bedController.GetRemainingTimeAsync)
                     .ConfigureAwait(false);
 
                 _logger?.Trace($"{GetType().Name}: запрос длительности цикла");
@@ -97,7 +110,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
                         new SessionProcessingException(SessionProcessingErrorCodes.InversionTableProcessingError,
                             ex.Message,
                             ex)));
-               
+
             }
             catch (Exception ex)
             {
@@ -110,10 +123,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
             }
             finally
             {
-                if (Monitor.IsEntered(_lockObject))
-                {
-                    Monitor.Exit(_lockObject);
-                }
+                _mutex.Release();
             }
 
             return context;

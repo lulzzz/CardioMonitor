@@ -24,7 +24,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         private readonly IMonitorController _monitorController;
 
         private ILogger _logger;
-        private readonly object _lockObject;
+
+        private readonly SemaphoreSlim _mutex;
+        private readonly TimeSpan _blockWaitingTimeout;
 
         public PumpingManager([NotNull] IMonitorController monitorController,
             TimeSpan pumpingTimeout)
@@ -32,7 +34,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
             
             _pumpingTimeout = pumpingTimeout;
-            _lockObject = new object();
+            _mutex = new SemaphoreSlim(1);
+            // считаем стандартным период обновления данных в Pipeline 1 секунду, 
+            // если за пол секунлы этот метод не выполнился, что-то идет не так 
+            _blockWaitingTimeout = TimeSpan.FromMilliseconds(500);
         }
 
         public async Task<CycleProcessingContext> ProcessAsync(CycleProcessingContext context)
@@ -48,16 +53,22 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                 return context;
             }
 
-            var retryCounts = context.TryGetAutoPumpingRequestParams()?.PumpingNumberOfAttempts ?? 0;
+            var isBlocked = await _mutex
+                .WaitAsync(_blockWaitingTimeout)
+                .ConfigureAwait(false);
+            if (!isBlocked)
+            {
+                _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
+                                 $"Новый запрос не будет выполнен, т.к. прошло больше {_blockWaitingTimeout.TotalMilliseconds} мс");
+                return context;
+            }
 
+            var retryCounts = context.TryGetAutoPumpingRequestParams()?.PumpingNumberOfAttempts ?? 0;
+            
             bool wasPumpingComleted;
             try
             {
-                if (!Monitor.TryEnter(_lockObject))
-                {
-                    _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. Новый запрос не будет выполнен");
-                    return context;
-                }
+
 
                 var timeoutPolicy = Policy
                     .TimeoutAsync(_pumpingTimeout);
@@ -102,10 +113,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             }
             finally
             {
-                if (Monitor.IsEntered(_lockObject))
-                {
-                    Monitor.Exit(_lockObject);
-                }
+                _mutex.Release();
             }
 
             context.AddOrUpdate(new PumpingResultContextParams(wasPumpingComleted));

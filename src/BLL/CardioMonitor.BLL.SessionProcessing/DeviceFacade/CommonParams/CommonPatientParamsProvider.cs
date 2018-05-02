@@ -27,7 +27,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
         private readonly IMonitorController _monitorController;
 
         private ILogger _logger;
-        private readonly object _lockObject;
+        private readonly SemaphoreSlim _mutex;
+        private readonly TimeSpan _blockWaitingTimeout;
 
         public CommonPatientParamsProvider(
             [NotNull] IMonitorController monitorController,
@@ -35,7 +36,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
         {
             _monitorController = monitorController ?? throw new ArgumentNullException(nameof(monitorController));
             _updatePatientParamTimeout = updatePatientParamTimeout;
-            _lockObject = new object();
+            _mutex = new SemaphoreSlim(1);
+            // считаем стандартным период обновления данных в Pipeline 1 секунду, 
+            // если за пол секунлы этот метод не выполнился, что-то идет не так 
+            _blockWaitingTimeout = TimeSpan.FromMilliseconds(500);
         }
 
         public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
@@ -44,20 +48,26 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             var angleParams = context.TryGetAngleParam();
             if (angleParams == null) return context;
             
+            var isBlocked = await _mutex
+                .WaitAsync(_blockWaitingTimeout)
+                .ConfigureAwait(false);
+            if (!isBlocked)
+            {
+                _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
+                                 $"Новый запрос не будет выполнен, т.к. прошло больше {_blockWaitingTimeout.TotalMilliseconds} мс");
+                return context;
+            }
+
             PatientCommonParams param = null;
-            
+
             var sessionInfo = context.TryGetSessionProcessingInfo();
             var cycleNumber = sessionInfo?.CurrentCycleNumber;
             var iterationInfo = context.TryGetIterationParams();
             var iterationNumber = iterationInfo?.CurrentIteration;
-            
+
             try
             {
-                if (!Monitor.TryEnter(_lockObject))
-                {
-                    _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. Новый запрос не будет выполнен");
-                    return context;
-                }
+                
 
                 _logger?.Trace($"{GetType().Name}: запрос общих параметров пациента");
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
@@ -102,10 +112,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             }
             finally
             {
-                if (Monitor.IsEntered(_lockObject))
-                {
-                    Monitor.Exit(_lockObject);
-                }
+                _mutex.Release();
                 if (param == null)
                 {
                     param = new PatientCommonParams(-1, -1, -1);

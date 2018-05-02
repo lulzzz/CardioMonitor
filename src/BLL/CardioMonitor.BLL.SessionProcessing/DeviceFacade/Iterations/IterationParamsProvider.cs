@@ -18,31 +18,41 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
         [NotNull] private readonly IBedController _bedController;
         private readonly TimeSpan _bedControllerTimeout;
         private ILogger _logger;
-        private readonly object _lockObject;
+
+        private readonly SemaphoreSlim _mutex;
+        private readonly TimeSpan _blockWaitingTimeout;
 
         public IterationParamsProvider([NotNull] IBedController bedController, 
             TimeSpan bedControllerTimeout)
         {
             _bedController = bedController;
             _bedControllerTimeout = bedControllerTimeout;
-            _lockObject = new object();
+
+            _mutex = new SemaphoreSlim(1);
+            // считаем стандартным период обновления данных в Pipeline 1 секунду, 
+            // если за пол секунлы этот метод не выполнился, что-то идет не так 
+            _blockWaitingTimeout = TimeSpan.FromMilliseconds(500);
         }
 
         public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-
             
+            var isBlocked = await _mutex
+                .WaitAsync(_blockWaitingTimeout)
+                .ConfigureAwait(false);
+            if (!isBlocked)
+            {
+                _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
+                                 $"Новый запрос не будет выполнен, т.к. прошло больше {_blockWaitingTimeout.TotalMilliseconds} мс");
+                return context;
+            }
+
             var sessionInfo = context.TryGetSessionProcessingInfo();
             var cycleNumber = sessionInfo?.CurrentCycleNumber;
-            
+
             try
             {
-                if (!Monitor.TryEnter(_lockObject))
-                {
-                    _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. Новый запрос не будет выполнен");
-                    return context;
-                }
 
                 _logger?.Trace($"{GetType().Name}: запрос текущей итерации...");
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
@@ -57,7 +67,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                     .ExecuteAsync(_bedController
                         .GetNextIterationNumberForCommonParamsMeasuringAsync)
                     .ConfigureAwait(false);
-                _logger?.Trace($"{GetType().Name}: следующая итерация для измерения общих параметров - {nextIterationToMeasuringCommonParams}.");
+                _logger?.Trace(
+                    $"{GetType().Name}: следующая итерация для измерения общих параметров - {nextIterationToMeasuringCommonParams}.");
 
 
                 _logger?.Trace($"{GetType().Name}: запрос следующей итерации для измерения давления...");
@@ -65,14 +76,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                     .ExecuteAsync(_bedController
                         .GetNextIterationNumberForPressureMeasuringAsync)
                     .ConfigureAwait(false);
-                _logger?.Trace($"{GetType().Name}: следующая итерация для измерения давления - {nextIterationToMeasuringCommonParams}.");
+                _logger?.Trace(
+                    $"{GetType().Name}: следующая итерация для измерения давления - {nextIterationToMeasuringCommonParams}.");
 
                 _logger?.Trace($"{GetType().Name}: запрос следующей итерации для измерения ЭКГ...");
                 var nextIterationToMeasuringEcg = await timeoutPolicy
                     .ExecuteAsync(_bedController
                         .GetNextIterationNumberForEcgMeasuringAsync)
                     .ConfigureAwait(false);
-                _logger?.Trace($"{GetType().Name}: следующая итерация для измерения ЭКГ - {nextIterationToMeasuringEcg}.");
+                _logger?.Trace(
+                    $"{GetType().Name}: следующая итерация для измерения ЭКГ - {nextIterationToMeasuringEcg}.");
 
                 context.AddOrUpdate(new IterationCycleProcessingContextParams(
                     iterationToGetEcg: nextIterationToMeasuringEcg,
@@ -112,10 +125,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
             }
             finally
             {
-                if (Monitor.IsEntered(_lockObject))
-                {
-                    Monitor.Exit(_lockObject);
-                }
+                _mutex.Release();
             }
             return context;
         }
