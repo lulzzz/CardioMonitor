@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
+using CardioMonitor.EventHandlers.Sessions;
 using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
@@ -16,6 +17,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class SessionsViewModel : Notifier, IStoryboardPageViewModel
     {
+        #region Fields
+
         private readonly ISessionsService _sessionsService;
         private readonly IPatientsService _patientsService;
         private readonly ILogger _logger;
@@ -28,20 +31,47 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _startSessionCommand;
         private ICommand _deleteSessionCommand;
         private ICommand _showResultsCommand;
+        private string _busyMessage;
+
+        private bool _isBusy;
+
+        [NotNull]
+        private readonly SessionAddedEventHandler _sessionAddedEventHandler;
+        [NotNull]
+        private readonly SessionChangedEventHandler _sessionChangedEventHandler;
+        [NotNull]
+        private readonly SessionDeletedEventHandler _sessionDeletedEventHandler;
+
+        private bool _isSessionListChanged;
+
+        #endregion
 
         public SessionsViewModel(
             ISessionsService sessionsService, 
             IPatientsService patientsService,
             [NotNull] ILogger logger,
-            [NotNull] ToastNotifications.Notifier notifier)
+            [NotNull] ToastNotifications.Notifier notifier, 
+            [NotNull] SessionAddedEventHandler sessionAddedEventHandler, 
+            [NotNull] SessionChangedEventHandler sessionChangedEventHandler, 
+            [NotNull] SessionDeletedEventHandler sessionDeletedEventHandler)
         {
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _patientsService = patientsService;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _notifier = notifier;
+            _sessionAddedEventHandler = sessionAddedEventHandler ?? throw new ArgumentNullException(nameof(sessionAddedEventHandler));
+            _sessionChangedEventHandler = sessionChangedEventHandler ?? throw new ArgumentNullException(nameof(sessionChangedEventHandler));
+            _sessionDeletedEventHandler = sessionDeletedEventHandler ?? throw new ArgumentNullException(nameof(sessionDeletedEventHandler));
+
+            _sessionAddedEventHandler.SessionAdded += delegate { _isSessionListChanged = true; };
+            _sessionChangedEventHandler.SessionChanged += delegate { _isSessionListChanged = true; };
+            _sessionDeletedEventHandler.SessionDeleted += delegate { _isSessionListChanged = true; };
+
+            _isSessionListChanged = false;
         }
 
-        
+        #region Properties
+
         public SessionWithPatientInfo SelectedSessionInfo
         {
             get => _selectedSessionInfo;
@@ -75,7 +105,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 RisePropertyChanged(nameof(IsBusy));
             }
         }
-        private bool _isBusy;
 
         public string BusyMessage
         {
@@ -86,8 +115,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 RisePropertyChanged(nameof(BusyMessage));
             }
         }
-        private string _busyMessage;
 
+        #endregion
+
+        #region Commands
 
         public ICommand StartSessionCommand
         {
@@ -124,6 +155,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+        #endregion
 
         private async Task StartSessionAsync()
         {
@@ -173,15 +205,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private async Task ShowResultsAsync()
         {
-            Patient patient;
             try
             {
                 IsBusy = true;
                 BusyMessage = "Подготовка данных...";
-                patient =
-                    await  _patientsService
-                        .GetPatientAsync(SelectedSessionInfo.PatientId)
-                        .ConfigureAwait(true);
+                var patient = await  _patientsService
+                    .GetPatientAsync(SelectedSessionInfo.PatientId)
+                    .ConfigureAwait(true);
 
                 await PageTransitionRequested.InvokeAsync(
                         this,
@@ -203,8 +233,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = false;
             }
-
-          
         }
 
         public void Clear()
@@ -215,10 +243,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public void Dispose()
         {
-
+            _sessionAddedEventHandler.Dispose();
+            _sessionDeletedEventHandler.Dispose();
+            _sessionChangedEventHandler.Dispose();
         }
 
-        private async Task LoadSessionsAsync()
+        private async Task LoadSessionsSafeAsync()
         {
             try
             {
@@ -231,6 +261,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     ? new ObservableCollection<SessionWithPatientInfo>(sessions)
                     : new ObservableCollection<SessionWithPatientInfo>();
                 IsBusy = false;
+                _isSessionListChanged = false;
             }
             catch (Exception ex)
             {
@@ -251,7 +282,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task OpenAsync(IStoryboardPageContext context)
         {
-            Task.Factory.StartNew(async () => await LoadSessionsAsync().ConfigureAwait(false));
+            _sessionAddedEventHandler.Subscribe();
+            _sessionDeletedEventHandler.Subscribe();
+            _sessionChangedEventHandler.Subscribe();
+
+            Task.Factory.StartNew(async () => await LoadSessionsSafeAsync().ConfigureAwait(false));
             return Task.CompletedTask;
         }
 
@@ -262,11 +297,20 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task LeaveAsync()
         {
+            _sessionAddedEventHandler.Unsubscribe();
+            _sessionDeletedEventHandler.Unsubscribe();
+            _sessionChangedEventHandler.Unsubscribe();
+
             return Task.CompletedTask;
         }
 
         public Task ReturnAsync(IStoryboardPageContext context)
         {
+            if (_isSessionListChanged)
+            {
+                Task.Factory.StartNew(async () => await LoadSessionsSafeAsync().ConfigureAwait(false));
+            }
+
             return Task.CompletedTask;
         }
 
