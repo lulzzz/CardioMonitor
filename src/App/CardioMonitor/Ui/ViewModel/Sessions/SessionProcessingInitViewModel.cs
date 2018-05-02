@@ -390,7 +390,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             SetDefaultValues();
             if (_previouslySelectedPatientIdFromContext == pageContext.PatientId
                 && Patients != null
-                && !_isPatientsListChanged) return;
+                && !_isPatientsListChanged
+                && !_isDeviceConfigsListChanged) return;
             var temp = this[String.Empty];
             if (updateDevices)
             {

@@ -713,9 +713,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
                 await RequestManualDataUpdateAsync().ConfigureAwait(true);
 
-                await _eventBus
-                    .PublishAsync(new SessionAddedEvent())
-                    .ConfigureAwait(false);
                 CanManualDataCommandExecute = false;
             }
             catch (Exception e)
