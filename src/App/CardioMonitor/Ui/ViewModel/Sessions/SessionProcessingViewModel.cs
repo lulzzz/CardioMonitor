@@ -17,7 +17,10 @@ using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
 using Markeli.Storyboards;
 using Markeli.Utils.Logging;
+using ToastNotifications.Core;
+using ToastNotifications.Messages;
 using IUiInvoker = CardioMonitor.Infrastructure.IUiInvoker;
+using Notifier = ToastNotifications.Notifier;
 
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
@@ -63,6 +66,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         [NotNull] private readonly IDeviceConfigurationService _deviceConfigurationService;
         [NotNull] private readonly IPatientsService _patientsService;
         [NotNull] private readonly IUiInvoker _uiInvoker;
+
+        [NotNull]
+        private readonly Notifier _notifier;
 
         private bool _isResultSaved;
 
@@ -250,6 +256,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     }
                     catch (Exception e)
                     {
+                        _notifier.ShowError("Не удалось изменить статус автонакачки");
                         _logger.Error($"{GetType().Name}: Ошибка изменения статуса автоначки. Причина: {e.Message}");
                         _isAutoPumpingEnabled = previousValue;
                     }
@@ -336,7 +343,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] IWorkerController workerController,
             [NotNull] IDeviceConfigurationService deviceConfigurationService,
             [NotNull] IPatientsService patientsService,
-            [NotNull] IUiInvoker uiInvoker)
+            [NotNull] IUiInvoker uiInvoker, 
+            [NotNull] Notifier notifier)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
@@ -348,6 +356,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                                           throw new ArgumentNullException(nameof(deviceConfigurationService));
             _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
             _uiInvoker = uiInvoker ?? throw new ArgumentNullException(nameof(uiInvoker));
+            _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
 
             CanManualDataCommandExecute = true;
             IsAutoPumpingChangingEnabled = true;
@@ -355,7 +364,86 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             //todo for what?
             // Session = new SessionModel();
             OnException += HandleOnException;
+            OnSessionErrorStop += HandleSessionErrorStop;
+            OnSessionCompleted += HandleSessionCompleted;
+            OnPausedFromDevice += HanlePausedFromDevice;
+            OnResumedFromDevice += HandleResumedFromDevice;
+            OnEmeregencyStoppedFromDevice += HandleEmeregencyStoppedFromDevice;
+            OnReversedFromDevice += HandleReversedFromDevice;
             OnSessionStatusChanged += HandleSessionStatusChanged;
+            OnCycleCompleted += HandleCycleCompleted;
+        }
+
+
+
+        #region Device events hadnling
+
+        private void HandleCycleCompleted(object sender, short completedCycleNumber)
+        {
+            if (completedCycleNumber == PatientParamsPerCycles.Count) return;
+
+            _notifier.ShowInformation($"Завершилось повторение № {completedCycleNumber}");
+
+            // если выбрана другая вкладка, то ничего делать не будем
+            if (SelectedCycleTab != completedCycleNumber -1) return;
+            SelectedCycleTab = completedCycleNumber;
+        }
+
+        private void HandleReversedFromDevice(object sender, EventArgs eventArgs)
+        {
+            _uiInvoker.Invoke(() => { IsReverseAlreadyRequested = true; });
+
+            _notifier.ShowInformation("С инверсионного стола запущен рерверс");
+        }
+
+        private void HandleSessionCompleted(object sender, EventArgs eventArgs)
+        {
+            Task.Factory.StartNew(async () =>
+            {
+                try
+                {
+                    _uiInvoker.Invoke(() =>
+                    {
+                        IsBusy = true;
+                        BusyMessage = "Сохранение результатов сеанса";
+                    });
+                    await SaveSessionAsync().ConfigureAwait(false);
+                    _notifier.ShowSuccess("Сеанс завершен успешно");
+                }
+                catch (Exception ex)
+                {
+                    _notifier.ShowError("Ошибка сохранения результатов сеанса");
+                    _logger.Error($"{GetType().Name}: Ошибка сохранения результатов сеанса. Причина: {ex.Message}", ex);
+                }
+                finally
+                {
+                    _uiInvoker.Invoke(() =>
+                    {
+                        IsBusy = false;
+                        BusyMessage = String.Empty;
+                    });
+                }
+            });
+        }
+
+        private void HandleResumedFromDevice(object sender, EventArgs eventArgs)
+        {
+            _notifier.ShowInformation("С инверсионного стола продолжен сеанс");
+        }
+
+        private void HanlePausedFromDevice(object sender, EventArgs eventArgs)
+        {
+            _notifier.ShowInformation("С инверсионного стола сеанс приостановлен");
+        }
+
+        private void HandleEmeregencyStoppedFromDevice(object sender, EventArgs eventArgs)
+        {
+            _notifier.ShowWarning("С инверсионного стола вызвана экстренная остановка сеанса");
+        }
+
+        private void HandleSessionErrorStop(object sender, Exception exception)
+        {
+            _notifier.ShowError("Сеанс прерван из-за непредвиденной ошибки");
         }
 
         private void HandleSessionStatusChanged(object sender, EventArgs eventArgs)
@@ -372,7 +460,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private void HandleOnException(object sender, SessionProcessingException sessionProcessingException)
         {
+            _notifier.ShowWarning($"Ошибка выполнения сеанса: {sessionProcessingException.Message}");
         }
+
+        #endregion
 
         private bool CanStartCommandExecute()
         {
@@ -428,7 +519,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
             catch (Exception e)
             {
-                await MessageHelper.Instance.ShowMessageAsync($"Ошибка {actionName} сеанса").ConfigureAwait(true);
+                _notifier.ShowError($"Ошибка {actionName} сеанса");
                 _logger.Error($"{GetType().Name}: Ошибка {actionName} сеанса. Причина: {e.Message}", e);
             }
             finally
@@ -511,13 +602,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             //Session.Status = SessionStatus.Completed;
             //todo save later
-            // SaveSession();
+            // SaveSessionAsync();
         }
 
         /// <summary>
         /// Сохраняет результаты сеанса в базу и файл
         /// </summary>
-        private async void SaveSession()
+        private async Task SaveSessionAsync()
         {
             _isResultSaved = true;
 //            var exceptionMessage = String.Empty;
@@ -565,7 +656,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception e)
             {
                 _logger.Error($"{GetType().Name}: Ошибка реверса. Причина: {e.Message}", e);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка реверса");
+                _notifier.ShowError("Ошибка реверса");
             }
             finally
             {
@@ -596,7 +687,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception e)
             {
                 _logger.Error($"{GetType().Name}: Ошибка экстренной остановки. Причина: {e.Message}", e);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка экстренной остановки");
+                _notifier.ShowError("Ошибка экстренной остановки");
             }
             finally
             {
@@ -618,7 +709,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception e)
             {
                 _logger.Error($"{GetType().Name}: Ошибка обновления данных для последней точки. Причина: {e.Message}", e);
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка обновления данных для последней точки");
+                _notifier.ShowError("Ошибка обновления данных для последней точки");
             }
             finally
             {
@@ -657,7 +748,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
             catch (Exception e)
             {
-                await MessageHelper.Instance.ShowMessageAsync("Ошибка подготовки сеанса").ConfigureAwait(true);
+                _notifier.ShowError("Ошибка подготовки сеанса");
                 _logger.Error($"{GetType().Name}: Ошибка открытия страницы выполнения сеанса. Причина: {e.Message}", e);
             }
             finally

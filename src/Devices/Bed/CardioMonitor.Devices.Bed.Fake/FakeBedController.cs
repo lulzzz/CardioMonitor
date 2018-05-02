@@ -23,6 +23,11 @@ namespace CardioMonitor.Devices.Bed.Fake
         private short _checkPointsCount;
         private ICollection<short> _checkPointIterationNumber;
 
+        /// <summary>
+        /// Специальная задержка для более корректного определения повторения и итерации
+        /// </summary>
+        private readonly TimeSpan _magicDelay;
+
         public void Dispose()
         {
         }
@@ -36,6 +41,7 @@ namespace CardioMonitor.Devices.Bed.Fake
         {
             _workerController = workerController;
             _elapsedTime = TimeSpan.Zero;
+            _magicDelay = TimeSpan.FromMilliseconds(300);
         }
 
         public bool IsConnected { get; private set; }
@@ -122,7 +128,7 @@ namespace CardioMonitor.Devices.Bed.Fake
         public async Task<short> GetCurrentCycleNumberAsync()
         {
             await Task.Delay(_config.DefaultDelay);
-            return Math.Min((short)(Math.Round((double)_elapsedTime.Ticks / _cycleDuration.Ticks)+1), _config.CyclesCount);
+            return Math.Min((short)(Math.Round((double)(_elapsedTime.Ticks - _magicDelay.Ticks) / _cycleDuration.Ticks)+1), _config.CyclesCount);
         }
 
         public async Task<short> GetIterationsCountAsync()
@@ -141,7 +147,7 @@ namespace CardioMonitor.Devices.Bed.Fake
         private short GetCurrentIteration()
         {
             var cycleElapsedTime = GetCycleElapsedTime();
-            var result = cycleElapsedTime.Ticks * _iterationsCount / _cycleDuration.Ticks;
+            var result = (cycleElapsedTime.Ticks -_magicDelay.Ticks) * _iterationsCount / _cycleDuration.Ticks;
             return (short)(result + 1);
         }
 

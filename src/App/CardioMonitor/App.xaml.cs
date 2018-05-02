@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Windows;
 using Cardiomonitor.Devices.Monitor.Mitar.WpfModule;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
@@ -33,6 +35,9 @@ using Markeli.Utils.EventBus.Local;
 using Markeli.Utils.Logging;
 using Markeli.Utils.Logging.NLog;
 using SimpleInjector;
+using ToastNotifications;
+using ToastNotifications.Lifetime;
+using ToastNotifications.Position;
 
 namespace CardioMonitor
 {
@@ -43,35 +48,38 @@ namespace CardioMonitor
     {
         private static string NLogConfigName = "NLog.config";
 
+        private static readonly List<WpfDeviceModule> _modules = new List<WpfDeviceModule>
+        {
+            FakeBedControllerModule.Module,
+            FakeMonitorControllerModule.Module,
+            MitarMonitorControllerModule.Module,
+            UdpInversionTableControllerModule.Module
+        };
+
         public App()
         {
             var container = Bootstrap();
             var mainWindowViewModel = container.GetInstance<MainWindowViewModel>();
             var mainWindow = new MainWindow(mainWindowViewModel);
+            InitNotifictionSubstem(container);
+            InitDevices(container, _modules);
             mainWindow.Show();
         }
 
         private static Container Bootstrap()
         {
             var container = new Container();
-            var modules = new List<WpfDeviceModule>
-            {
-                FakeBedControllerModule.Module,
-                FakeMonitorControllerModule.Module,
-                MitarMonitorControllerModule.Module,
-                UdpInversionTableControllerModule.Module
-            };
+           
 
             RegisterInfrastructure(container);
             RegisterLogger(container);
             RegisterViewModels(container);
-            RegisterDevices(container, modules);
+            RegisterDevices(container, _modules);
             RegisterServices(container);
             RegisterEventBus(container);
             RegisterPatientEventsHandlers(container);
+            RegisterNotificationSubsytem(container);
 
-
-            InitDevices(container, modules);
             // throw exception, incorrect seleted lifycycles for disposable objects
             // container.Verify();
 
@@ -153,6 +161,34 @@ namespace CardioMonitor
             container.Register<PatientAddedEventHandler>();
             container.Register<PatientChangedEventHandler>();
             container.Register<PatientDeletedEventHandler>();
+        }
+
+        private static void RegisterNotificationSubsytem(Container container)
+        {
+            var notifier = new Notifier(cfg =>
+            {
+                var uiInvoker = container.GetInstance<Infrastructure.IUiInvoker>();
+                uiInvoker.Invoke(() =>
+                {
+                    cfg.PositionProvider = new WindowPositionProvider(
+                        parentWindow: Current.MainWindow,
+                        corner: Corner.TopRight,
+                        offsetX: 10,
+                        offsetY: 10);
+
+                    cfg.LifetimeSupervisor = new TimeAndCountBasedLifetimeSupervisor(
+                        notificationLifetime: TimeSpan.FromSeconds(10),
+                        maximumNotificationCount: MaximumNotificationCount.FromCount(5));
+
+                    cfg.Dispatcher = Current.Dispatcher;
+                });
+            });
+            container.RegisterInstance(notifier);
+        }   
+
+        private static void InitNotifictionSubstem(Container container)
+        {
+            var notifier = container.GetInstance<Notifier>();
         }
 
         private static void InitDevices(Container container, ICollection<WpfDeviceModule> modules)

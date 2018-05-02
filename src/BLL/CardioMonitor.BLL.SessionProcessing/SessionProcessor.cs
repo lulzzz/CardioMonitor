@@ -157,7 +157,9 @@ namespace CardioMonitor.BLL.SessionProcessing
         public event EventHandler<Exception> OnSessionErrorStop;
        
         public event EventHandler OnSessionCompleted;
-        
+
+        public event EventHandler<short> OnCycleCompleted;
+
         public event EventHandler OnPausedFromDevice;
         
         public event EventHandler OnResumedFromDevice;
@@ -166,7 +168,8 @@ namespace CardioMonitor.BLL.SessionProcessing
         
         public event EventHandler OnReversedFromDevice;
 
-        public event EventHandler OnSessionStatusChanged; 
+        public event EventHandler OnSessionStatusChanged;
+
 
 
         #endregion
@@ -184,8 +187,6 @@ namespace CardioMonitor.BLL.SessionProcessing
             if (bedController == null) throw new ArgumentNullException(nameof(bedController));
             if (monitorController == null) throw new ArgumentNullException(nameof(monitorController));
             if (workerController == null) throw new ArgumentNullException(nameof(workerController));
-            if (uiInvoker == null) throw new ArgumentNullException(nameof(uiInvoker));
-
             _startParams = startParams ?? throw new ArgumentNullException(nameof(startParams));
 
             _devicesFacade = new DevicesFacade(
@@ -200,6 +201,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             _devicesFacade.OnSessionErrorStop += OnSessionErrorStop;
             _devicesFacade.OnSessionErrorStop += HandleOnSessionErrorStop;
             _devicesFacade.OnCycleCompleted += HandleOnCycleCompleted;
+            _devicesFacade.OnCycleCompleted += OnCycleCompleted;
             _devicesFacade.OnElapsedTimeChanged += HandleOnElapsedTimeChanged;
             _devicesFacade.OnRemainingTimeChanged += HandleOnRemainingTimeChanged;
             _devicesFacade.OnSessionCompleted += OnSessionCompleted;
@@ -225,7 +227,7 @@ namespace CardioMonitor.BLL.SessionProcessing
                 });
             }
 
-            _uiInvoker = uiInvoker;
+            _uiInvoker = uiInvoker ?? throw new ArgumentNullException(nameof(uiInvoker));
             _uiInvoker.Invoke(() =>
             {
                 PatientParamsPerCycles = temp;
@@ -305,6 +307,8 @@ namespace CardioMonitor.BLL.SessionProcessing
 
         public void Dispose()
         {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse
+            // ReSharper disable once HeuristicUnreachableCode
             if (_devicesFacade == null) return;
             
             _devicesFacade.OnException -= OnException;
