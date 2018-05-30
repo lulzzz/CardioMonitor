@@ -56,7 +56,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
                 var needRequestEcg = false;
                 if (currentIteration == nextIterationToEcgMeassuring)
                 {
-                    needRequestEcg = _ecgParamsCheckPoints.Contains(ecgCheckPoint);
+                    needRequestEcg = !_ecgParamsCheckPoints.Contains(ecgCheckPoint);
                     if (needRequestEcg)
                     {
                         _ecgParamsCheckPoints.Add(ecgCheckPoint);
@@ -65,7 +65,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
                 var needRequestCommonParams = false;
                 if (currentIteration == nextIterationToCommonParamsMeassuring)
                 {
-                    needRequestCommonParams = _commonParamsCheckPoints.Contains(commonParamsCheckPoint);
+                    needRequestCommonParams = !_commonParamsCheckPoints.Contains(commonParamsCheckPoint);
                     if (needRequestCommonParams)
                     {
                         _commonParamsCheckPoints.Add(commonParamsCheckPoint);
@@ -74,7 +74,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
                 var needRequestPressureParams = false;
                 if (currentIteration == nextIterationToPressureParamsMeassuring)
                 {
-                    needRequestPressureParams = _pressureParamsCheckPoints.Contains(pressureParamsCheckPoint);
+                    needRequestPressureParams = !_pressureParamsCheckPoints.Contains(pressureParamsCheckPoint);
                     if (needRequestPressureParams)
                     {
                         _pressureParamsCheckPoints.Add(pressureParamsCheckPoint);

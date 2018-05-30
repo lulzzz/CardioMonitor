@@ -24,12 +24,24 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
             UniqObjectId = Guid.NewGuid();
         }
 
+        /// <summary>
+        /// Номер текущей итерации
+        /// </summary>
         public short CurrentIteration { get; }
         
+        /// <summary>
+        /// Номер итерации, в которой нужно запросить с кардиомонитора общие параметры
+        /// </summary>
         public short IterationToGetCommonParams { get; }
         
+        /// <summary>
+        /// Номер итерации, в которой нужно запросить с кардиомонитора параметры давления
+        /// </summary>
         public short IterationToGetPressureParams { get; }
         
+        /// <summary>
+        /// Номер итерации, в которой нужно запросить с кардиомонитора ЭКГ
+        /// </summary>
         public short IterationToGetEcg { get; }
     }
 
