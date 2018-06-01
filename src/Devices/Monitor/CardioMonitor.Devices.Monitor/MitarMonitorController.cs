@@ -17,7 +17,9 @@ namespace CardioMonitor.Devices.Monitor
     /// </summary>
     public class MitarMonitorController : IMonitorController
     {
-        private const int IsRequestedValue = 1;
+        #region fields
+
+       private const int IsRequestedValue = 1;
         
         //todo оставил, чтобы пока помнить адресс
 //        private readonly int localUdpPort = 30304;
@@ -61,6 +63,7 @@ namespace CardioMonitor.Devices.Monitor
         
         [NotNull]
         private readonly ConcurrentQueue<Exception> _lastExceptions;
+        #endregion
 
         // ReSharper disable once NotNullMemberIsNotInitialized
         public MitarMonitorController([NotNull] IWorkerController workerController)
@@ -293,7 +296,12 @@ namespace CardioMonitor.Devices.Monitor
             AssertConnection();
             lock (_pumpingLockObject)
             {
-                throw new NotImplementedException();
+                byte[] sendMessage = new byte[25]
+                {
+                    0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22
+                };
+                return _stream.WriteAsync(sendMessage, 0, sendMessage.Length);
             }
         }
         
