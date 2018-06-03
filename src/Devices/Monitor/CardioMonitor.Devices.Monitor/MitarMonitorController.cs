@@ -17,9 +17,10 @@ namespace CardioMonitor.Devices.Monitor
     /// </summary>
     public class MitarMonitorController : IMonitorController
     {
+        static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
         #region fields
 
-       private const int IsRequestedValue = 1;
+        private const int IsRequestedValue = 1;
         
         //todo оставил, чтобы пока помнить адресс
 //        private readonly int localUdpPort = 30304;
@@ -190,7 +191,7 @@ namespace CardioMonitor.Devices.Monitor
             if (!isCommonParamsRequested && !isPressureParamsRequested && !isEcgParamsRequested) return;
             AssertConnection();
 
-
+            await semaphoreSlim.WaitAsync();
             PatientPressureParams pressureParams = null;
             PatientCommonParams commonParams = null;
 
@@ -198,22 +199,46 @@ namespace CardioMonitor.Devices.Monitor
             try
             {
                 MitarMonitorDataParser monitorDataParser = new MitarMonitorDataParser();
-                const int messageSize = 100;
+                const int messageSize = 6400;
                 byte[] message = new byte[messageSize];
+                int i = 0;
+                while (i < messageSize)
+                {
+                    byte[] text = new byte[1024];
+                    var buffSize = await _stream.ReadAsync(text, 0, text.Length).ConfigureAwait(false);
+                    if (i + buffSize < messageSize)
+                    {
+                        Array.ConstrainedCopy(text, 0, message, i, buffSize);
+
+                    }
+
+                    i += buffSize;
+                    //var data = GetECGValue(text);
+                    //ECGData[i] = data[0];
+                    //ECGData[i + 1] = data[1];
+                    //i+=2;
+                }
+
+                var patientData = monitorDataParser.GetPatientCommonParams(message);
+                commonParams = patientData.Item1;
+                pressureParams = patientData.Item2;
+
                 //todo вот тут как-то получить данные и скастовать их к нужному виду
-                await _stream.ReadAsync(message, 0, messageSize)
-                    .ConfigureAwait(false);
+                /*await _stream.ReadAsync(message, 0, messageSize)
+                    .ConfigureAwait(false);*/
                 //commonParams = monitorDataParser.GetPatientCommonParams(message);
                 if (isCommonParamsRequested)
                 {
                     _lastCommonParams = commonParams;
                     _commonParamsReady.Set();
                 }
+
                 if (isPressureParamsRequested)
                 {
                     _lastPressureParams = pressureParams;
                     _commonParamsReady.Set();
                 }
+
                 if (isEcgParamsRequested)
                 {
                     _ecgValues.Enqueue(ecgValue[0]);
@@ -227,6 +252,7 @@ namespace CardioMonitor.Devices.Monitor
                         while (_ecgValues.TryDequeue(out var _))
                         {
                         }
+
                         _ecgParamsReady.Set();
                     }
                 }
@@ -238,15 +264,22 @@ namespace CardioMonitor.Devices.Monitor
                 {
                     _commonParamsReady.Set();
                 }
+
                 if (isPressureParamsRequested)
                 {
                     _commonParamsReady.Set();
                 }
+
                 if (isEcgParamsRequested)
                 {
                     _ecgParamsReady.Set();
                 }
+
                 throw;
+            }
+            finally
+            {
+                semaphoreSlim.Release();
             }
         }
 
@@ -291,6 +324,10 @@ namespace CardioMonitor.Devices.Monitor
 
         #region Получение данных
 
+        /// <summary>
+        /// накачка давления
+        /// </summary>
+        /// <returns></returns>
         public Task PumpCuffAsync()
         {
             AssertConnection();

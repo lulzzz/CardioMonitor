@@ -77,7 +77,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                         .GetNextIterationNumberForPressureMeasuringAsync)
                     .ConfigureAwait(false);
                 _logger?.Trace(
-                    $"{GetType().Name}: следующая итерация для измерения давления - {nextIterationToMeasuringCommonParams}.");
+                    $"{GetType().Name}: следующая итерация для измерения давления - {nextIterationToMeasuringPressureParams}.");
 
                 _logger?.Trace($"{GetType().Name}: запрос следующей итерации для измерения ЭКГ...");
                 var nextIterationToMeasuringEcg = await timeoutPolicy

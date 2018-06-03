@@ -363,11 +363,14 @@ namespace CardioMonitor.BLL.SessionProcessing
                     var cycleNumber = exception.CycleNumber;
                     var iterationNumber = exception.IterationNumber;
                     if (iterationNumber == null || cycleNumber == null) return;
+                    if (cycleNumber.Value != 0)
+                    {
+                        var checkPoint = PatientParamsPerCycles[cycleNumber.Value - 1]
+                            .CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
+                        if (checkPoint == null) return;
+                        checkPoint.HandleErrorOnCommoParamsProcessing();
+                    }
 
-                    var checkPoint = PatientParamsPerCycles[cycleNumber.Value-1]
-                        .CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
-                    if (checkPoint == null) return;
-                    checkPoint.HandleErrorOnCommoParamsProcessing();
                     break;
                 }
                 case SessionProcessingErrorCodes.PatientPressureParamsRequestError:
@@ -377,10 +380,14 @@ namespace CardioMonitor.BLL.SessionProcessing
                     var iterationNumber = exception.IterationNumber;
                     if (iterationNumber == null || cycleNumber == null) return;
 
-                    var checkPoint = PatientParamsPerCycles[cycleNumber.Value-1]
-                        .CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
-                    if (checkPoint == null) return;
-                    checkPoint.HandleErrorOnPressureParamsProcessing();
+                    if (cycleNumber.Value != 0)
+                    {
+                        var checkPoint = PatientParamsPerCycles[cycleNumber.Value - 1]
+                            .CycleParams.FirstOrDefault(x => x.IterationNumber == iterationNumber.Value);
+                        if (checkPoint == null) return;
+                        checkPoint.HandleErrorOnPressureParamsProcessing();
+                    }
+
                     break;
                 }
             }
@@ -398,19 +405,21 @@ namespace CardioMonitor.BLL.SessionProcessing
                     var cycleNumber = patientPressureParams.CycleNumber;
                     var iterationNumber = patientPressureParams.IterationNumber;
                     var inclinationAngle = patientPressureParams.InclinationAngle;
-
-                    var checkPoint = PatientParamsPerCycles[cycleNumber - 1].CycleParams
-                        .FirstOrDefault(x => x.IterationNumber == iterationNumber);
-                    if (checkPoint == null)
+                    if (cycleNumber != 0)
                     {
-                        checkPoint = new CheckPointParams(
-                            cycleNumber,
-                            iterationNumber,
-                            inclinationAngle);
-                        PatientParamsPerCycles[cycleNumber - 1].CycleParams.Add(checkPoint);
-                    }
+                        var checkPoint = PatientParamsPerCycles[cycleNumber - 1].CycleParams
+                            .FirstOrDefault(x => x.IterationNumber == iterationNumber);
+                        if (checkPoint == null)
+                        {
+                            checkPoint = new CheckPointParams(
+                                cycleNumber,
+                                iterationNumber,
+                                inclinationAngle);
+                            PatientParamsPerCycles[cycleNumber - 1].CycleParams.Add(checkPoint);
+                        }
 
-                    checkPoint.SetPressureParams(patientPressureParams);
+                        checkPoint.SetPressureParams(patientPressureParams);
+                    }
                 });
             }
         }
@@ -427,19 +436,21 @@ namespace CardioMonitor.BLL.SessionProcessing
                     var iterationNumber = commonPatientParams.IterationNumber;
 
                     var inclinationAngle = commonPatientParams.InclinationAngle;
-
-                    var checkPoint = PatientParamsPerCycles[cycleNumber - 1].CycleParams
-                        .FirstOrDefault(x => x.IterationNumber == iterationNumber);
-                    if (checkPoint == null)
+                    if (cycleNumber != 0)
                     {
-                        checkPoint = new CheckPointParams(
-                            cycleNumber,
-                            iterationNumber,
-                            inclinationAngle);
-                        PatientParamsPerCycles[cycleNumber - 1].CycleParams.Add(checkPoint);
-                    }
+                        var checkPoint = PatientParamsPerCycles[cycleNumber - 1].CycleParams
+                            .FirstOrDefault(x => x.IterationNumber == iterationNumber);
+                        if (checkPoint == null)
+                        {
+                            checkPoint = new CheckPointParams(
+                                cycleNumber,
+                                iterationNumber,
+                                inclinationAngle);
+                            PatientParamsPerCycles[cycleNumber - 1].CycleParams.Add(checkPoint);
+                        }
 
-                    checkPoint.SetCommonParams(commonPatientParams);
+                        checkPoint.SetCommonParams(commonPatientParams);
+                    }
                 });
             }
         }

@@ -48,7 +48,7 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         private Worker _syncWorker;
 
-        private BedSessionInfo _sessionInfo = new BedSessionInfo();
+        private BedSessionInfo _sessionInfo;
 
         [NotNull]
         private readonly ConcurrentQueue<Exception> _lastExceptions;
@@ -76,6 +76,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             if (initParams == null) throw new ArgumentNullException(nameof(initParams));
             var udpControllerInitParams = initParams as BedUdpControllerConfig;
             _config = udpControllerInitParams ?? throw new InvalidOperationException($"Необходимо передать объект типа {typeof(BedUdpControllerConfig)}");
+            _sessionInfo = new BedSessionInfo(_config.MaxAngleX);
         }
 
         public async Task ConnectAsync()
@@ -321,7 +322,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             RiseExceptions();
             AssertRegisterIsNull();
             await Task.Yield();
-            return   _sessionInfo.GetCycleDuration();
+            return   _sessionInfo.GetCycleDuration(await GetIterationsCountAsync());
         }
 
         public async Task<short> GetCyclesCountAsync()
@@ -361,7 +362,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             RiseExceptions();
             AssertRegisterIsNull();
             await Task.Yield();
-            return  _sessionInfo.GetNextIterationNumberForPressureMeasuring();
+            return  _sessionInfo.GetNextIterationNumberForPressureMeasuring(await GetCurrentIterationAsync());
         }
 
         public async Task<short> GetNextIterationNumberForCommonParamsMeasuringAsync()
@@ -369,7 +370,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             RiseExceptions();
             AssertRegisterIsNull();
             await Task.Yield();
-            return _sessionInfo.GetNextIterationNumberForCommonParamsMeasuring();
+            return _sessionInfo.GetNextIterationNumberForCommonParamsMeasuring(await GetCurrentIterationAsync());
         }
 
         public async Task<short> GetNextIterationNumberForEcgMeasuringAsync()
@@ -377,7 +378,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             RiseExceptions();
             AssertRegisterIsNull();
             await Task.Yield();
-            return  _sessionInfo.GetNextIterationNumberForEcgMeasuring();
+            return  _sessionInfo.GetNextIterationNumberForEcgMeasuring(await GetCurrentIterationAsync());
         }
 
         public async Task<TimeSpan> GetRemainingTimeAsync()
