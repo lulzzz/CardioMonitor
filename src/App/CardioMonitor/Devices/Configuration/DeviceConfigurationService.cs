@@ -126,7 +126,8 @@ namespace CardioMonitor.Devices.Configuration
                 result.ConfigId = config.ConfigId;
                 result.DeviceTypeId = config.DeviceTypeId;
                 result.ParamsJson = config.ParamsJson;
-
+                context.DeviceConfigurations.Attach(result);
+                
                 await context.SaveChangesAsync();
                 
                 await _eventBus
