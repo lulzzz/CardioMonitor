@@ -140,7 +140,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             }
             
             var checkPointReachedParams = context.TryGetCheckPointParams();
-            return checkPointReachedParams != null && checkPointReachedParams.NeedRequestEcg;
+            return checkPointReachedParams != null && checkPointReachedParams.NeedRequestCommonParams;
         }
 
         public void SetLogger(ILogger logger)
