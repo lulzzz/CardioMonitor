@@ -206,3 +206,17 @@ FakesAssemblies/
 src/\.idea/\.idea\.CardioMonitor/\.idea/
 
 src/\.idea/\.idea\.CardioMonitor/
+
+src/Data/CardioMonitor\.Data\.Common/CardioMonitor\.Data\.Common\.csproj\.DotSettings
+
+src/Devices/Bed/CardioMonitor\.Devices\.Bed\.RJ/CardioMonitor\.Devices\.Bed\.UDP\.csproj\.DotSettings
+
+src/Devices/Monitor/CardioMonitor\.Devices\.Monitor\.Infrastructure/CardioMonitor\.Devices\.Monitor\.Infrastructure\.csproj\.DotSettings
+
+src/Devices/Monitor/CardioMonitor\.Devices\.Monitor/CardioMonitor\.Devices\.Monitor\.csproj\.DotSettings
+
+src/Infrastructure/CardioMonitor\.Infrastructure/CardioMonitor\.Infrastructure\.csproj\.DotSettings
+
+src/Infrastructure/Logging/Scout\.Utils\.Logging\.NLog/Scout\.Utils\.Logging\.NLog\.csproj\.DotSettings
+
+src/App/CardioMonitor/app\.config
