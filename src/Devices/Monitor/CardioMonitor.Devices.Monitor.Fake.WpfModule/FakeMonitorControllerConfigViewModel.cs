@@ -173,16 +173,16 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
                 return;
             }
             var config = _configBuilder.Build(jsonConfig) as FakeCardioMonitorConfig;
-            TimeoutMs = config.Timeout.Milliseconds;
-            UpdateDataPeriodMs = config.UpdateDataPeriod.Milliseconds;
+            TimeoutMs = Convert.ToInt32(config.Timeout.TotalMilliseconds);
+            UpdateDataPeriodMs = Convert.ToInt32(config.UpdateDataPeriod.TotalMilliseconds);
             NeedReconnect = config.DeviceReconnectionTimeout.HasValue;
             if (config.DeviceReconnectionTimeout.HasValue)
             {
-                ReconnectionTimeoutSec = config.DeviceReconnectionTimeout.Value.Seconds;
+                ReconnectionTimeoutSec = Convert.ToInt32(config.DeviceReconnectionTimeout.Value.TotalSeconds);
             }
 
-            DelayMs = config.DefaultDelay.Milliseconds;
-            PumpingDelayMs = config.PumpingDelay.Milliseconds;
+            DelayMs = Convert.ToInt32(config.DefaultDelay.TotalMilliseconds);
+            PumpingDelayMs = Convert.ToInt32(config.PumpingDelay.TotalMilliseconds);
             IsDataChanged = false;
         }
 
