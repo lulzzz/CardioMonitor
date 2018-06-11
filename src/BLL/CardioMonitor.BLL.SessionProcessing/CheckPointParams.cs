@@ -24,6 +24,9 @@ namespace CardioMonitor.BLL.SessionProcessing
             HeartRate = new DeviceValue<short>();
             RespirationRate = new DeviceValue<short>();
             Spo2 = new DeviceValue<short>();
+            SystolicArterialPressure = new DeviceValue<short>();
+            DiastolicArterialPressure = new DeviceValue<short>();
+            AverageArterialPressure = new DeviceValue<short>();
         }
 
         internal void SetCommonParams([NotNull] CommonPatientParams patientParams)
