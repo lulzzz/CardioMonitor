@@ -117,6 +117,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
                 }
             }
             
+            _logger?.Trace($"{nameof(GetType)}: текущие общие показатели: ЧСС - {param.HeartRate}, " +
+                           $"ЧСД - {param.RepsirationRate}, " +
+                           $"SPO2 - {param.Spo2}");
             context.AddOrUpdate(
                 new CommonPatientCycleProcessingContextParams(
                     param.HeartRate,

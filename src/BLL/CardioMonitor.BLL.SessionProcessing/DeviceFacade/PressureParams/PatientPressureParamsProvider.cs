@@ -123,7 +123,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                 }
             }
 
-
+            _logger?.Trace($"{nameof(GetType)}: текущие показатели давления: систолическиое - {param.SystolicArterialPressure}, " +
+                           $"диастолическое - {param.DiastolicArterialPressure}, " +
+                           $"среднее - {param.AverageArterialPressure}");
             UpdateContex(param, context);
             return context;
         }
