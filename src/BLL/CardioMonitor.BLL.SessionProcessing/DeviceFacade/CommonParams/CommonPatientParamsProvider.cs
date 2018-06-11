@@ -67,7 +67,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
 
             try
             {              
-                _logger?.Trace($"{GetType().Name}: запрос общих параметров пациента");
+                _logger?.Trace($"{GetType().Name}: запрос общих параметров пациента с таймаутом {_updatePatientParamTimeout.Milliseconds} мс");
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
                 param = await timeoutPolicy
                     .ExecuteAsync(_monitorController.GetPatientCommonParamsAsync)

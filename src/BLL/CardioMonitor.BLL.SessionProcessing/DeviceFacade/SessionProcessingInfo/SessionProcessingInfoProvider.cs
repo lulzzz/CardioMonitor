@@ -56,31 +56,31 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
 
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
 
-                _logger?.Trace($"{GetType().Name}: запрос прошедшего времени");
+                _logger?.Trace($"{GetType().Name}: запрос прошедшего времени с тайаутом {_bedControllerTimeout.Milliseconds} мс");
                 var elapsedTime = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetElapsedTimeAsync)
                     .ConfigureAwait(false);
 
-                _logger?.Trace($"{GetType().Name}: запрос оставшегося времени");
+                _logger?.Trace($"{GetType().Name}: запрос оставшегося времени с тайаутом {_bedControllerTimeout.Milliseconds} мс");
                 var remainingTime = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetRemainingTimeAsync)
                     .ConfigureAwait(false);
 
-                _logger?.Trace($"{GetType().Name}: запрос длительности цикла");
+                _logger?.Trace($"{GetType().Name}: запрос длительности цикла с тайаутом {_bedControllerTimeout.Milliseconds} мс");
                 var cycleDuration = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetCycleDurationAsync)
                     .ConfigureAwait(false);
 
-                _logger?.Trace($"{GetType().Name}: запрос количества циклов");
+                _logger?.Trace($"{GetType().Name}: запрос количества циклов с тайаутом {_bedControllerTimeout.Milliseconds} мс");
                 var cyclesCount = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetCyclesCountAsync)
                     .ConfigureAwait(false);
 
-                _logger?.Trace($"{GetType().Name}: запрос номера текущего цикла");
+                _logger?.Trace($"{GetType().Name}: запрос номера текущего цикла с тайаутом {_bedControllerTimeout.Milliseconds} мс");
                 var currentCycleNumber = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetCurrentCycleNumberAsync)

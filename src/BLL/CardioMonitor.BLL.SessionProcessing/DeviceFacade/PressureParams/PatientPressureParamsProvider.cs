@@ -74,7 +74,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             {
 
 
-                _logger?.Trace($"{GetType().Name}: запрос показателей давления");
+                _logger?.Trace($"{GetType().Name}: запрос показателей давления с таймаутом {_updatePatientParamTimeout.Milliseconds} мс");
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
                 param = await timeoutPolicy.ExecuteAsync(
                         _monitorController
