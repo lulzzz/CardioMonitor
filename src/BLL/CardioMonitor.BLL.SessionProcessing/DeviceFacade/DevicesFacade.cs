@@ -875,6 +875,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             await _monitorController
                 .DisconnectAsync()
                 .ConfigureAwait(false);
+            //tdo synchonizer
         }
 
         public Task PauseAsync()
