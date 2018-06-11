@@ -121,12 +121,13 @@ namespace CardioMonitor.Devices.Configuration
                     .ConfigureAwait(false);
 
                 if (result == null) throw new ArgumentException();
+                context.Entry(result).State = EntityState.Modified;
                 
                 result.DeviceId = config.DeviceId;
                 result.ConfigId = config.ConfigId;
                 result.DeviceTypeId = config.DeviceTypeId;
+                result.ConfigName = config.ConfigName;
                 result.ParamsJson = config.ParamsJson;
-                context.DeviceConfigurations.Attach(result);
                 
                 await context.SaveChangesAsync();
                 
