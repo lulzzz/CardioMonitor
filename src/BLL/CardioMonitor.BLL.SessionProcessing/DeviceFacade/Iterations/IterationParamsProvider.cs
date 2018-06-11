@@ -22,6 +22,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
         private readonly SemaphoreSlim _mutex;
         private readonly TimeSpan _blockWaitingTimeout;
 
+        private const short StartIterationNumber = 1;
+        
+
         public IterationParamsProvider([NotNull] IBedController bedController, 
             TimeSpan bedControllerTimeout)
         {
@@ -60,6 +63,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                     .ExecuteAsync(_bedController
                         .GetCurrentIterationAsync)
                     .ConfigureAwait(false);
+                if (currentIteration == 0)
+                {
+                    currentIteration = StartIterationNumber;
+                }
                 _logger?.Trace($"{GetType().Name}: текущая итерация - {currentIteration}");
 
                 _logger?.Trace($"{GetType().Name}: запрос следующей итерации для измерения общих параметров...");

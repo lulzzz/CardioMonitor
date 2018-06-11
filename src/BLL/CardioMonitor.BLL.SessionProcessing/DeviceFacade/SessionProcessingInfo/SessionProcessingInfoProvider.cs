@@ -17,6 +17,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
     /// </summary>
     internal class SessionProcessingInfoProvider : ICycleProcessingPipelineElement
     {
+        private const short StartCycleNumber = 1;
+
         [NotNull]
         private readonly IBedController _bedController;
 
@@ -85,6 +87,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
                     .ExecuteAsync(
                         _bedController.GetCurrentCycleNumberAsync)
                     .ConfigureAwait(false);
+                if (currentCycleNumber == 0)
+                {
+                    currentCycleNumber = StartCycleNumber;
+                }
 
                 var sessionProcessingInfo = new SessionProcessingInfoContextParamses(
                     elapsedTime,
