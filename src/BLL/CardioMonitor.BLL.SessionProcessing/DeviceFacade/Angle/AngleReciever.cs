@@ -60,7 +60,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
 
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
 
-                _logger?.Trace($"{GetType().Name}: запрос текущего угла наклона кровати по оси X с таймаутом {_bedControllerTimeout.Milliseconds} мс");
+                _logger?.Trace($"{GetType().Name}: запрос текущего угла наклона кровати по оси X с таймаутом {_bedControllerTimeout.TotalMilliseconds} мс");
                 var currentAngle = await timeoutPolicy.ExecuteAsync(_bedController
                         .GetAngleXAsync)
                     .ConfigureAwait(false);

@@ -59,7 +59,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             if (!isBlocked)
             {
                 _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
-                                 $"Новый запрос не будет выполнен, т.к. прошло больше {_blockWaitingTimeout.TotalMilliseconds} мс");
+                                 $"Новый запрос не будет выполнен, т.к. прошло больше " +
+                                 $"{_blockWaitingTimeout.TotalMilliseconds} мс");
                 return context;
             }
 
@@ -74,7 +75,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             {
 
 
-                _logger?.Trace($"{GetType().Name}: запрос показателей давления с таймаутом {_updatePatientParamTimeout.Milliseconds} мс");
+                _logger?.Trace($"{GetType().Name}: запрос показателей давления с таймаутом " +
+                               $"{_updatePatientParamTimeout.TotalMilliseconds} мс");
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
                 param = await timeoutPolicy.ExecuteAsync(
                         _monitorController
