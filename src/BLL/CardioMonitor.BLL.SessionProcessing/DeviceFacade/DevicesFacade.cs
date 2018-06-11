@@ -327,19 +327,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
                     return pumpingManager.CanProcess(context) && !forcedRequested;
                 });
-            mainBroadcastBlock.LinkTo(
-                pressureParamsProviderBlock,
-                new DataflowLinkOptions
-                {
-                    PropagateCompletion = true
-                },
-                context =>
-                {
-                    var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
-                    var wasPumpingCompleted = context?.TryGetAutoPumpingResultParams()?.WasPumpingCompleted ?? false;
-                    return forcedRequested && wasPumpingCompleted;
-                });
-
+            
             pupmingManagerBlock.LinkTo(
                 pressureParamsProviderBlock,
                 new DataflowLinkOptions

@@ -51,7 +51,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             var pumpingResult = context.TryGetAutoPumpingResultParams();
-            if (!(pumpingResult?.WasPumpingCompleted ?? false)) return context;
+            if (!(pumpingResult?.WasPumpingCompleted ?? false))
+            {
+                _logger?.Trace($"{GetType().Name}: получение данных не будет выполнено, " +
+                               $"т.к. накачка манжеты завершилась неудачно");
+                return context;
+            }
 
             var isBlocked = await _mutex
                 .WaitAsync(_blockWaitingTimeout)
