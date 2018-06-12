@@ -73,6 +73,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
                         _bedController.GetRemainingTimeAsync)
                     .ConfigureAwait(false);
 
+                _logger?.Trace($"{GetType().Name}:  оставшееся время  " +
+                               $"{remainingTime} ");
+
                 _logger?.Trace($"{GetType().Name}: запрос длительности цикла с тайаутом " +
                                $"{_bedControllerTimeout.TotalMilliseconds} мс");
                 var cycleDuration = await timeoutPolicy
