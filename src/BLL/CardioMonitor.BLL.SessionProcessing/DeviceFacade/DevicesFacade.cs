@@ -25,7 +25,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
     /// Фасад взаимодействия с внешними устройствами
     /// </summary>
     /// <remarks>
-    /// Управляет и запрашивает данные с устроств согласно бизнес-логике
+    /// Управляет и запрашивает данные с устройств согласно бизнес-логике
     /// </remarks>
     internal class DevicesFacade : 
         IDevicesFacade,
@@ -900,7 +900,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         SessionProcessingErrorCodes.UnhandledException,
                         e.Message, 
                         e));
-            }
+            }          
             return Task.CompletedTask;
         }
 

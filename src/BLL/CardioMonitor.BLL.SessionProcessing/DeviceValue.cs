@@ -7,7 +7,7 @@
     public struct DeviceValue<T>
     {
         /// <summary>
-        /// Признак удачного поулчения данных с устройства
+        /// Признак удачного получения данных с устройства
         /// </summary>
         public bool IsValueObtained { get; }
         
@@ -17,7 +17,7 @@
         public bool IsErrorOccured { get; }
         
         /// <summary>
-        /// Данные, полученыне от устройства
+        /// Данные, полученные от устройства
         /// </summary>
         public T Value { get; }
 

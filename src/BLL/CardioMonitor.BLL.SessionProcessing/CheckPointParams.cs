@@ -98,7 +98,7 @@ namespace CardioMonitor.BLL.SessionProcessing
         private DeviceValue<short> _heartRate;
 
         /// <summary>
-        /// Частотат дыхания (ЧД)
+        /// Частота дыхания (ЧД)
         /// </summary>
         public DeviceValue<short> RespirationRate
         {
