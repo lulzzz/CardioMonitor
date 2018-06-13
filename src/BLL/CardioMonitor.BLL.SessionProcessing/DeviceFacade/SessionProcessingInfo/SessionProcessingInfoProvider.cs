@@ -17,6 +17,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
     /// </summary>
     internal class SessionProcessingInfoProvider : ICycleProcessingPipelineElement
     {
+        private const short StartCycleNumber = 1;
+
         [NotNull]
         private readonly IBedController _bedController;
 
@@ -47,7 +49,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
             if (!isBlocked)
             {
                 _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
-                                 $"Новый запрос не будет выполнен, т.к. прошло больше {_blockWaitingTimeout.TotalMilliseconds} мс");
+                                 $"Новый запрос не будет выполнен, т.к. прошло больше " +
+                                 $"{_blockWaitingTimeout.TotalMilliseconds} мс");
                 return context;
             }
 
@@ -56,35 +59,47 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
 
                 var timeoutPolicy = Policy.TimeoutAsync(_bedControllerTimeout);
 
-                _logger?.Trace($"{GetType().Name}: запрос прошедшего времени");
+                _logger?.Trace($"{GetType().Name}: запрос прошедшего времени с тайаутом " +
+                               $"{_bedControllerTimeout.TotalMilliseconds} мс");
                 var elapsedTime = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetElapsedTimeAsync)
                     .ConfigureAwait(false);
 
-                _logger?.Trace($"{GetType().Name}: запрос оставшегося времени");
+                _logger?.Trace($"{GetType().Name}: запрос оставшегося времени с тайаутом " +
+                               $"{_bedControllerTimeout.TotalMilliseconds} мс");
                 var remainingTime = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetRemainingTimeAsync)
                     .ConfigureAwait(false);
 
-                _logger?.Trace($"{GetType().Name}: запрос длительности цикла");
+                _logger?.Trace($"{GetType().Name}:  оставшееся время  " +
+                               $"{remainingTime} ");
+
+                _logger?.Trace($"{GetType().Name}: запрос длительности цикла с тайаутом " +
+                               $"{_bedControllerTimeout.TotalMilliseconds} мс");
                 var cycleDuration = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetCycleDurationAsync)
                     .ConfigureAwait(false);
 
-                _logger?.Trace($"{GetType().Name}: запрос количества циклов");
+                _logger?.Trace($"{GetType().Name}: запрос количества циклов с тайаутом " +
+                               $"{_bedControllerTimeout.TotalMilliseconds} мс");
                 var cyclesCount = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetCyclesCountAsync)
                     .ConfigureAwait(false);
 
-                _logger?.Trace($"{GetType().Name}: запрос номера текущего цикла");
+                _logger?.Trace($"{GetType().Name}: запрос номера текущего цикла с тайаутом " +
+                               $"{_bedControllerTimeout.TotalMilliseconds} мс");
                 var currentCycleNumber = await timeoutPolicy
                     .ExecuteAsync(
                         _bedController.GetCurrentCycleNumberAsync)
                     .ConfigureAwait(false);
+                if (currentCycleNumber == 0)
+                {
+                    currentCycleNumber = StartCycleNumber;
+                }
 
                 var sessionProcessingInfo = new SessionProcessingInfoContextParamses(
                     elapsedTime,

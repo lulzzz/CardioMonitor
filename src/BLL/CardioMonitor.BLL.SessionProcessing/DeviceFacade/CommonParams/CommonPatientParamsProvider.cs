@@ -67,7 +67,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
 
             try
             {              
-                _logger?.Trace($"{GetType().Name}: запрос общих параметров пациента");
+                _logger?.Trace($"{GetType().Name}: запрос общих параметров пациента с таймаутом {_updatePatientParamTimeout.TotalMilliseconds} мс");
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
                 param = await timeoutPolicy
                     .ExecuteAsync(_monitorController.GetPatientCommonParamsAsync)
@@ -117,6 +117,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
                 }
             }
             
+            _logger?.Trace($"{GetType().Name}: текущие общие показатели: ЧСС - {param.HeartRate}, " +
+                           $"ЧСД - {param.RepsirationRate}, " +
+                           $"SPO2 - {param.Spo2}");
             context.AddOrUpdate(
                 new CommonPatientCycleProcessingContextParams(
                     param.HeartRate,
@@ -137,7 +140,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             }
             
             var checkPointReachedParams = context.TryGetCheckPointParams();
-            return checkPointReachedParams != null && checkPointReachedParams.NeedRequestEcg;
+            return checkPointReachedParams != null && checkPointReachedParams.NeedRequestCommonParams;
         }
 
         public void SetLogger(ILogger logger)

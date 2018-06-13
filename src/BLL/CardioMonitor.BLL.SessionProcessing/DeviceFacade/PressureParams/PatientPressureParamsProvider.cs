@@ -51,7 +51,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             var pumpingResult = context.TryGetAutoPumpingResultParams();
-            if (!(pumpingResult?.WasPumpingCompleted ?? false)) return context;
+            if (!(pumpingResult?.WasPumpingCompleted ?? false))
+            {
+                _logger?.Trace($"{GetType().Name}: получение данных не будет выполнено, " +
+                               $"т.к. накачка манжеты завершилась неудачно");
+                return context;
+            }
 
             var isBlocked = await _mutex
                 .WaitAsync(_blockWaitingTimeout)
@@ -59,7 +64,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             if (!isBlocked)
             {
                 _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
-                                 $"Новый запрос не будет выполнен, т.к. прошло больше {_blockWaitingTimeout.TotalMilliseconds} мс");
+                                 $"Новый запрос не будет выполнен, т.к. прошло больше " +
+                                 $"{_blockWaitingTimeout.TotalMilliseconds} мс");
                 return context;
             }
 
@@ -74,7 +80,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             {
 
 
-                _logger?.Trace($"{GetType().Name}: запрос показателей давления");
+                _logger?.Trace($"{GetType().Name}: запрос показателей давления с таймаутом " +
+                               $"{_updatePatientParamTimeout.TotalMilliseconds} мс");
                 var timeoutPolicy = Policy.TimeoutAsync(_updatePatientParamTimeout);
                 param = await timeoutPolicy.ExecuteAsync(
                         _monitorController
@@ -123,7 +130,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                 }
             }
 
-
+            _logger?.Trace($"{nameof(GetType)}: текущие показатели давления: систолическиое - {param.SystolicArterialPressure}, " +
+                           $"диастолическое - {param.DiastolicArterialPressure}, " +
+                           $"среднее - {param.AverageArterialPressure}");
             UpdateContex(param, context);
             return context;
         }
@@ -153,7 +162,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             }
             
             var checkPointReachedParams = context.TryGetCheckPointParams();
-            return checkPointReachedParams != null && checkPointReachedParams.NeedRequestEcg;
+            return checkPointReachedParams != null && checkPointReachedParams.NeedRequestPressureParams;
         }
 
         public void SetLogger(ILogger logger)

@@ -30,6 +30,8 @@ namespace CardioMonitor.Devices.Monitor
         private NetworkStream _stream;
         private TcpClient _tcpClient;
 
+        private MitarMonitorDataReceiver mitar;
+
         /// <remarks>
         /// NotNull помечено специально, чтобы анализатор не ругался. В каждом методе должны быть провеки методом <see cref="AssertInitParams"/>
         /// </remarks>
@@ -127,6 +129,8 @@ namespace CardioMonitor.Devices.Monitor
                 await _tcpClient.ConnectAsync(monitorIpAddress, _initParams.MonitorTcpPort)
                     .ConfigureAwait(false);
                 _stream = _tcpClient.GetStream();
+                mitar = new MitarMonitorDataReceiver(_stream);
+                mitar.Start();
                 // ReSharper disable once HeapView.CanAvoidClosure
                 _syncWorker = _workerController.StartWorker(_initParams.UpdateDataPeriod, async () =>
                 {
@@ -198,30 +202,30 @@ namespace CardioMonitor.Devices.Monitor
             short[] ecgValue =  new short[2];
             try
             {
-                MitarMonitorDataParser monitorDataParser = new MitarMonitorDataParser();
-                const int messageSize = 6400;
-                byte[] message = new byte[messageSize];
-                int i = 0;
-                while (i < messageSize)
-                {
-                    byte[] text = new byte[1024];
-                    var buffSize = await _stream.ReadAsync(text, 0, text.Length).ConfigureAwait(false);
-                    if (i + buffSize < messageSize)
-                    {
-                        Array.ConstrainedCopy(text, 0, message, i, buffSize);
+                //MitarMonitorDataParser monitorDataParser = new MitarMonitorDataParser();
+                //const int messageSize = 6400;
+                //byte[] message = new byte[messageSize];
+                //int i = 0;
+                //while (i < messageSize)
+                //{
+                //    byte[] text = new byte[1024];
+                //    var buffSize = await _stream.ReadAsync(text, 0, text.Length).ConfigureAwait(false);
+                //    if (i + buffSize < messageSize)
+                //    {
+                //        Array.ConstrainedCopy(text, 0, message, i, buffSize);
 
-                    }
+                //    }
 
-                    i += buffSize;
-                    //var data = GetECGValue(text);
-                    //ECGData[i] = data[0];
-                    //ECGData[i + 1] = data[1];
-                    //i+=2;
-                }
+                //    i += buffSize;
+                //    //var data = GetECGValue(text);
+                //    //ECGData[i] = data[0];
+                //    //ECGData[i + 1] = data[1];
+                //    //i+=2;
+               // }
 
-                var patientData = monitorDataParser.GetPatientCommonParams(message);
-                commonParams = patientData.Item1;
-                pressureParams = patientData.Item2;
+                
+                commonParams = await mitar.GetCommonParams();
+                pressureParams = await mitar.GetPressureParams();
 
                 //todo вот тут как-то получить данные и скастовать их к нужному виду
                 /*await _stream.ReadAsync(message, 0, messageSize)
@@ -236,7 +240,7 @@ namespace CardioMonitor.Devices.Monitor
                 if (isPressureParamsRequested)
                 {
                     _lastPressureParams = pressureParams;
-                    _commonParamsReady.Set();
+                    _pressureParamsReady.Set();
                 }
 
                 if (isEcgParamsRequested)
@@ -289,6 +293,8 @@ namespace CardioMonitor.Devices.Monitor
             try
             {
                 _workerController.CloseWorker(_syncWorker);
+                 mitar.Stop();
+                 mitar = null;
                 _stream?.Dispose();
                 _stream = null;
                 _tcpClient?.Dispose();

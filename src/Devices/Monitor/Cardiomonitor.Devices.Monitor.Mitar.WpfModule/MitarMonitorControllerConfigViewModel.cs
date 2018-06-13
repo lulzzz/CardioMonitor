@@ -177,12 +177,12 @@ namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
                 return;
             }
             var config = _configBuilder.Build(jsonConfig) as MitarMonitorControlerConfig;
-            TimeoutMs = config.Timeout.Milliseconds;
-            UpdateDataPeriodMs = config.UpdateDataPeriod.Milliseconds;
+            TimeoutMs = Convert.ToInt32(config.Timeout.TotalMilliseconds);
+            UpdateDataPeriodMs = Convert.ToInt32(config.UpdateDataPeriod.TotalMilliseconds);
             NeedReconnect = config.DeviceReconnectionTimeout.HasValue;
             if (config.DeviceReconnectionTimeout.HasValue)
             {
-                ReconnectionTimeoutSec = config.DeviceReconnectionTimeout.Value.Seconds;
+                ReconnectionTimeoutSec = Convert.ToInt32(config.DeviceReconnectionTimeout.Value.TotalSeconds);
             }
 
             MonitorBroadcastUdpPort = config.MonitorBroadcastUdpPort;

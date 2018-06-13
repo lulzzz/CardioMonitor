@@ -327,19 +327,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
                     return pumpingManager.CanProcess(context) && !forcedRequested;
                 });
-            mainBroadcastBlock.LinkTo(
-                pressureParamsProviderBlock,
-                new DataflowLinkOptions
-                {
-                    PropagateCompletion = true
-                },
-                context =>
-                {
-                    var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
-                    var wasPumpingCompleted = context?.TryGetAutoPumpingResultParams()?.WasPumpingCompleted ?? false;
-                    return forcedRequested && wasPumpingCompleted;
-                });
-
+            
             pupmingManagerBlock.LinkTo(
                 pressureParamsProviderBlock,
                 new DataflowLinkOptions
@@ -384,7 +372,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     }
                     _logger?.Trace($"{GetType().Name}: ошибка в Pipeline: " +
                                    $"итерация {exceptionParams.Exception.IterationNumber}, " +
-                                   $"сенас {exceptionParams.Exception.CycleNumber}, " +
+                                   $"сеанс {exceptionParams.Exception.CycleNumber}, " +
                                    $"код ошибки {exceptionParams.Exception.ErrorCode}, " +
                                    $"причина: {exceptionParams.Exception.Message}",
                         exceptionParams.Exception);
@@ -413,7 +401,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 var pressureParams = context.TryGetPressureParams();
                 if (pressureParams != null)
                 {
-                    _logger?.Trace($"{GetType().Name}: поступили новые данных о давлении пациента");
+                    _logger?.Trace($"{GetType().Name}: поступили новые данные о давлении пациента");
                     RiseOnce(pressureParams, () => OnPatientPressureParamsRecieved?.Invoke(
                         this,
                         new PatientPressureParams(
@@ -875,6 +863,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             await _monitorController
                 .DisconnectAsync()
                 .ConfigureAwait(false);
+            //tdo synchonizer
         }
 
         public Task PauseAsync()

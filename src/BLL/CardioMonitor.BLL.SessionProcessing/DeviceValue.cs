@@ -38,6 +38,9 @@
 
         public override string ToString()
         {
+            if (!IsValueObtained) return "-";
+            if (IsErrorOccured) return "ошибка";
+            
             return Value.ToString();
         }
     }

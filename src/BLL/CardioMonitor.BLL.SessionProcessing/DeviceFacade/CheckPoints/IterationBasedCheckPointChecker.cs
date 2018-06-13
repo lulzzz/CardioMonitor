@@ -84,10 +84,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
                 var ecgStatus = needRequestEcg
                     ? "требуется"
                     : "не требуется";
-                var commonParamsStatus = needRequestEcg
+                var commonParamsStatus = needRequestCommonParams
                     ? "требуется"
                     : "не требуется";
-                var pressureParamsStatus = needRequestEcg
+                var pressureParamsStatus = needRequestPressureParams
                     ? "требуется"
                     : "не требуется";
                 _logger?.Trace($"{GetType().Name}: Цикл {currentCycleNumber}, итерация {currentIteration}: запрос ЭКГ {ecgStatus}, запрос общих параметров {commonParamsStatus}, запрос давления {pressureParamsStatus}");
