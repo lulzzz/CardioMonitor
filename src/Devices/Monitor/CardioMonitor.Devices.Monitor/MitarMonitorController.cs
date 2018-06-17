@@ -45,9 +45,12 @@ namespace CardioMonitor.Devices.Monitor
         private PatientPressureParams _lastPressureParams;
         private PatientEcgParams _lastEcgParams;
 
+        private PumpingStatus _pumpingStatus;
+
         private readonly ManualResetEventSlim _commonParamsReady;
         private readonly ManualResetEventSlim _pressureParamsReady;
         private readonly ManualResetEventSlim _ecgParamsReady;
+        private readonly ManualResetEventSlim _pumpingReady;
 
         // используется для блокировки с помощью lock - чтобы в один момент времени выполнялся только один метод
         private readonly object _commonParamsRequestLockObject;
@@ -63,6 +66,8 @@ namespace CardioMonitor.Devices.Monitor
 
         private DateTime _startedEcgCollectingTime;
         private TimeSpan _ecgCollectionDuration;
+
+        private bool _isPumpStarted;
         
         [NotNull]
         private readonly ConcurrentQueue<Exception> _lastExceptions;
@@ -87,6 +92,8 @@ namespace CardioMonitor.Devices.Monitor
             _commonParamsReady = new ManualResetEventSlim(false);
             _pressureParamsReady = new ManualResetEventSlim(false);
             _ecgParamsReady = new ManualResetEventSlim(false);
+            _pumpingReady = new ManualResetEventSlim(false);
+            _pumpingStatus = new PumpingStatus(false,false);
             
             _ecgValues = new ConcurrentQueue<short>();
             _lastExceptions = new ConcurrentQueue<Exception>();
@@ -196,8 +203,6 @@ namespace CardioMonitor.Devices.Monitor
             AssertConnection();
 
             await semaphoreSlim.WaitAsync();
-            PatientPressureParams pressureParams = null;
-            PatientCommonParams commonParams = null;
 
             short[] ecgValue =  new short[2];
             try
@@ -224,13 +229,24 @@ namespace CardioMonitor.Devices.Monitor
                // }
 
                 
-                commonParams = await mitar.GetCommonParams();
-                pressureParams = await mitar.GetPressureParams();
+                var commonParams = await mitar.GetCommonParams();
+                var pressureParams = await mitar.GetPressureParams();
+                _pumpingStatus = await mitar.GetPumpingStatus();
+                //var pumpingResult = await mitar.GetPumpingStatus();
 
                 //todo вот тут как-то получить данные и скастовать их к нужному виду
                 /*await _stream.ReadAsync(message, 0, messageSize)
                     .ConfigureAwait(false);*/
                 //commonParams = monitorDataParser.GetPatientCommonParams(message);
+                if (_isPumpStarted)
+                {
+                    if (_pumpingStatus.IsPumpingError || !_pumpingStatus.IsPumpingInProgress)
+                    {
+                        _pumpingReady.Set();
+                    }
+                }
+
+
                 if (isCommonParamsRequested)
                 {
                     _lastCommonParams = commonParams;
@@ -292,8 +308,10 @@ namespace CardioMonitor.Devices.Monitor
         {
             try
             {
+                mitar.Stop();
+                Thread.Sleep(100);
                 _workerController.CloseWorker(_syncWorker);
-                 mitar.Stop();
+                 
                  mitar = null;
                 _stream?.Dispose();
                 _stream = null;
@@ -339,12 +357,26 @@ namespace CardioMonitor.Devices.Monitor
             AssertConnection();
             lock (_pumpingLockObject)
             {
-                byte[] sendMessage = new byte[25]
+                return Task.Factory.StartNew(() =>
                 {
-                    0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22
-                };
-                return _stream.WriteAsync(sendMessage, 0, sendMessage.Length);
+                    byte[] sendMessage = new byte[25]
+                    {
+                        0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22
+                    };
+                    _stream.WriteAsync(sendMessage, 0, sendMessage.Length);
+                    _isPumpStarted = true;
+                    _pumpingReady.Wait(new TimeSpan(0, 1,
+                        0)); //todo по таймауту по идее должен кидаться эксепшн (подумать над необходимостью)
+                    _isPumpStarted = false;
+                    if (_pumpingStatus.IsPumpingError)
+                    {
+                        throw new ArgumentException(
+                            "Ошибка накачки давления "); //todo не знаю какого типа эксепшен вызывать
+                    }
+                });
+
+            
             }
         }
         

@@ -53,6 +53,7 @@
     <Compile Include="PatientEcgParams.cs" />
     <Compile Include="PatientParamsIterationNumber.cs" />
     <Compile Include="PatientPressureParams.cs" />
+    <Compile Include="PumpingStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

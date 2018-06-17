@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 
@@ -11,6 +12,7 @@ namespace CardioMonitor.Devices.Monitor
     public class MitarMonitorDataReceiver
     {
         #region fields
+        static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
         private NetworkStream _stream;
         private short _pressureModuleStatus;
         private bool _isNeedDataRead;
@@ -20,6 +22,9 @@ namespace CardioMonitor.Devices.Monitor
         private short _systolicArterialPressure;
         private short _diastolicArterialPressure;
         private short _averageArterialPressure;
+        private bool _isPumpingError;
+        private bool _isPumpingInProgress;
+
         #endregion
         
 
@@ -48,19 +53,32 @@ namespace CardioMonitor.Devices.Monitor
             return Task.Factory.StartNew(() => new PatientPressureParams(_systolicArterialPressure,_diastolicArterialPressure,_averageArterialPressure));
         }
 
+        public Task<PumpingStatus> GetPumpingStatus()
+        {
+            return Task.Factory.StartNew(() => new PumpingStatus(_isPumpingError,_isPumpingInProgress));
+        }
+
         private async void GetDataFromStream()
         {
-            while (_isNeedDataRead)
+            await semaphoreSlim.WaitAsync();
+            try
             {
-                if (_stream != null)
+                while (_isNeedDataRead)
                 {
-                    byte[] buffer = new byte[64];
-                    var buffSize = await _stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
-                    if (buffSize > 0)
+                    if (_stream != null)
                     {
-                        Parse(buffer);
+                        byte[] buffer = new byte[64];
+                        var buffSize = await _stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                        if (buffSize > 0)
+                        {
+                            Parse(buffer);
+                        }
                     }
                 }
+            }
+            finally
+            {
+                semaphoreSlim.Release();
             }
         }
 
@@ -112,7 +130,7 @@ namespace CardioMonitor.Devices.Monitor
                         }
                         case 22:
                         {
-                            _pressureModuleStatus = GetIdxParamData(packet);
+                            StatusParseTest(packet);
                             break;
                         }
 
@@ -132,7 +150,18 @@ namespace CardioMonitor.Devices.Monitor
             return  (short)(valueLowFirst + (valueHighFirst << 4) + (valueLowSecond << 8) + (valueHighSecond << 12));
         }
 
-            
+        private void StatusParseTest(byte[] packet)
+        {
+            int valueLowFirst = packet[6] >> 4;
+            int valueHighFirst = packet[8] >> 4;
+            int valueLowSecond = packet[10] >> 4;
+            int valueHighSecond = packet[12] >> 4;
+            byte low = (byte)(valueLowFirst + (valueHighFirst << 4));
+            byte high = (byte)(valueLowSecond + (valueHighSecond << 4));
+
+            _isPumpingError = high != 128;
+            _isPumpingInProgress = low != 0;
+        }
             
         
     }

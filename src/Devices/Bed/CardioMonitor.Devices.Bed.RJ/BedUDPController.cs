@@ -77,6 +77,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             var udpControllerInitParams = initParams as BedUdpControllerConfig;
             _config = udpControllerInitParams ?? throw new InvalidOperationException($"Необходимо передать объект типа {typeof(BedUdpControllerConfig)}");
             _sessionInfo = new BedSessionInfo(_config.MaxAngleX);
+            _registerValues = new BedRegisterValues();
         }
 
         public async Task ConnectAsync()
@@ -213,7 +214,14 @@ namespace CardioMonitor.Devices.Bed.UDP
                 var getAllRegister = message.GetAllRegisterMessage();
                 await _udpClient.SendAsync(getAllRegister, getAllRegister.Length);
                 var receiveMessage = await _udpClient.ReceiveAsync();
-                _registerValues = message.GetAllRegisterValues(receiveMessage.Buffer);
+                var registerValues = message.GetAllRegisterValues(receiveMessage.Buffer);
+                if ((_registerValues.BedStatus == BedStatus.SessionStarted || _registerValues.BedStatus == BedStatus.Pause)
+                    && registerValues.BedStatus == BedStatus.Reverse)
+                {
+                    OnReverseFromDeviceRequested(this, EventArgs.Empty);
+                }
+
+                _registerValues = registerValues;
             }
             finally
             {

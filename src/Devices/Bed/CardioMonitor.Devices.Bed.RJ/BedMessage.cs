@@ -67,9 +67,12 @@ namespace CardioMonitor.Devices.Bed.UDP
             switch (command)
             {
                 case BedControlCommand.Start:
-                case BedControlCommand.Pause:
                 {
                     return GetWriteRegisterMessage(BedMovingPosition, new byte[] {0x00, 0xAA});
+                }
+                case BedControlCommand.Pause:
+                {
+                    return GetWriteRegisterMessage(BedMovingPosition, new byte[] {0x00, 0xAD});
                 }
                 case BedControlCommand.EmergencyStop:
                 {
@@ -146,23 +149,23 @@ namespace CardioMonitor.Devices.Bed.UDP
         {
             switch (input)
             {
-                case 0xAA:
+                case 0x01:
                 {
                     return BedStatus.SessionStarted;
                 }
-                case 0xAB:
+                case 0x02:
                 {
                     return BedStatus.EmergencyStop;
                 }
-                case 0xAC:
+                case 0x03:
                 {
                     return BedStatus.Reverse;
                 }
-                case 0xAD:
+                case 0x04:
                 {
                     return BedStatus.Pause;
                 }
-                case 0xAE:
+                case 0x00:
                 {
                     return BedStatus.Ready;
                 }
