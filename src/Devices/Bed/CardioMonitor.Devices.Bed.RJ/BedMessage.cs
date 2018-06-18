@@ -72,7 +72,7 @@ namespace CardioMonitor.Devices.Bed.UDP
                 }
                 case BedControlCommand.Pause:
                 {
-                    return GetWriteRegisterMessage(BedMovingPosition, new byte[] {0x00, 0xAD});
+                    return GetWriteRegisterMessage(BedMovingPosition, new byte[] {0x00, 0xAA});
                 }
                 case BedControlCommand.EmergencyStop:
                 {

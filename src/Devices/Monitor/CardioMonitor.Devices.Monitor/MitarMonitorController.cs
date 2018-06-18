@@ -50,7 +50,7 @@ namespace CardioMonitor.Devices.Monitor
         private readonly ManualResetEventSlim _commonParamsReady;
         private readonly ManualResetEventSlim _pressureParamsReady;
         private readonly ManualResetEventSlim _ecgParamsReady;
-        private readonly ManualResetEventSlim _pumpingReady;
+        private readonly AutoResetEvent _pumpingReady;
 
         // используется для блокировки с помощью lock - чтобы в один момент времени выполнялся только один метод
         private readonly object _commonParamsRequestLockObject;
@@ -68,6 +68,7 @@ namespace CardioMonitor.Devices.Monitor
         private TimeSpan _ecgCollectionDuration;
 
         private bool _isPumpStarted;
+        private bool _isPumpStartPumping;
         
         [NotNull]
         private readonly ConcurrentQueue<Exception> _lastExceptions;
@@ -92,7 +93,7 @@ namespace CardioMonitor.Devices.Monitor
             _commonParamsReady = new ManualResetEventSlim(false);
             _pressureParamsReady = new ManualResetEventSlim(false);
             _ecgParamsReady = new ManualResetEventSlim(false);
-            _pumpingReady = new ManualResetEventSlim(false);
+            _pumpingReady = new AutoResetEvent(false);
             _pumpingStatus = new PumpingStatus(false,false);
             
             _ecgValues = new ConcurrentQueue<short>();
@@ -199,7 +200,7 @@ namespace CardioMonitor.Devices.Monitor
             var isPressureParamsRequested = _isPressureParamsRequested == IsRequestedValue;
             var isEcgParamsRequested = _isEcgParamsRequested == IsRequestedValue;
 
-            if (!isCommonParamsRequested && !isPressureParamsRequested && !isEcgParamsRequested) return;
+            if (!isCommonParamsRequested && !isPressureParamsRequested && !isEcgParamsRequested && !_isPumpStarted) return;
             AssertConnection();
 
             await semaphoreSlim.WaitAsync();
@@ -240,8 +241,14 @@ namespace CardioMonitor.Devices.Monitor
                 //commonParams = monitorDataParser.GetPatientCommonParams(message);
                 if (_isPumpStarted)
                 {
-                    if (_pumpingStatus.IsPumpingError || !_pumpingStatus.IsPumpingInProgress)
+                    if (!_isPumpStartPumping && _pumpingStatus.IsPumpingInProgress)
                     {
+                        _isPumpStartPumping = true;
+                    }
+                    if ( _isPumpStartPumping &&( _pumpingStatus.IsPumpingError || !_pumpingStatus.IsPumpingInProgress))
+                    {
+                        _isPumpStartPumping = false;
+                        _isPumpStarted = false;
                         _pumpingReady.Set();
                     }
                 }
@@ -365,8 +372,9 @@ namespace CardioMonitor.Devices.Monitor
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22
                     };
                     _stream.WriteAsync(sendMessage, 0, sendMessage.Length);
+                   // Thread.Sleep(1000);
                     _isPumpStarted = true;
-                    _pumpingReady.Wait(new TimeSpan(0, 1,
+                    _pumpingReady.WaitOne(new TimeSpan(0, 1,
                         0)); //todo по таймауту по идее должен кидаться эксепшн (подумать над необходимостью)
                     _isPumpStarted = false;
                     if (_pumpingStatus.IsPumpingError)

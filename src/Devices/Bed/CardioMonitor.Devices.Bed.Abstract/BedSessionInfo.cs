@@ -123,7 +123,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
                     }
                 case 31.5:
                     {
-                        return new List<short> { 0, 6, 13, 20, 25, 32, 39 };
+                        return new List<short> { 1, 6, 13, 20, 25, 32, 39 };
                     }
             }
             throw new ArgumentException("Неизвестное значение угла");
