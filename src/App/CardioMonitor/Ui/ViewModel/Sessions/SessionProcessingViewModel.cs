@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
@@ -13,6 +14,7 @@ using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Events.Sessions;
 using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.Workers;
+using CardioMonitor.Resources;
 using CardioMonitor.Ui.Base;
 using JetBrains.Annotations;
 using MahApps.Metro.Controls.Dialogs;
@@ -122,25 +124,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             ? new ObservableCollection<Patient> {Patient}
             : new ObservableCollection<Patient>();
 
-//        /// <summary>
-//        /// Сеанс
-//        /// </summary>
-//        public SessionModel Session
-//        {
-//            get { return _session; }
-//            private set
-//            {
-//                if (!value.Equals(_session))
-//                {
-//                    _session = value;
-//                    RisePropertyChanged(nameof(Session));
-//                   // RisePropertyChanged(nameof(Status));
-//                    ElapsedTime = new TimeSpan();
-//                    RemainingTime = new TimeSpan();
-//                    StartButtonText = Localisation.SessionViewModel_StartButton_Text;
-//                }
-//            }
-//        }
 
         /// <summary>
         /// Текст кнопки старт
@@ -414,7 +397,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         IsBusy = true;
                         BusyMessage = "Сохранение результатов сеанса";
                     });
-                    await SaveSessionAsync().ConfigureAwait(false);
+                    await SaveSessionAsync()
+                        .ConfigureAwait(false);
                     
                     _notifier.ShowSuccess("Сеанс завершен успешно");
                 }
@@ -619,27 +603,37 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private async Task SaveSessionAsync()
         {
             _isResultSaved = true;
-//            var exceptionMessage = String.Empty;
-//            try
-//            {
-//                _filesRepository.SaveToFile(Patient, Session.Session);
-//                //todo это работать не будет
-//                _sessionsService.AddAsync(Session.Session);
-//                await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionViewModel_SessionCompeted);
-//            }
-//            catch (ArgumentNullException ex)
-//            {
-//                _logger.LogError("SessionViewModel", ex);
-//                exceptionMessage = Localisation.SessionViewModel_SaveSession_ArgumentNullException;
-//            }
-//            catch (Exception ex)
-//            {
-//                exceptionMessage = ex.Message;
-//            }
-//            if (!String.IsNullOrEmpty(exceptionMessage))
-//            {
-//                await MessageHelper.Instance.ShowMessageAsync(exceptionMessage);
-//            }
+            var exceptionMessage = String.Empty;
+            try
+            {
+               // _filesRepository.SaveToFile(Patient, Session.Session);
+                //todo это работать не будет
+                var session = new Session
+                {
+                    Status = SessionStatus,
+                    PatientId = Patient.Id,
+                    DateTime = DateTime.UtcNow,
+                    Cycles = PatientParamsPerCycles.Select(
+                        x => new SessionCycle
+                        {
+                            CycleNumber = x.CycleNumber,
+                            
+                            CycleParams = x.CycleParams.ToList()
+                        });
+                };
+                _sessionsService.AddAsync();
+                _notifier.ShowSuccess(Localisation.SessionViewModel_SessionCompeted);
+            }
+            catch (ArgumentNullException ex)
+            {
+                _logger.Error($"{GetType().Name}: ошибка сохранения. Причины: {ex.Message}", ex);
+                _notifier.ShowError(Localisation.SessionViewModel_SaveSession_ArgumentNullException);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"{GetType().Name}: ошибка сохранения. Причины: {ex.Message}", ex);
+                _notifier.ShowError("Необработанная ошибка сохранения сеана");
+            }
         }
 
         private bool CanReverseCommandExecute()

@@ -235,14 +235,16 @@ namespace CardioMonitor.BLL.SessionProcessing
             _isInitialized = true;
         }
 
-        public Task StartAsync()
+        public async Task StartAsync()
         {
             AssureInitialization();
 
+            await _devicesFacade
+                .StartAsync()
+                .ConfigureAwait(true);
             _uiInvoker.Invoke(() => {
                 SessionStatus = SessionStatus.InProgress;
             });
-            return _devicesFacade.StartAsync();
         }
 
         private void AssureInitialization()
