@@ -18,36 +18,36 @@
         /// <summary>
         /// Угол наклона кровати
         /// </summary>
-        public float InclinationAngle { get; set; }
+        public DeviceValue<float> InclinationAngle { get; set; }
 
         /// <summary>
         /// Частота сердечных сокращений (ЧСС)
         /// </summary>
-        public short HeartRate { get; set; }
+        public DeviceValue<short> HeartRate { get; set; }
 
         /// <summary>
         /// Частотат дыхания (ЧД)
         /// </summary>
-        public short RepsirationRate { get; set; }
+        public DeviceValue<short> RepsirationRate { get; set; }
 
         /// <summary>
         /// SPO2
         /// </summary>
-        public short Spo2 { get; set; }
+        public DeviceValue<short> Spo2 { get; set; }
 
         /// <summary>
         /// Систолическое артериальное давление
         /// </summary>
-        public short SystolicArterialPressure { get; set; }
+        public DeviceValue<short> SystolicArterialPressure { get; set; }
 
         /// <summary>
         /// Диастолическое артериальное давление
         /// </summary>
-        public short DiastolicArterialPressure { get; set; }
+        public DeviceValue<short> DiastolicArterialPressure { get; set; }
 
         /// <summary>
         /// Среднее артериальное давлние 
         /// </summary>
-        public short AverageArterialPressure { get; set; }
+        public DeviceValue<short> AverageArterialPressure { get; set; }
     }
 }

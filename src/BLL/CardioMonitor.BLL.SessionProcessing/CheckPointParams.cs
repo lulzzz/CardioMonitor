@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade;
 using JetBrains.Annotations;
 
@@ -50,21 +51,21 @@ namespace CardioMonitor.BLL.SessionProcessing
         internal void HandleErrorOnCommoParamsProcessing()
         {
             // на тот случай, если данные в рамках итерации были получены, но итерация не завершилась, а ошибка возникла
-            if (HeartRate.IsValueObtained) return;
+            if (HeartRate.Status == DeviceValueStatus.Obtained) return;
             
-            HeartRate = new DeviceValue<short>( true);
-            RespirationRate = new DeviceValue<short>(true);
-            Spo2 = new DeviceValue<short>(true);
+            HeartRate = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
+            RespirationRate = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
+            Spo2 = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
         }
         
         internal void HandleErrorOnPressureParamsProcessing()
         {
             // на тот случай, если данные в рамках итерации были получены, но итерация не завершилась, а ошиюба возникла
-            if (AverageArterialPressure.IsValueObtained) return;
+            if (AverageArterialPressure.Status == DeviceValueStatus.Obtained) return;
             
-            SystolicArterialPressure = new DeviceValue<short>(true);
-            DiastolicArterialPressure = new DeviceValue<short>(true);
-            AverageArterialPressure = new DeviceValue<short>(true);
+            SystolicArterialPressure = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
+            DiastolicArterialPressure = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
+            AverageArterialPressure = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
         }
 
         #region Fields

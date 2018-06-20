@@ -61,6 +61,7 @@
     <Compile Include="Configurations\SessionCycleConfiguration.cs" />
     <Compile Include="Context\ICardioMonitorContextFactory.cs" />
     <Compile Include="Entities\Patients\PatientEntity.cs" />
+    <Compile Include="Entities\Sessions\DaoDeviceValueStatus.cs" />
     <Compile Include="Entities\Sessions\PatientParamsEntity.cs" />
     <Compile Include="Entities\Sessions\SessionCompletionStatus.cs" />
     <Compile Include="Entities\Sessions\SessionCycleEntity.cs" />

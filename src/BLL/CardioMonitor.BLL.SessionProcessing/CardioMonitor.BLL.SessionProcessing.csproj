@@ -51,7 +51,6 @@
     <Compile Include="DeviceFacade\PressureParams\PumpingResultContextParamsExtensions.cs" />
     <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoContextParamses.cs" />
     <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoProvider.cs" />
-    <Compile Include="DeviceValue.cs" />
     <Compile Include="ISessionParamsValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Exceptions\SessionProcessingErrorCodes.cs" />

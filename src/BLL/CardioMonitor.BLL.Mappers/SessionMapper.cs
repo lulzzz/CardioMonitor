@@ -1,10 +1,49 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.Data.Contracts.Entities.Sessions;
+using CardioMonitor.Data.Ef.Entities.Sessions;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.Mappers
 {
+    public static class DeviceValueStatusMapper
+    {
+        public static DeviceValueStatus ToDomain(this DaoDeviceValueStatus status)
+        {
+            switch (status)
+            {
+                case DaoDeviceValueStatus.Unknown:
+                    return DeviceValueStatus.Unknown;
+                case DaoDeviceValueStatus.NotObtained:
+                    return DeviceValueStatus.NotObtained;
+                case DaoDeviceValueStatus.Obtained:
+                    return DeviceValueStatus.Obtained;
+                case DaoDeviceValueStatus.ErrorOccured:
+                    return DeviceValueStatus.ErrorOccured;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(status), status, null);
+            }
+        }
+        
+        public static DaoDeviceValueStatus ToEntity(this DeviceValueStatus status)
+        {
+            switch (status)
+            {
+                case DeviceValueStatus.Unknown:
+                    return DaoDeviceValueStatus.Unknown;
+                case DeviceValueStatus.NotObtained:
+                    return DaoDeviceValueStatus.NotObtained;
+                case DeviceValueStatus.Obtained:
+                    return DaoDeviceValueStatus.Obtained;
+                case DeviceValueStatus.ErrorOccured:
+                    return DaoDeviceValueStatus.ErrorOccured;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(status), status, null);
+            }
+        }
+    }
+    
     //todo уточнить
     public static class SessionMapper
     {
@@ -80,15 +119,29 @@ namespace CardioMonitor.BLL.Mappers
         {
             return new PatientParams
             {
-                AverageArterialPressure = entity.AverageArterialPressure,
-                DiastolicArterialPressure = entity.DiastolicArterialPressure,
-                HeartRate = entity.HeartRate,
+                AverageArterialPressure = new DeviceValue<short>(
+                    entity.AverageArterialPressure,
+                    entity.AverageArterialPressureStatus.ToDomain()),
+                DiastolicArterialPressure = new DeviceValue<short>(
+                    entity.DiastolicArterialPressure,
+                    entity.DiastolicArterialPressureStatus.ToDomain()),
+                HeartRate = new DeviceValue<short>(
+                    entity.HeartRate,
+                    entity.HeartRateStatus.ToDomain()),
                 Id = entity.Id,
-                InclinationAngle = entity.InclinationAngle,
+                InclinationAngle = new DeviceValue<float>(
+                    entity.InclinationAngle,
+                    entity.InclinationAngleStatus.ToDomain()),
                 Iteraton = entity.Iteration,
-                RepsirationRate = entity.RepsirationRate,
-                Spo2 = entity.Spo2,
-                SystolicArterialPressure = entity.SystolicArterialPressure
+                RepsirationRate = new DeviceValue<short>(
+                    entity.RepsirationRate,
+                    entity.RepsirationRateStatus.ToDomain()),
+                Spo2 = new DeviceValue<short>(
+                    entity.Spo2,
+                    entity.Spo2Status.ToDomain()),
+                SystolicArterialPressure = new DeviceValue<short>(
+                    entity.SystolicArterialPressure,
+                    entity.SystolicArterialPressureStatus.ToDomain())
             };
         }
 
@@ -96,14 +149,21 @@ namespace CardioMonitor.BLL.Mappers
         {
             return new PatientParamsEntity
             {
-                AverageArterialPressure = domain.AverageArterialPressure,
-                DiastolicArterialPressure = domain.DiastolicArterialPressure,
-                HeartRate = domain.HeartRate,
-                InclinationAngle = domain.InclinationAngle,
+                AverageArterialPressure = domain.AverageArterialPressure.Value,
+                AverageArterialPressureStatus = domain.AverageArterialPressure.Status.ToEntity(),
+                DiastolicArterialPressure = domain.DiastolicArterialPressure.Value,
+                DiastolicArterialPressureStatus = domain.DiastolicArterialPressure.Status.ToEntity(),
+                HeartRate = domain.HeartRate.Value,
+                HeartRateStatus = domain.HeartRate.Status.ToEntity(),
+                InclinationAngle = domain.InclinationAngle.Value,
+                InclinationAngleStatus = domain.InclinationAngle.Status.ToEntity(),
                 Iteration = domain.Iteraton,
-                RepsirationRate = domain.RepsirationRate,
-                Spo2 = domain.Spo2,
-                SystolicArterialPressure = domain.SystolicArterialPressure
+                RepsirationRate = domain.RepsirationRate.Value,
+                RepsirationRateStatus = domain.RepsirationRate.Status.ToEntity(),
+                Spo2 = domain.Spo2.Value,
+                Spo2Status = domain.Spo2.Status.ToEntity(),
+                SystolicArterialPressure = domain.SystolicArterialPressure.Value,
+                SystolicArterialPressureStatus = domain.SystolicArterialPressure.Status.ToEntity()
             };
         }
     }

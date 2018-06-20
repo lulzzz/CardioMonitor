@@ -7,6 +7,8 @@ namespace CardioMonitor.BLL.CoreContracts.Session
     {
         Task<int> AddAsync(Session session);
 
+        Task EditAsync(Session session);
+
         Task<Session> GetAsync(int sessionId);
 
         Task<ICollection<SessionWithPatientInfo>> GetAllAsync();

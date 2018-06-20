@@ -55,7 +55,6 @@
     <Compile Include="MitarMonitorDataReceiver.cs" />
     <Compile Include="MitarMonitorDeviceId.cs" />
     <Compile Include="MonitorTCPClient.cs" />
-    <Compile Include="OldMonitorController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

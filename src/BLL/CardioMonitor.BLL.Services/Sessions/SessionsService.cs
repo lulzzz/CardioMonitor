@@ -48,6 +48,29 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
             }
         }
 
+        public async Task EditAsync(Session session)
+        {
+            if (session == null) throw new ArgumentNullException(nameof(session));
+
+            using (var context = _factory.Create())
+            {
+                if (!context.Sessions.Any(x => x.Id == session.Id)) 
+                    throw new ArgumentException(nameof(session.Id));
+                
+                var entity = session.ToEntity();
+                context.Sessions.Attach(entity);
+                context.Entry(entity).State = EntityState.Modified;
+                
+                await context
+                    .SaveChangesAsync()
+                    .ConfigureAwait(false);
+
+                await _eventBus
+                    .PublishAsync(new SessionChangedEvent(entity.Id))
+                    .ConfigureAwait(false);
+            }
+        }
+
 
         public async Task<Session> GetAsync(int sessionId)
         {
