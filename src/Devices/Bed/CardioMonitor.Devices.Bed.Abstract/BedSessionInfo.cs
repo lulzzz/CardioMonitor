@@ -12,11 +12,12 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
     {
         private List<short> _comonParamsIterationList;
         private List<short> _pressureParamsIterationList;
-        private List<int> _ecgParamsIterationList;
+        private List<short> _ecgParamsIterationList;
         public BedSessionInfo(float maxAngle)
         {
             _comonParamsIterationList = GetPatientParamsIterationNumberList(maxAngle);
             _pressureParamsIterationList = GetPatientParamsIterationNumberList(maxAngle);
+            _ecgParamsIterationList = GetECGIterationNumberList(maxAngle);
         }
 
         /// <summary>
@@ -50,7 +51,7 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
 
         public short GetNextIterationNumberForEcgMeasuring(short currentIteration)
         {
-            return 0; //todo 
+            return _ecgParamsIterationList.FirstOrDefault(x => x >= currentIteration);
         }
 
 
