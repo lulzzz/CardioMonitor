@@ -455,7 +455,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     OnRemainingTimeChanged?.Invoke(this, sessionProcessingInfo.RemainingTime);
 
                     // считаем, что сессия завершилась, когда оставшееся время равно 0
-                    var isSessionCompleted = sessionProcessingInfo.RemainingTime <= TimeSpan.Zero;
+                    var isSessionCompleted = sessionProcessingInfo.RemainingTime <= TimeSpan.Zero 
+                                             && sessionProcessingInfo.CurrentCycleNumber == sessionProcessingInfo.CyclesCount;
                     // чтобы не было лишних вызовов в случае долгого обновления в последней фазе
                     if (isSessionCompleted)
                     {
@@ -878,7 +879,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             await _monitorController
                 .DisconnectAsync()
                 .ConfigureAwait(false);
-            //tdo synchonizer
+            //todo synchonizer
         }
 
         public Task PauseAsync()
