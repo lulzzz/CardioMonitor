@@ -12,9 +12,9 @@ namespace CardioMonitor.Data.Ef.Configurations
             Property(x => x.DateTime).HasColumnName("DateTime");
             Property(x => x.Status).HasColumnName("Status");
 
-            //HasMany(x => x.Cycles).
-            //    WithRequired(x => x.SessionEntity).
-            //    HasForeignKey(x => x.Id);
+            HasMany(x => x.Cycles).
+                WithRequired(x => x.SessionEntity).
+                HasForeignKey(x => x.Id);
         }
     }
 }
