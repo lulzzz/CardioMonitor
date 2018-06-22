@@ -7,6 +7,8 @@ namespace CardioMonitor.BLL.CoreContracts.Session
     /// </summary>
     public class SessionCycle
     {
+        public int Id { get; set; }
+        
         public int SessionId { get; set; }
 
         public int CycleNumber { get; set; }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -49,7 +50,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private SessionProcessingPageConext _context;
 
         private Patient _patient;
-        private SessionModel _session;
         private bool _canManualDataCommandExecute;
 
         private string _startButtonText;
@@ -58,7 +58,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _reverseCommand;
         private ICommand _emergencyStopCommand;
         private ICommand _manualRequestCommand;
-
+        private ICommand _saveSessionToDbCommand;
+        private ICommand _saveSessionToFileCommand;
 
         private readonly ILogger _logger;
         private readonly IFilesManager _filesRepository;
@@ -71,16 +72,17 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         [NotNull] private readonly IPatientsService _patientsService;
         [NotNull] private readonly IUiInvoker _uiInvoker;
 
-        [NotNull]
-        private readonly Notifier _notifier;
+        [NotNull] private readonly Notifier _notifier;
 
-        [NotNull]
-        private readonly IEventBus _eventBus;
+        [NotNull] private readonly IEventBus _eventBus;
 
-        private bool _isResultSaved;
+        [CanBeNull] private int? _savedSessionId;
+
+        private bool _isSessionSaved;
+
+        private DateTime _sessionTimeUtc;
 
         private bool _isSessionStarted;
-        private bool _isSessionCompleted;
 
         private int _selectedCycleTab;
 
@@ -98,6 +100,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         #endregion
 
         #region Свойства
+
 
         /// <summary>
         /// Пациент
@@ -254,9 +257,31 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+        public bool IsSessionSaved
+        {
+            get => _isSessionSaved;
+            set
+            {
+                _isSessionSaved = value;
+                RisePropertyChanged(nameof(IsSessionSaved));
+
+            }
+        }
+
+        public int? SavedSessionId
+        {
+            get => _savedSessionId;
+            set
+            {
+                _savedSessionId = value;
+                RisePropertyChanged(nameof(SavedSessionId));
+                IsSessionSaved = true;
+            }
+        }
+
         #endregion
 
-        #region Command
+        #region Commands
 
         /// <summary>
         /// Команда старта/пауза сеанса
@@ -318,6 +343,30 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+        public ICommand SaveSessionToDbCommand
+        {
+            get
+            {
+                return _saveSessionToDbCommand ?? (_saveSessionToDbCommand = new SimpleCommand
+                {
+                    CanExecuteDelegate = o => true,
+                    ExecuteDelegate = async o => await SaveSessionToDbAsync().ConfigureAwait(true)
+                });
+            }
+        }
+
+        public ICommand SaveSessionToFileCommand
+        {
+            get
+            {
+                return _saveSessionToFileCommand ?? (_saveSessionToFileCommand = new SimpleCommand
+                {
+                    CanExecuteDelegate = o => true,
+                    ExecuteDelegate = async o => await SaveSessionToFileAsync().ConfigureAwait(true)
+                });
+            }
+        }
+
         #endregion
 
         /// <summary>
@@ -331,8 +380,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] IWorkerController workerController,
             [NotNull] IDeviceConfigurationService deviceConfigurationService,
             [NotNull] IPatientsService patientsService,
-            [NotNull] IUiInvoker uiInvoker, 
-            [NotNull] Notifier notifier, 
+            [NotNull] IUiInvoker uiInvoker,
+            [NotNull] Notifier notifier,
             [NotNull] IEventBus eventBus)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -351,8 +400,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             CanManualDataCommandExecute = true;
             IsAutoPumpingChangingEnabled = true;
             StartButtonText = _startText;
-            //todo for what?
-            // Session = new SessionModel();
             OnException += HandleOnException;
             OnSessionErrorStop += HandleSessionErrorStop;
             OnSessionCompleted += HandleSessionCompleted;
@@ -375,7 +422,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _notifier.ShowInformation($"Завершилось повторение № {completedCycleNumber}");
 
             // если выбрана другая вкладка, то ничего делать не будем
-            if (SelectedCycleTab != completedCycleNumber -1) return;
+            if (SelectedCycleTab != completedCycleNumber - 1) return;
             SelectedCycleTab = completedCycleNumber;
         }
 
@@ -388,34 +435,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private void HandleSessionCompleted(object sender, EventArgs eventArgs)
         {
-            Task.Factory.StartNew(async () =>
-            {
-                try
-                {
-                    _uiInvoker.Invoke(() =>
-                    {
-                        IsBusy = true;
-                        BusyMessage = "Сохранение результатов сеанса";
-                    });
-                    await SaveSessionAsync()
-                        .ConfigureAwait(false);
-                    
-                    _notifier.ShowSuccess("Сеанс завершен успешно");
-                }
-                catch (Exception ex)
-                {
-                    _notifier.ShowError("Ошибка сохранения результатов сеанса");
-                    _logger.Error($"{GetType().Name}: Ошибка сохранения результатов сеанса. Причина: {ex.Message}", ex);
-                }
-                finally
-                {
-                    _uiInvoker.Invoke(() =>
-                    {
-                        IsBusy = false;
-                        BusyMessage = String.Empty;
-                    });
-                }
-            });
+            Task.Factory.StartNew(async () => await SaveSessionToDbAsync());
+            _notifier.ShowSuccess(Localisation.SessionViewModel_SessionCompeted);
         }
 
         private void HandleResumedFromDevice(object sender, EventArgs eventArgs)
@@ -431,11 +452,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private void HandleEmeregencyStoppedFromDevice(object sender, EventArgs eventArgs)
         {
             _notifier.ShowWarning("С инверсионного стола вызвана экстренная остановка сеанса");
+            Task.Factory.StartNew(async () => await SaveSessionToDbAsync());
         }
 
         private void HandleSessionErrorStop(object sender, Exception exception)
         {
             _notifier.ShowError("Сеанс прерван из-за непредвиденной ошибки");
+            Task.Factory.StartNew(async () => await SaveSessionToDbAsync());
         }
 
         private void HandleSessionStatusChanged(object sender, EventArgs eventArgs)
@@ -452,7 +475,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private void HandleOnException(object sender, SessionProcessingException sessionProcessingException)
         {
-            _notifier.ShowWarning($"Ошибка выполнения сеанса: {sessionProcessingException.Message}");
+            _notifier.ShowWarning($"Произошла ошибка в ходе выполнения сеанса: {sessionProcessingException.Message}");
         }
 
         #endregion
@@ -506,6 +529,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         await StartAsync().ConfigureAwait(true);
                         StartButtonText = _pauseText;
                         IsSessionStarted = true;
+                        _sessionTimeUtc = DateTime.UtcNow;
                         break;
                 }
             }
@@ -523,7 +547,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private async Task InitAsync()
         {
-            _isResultSaved = false;
+            _savedSessionId = null;
 
             var context = _context;
 
@@ -570,7 +594,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             var startParams = new SessionParams(
                 context.CyclesCount,
                 //todo в параметры
-                TimeSpan.FromMilliseconds(1000),
+                TimeSpan.FromMilliseconds(900),
                 bedControllerConfig,
                 monitorInitConfig,
                 context.PumpingNumberOfAttemptsOnStartAndFinish,
@@ -584,45 +608,42 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 _logger,
                 _uiInvoker);
             SelectedCycleTab = 0;
-
-        }
-
-        /// <summary>
-        /// Завершает сенас
-        /// </summary>
-        private void SessionComplete()
-        {
-            //Session.Status = SessionStatus.Completed;
-            //todo save later
-            // SaveSessionAsync();
         }
 
         /// <summary>
         /// Сохраняет результаты сеанса в базу и файл
         /// </summary>
-        private async Task SaveSessionAsync()
+        private async Task SaveSessionToDbAsync()
         {
-            _isResultSaved = true;
-            var exceptionMessage = String.Empty;
             try
             {
-               // _filesRepository.SaveToFile(Patient, Session.Session);
-                //todo это работать не будет
-                var session = new Session
+                _uiInvoker.Invoke(() =>
                 {
-                    Status = SessionStatus,
-                    PatientId = Patient.Id,
-                    DateTime = DateTime.UtcNow,
-                    Cycles = PatientParamsPerCycles.Select(
-                        x => new SessionCycle
-                        {
-                            CycleNumber = x.CycleNumber,
-                            
-                            CycleParams = x.CycleParams.ToList()
-                        });
-                };
-                _sessionsService.AddAsync();
-                _notifier.ShowSuccess(Localisation.SessionViewModel_SessionCompeted);
+                    IsBusy = true;
+                    BusyMessage = "Сохранение результатов сеанса";
+                });
+
+                var session = GetSession();
+                if (IsSessionSaved)
+                {
+                    if (!SavedSessionId.HasValue) throw new InvalidOperationException("ID сессиия не сохранено");
+
+                    var oldSession = await _sessionsService
+                        .GetAsync(SavedSessionId.Value)
+                        .ConfigureAwait(true);
+                    UpdateIdsInSession(session, oldSession);
+                    await _sessionsService
+                        .EditAsync(session)
+                        .ConfigureAwait(true);
+                    _notifier.ShowSuccess("Результаты сеанса обновлены");
+                }
+                else
+                {
+                    SavedSessionId = await _sessionsService
+                        .AddAsync(session)
+                        .ConfigureAwait(true);
+                    _notifier.ShowSuccess("Результаты сеанса сохранены");
+                }
             }
             catch (ArgumentNullException ex)
             {
@@ -632,8 +653,73 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             catch (Exception ex)
             {
                 _logger.Error($"{GetType().Name}: ошибка сохранения. Причины: {ex.Message}", ex);
-                _notifier.ShowError("Необработанная ошибка сохранения сеана");
+                _notifier.ShowError("Ошибка сохранения сеанса");
             }
+            finally
+            {
+                _uiInvoker.Invoke(() =>
+                {
+                    IsBusy = false;
+                    BusyMessage = String.Empty;
+                });
+            }
+        }
+
+        private Session GetSession()
+        {
+            return new Session
+            {
+                Status = SessionStatus,
+                PatientId = Patient.Id,
+                DateTime = _sessionTimeUtc,
+                Cycles = PatientParamsPerCycles
+                    .Select(
+                        //todo mappers
+                        x => new SessionCycle
+                        {
+                            CycleNumber = x.CycleNumber,
+                            PatientParams = x.CycleParams
+                                .Select(y => new PatientParams
+                                {
+                                    AverageArterialPressure = y.AverageArterialPressure,
+                                    DiastolicArterialPressure = y.DiastolicArterialPressure,
+                                    HeartRate = y.HeartRate,
+                                    InclinationAngle = y.InclinationAngle,
+                                    Iteraton = y.IterationNumber,
+                                    RepsirationRate = y.RespirationRate,
+                                    Spo2 = y.Spo2,
+                                    SystolicArterialPressure = y.SystolicArterialPressure
+                                })
+                                .ToList()
+                        })
+                    .ToList()
+            };
+        }
+
+        private void UpdateIdsInSession([NotNull] Session newSession, [NotNull] Session sessionFromDb)
+        {
+            newSession.Id = sessionFromDb.Id;
+            if (newSession.Cycles.Count != sessionFromDb.Cycles.Count)
+                throw new ArgumentException($"Новая сессия и сессия из базы c ID {sessionFromDb.Id} отличаются количеством повторений");
+
+            for (var i = 0; i < newSession.Cycles.Count; ++i)
+            {
+                newSession.Cycles[i].Id = sessionFromDb.Cycles[i].Id;
+                
+                if (newSession.Cycles[i].PatientParams.Count != sessionFromDb.Cycles[i].PatientParams.Count)
+                    throw new ArgumentException($"Новая сессия и сессия из базы c ID {sessionFromDb.Id} " +
+                                                $"отличаются количеством измерений для повторения с ID {sessionFromDb.Cycles[i].Id}");
+                for (var j = 0; j < newSession.Cycles[i].PatientParams.Count; ++j)
+                {
+                    newSession.Cycles[i].PatientParams[j].Id = sessionFromDb.Cycles[i].PatientParams[j].Id;
+                }
+            }
+        }
+
+
+        private async Task SaveSessionToFileAsync()
+        {
+            return;
         }
 
         private bool CanReverseCommandExecute()
@@ -665,8 +751,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 IsBusy = false;
                 BusyMessage = String.Empty;
             }
-
-
+            
         }
 
         private bool CanEmergencyCommandExecute()
@@ -685,6 +770,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 IsBusy = true;
                 BusyMessage = "Экстренная остановка...";
                 await EmeregencyStopAsync().ConfigureAwait(true);
+                await SaveSessionToDbAsync().ConfigureAwait(true);
             }
             catch (Exception e)
             {
@@ -706,6 +792,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 BusyMessage = "Обновление данных для последней точки...";
 
                 await RequestManualDataUpdateAsync().ConfigureAwait(true);
+                await SaveSessionToDbAsync().ConfigureAwait(true);
 
                 CanManualDataCommandExecute = false;
             }
@@ -719,19 +806,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 IsBusy = false;
                 BusyMessage = String.Empty;
             }
-        }
-
-        /// <summary>
-        /// Очищает содержимое ViewModel, обнуляя все данные
-        /// </summary>
-        public void Clear()
-        {
-            Patient = null;
-            RemainingTime = TimeSpan.Zero;
-            ElapsedTime = TimeSpan.Zero;
-            IsSessionStarted = false;
-
-            //Session = new SessionModel();
         }
 
         private async Task InternalOpenAsync(SessionProcessingPageConext context)
@@ -797,31 +871,64 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             if (SessionStatus == SessionStatus.InProgress
                 || SessionStatus == SessionStatus.Suspended)
             {
-                var result = await MessageHelper.Instance.ShowMessageAsync("Все данные будут потеряны. Вы уверены?", "Cardio Monitor",
+                var result = await MessageHelper.Instance.ShowMessageAsync(
+                    "Сеанс не завершен. Все текущие данные будут потеряны. Вы уверены?", 
+                    "Cardio Monitor",
                     MessageDialogStyle.AffirmativeAndNegative);
                 return result == MessageDialogResult.Affirmative;
             }
 
             if (SessionStatus == SessionStatus.EmergencyStopped
                 || SessionStatus == SessionStatus.Completed
-                || SessionStatus == SessionStatus.TerminatedOnError && !_isResultSaved)
+                || SessionStatus == SessionStatus.TerminatedOnError && !IsSessionSaved)
             {
 
-                var result = await MessageHelper.Instance.ShowMessageAsync("Все данные будут потеряны. Вы уверены?", "Cardio Monitor",
+                var result = await MessageHelper.Instance.ShowMessageAsync(
+                    "Результаты сеанса не сохранены и будут потеряны. Вы уверены?", 
+                    "Cardio Monitor",
                     MessageDialogStyle.AffirmativeAndNegative);
                 return result == MessageDialogResult.Affirmative;
             }
-
-            //todo is saved?
             return true;
         }
 
         public async Task CloseAsync()
         {
-            if (_isSessionCompleted) return;
-            if (!_isSessionStarted) return;
+            if (SessionStatus == SessionStatus.EmergencyStopped
+                || SessionStatus == SessionStatus.Completed
+                || SessionStatus == SessionStatus.TerminatedOnError
+                || !_isSessionStarted)
+            {
+                ClearData();
+                return;
+            }
 
-            await EmeregencyStopAsync();
+            try
+            {
+
+                await EmeregencyStopAsync().ConfigureAwait(true);
+                await SaveSessionToDbAsync().ConfigureAwait(true);
+                ClearData();
+            }
+            catch (Exception e)
+            {
+                _notifier.ShowError("Ошибка закрытия формы. Экстренная остановка выполнена некорректно или данные не сохранены");
+                _logger.Error($"{GetType().Name}: Ошибка закрытия формы. Причина: {e.Message}", e);   
+            }
+        }
+        
+        /// <summary>
+        /// Очищает содержимое ViewModel, обнуляя все данные
+        /// </summary>
+        private void ClearData()
+        {
+            Patient = null;
+            RemainingTime = TimeSpan.Zero;
+            ElapsedTime = TimeSpan.Zero;
+            IsSessionStarted = false;
+            SessionStatus = SessionStatus.NotStarted;
+            PatientParamsPerCycles = new List<CycleData>(0);
+            SavedSessionId = null;
         }
 
         public event Func<TransitionEvent, Task> PageCanceled;

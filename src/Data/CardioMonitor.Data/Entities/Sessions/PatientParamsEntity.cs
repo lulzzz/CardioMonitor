@@ -23,11 +23,6 @@ namespace CardioMonitor.Data.Contracts.Entities.Sessions
         public float InclinationAngle { get; set; }
         
         /// <summary>
-        /// Статус получения укла наклона (<see cref="InclinationAngle"/>)
-        /// </summary>
-        public DaoDeviceValueStatus InclinationAngleStatus { get; set; }
-
-        /// <summary>
         /// Частота сердечных сокращений (ЧСС)
         /// </summary>
         public short HeartRate { get; set; }

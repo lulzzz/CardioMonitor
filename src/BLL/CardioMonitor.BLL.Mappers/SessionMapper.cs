@@ -94,6 +94,7 @@ namespace CardioMonitor.BLL.Mappers
         {
             return new SessionCycle
             {
+                Id = entity.Id,
                 CycleNumber = entity.CycleNumber,
                 SessionId = entity.SessionId,
                 PatientParams = entity.PatientParams.Select(x => x.ToDomain()).ToList()
@@ -104,6 +105,7 @@ namespace CardioMonitor.BLL.Mappers
         {
             var entity = new SessionCycleEntity
             {
+                Id = domain.Id,
                 CycleNumber = domain.CycleNumber,
                 SessionId = domain.SessionId,
                 PatientParams = domain.PatientParams.Select(x => x.ToEntity()).ToList()
@@ -129,13 +131,12 @@ namespace CardioMonitor.BLL.Mappers
                     entity.HeartRate,
                     entity.HeartRateStatus.ToDomain()),
                 Id = entity.Id,
-                InclinationAngle = new DeviceValue<float>(
-                    entity.InclinationAngle,
-                    entity.InclinationAngleStatus.ToDomain()),
+                InclinationAngle = entity.InclinationAngle,
                 Iteraton = entity.Iteration,
                 RepsirationRate = new DeviceValue<short>(
                     entity.RepsirationRate,
                     entity.RepsirationRateStatus.ToDomain()),
+                SessionCycleId = entity.SessionCycleId,
                 Spo2 = new DeviceValue<short>(
                     entity.Spo2,
                     entity.Spo2Status.ToDomain()),
@@ -155,8 +156,9 @@ namespace CardioMonitor.BLL.Mappers
                 DiastolicArterialPressureStatus = domain.DiastolicArterialPressure.Status.ToEntity(),
                 HeartRate = domain.HeartRate.Value,
                 HeartRateStatus = domain.HeartRate.Status.ToEntity(),
-                InclinationAngle = domain.InclinationAngle.Value,
-                InclinationAngleStatus = domain.InclinationAngle.Status.ToEntity(),
+                Id = domain.Id,
+                SessionCycleId = domain.SessionCycleId,
+                InclinationAngle = domain.InclinationAngle,
                 Iteration = domain.Iteraton,
                 RepsirationRate = domain.RepsirationRate.Value,
                 RepsirationRateStatus = domain.RepsirationRate.Status.ToEntity(),

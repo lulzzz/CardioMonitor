@@ -9,6 +9,8 @@
         /// Идентификатор
         /// </summary>
         public long Id { get; set; }
+        
+        public int SessionCycleId { get; set; }
 
         /// <summary>
         /// Специальное поле для корректной сортировки этих параметров
@@ -18,7 +20,7 @@
         /// <summary>
         /// Угол наклона кровати
         /// </summary>
-        public DeviceValue<float> InclinationAngle { get; set; }
+        public float InclinationAngle { get; set; }
 
         /// <summary>
         /// Частота сердечных сокращений (ЧСС)
