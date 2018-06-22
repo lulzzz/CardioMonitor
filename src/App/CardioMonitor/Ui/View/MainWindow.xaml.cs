@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Windows;
 using CardioMonitor.Ui.ViewModel;
-using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
 
 namespace CardioMonitor.Ui.View
 {

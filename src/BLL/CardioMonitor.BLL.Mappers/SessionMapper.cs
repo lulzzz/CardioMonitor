@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using CardioMonitor.BLL.CoreContracts.Session;
-using CardioMonitor.Data.Contracts.Entities.Sessions;
 using CardioMonitor.Data.Ef.Entities.Sessions;
 using JetBrains.Annotations;
 

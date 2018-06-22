@@ -6,7 +6,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:settings="clr-namespace:CardioMonitor.Ui.ViewModel.Settings"
-             xmlns:controls1="clr-namespace:CardioMonitor.Ui.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             xmlns:controls1="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              d:DataContext="{d:DesignInstance Type=settings:SettingsViewModel}">
     <UserControl.Resources>
         <ResourceDictionary>

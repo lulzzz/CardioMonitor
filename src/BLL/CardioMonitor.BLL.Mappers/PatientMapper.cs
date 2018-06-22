@@ -1,5 +1,5 @@
 ﻿using CardioMonitor.BLL.CoreContracts.Patients;
-using CardioMonitor.Data.Contracts.Entities.Patients;
+using CardioMonitor.Data.Ef.Entities.Patients;
 
 namespace CardioMonitor.BLL.Mappers
 {

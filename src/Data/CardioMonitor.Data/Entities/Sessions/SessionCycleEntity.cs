@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace CardioMonitor.Data.Contracts.Entities.Sessions
+namespace CardioMonitor.Data.Ef.Entities.Sessions
 {
     /// <summary>
     /// Цикл сеанса (повторение)

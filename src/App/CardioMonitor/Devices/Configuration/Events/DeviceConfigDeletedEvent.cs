@@ -1,7 +1,7 @@
 ﻿using System;
 using Markeli.Utils.EventBus.Contracts;
 
-namespace CardioMonitor.Events.Devices
+namespace CardioMonitor.Devices.Configuration.Events
 {
     public class DeviceConfigDeletedEvent : IEvent
     {

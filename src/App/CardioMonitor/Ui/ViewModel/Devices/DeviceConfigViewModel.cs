@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 using CardioMonitor.Devices.WpfModule;
-using CardioMonitor.Ui.Base;
+using CardioMonitor.Infrastructure.WpfCommon.Base;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.Ui.ViewModel.Devices

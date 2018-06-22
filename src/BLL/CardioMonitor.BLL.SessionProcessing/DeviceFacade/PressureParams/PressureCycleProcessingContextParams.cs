@@ -1,5 +1,4 @@
 ﻿using System;
-using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
 {

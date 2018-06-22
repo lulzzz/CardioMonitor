@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using CardioMonitor.Devices.Monitor;
 using CardioMonitor.Devices.WpfModule;
-using CardioMonitor.Ui.Base;
+using CardioMonitor.Infrastructure.WpfCommon.Base;
 
 namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
 {

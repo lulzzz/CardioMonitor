@@ -1,6 +1,4 @@
-﻿using CardioMonitor.Data.Ef.Entities.Sessions;
-
-namespace CardioMonitor.Data.Contracts.Entities.Sessions
+﻿namespace CardioMonitor.Data.Ef.Entities.Sessions
 {
     /// <summary>
     /// Показатели пациента

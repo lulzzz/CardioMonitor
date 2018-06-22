@@ -1,7 +1,7 @@
 ﻿using System;
 using JetBrains.Annotations;
 
-namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time
+namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
 {
     internal class SessionProcessingInfoContextParamses: ICycleProcessingContextParams
     {

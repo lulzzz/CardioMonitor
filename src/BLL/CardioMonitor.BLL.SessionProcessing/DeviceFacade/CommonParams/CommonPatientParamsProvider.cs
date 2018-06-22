@@ -6,7 +6,7 @@ using CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionRequest;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations;
-using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Monitor.Infrastructure;

@@ -4,8 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
+             xmlns:controls="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              d:DataContext="{d:DesignInstance Type=viewModel:SessionDataViewModel}"
-             xmlns:controls="clr-namespace:CardioMonitor.Ui.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1000">
     <controls:BusyIndicator

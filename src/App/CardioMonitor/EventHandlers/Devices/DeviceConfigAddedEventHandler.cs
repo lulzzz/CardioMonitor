@@ -1,5 +1,5 @@
 ﻿using System;
-using CardioMonitor.Events.Devices;
+using CardioMonitor.Devices.Configuration.Events;
 using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.EventBus.Local;
 

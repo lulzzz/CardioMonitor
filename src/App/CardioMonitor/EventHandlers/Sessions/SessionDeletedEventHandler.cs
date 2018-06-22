@@ -1,5 +1,5 @@
 ﻿using System;
-using CardioMonitor.Events.Sessions;
+using CardioMonitor.BLL.CoreContracts.Session.Events;
 using JetBrains.Annotations;
 using Markeli.Utils.EventBus.Contracts;
 using Markeli.Utils.EventBus.Local;

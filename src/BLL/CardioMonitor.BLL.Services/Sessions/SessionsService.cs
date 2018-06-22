@@ -5,9 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
+using CardioMonitor.BLL.CoreContracts.Session.Events;
 using CardioMonitor.BLL.Mappers;
 using CardioMonitor.Data.Ef.Context;
-using CardioMonitor.Events.Sessions;
 using JetBrains.Annotations;
 using Markeli.Utils.EventBus.Contracts;
 

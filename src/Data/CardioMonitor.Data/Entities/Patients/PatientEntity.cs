@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using CardioMonitor.Data.Contracts.Entities.Sessions;
+using CardioMonitor.Data.Ef.Entities.Sessions;
 
-namespace CardioMonitor.Data.Contracts.Entities.Patients
+namespace CardioMonitor.Data.Ef.Entities.Patients
 {
     /// <summary>
     /// Пациент

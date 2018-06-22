@@ -1,7 +1,7 @@
 ﻿using System;
 using Markeli.Utils.EventBus.Contracts;
 
-namespace CardioMonitor.Events.Sessions
+namespace CardioMonitor.BLL.CoreContracts.Session.Events
 {
     public class SessionChangedEvent : IEvent
     {

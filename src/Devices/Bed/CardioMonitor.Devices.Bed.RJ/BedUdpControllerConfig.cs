@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Net;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
-using Newtonsoft.Json;
 
 namespace CardioMonitor.Devices.Bed.UDP
 {

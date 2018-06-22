@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.Ui.Communication
+﻿namespace CardioMonitor.Infrastructure.WpfCommon.Communication
 {
     public enum AccessMode
     {

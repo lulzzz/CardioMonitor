@@ -4,7 +4,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using CardioMonitor.Ui.Base;
+using CardioMonitor.Infrastructure.WpfCommon.Base;
 using CardioMonitor.Ui.View.Devices;
 using CardioMonitor.Ui.View.Patients;
 using CardioMonitor.Ui.View.Sessions;

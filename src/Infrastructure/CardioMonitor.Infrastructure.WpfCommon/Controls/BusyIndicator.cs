@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace CardioMonitor.Ui.Controls
+namespace CardioMonitor.Infrastructure.WpfCommon.Controls
 {
     public class BusyIndicator : ContentControl
     {

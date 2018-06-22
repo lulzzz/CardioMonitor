@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows;
 
-namespace CardioMonitor.Ui.Base
+namespace CardioMonitor.Infrastructure.WpfCommon.Base
 {
     public class Notifier : DependencyObject, INotifyPropertyChanged
     {

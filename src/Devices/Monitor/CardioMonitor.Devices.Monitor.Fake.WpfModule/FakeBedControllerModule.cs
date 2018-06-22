@@ -1,5 +1,4 @@
-﻿using CardioMonitor.Devices.Bed.Fake.WpfModule;
-using CardioMonitor.Devices.Monitor.Infrastructure;
+﻿using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Devices.WpfModule;
 
 namespace CardioMonitor.Devices.Monitor.Fake.WpfModule

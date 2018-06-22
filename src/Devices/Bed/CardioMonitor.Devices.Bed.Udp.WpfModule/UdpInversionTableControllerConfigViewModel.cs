@@ -3,7 +3,7 @@ using System.ComponentModel;
 using CardioMonitor.Devices.Bed.UDP;
 using CardioMonitor.Devices.WpfModule;
 using CardioMonitor.Infrastructure;
-using CardioMonitor.Ui.Base;
+using CardioMonitor.Infrastructure.WpfCommon.Base;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.Devices.Bed.Udp.WpfModule

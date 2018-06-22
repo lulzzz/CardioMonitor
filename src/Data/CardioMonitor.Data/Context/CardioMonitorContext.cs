@@ -4,8 +4,8 @@ using System.Data.Entity.Infrastructure;
 using System.Data.Entity.ModelConfiguration;
 using System.Linq;
 using System.Reflection;
-using CardioMonitor.Data.Contracts.Entities.Patients;
-using CardioMonitor.Data.Contracts.Entities.Sessions;
+using CardioMonitor.Data.Ef.Entities.Patients;
+using CardioMonitor.Data.Ef.Entities.Sessions;
 
 namespace CardioMonitor.Data.Ef.Context
 {

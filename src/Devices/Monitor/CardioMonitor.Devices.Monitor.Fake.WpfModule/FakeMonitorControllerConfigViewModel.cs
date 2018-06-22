@@ -1,8 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using CardioMonitor.Devices.WpfModule;
-using CardioMonitor.Ui.Base;
-using Newtonsoft.Json;
+using CardioMonitor.Infrastructure.WpfCommon.Base;
 
 namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
 {

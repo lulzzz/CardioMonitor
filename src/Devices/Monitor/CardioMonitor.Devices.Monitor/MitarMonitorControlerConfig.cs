@@ -1,6 +1,5 @@
 ﻿using System;
 using CardioMonitor.Devices.Monitor.Infrastructure;
-using Newtonsoft.Json;
 
 namespace CardioMonitor.Devices.Monitor
 {

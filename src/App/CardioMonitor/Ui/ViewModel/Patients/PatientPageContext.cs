@@ -1,5 +1,5 @@
 ﻿using CardioMonitor.BLL.CoreContracts.Patients;
-using CardioMonitor.Ui.Communication;
+using CardioMonitor.Infrastructure.WpfCommon.Communication;
 using Markeli.Storyboards;
 
 namespace CardioMonitor.Ui.ViewModel.Patients

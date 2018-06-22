@@ -12,7 +12,7 @@ using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.EventHandlers.Devices;
 using CardioMonitor.EventHandlers.Patients;
-using CardioMonitor.Ui.Base;
+using CardioMonitor.Infrastructure.WpfCommon.Base;
 using JetBrains.Annotations;
 using Markeli.Storyboards;
 using Markeli.Utils.Logging;

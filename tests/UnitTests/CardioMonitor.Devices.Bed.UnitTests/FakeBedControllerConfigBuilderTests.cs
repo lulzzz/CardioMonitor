@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CardioMonitor.Devices.Bed.Fake;
-using Xunit;
+﻿using Xunit;
 
 namespace CardioMonitor.Devices.Bed.UnitTests
 {

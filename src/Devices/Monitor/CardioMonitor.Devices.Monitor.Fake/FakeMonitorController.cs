@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Monitor.Infrastructure;
-using Newtonsoft.Json.Serialization;
 
 namespace CardioMonitor.Devices.Monitor.Fake
 {

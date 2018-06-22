@@ -1,4 +1,4 @@
-﻿namespace CardioMonitor.Data.Contracts.Entities.Sessions
+﻿namespace CardioMonitor.Data.Ef.Entities.Sessions
 {
     /// <summary>
     /// Статус завершения сеанса

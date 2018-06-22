@@ -5,8 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Patients"
+             xmlns:controls1="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              d:DataContext="{d:DesignInstance Type=viewModel:PatientViewModel}"
-             xmlns:controls1="clr-namespace:CardioMonitor.Ui.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              mc:Ignorable="d" 
              d:DesignHeight="350" d:DesignWidth="400">
     <controls1:BusyIndicator

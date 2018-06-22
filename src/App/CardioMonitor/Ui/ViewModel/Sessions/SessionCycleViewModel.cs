@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using CardioMonitor.BLL.CoreContracts.Session;
-using CardioMonitor.Ui.Base;
+using CardioMonitor.Infrastructure.WpfCommon.Base;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {

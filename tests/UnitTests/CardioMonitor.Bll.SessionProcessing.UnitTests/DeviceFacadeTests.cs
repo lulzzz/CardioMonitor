@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade;

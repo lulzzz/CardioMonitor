@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade

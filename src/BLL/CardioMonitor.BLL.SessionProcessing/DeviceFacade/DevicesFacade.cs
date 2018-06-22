@@ -11,7 +11,6 @@ using CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionReque
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo;
-using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;

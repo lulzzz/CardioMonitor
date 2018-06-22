@@ -30,7 +30,7 @@ using System;
 // ReSharper disable MemberCanBeProtected.Global
 // ReSharper disable InconsistentNaming
 
-namespace CardioMonitor.Devices.Bed.Fake.WpfModule.Annotations
+namespace CardioMonitor.Devices.Bed.Fake.WpfModule.Properties
 {
   /// <summary>
   /// Indicates that the value of the marked element could be <c>null</c> sometimes,

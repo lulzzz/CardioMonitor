@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using CardioMonitor.BLL.CoreContracts.Session;
-using CardioMonitor.Ui.Base;
+using CardioMonitor.Infrastructure.WpfCommon.Base;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {

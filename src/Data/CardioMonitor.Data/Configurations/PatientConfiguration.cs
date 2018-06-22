@@ -1,5 +1,5 @@
 ﻿using System.Data.Entity.ModelConfiguration;
-using CardioMonitor.Data.Contracts.Entities.Patients;
+using CardioMonitor.Data.Ef.Entities.Patients;
 
 namespace CardioMonitor.Data.Ef.Configurations
 {

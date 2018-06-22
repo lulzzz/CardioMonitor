@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Windows;
 using System.Windows.Controls;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.WpfModule;

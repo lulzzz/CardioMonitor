@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations;
-using CardioMonitor.BLL.SessionProcessing.DeviceFacade.Time;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using JetBrains.Annotations;
 using Markeli.Utils.Logging;

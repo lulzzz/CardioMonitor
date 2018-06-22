@@ -4,8 +4,8 @@ using System.Data.Entity;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using CardioMonitor.Devices.Configuration.Events;
 using CardioMonitor.Devices.Data;
-using CardioMonitor.Events.Devices;
 using JetBrains.Annotations;
 using Markeli.Utils.EventBus.Contracts;
 

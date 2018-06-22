@@ -1,11 +1,9 @@
-﻿using System.Windows.Controls;
-
-namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
+﻿namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
 {
     /// <summary>
     /// Interaction logic for MitarMonitorControllerConfigView.xaml
     /// </summary>
-    public partial class MitarMonitorControllerConfigView : UserControl
+    public partial class MitarMonitorControllerConfigView
     {
         public MitarMonitorControllerConfigView()
         {

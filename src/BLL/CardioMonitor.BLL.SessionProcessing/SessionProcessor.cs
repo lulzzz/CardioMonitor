@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.SessionProcessing.DeviceFacade;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
-using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure;

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Configuration;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using MyHIDUSBLibrary;
