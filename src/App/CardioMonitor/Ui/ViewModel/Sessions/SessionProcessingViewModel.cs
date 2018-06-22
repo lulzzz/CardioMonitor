@@ -89,8 +89,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private bool _isBusy;
         private string _busyMessage;
 
-        private string _executionStatus;
-
         private bool _isReverseAlreadyRequested;
 
         private bool _isAutoPumpingChangingEnabled;
@@ -105,7 +103,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// <summary>
         /// Пациент
         /// </summary>
-        public Patient Patient
+        private Patient Patient
         {
             get => _patient;
             set
@@ -134,7 +132,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public string StartButtonText
         {
             get => _startButtonText;
-            set
+            private set
             {
                 if (value == _startButtonText) return;
                 _startButtonText = value;
@@ -155,7 +153,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public bool IsBusy
         {
             get => _isBusy;
-            set
+            private set
             {
                 _isBusy = value;
                 RisePropertyChanged(nameof(IsBusy));
@@ -165,30 +163,17 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public string BusyMessage
         {
             get => _busyMessage;
-            set
+            private set
             {
                 _busyMessage = value;
                 RisePropertyChanged(nameof(BusyMessage));
             }
         }
 
-
-
-        public string ExecutionStatus
-        {
-            get => _executionStatus;
-            set
-            {
-                if (value == _executionStatus) return;
-                _executionStatus = value;
-                RisePropertyChanged(nameof(ExecutionStatus));
-            }
-        }
-
         public bool IsSessionStarted
         {
             get => _isSessionStarted;
-            set
+            private set
             {
                 _isSessionStarted = value;
                 RisePropertyChanged(nameof(IsSessionStarted));
@@ -196,7 +181,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         }
 
 
-        public bool CanManualDataCommandExecute
+        private bool CanManualDataCommandExecute
         {
             get => _canManualDataCommandExecute;
             set
@@ -207,7 +192,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
-        public bool IsReverseAlreadyRequested
+        private bool IsReverseAlreadyRequested
         {
             get => _isReverseAlreadyRequested;
             set
@@ -222,7 +207,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public bool IsAutoPumpingChangingEnabled
         {
             get => _isAutoPumpingChangingEnabled;
-            set
+            private set
             {
                 _isAutoPumpingChangingEnabled = value;
                 RisePropertyChanged(nameof(IsAutoPumpingChangingEnabled));
@@ -257,18 +242,19 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
-        public bool IsSessionSaved
+        private bool IsSessionSaved
         {
             get => _isSessionSaved;
             set
             {
                 _isSessionSaved = value;
                 RisePropertyChanged(nameof(IsSessionSaved));
+                RisePropertyChanged(nameof(IsSavingToDbEnabled));
 
             }
         }
 
-        public int? SavedSessionId
+        private int? SavedSessionId
         {
             get => _savedSessionId;
             set
@@ -278,6 +264,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 IsSessionSaved = true;
             }
         }
+
+        public bool IsSavingToDbEnabled => (SessionStatus == SessionStatus.Completed
+                                              || SessionStatus == SessionStatus.EmergencyStopped
+                                              || SessionStatus == SessionStatus.TerminatedOnError)
+                                             && !IsSessionSaved;
 
         #endregion
 
@@ -453,6 +444,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             _notifier.ShowWarning("С инверсионного стола вызвана экстренная остановка сеанса");
             Task.Factory.StartNew(async () => await SaveSessionToDbAsync());
+            // не хочет лезть в родительский класс, поэтому такой костыль
+            RisePropertyChanged(nameof(IsSavingToDbEnabled));
         }
 
         private void HandleSessionErrorStop(object sender, Exception exception)
@@ -467,6 +460,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             RisePropertyChanged(nameof(ReverseCommand));
             RisePropertyChanged(nameof(EmergencyStopCommand));
             RisePropertyChanged(nameof(ManualRequestCommand));
+            RisePropertyChanged(nameof(IsSavingToDbEnabled));
 
             IsAutoPumpingChangingEnabled = SessionStatus == SessionStatus.InProgress
                                            || SessionStatus == SessionStatus.Suspended
@@ -626,7 +620,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 var session = GetSession();
                 if (IsSessionSaved)
                 {
-                    if (!SavedSessionId.HasValue) throw new InvalidOperationException("ID сессиия не сохранено");
+                    if (SavedSessionId == null) throw new InvalidOperationException("ID сессиия не сохранено");
 
                     var oldSession = await _sessionsService
                         .GetAsync(SavedSessionId.Value)
@@ -635,12 +629,19 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     await _sessionsService
                         .EditAsync(session)
                         .ConfigureAwait(true);
+                    await _eventBus
+                        .PublishAsync(new SessionChangedEvent(oldSession.Id))
+                        .ConfigureAwait(true);
                     _notifier.ShowSuccess("Результаты сеанса обновлены");
                 }
                 else
                 {
-                    SavedSessionId = await _sessionsService
+                    var sessionId = await _sessionsService
                         .AddAsync(session)
+                        .ConfigureAwait(true);
+                    SavedSessionId = sessionId;
+                    await _eventBus
+                        .PublishAsync(new SessionAddedEvent(sessionId))
                         .ConfigureAwait(true);
                     _notifier.ShowSuccess("Результаты сеанса сохранены");
                 }
@@ -660,7 +661,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 _uiInvoker.Invoke(() =>
                 {
                     IsBusy = false;
-                    BusyMessage = String.Empty;
+                    BusyMessage = null;
                 });
             }
         }

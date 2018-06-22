@@ -132,24 +132,38 @@
                 VerticalAlignment="Center"
                 Margin="10,0"
                 Width="262">
+                
+                <!--Ручное измерение в последней точке-->
+                <Button
+                    Command="{Binding SaveSessionToDbCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        Content="Обновить данные"
+                        Style="{DynamicResource CmSessionProcessingButtons}"
+                        Visibility="{Binding IsSavingToDbEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <!--Ручное измерение в последней точке-->
+                <Button
+                    Command="{Binding SaveSessionToFileCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                        Content="Обновить данные"
+                        Style="{DynamicResource CmSessionProcessingButtons}"
+                        Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CompletedSessionStatusToVisibilityConverter}}"/>
 
-                <!--Реверс-->
-                <Button x:Name="ManualRequest"
-                        Command="{Binding ManualRequestCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                <!--Ручное измерение в последней точке-->
+                <Button
+                    Command="{Binding ManualRequestCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                         Content="Обновить данные"
                         Style="{DynamicResource CmSessionProcessingButtons}"
                         Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CompletedSessionStatusToVisibilityConverter}}"/>
                     <!--Старт-->
-                <ToggleButton x:Name="StartSessionB"
-                              Command="{Binding StartCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                <ToggleButton
+                    Command="{Binding StartCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                               Content="{Binding StartButtonText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                               Style="{DynamicResource CmSessionProcessingToggleButtons}"
                               Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NotCompletedSessionStatusToVisibilityConverter}}"/>
                 <!--Реверс-->
-                <Button x:Name="ReverseSessionB"
-                        Command="{Binding ReverseCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                <Button
+                    Command="{Binding ReverseCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                         Content="Реверс"
-                        Style="{DynamicResource CmSessionProcessingButtons}"/>
+                        Style="{DynamicResource CmSessionProcessingButtons}"
+                        Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NotCompletedSessionStatusToVisibilityConverter}}"/>
             </StackPanel>
             <StackPanel
                 Grid.Column="1"
@@ -165,9 +179,9 @@
                     IsEnabled="{Binding IsAutoPumpingChangingEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                     Style="{DynamicResource CmSettingsToggleSwitch}"/>
                     <!--Экстренная остановка-->
-                <Button x:Name="EmergencyStopB"
-                        Command="{Binding EmergencyStopCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                        Style="{DynamicResource CmSessionProcessingButtons}">
+                <Button
+                    Command="{Binding EmergencyStopCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    Style="{DynamicResource CmSessionProcessingButtons}">
                     <Button.Content>
                         <TextBlock Text="ЭКСТРЕННАЯ ОСТАНОВКА"
                                    FontSize="12"
