@@ -93,7 +93,7 @@ CREATE TABLE public."PatientParams"
   "SystolicArterialPressure" smallint,
   "SystolicArterialPressureStatus" smallint,
   "DiastolicArterialPressure" smallint,
-  "DiastolicArterialPressurestatus" smallint,
+  "DiastolicArterialPressureStatus" smallint,
   "AverageArterialPressure" smallint,
   "AverageArterialPressureStatus" smallint,
   "SessionCycleId" integer,
