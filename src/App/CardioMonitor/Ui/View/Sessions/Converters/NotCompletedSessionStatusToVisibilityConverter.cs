@@ -17,7 +17,9 @@ namespace CardioMonitor.Ui.View.Sessions.Converters
                 status = sessionStatus;
             }
 
-            return status != SessionStatus.Completed
+            return (status != SessionStatus.Completed 
+                && status != SessionStatus.EmergencyStopped
+                && status != SessionStatus.TerminatedOnError)
                 ? Visibility.Visible
                 : Visibility.Collapsed;
         }

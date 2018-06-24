@@ -74,7 +74,8 @@ namespace CardioMonitor.BLL.Mappers
                 DateTime = session.DateTime,
                 Id = session.Id,
                 Status = session.Status.ToSessionStatus(),
-                PatientId = session.PatientId
+                PatientId = session.PatientId,
+                Cycles = session.Cycles.Select(x => x.ToDomain()).ToList()
             };
         }
 

@@ -14,7 +14,7 @@ namespace CardioMonitor.Data.Ef.Configurations
 
             HasMany(x => x.Cycles).
                 WithRequired(x => x.SessionEntity).
-                HasForeignKey(x => x.Id);
+                HasForeignKey(x => x.SessionId);
         }
     }
 }

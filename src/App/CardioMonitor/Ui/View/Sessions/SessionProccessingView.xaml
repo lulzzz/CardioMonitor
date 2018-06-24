@@ -133,16 +133,16 @@
                 Margin="10,0"
                 Width="262">
                 
-                <!--Ручное измерение в последней точке-->
+                <!--Сохранение в базу-->
                 <Button
                     Command="{Binding SaveSessionToDbCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                        Content="Обновить данные"
+                        Content="Сохранить в базу"
                         Style="{DynamicResource CmSessionProcessingButtons}"
                         Visibility="{Binding IsSavingToDbEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                <!--Ручное измерение в последней точке-->
+                <!--Сохранение в файл-->
                 <Button
                     Command="{Binding SaveSessionToFileCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                        Content="Обновить данные"
+                        Content="Сохранить в файл"
                         Style="{DynamicResource CmSessionProcessingButtons}"
                         Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CompletedSessionStatusToVisibilityConverter}}"/>
 

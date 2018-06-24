@@ -10,6 +10,7 @@ using CardioMonitor.BLL.Mappers;
 using CardioMonitor.Data.Ef.Context;
 using JetBrains.Annotations;
 using Markeli.Utils.EventBus.Contracts;
+using ThenInclude.EF6;
 
 namespace CardioMonitor.BLL.CoreServices.Sessions
 {
@@ -77,6 +78,7 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
             using (var context = _factory.Create())
             {
                 var result = await context.Sessions
+                    .Include(x => x.Cycles.Select(y => y.PatientParams))
                     .AsNoTracking()
                     .FirstOrDefaultAsync(x => x.Id == sessionId)
                     .ConfigureAwait(false);
