@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Caching;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,6 +61,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private readonly MemoryCache _processedEventsCached;
 
         private bool _isReverseAlreadyRequested;
+
+        private readonly HashSet<int> _completedCycles;
+
+        /// <summary>
+        /// Признак глобального завершения сессия в рамках всего пайплайна
+        /// </summary>
+        /// <remarks>
+        /// Небольшой костыль, чтобы дважды не срабатывало информирование о завершении сеанса
+        /// </remarks>
+        private bool _isSessionGlobalyCompleted;
 
         #endregion
 
@@ -172,6 +183,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             _processedEventsCached = new MemoryCache(GetType().Name);
             _isFailedOnPumping = false;
             _isReverseAlreadyRequested = false;
+            _isSessionGlobalyCompleted = false;
+            _completedCycles = new HashSet<int>();
         }
 
         private void CreatePipeline(
@@ -450,17 +463,20 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         _cycleProcessingSynchronizer.Stop();
                     }
                     
-                    if (_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber ||
-                          isSessionCompleted)
+                    if ((_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber 
+                         || isSessionCompleted) 
+                        && !_completedCycles.Contains(sessionProcessingInfo.CurrentCycleNumber))
                     {
+                        _completedCycles.Add(sessionProcessingInfo.CurrentCycleNumber);
                         await InnerForceDataCollectionRequestAsync().ConfigureAwait(false);
                         _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber; // по идеи, 
                         OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
                         _logger?.Info($"{GetType().Name}: закончился цикл {sessionProcessingInfo.CurrentCycleNumber}");
                     }
 
-                    if (isSessionCompleted)
+                    if (isSessionCompleted && !_isSessionGlobalyCompleted)
                     {
+                        _isSessionGlobalyCompleted = true;
                         _isStandartProcessingInProgress = false;
                         OnSessionCompleted?.Invoke(this, EventArgs.Empty);
                         _logger?.Info($"{GetType().Name}: сеанс завершился");

@@ -60,6 +60,16 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
                 
                 var entity = session.ToEntity();
                 context.Sessions.Attach(entity);
+                foreach (var cycleEntity in entity.Cycles)
+                {
+                    context.SessionCycles.Attach(cycleEntity);
+                    context.Entry(entity).State = EntityState.Modified;
+                    foreach (var paramsEntity in cycleEntity.PatientParams)
+                    {
+                        context.PatientParams.Attach(paramsEntity);
+                        context.Entry(paramsEntity).State = EntityState.Modified;
+                    }
+                }
                 context.Entry(entity).State = EntityState.Modified;
                 
                 await context

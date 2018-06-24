@@ -878,9 +878,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 return result == MessageDialogResult.Affirmative;
             }
 
-            if (SessionStatus == SessionStatus.EmergencyStopped
+            if ((SessionStatus == SessionStatus.EmergencyStopped
                 || SessionStatus == SessionStatus.Completed
-                || SessionStatus == SessionStatus.TerminatedOnError && !IsSessionSaved)
+                || SessionStatus == SessionStatus.TerminatedOnError) && !IsSessionSaved)
             {
 
                 var result = await MessageHelper.Instance.ShowMessageAsync(

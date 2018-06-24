@@ -55,7 +55,12 @@ namespace CardioMonitor.BLL.Mappers
                 Id = session.Id,
                 Status = session.Status.ToSessionCompletionStatus(),
                 PatientId = session.PatientId,
-                Cycles = session.Cycles.Select(x => x.ToEntity()).ToList()
+                Cycles = session.Cycles.Select(x =>
+                {
+                    var cycle = x.ToEntity();
+                    cycle.SessionId = session.Id;
+                    return cycle;
+                }).ToList()
             };
             foreach (var sessionCycleEntity in entity.Cycles)
             {
@@ -108,7 +113,12 @@ namespace CardioMonitor.BLL.Mappers
                 Id = domain.Id,
                 CycleNumber = domain.CycleNumber,
                 SessionId = domain.SessionId,
-                PatientParams = domain.PatientParams.Select(x => x.ToEntity()).ToList()
+                PatientParams = domain.PatientParams.Select(x =>
+                {
+                    var patientParams = x.ToEntity();
+                    patientParams.SessionCycleId = domain.Id;
+                    return patientParams;
+                }).ToList()
             };
             foreach (var patientParamsEntity in entity.PatientParams)
             {
