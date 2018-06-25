@@ -5,6 +5,9 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
              xmlns:controls="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:sessions="clr-namespace:CardioMonitor.Ui.View.Sessions"
+             xmlns:sessionProcessing="clr-namespace:CardioMonitor.BLL.SessionProcessing;assembly=CardioMonitor.BLL.SessionProcessing"
              d:DataContext="{d:DesignInstance Type=viewModel:SessionDataViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1000">
@@ -26,18 +29,18 @@
             <TextBlock Text="{Binding PatientName}"
                    Style="{DynamicResource CmPageHeader}">
             </TextBlock>
-                <TextBlock Text="Дата сеанса:"
+                <TextBlock Text="Дата и время сеанса:"
                            Margin="25,10,10,10"
                            Style="{DynamicResource CmPageHeader}"/>
-            <TextBlock DataContext="{Binding Session}"
-                       Text="{Binding DateTime, StringFormat='{}{0:dd.MM.yyyy}'}"
+            <TextBlock 
+                Text="{Binding SessionDateTimeLocal, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}"
                        
                        Style="{DynamicResource CmPageHeader}"/>
         </StackPanel>
         <DataGrid Grid.Row="1"
                   ItemsSource="{Binding Patients}"
                   Style="{DynamicResource CmDataGrid}"
-                  Margin="10">
+                  ColumnWidth="*">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Фамилия"
                                     Binding="{Binding LastName}"/>
@@ -51,28 +54,20 @@
                                     Binding="{Binding Id}"/>
             </DataGrid.Columns>
         </DataGrid>
-        <DataGrid Grid.Row="2"
-                  DataContext="{Binding Session}"
-                  ItemsSource="{Binding PatientParams}"
-                  Style="{DynamicResource CmDataGrid}"
-                  Margin="10">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Угол наклона кровати"
-                                    Binding="{Binding InclinationAngle}"/>
-                <DataGridTextColumn Header="ЧСС"
-                                    Binding="{Binding HeartRate}"/>
-                <DataGridTextColumn Header="ЧД"
-                                    Binding="{Binding RepsirationRate}"/>
-                <DataGridTextColumn Header="SPO2"
-                                    Binding="{Binding Spo2}"/>
-                <DataGridTextColumn Header="Систолическое АД"
-                                    Binding="{Binding SystolicArterialPressure}"/>
-                <DataGridTextColumn Header="Диастолическое АД"
-                                    Binding="{Binding DiastolicArterialPressure}"/>
-                <DataGridTextColumn Header="Среднее АД"
-                                    Binding="{Binding AverageArterialPressure}"/>
-            </DataGrid.Columns>
-        </DataGrid>
+            <mah:MetroAnimatedSingleRowTabControl
+                Grid.Row="2"
+                ItemsSource="{Binding PatientParamsPerCycles, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                SelectedIndex="{Binding SelectedCycleTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                TabStripPlacement="Left"
+                mah:TabControlHelper.Underlined="TabItems"
+                DisplayMemberPath="CycleNumber">
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <sessions:SessionCycleView
+                            d:DataContext="{d:DesignInstance Type=sessionProcessing:CycleData}"/>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </mah:MetroAnimatedSingleRowTabControl>
             <StackPanel
                 Grid.Row="3"
                 Style="{DynamicResource CmBottomPanel}">
@@ -84,4 +79,6 @@
         </Grid>
     </controls:BusyIndicator>
 </UserControl>
+
+
 

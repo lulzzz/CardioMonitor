@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
+using CardioMonitor.BLL.SessionProcessing;
 using CardioMonitor.Files;
 using CardioMonitor.Infrastructure.WpfCommon.Base;
 using CardioMonitor.Resources;
@@ -12,21 +15,34 @@ using JetBrains.Annotations;
 using Markeli.Storyboards;
 using Markeli.Utils.Logging;
 using ToastNotifications.Messages;
+using ArgumentException = System.ArgumentException;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
     public class SessionDataViewModel : Notifier, IStoryboardPageViewModel
     {
+        #region Fields
+
         private readonly ILogger _logger;
         private readonly IFilesManager _filesRepository;
         private PatientFullName _patientName;
         private Patient _patient;
-        private SessionModel _session;
         private ICommand _saveCommand;
         private readonly ISessionsService _sessionsService;
         private readonly IPatientsService _patientsService;
         [NotNull]
         private readonly ToastNotifications.Notifier _notifier;
+
+        private IReadOnlyList<CycleData> _patientParamsPerCycles;
+
+        private string _busyMessage;
+
+        private bool _isReadOnly;
+
+        private SessionStatus _sessionStatus;
+        private DateTime _sessionDateTimeLocal;
+        private int _selectedCycleTab;
+        #endregion
 
         public SessionDataViewModel(
             ISessionsService sessionsService, 
@@ -44,6 +60,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
             IsReadOnly = true;
         }
+
+        #region Properties
 
         public PatientFullName PatientName
         {
@@ -78,21 +96,28 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
-        public ObservableCollection<Patient> Patients => Patient != null 
-            ? new ObservableCollection<Patient> { Patient }
-            : new ObservableCollection<Patient>();
+        public IReadOnlyList<Patient> Patients => Patient != null 
+            ? new List<Patient> { Patient }
+            : new List<Patient>();
 
-        public SessionModel Session
+     
+        /// <summary>
+        /// Показатели пациента с разделением по циклам
+        /// </summary>
+        public IReadOnlyList<CycleData> PatientParamsPerCycles
         {
-            get => _session;
+            get => _patientParamsPerCycles;
             set
             {
-                if (Equals(value, _session)) return;
-                _session = value;
-                RisePropertyChanged(nameof(Session));
+                _patientParamsPerCycles = value;
+                RisePropertyChanged(nameof(PatientParamsPerCycles));
             }
         }
 
+        /// <summary>
+        /// Признак доступности данных только для чтения
+        /// </summary>
+        //todo Непонятно, зачем он тут нужен
         public bool IsReadOnly
         {
             get => _isReadOnly;
@@ -102,7 +127,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 RisePropertyChanged(nameof(IsReadOnly));
             }
         }
-        private bool _isReadOnly;
 
         public bool IsBusy
         {
@@ -124,8 +148,39 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 RisePropertyChanged(nameof(BusyMessage));
             }
         }
-        private string _busyMessage;
 
+        public SessionStatus SessionStatus
+        {
+            get => _sessionStatus;
+            set
+            {
+                _sessionStatus = value;
+                RisePropertyChanged(nameof(SessionStatus));
+            }
+        }
+
+        public DateTime SessionDateTimeLocal
+        {
+            get => _sessionDateTimeLocal;
+            set
+            {
+                _sessionDateTimeLocal = value;
+                RisePropertyChanged(nameof(SessionDateTimeLocal));
+            }
+        }
+        
+        public int SelectedCycleTab
+        {
+            get => _selectedCycleTab;
+            set
+            {
+                _selectedCycleTab = value;
+                RisePropertyChanged(nameof(SelectedCycleTab));
+            }
+        }
+        #endregion
+
+        #region Commands
 
         public ICommand SaveCommand
         {
@@ -139,6 +194,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+
+        #endregion
+
         public async void SaveToFile()
         {
             var saveFileDialog = new SaveFileDialog {Filter = Localisation.FileRepository_SeansFileFilter};
@@ -149,7 +207,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = true;
                 BusyMessage = "Сохранение в файл...";
-                _filesRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
+           //     _filesRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
                 await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionDataViewModel_FileSaved);
                 _notifier.ShowSuccess("Сеанс успешно сохранен");
             }
@@ -169,14 +227,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             //todo what?
             await MessageHelper.Instance.ShowMessageAsync("Opened!").ConfigureAwait(true);
         }
-
-        public void Clear()
-        {
-            PatientName = null;
-            Session = null;
-            Patient = null;
-        }
-
+        
         public void Dispose()
         {
         }
@@ -190,7 +241,42 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 var session =  await _sessionsService
                     .GetAsync(sessionId)
                     .ConfigureAwait(true);
-                Session = new SessionModel {Session = session};
+                if (session?.Cycles == null) throw new ArgumentException(
+                    $"Сессия с Id {sessionId} не получена или не получены информация о повторениях");
+
+                var patientParamsPerCycles = new List<CycleData>(session.Cycles.Count);
+                foreach (var sessionCycle in session.Cycles)
+                {
+                    var patientParamsPerCycle = sessionCycle.PatientParams.Select(x =>
+                    {
+                        var checkPoint = new CheckPointParams((short) sessionCycle.CycleNumber, (short) x.Iteraton,
+                            x.InclinationAngle)
+                        {
+                            AverageArterialPressure = x.AverageArterialPressure,
+                            DiastolicArterialPressure = x.DiastolicArterialPressure,
+                            HeartRate = x.HeartRate,
+                            RespirationRate = x.RepsirationRate,
+                            Spo2 = x.Spo2,
+                            SystolicArterialPressure = x.SystolicArterialPressure,
+                            
+                        };
+                        return checkPoint;
+                    });
+                    
+                    var cycleData = new CycleData
+                    {
+                        CycleNumber = (short) sessionCycle.CycleNumber,
+                        CycleParams = new ObservableCollection<CheckPointParams>(patientParamsPerCycle)
+                    };
+                    patientParamsPerCycles.Add(cycleData);
+                }
+
+                SessionStatus = session.Status;
+                SessionDateTimeLocal = session.DateTime.ToLocalTime();
+                SelectedCycleTab = 1;
+                
+                PatientParamsPerCycles = patientParamsPerCycles;
+                
                 var patient =  await _patientsService
                     .GetPatientAsync(patientId)
                     .ConfigureAwait(true);
@@ -206,6 +292,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 IsBusy = false;
             }
         }
+
+
 
         #region IStoryboardViewModel
 
