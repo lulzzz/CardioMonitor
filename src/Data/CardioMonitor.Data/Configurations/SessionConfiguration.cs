@@ -9,7 +9,7 @@ namespace CardioMonitor.Data.Ef.Configurations
         {
             ToTable("Sessions").HasKey(x => x.Id);
 
-            Property(x => x.DateTime).HasColumnName("DateTime");
+            Property(x => x.DateTimeUtc).HasColumnName("DateTimeUtc");
             Property(x => x.Status).HasColumnName("Status");
 
             HasMany(x => x.Cycles).

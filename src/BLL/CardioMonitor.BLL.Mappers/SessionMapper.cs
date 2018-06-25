@@ -51,7 +51,7 @@ namespace CardioMonitor.BLL.Mappers
         {
             var entity =  new SessionEntity
             {
-                DateTime = session.DateTime,
+                DateTimeUtc = session.DateTimeUtc,
                 Id = session.Id,
                 Status = session.Status.ToSessionCompletionStatus(),
                 PatientId = session.PatientId,
@@ -76,7 +76,7 @@ namespace CardioMonitor.BLL.Mappers
         {
             return new Session
             {
-                DateTime = session.DateTime,
+                DateTimeUtc = session.DateTimeUtc,
                 Id = session.Id,
                 Status = session.Status.ToSessionStatus(),
                 PatientId = session.PatientId,
@@ -89,7 +89,7 @@ namespace CardioMonitor.BLL.Mappers
         {
             return new SessionInfo
             {
-                DateTime = session.DateTime,
+                DateTime = session.DateTimeUtc,
                 Id = session.Id,
                 Status = session.Status.ToSessionStatus()
             };

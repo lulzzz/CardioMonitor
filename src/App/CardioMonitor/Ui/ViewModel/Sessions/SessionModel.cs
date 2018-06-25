@@ -99,7 +99,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 {
                     Id = Id,
                     PatientId = PatientId,
-                    DateTime = DateTime,
+                    DateTimeUtc = DateTime,
                     Status = Status,
                     Cycles = new List<SessionCycle>(Cycles.Select(x => new SessionCycle
                     {
@@ -112,7 +112,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 Id = value.Id;
                 PatientId = value.PatientId;
-                DateTime = value.DateTime;
+                DateTime = value.DateTimeUtc;
                 Status = value.Status;
                 Cycles = new ObservableCollection<SessionCycleViewModel>(value.Cycles.Select(x => new SessionCycleViewModel
                 {

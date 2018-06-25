@@ -43,8 +43,8 @@ namespace CardioMonitor.Files
 
 
                 var dateSring =
-                    $"{session.DateTime.Day}_{session.DateTime.Month}_{session.DateTime.Year}_{session.DateTime.Hour}_{session.DateTime.Minute}_{session.DateTime.Second}";
-                var birthDateSring = $"{session.DateTime.Day}_{session.DateTime.Month}_{session.DateTime.Year}";
+                    $"{session.DateTimeUtc.Day}_{session.DateTimeUtc.Month}_{session.DateTimeUtc.Year}_{session.DateTimeUtc.Hour}_{session.DateTimeUtc.Minute}_{session.DateTimeUtc.Second}";
+                var birthDateSring = $"{session.DateTimeUtc.Day}_{session.DateTimeUtc.Month}_{session.DateTimeUtc.Year}";
                 var fileName =
                     $"{patient.LastName}_{patient.FirstName}_{patient.PatronymicName}_{birthDateSring}_{patient.Id}_{dateSring}.cmsf";
                 filePath = Path.Combine(filePath, fileName);

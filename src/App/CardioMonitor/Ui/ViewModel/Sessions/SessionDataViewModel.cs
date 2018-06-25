@@ -272,8 +272,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 }
 
                 SessionStatus = session.Status;
-                SessionDateTimeLocal = session.DateTime.ToLocalTime();
-                SelectedCycleTab = 1;
+                SessionDateTimeLocal = session.DateTimeUtc.ToLocalTime();
+                SelectedCycleTab = 0;
                 
                 PatientParamsPerCycles = patientParamsPerCycles;
                 

@@ -671,7 +671,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 Status = SessionStatus,
                 PatientId = Patient.Id,
-                DateTime = _sessionTimeUtc,
+                DateTimeUtc = _sessionTimeUtc,
                 Cycles = PatientParamsPerCycles
                     .Select(
                         //todo mappers

@@ -17,7 +17,7 @@ namespace CardioMonitor.Data.Ef.Entities.Sessions
         /// <summary>
         /// Дата и время
         /// </summary>
-        public DateTime DateTime { get; set; }
+        public DateTime DateTimeUtc { get; set; }
         
         /// <summary>
         /// Статус завершения сеанса

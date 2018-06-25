@@ -41,7 +41,7 @@ ALTER TABLE public."Patients"
 CREATE TABLE public."Sessions"
 (
   "Id" serial  NOT NULL,
-  "DateTime" date,
+  "DateTimeUtc" timestamp without time zone,
   "Status" smallint,
   "PatientId" integer,
   CONSTRAINT "Session_PK" PRIMARY KEY ("Id"),
