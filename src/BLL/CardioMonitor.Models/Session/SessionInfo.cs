@@ -13,9 +13,9 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         public int Id { get; set; }
 
         /// <summary>
-        /// Дата и время сеанса
+        /// Дата и время сеанса (UTC)
         /// </summary>
-        public DateTime DateTime { get; set; }
+        public DateTime TimestampUtc { get; set; }
 
         /// <summary>
         /// Статус сеанса

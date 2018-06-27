@@ -40,9 +40,9 @@
                   Style="{DynamicResource CmDataGrid}">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Дата сеанса"
-                                    Binding="{Binding DateTime, StringFormat='{}{0:dd.MM.yyyy}'}"/>
+                                    Binding="{Binding TimestampUtc, StringFormat='{}{0:dd.MM.yyyy}'}"/>
                 <DataGridTextColumn Header="Время сеанса"
-                                    Binding="{Binding DateTime, StringFormat='{}{0:H:mm}'}"/>
+                                    Binding="{Binding TimestampUtc, StringFormat='{}{0:H:mm}'}"/>
             </DataGrid.Columns>
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow"

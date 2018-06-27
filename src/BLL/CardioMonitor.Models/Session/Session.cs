@@ -61,9 +61,9 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         public string PatientFullName { get; set; }
 
         /// <summary>
-        /// Дата и время
+        /// Дата и время сеанса
         /// </summary>
-        public DateTime DateTime { get; set; }
+        public DateTime TimestampUtc { get; set; }
 
         /// <summary>
         /// Статус сеанса
@@ -75,7 +75,7 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         /// </summary>
         public SessionWithPatientInfo()
         {
-            DateTime = new DateTime();
+            TimestampUtc = new DateTime();
             Status = SessionStatus.NotStarted;
         }
     }

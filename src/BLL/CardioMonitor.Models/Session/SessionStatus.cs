@@ -8,26 +8,26 @@
         /// <summary>
         /// Неизвестно
         /// </summary>
-        NotStarted,
+        NotStarted = 0,
         /// <summary>
         /// Заврешен
         /// </summary>
-        Completed,
+        Completed = 1,
         /// <summary>
         /// Прерван
         /// </summary>
-        TerminatedOnError,
+        TerminatedOnError = 2,
         /// <summary>
         /// В процессе
         /// </summary>
-        InProgress,
+        InProgress = 3,
         /// <summary>
         /// Приостановлен
         /// </summary>
-        Suspended,
+        Suspended = 4,
         /// <summary>
         /// Экстренно остановлен
         /// </summary>
-        EmergencyStopped
+        EmergencyStopped = 5
     }
 }
