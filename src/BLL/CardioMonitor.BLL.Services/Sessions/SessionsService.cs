@@ -106,7 +106,7 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
                     .ConfigureAwait(false);
                 if (sessions.Count == 0) return new List<SessionWithPatientInfo>(0);
 
-                var patientIds = new HashSet<int>(sessions.Select(x => x.Id));
+                var patientIds = new HashSet<int>(sessions.Select(x => x.PatientId));
 
                 var patients = await context
                     .Patients
