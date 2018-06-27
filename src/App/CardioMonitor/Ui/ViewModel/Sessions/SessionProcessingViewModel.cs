@@ -13,7 +13,7 @@ using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.Monitor.Infrastructure;
-using CardioMonitor.Files;
+using CardioMonitor.FileSaving;
 using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Infrastructure.WpfCommon.Base;
 using CardioMonitor.Resources;
@@ -61,7 +61,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _saveSessionToFileCommand;
 
         private readonly ILogger _logger;
-        private readonly IFilesManager _filesRepository;
+        private readonly ISessionFileSavingManager _sessionFileSavingRepository;
         private readonly ISessionsService _sessionsService;
         [NotNull] private readonly IDeviceControllerFactory _deviceControllerFactory;
 
@@ -364,7 +364,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public SessionProcessingViewModel(
             [NotNull] ILogger logger,
-            [NotNull] IFilesManager filesRepository,
+            [NotNull] ISessionFileSavingManager sessionFileSavingRepository,
             [NotNull] ISessionsService sessionsService,
             [NotNull] IDeviceControllerFactory deviceControllerFactory,
             [NotNull] IWorkerController workerController,
@@ -375,7 +375,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] IEventBus eventBus)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
+            _sessionFileSavingRepository = sessionFileSavingRepository ?? throw new ArgumentNullException(nameof(sessionFileSavingRepository));
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _deviceControllerFactory = deviceControllerFactory ??
                                        throw new ArgumentNullException(nameof(deviceControllerFactory));

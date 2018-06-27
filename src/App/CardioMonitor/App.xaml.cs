@@ -20,7 +20,7 @@ using CardioMonitor.Devices.WpfModule;
 using CardioMonitor.EventHandlers.Devices;
 using CardioMonitor.EventHandlers.Patients;
 using CardioMonitor.EventHandlers.Sessions;
-using CardioMonitor.Files;
+using CardioMonitor.FileSaving;
 using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui;
@@ -148,7 +148,7 @@ namespace CardioMonitor
         {
             container.Register<IPatientsService, PatientService>(Lifestyle.Transient);
             container.Register<ISessionsService, SessionsService>(Lifestyle.Transient);
-            container.Register<IFilesManager, FilesManager>(Lifestyle.Transient);
+            container.Register<ISessionFileSavingManager, SessionFileSavingSavingManager>(Lifestyle.Transient);
             container.RegisterSingleton<ISessionParamsValidator, SessionParamsValidator>();
         }
 

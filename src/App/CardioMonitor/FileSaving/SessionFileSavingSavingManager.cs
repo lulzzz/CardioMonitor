@@ -7,17 +7,17 @@ using CardioMonitor.Resources;
 using CardioMonitor.Settings;
 using Markeli.Utils.Logging;
 
-namespace CardioMonitor.Files 
+namespace CardioMonitor.FileSaving 
 {
     /// <summary>
-    /// Репозиторий для доступа к файлам
+    /// Менеджер хранения данныъ сеанса в файле
     /// </summary>
-    internal class FilesManager : IFilesManager
+    internal class SessionFileSavingSavingManager : ISessionFileSavingManager
     {
         private readonly ILogger _logger;
         private readonly ICardioSettings _settings;
 
-        public FilesManager(ILogger logger, ICardioSettings settings)
+        public SessionFileSavingSavingManager(ILogger logger, ICardioSettings settings)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
@@ -33,8 +33,10 @@ namespace CardioMonitor.Files
         {
             if (patient == null) throw new ArgumentNullException(nameof(patient));
             if (session == null) throw new ArgumentNullException(nameof(session));
+            if (String.IsNullOrWhiteSpace(_settings.SessionsFilesDirectoryPath))
+                throw new ArgumentException("Session files directory not setted");
 
-            var dirPath = _settings.SessionsFilesDirectoryPath;
+            string dirPath;
             if (filePath == null)
             {
                 filePath = _settings.SessionsFilesDirectoryPath;
@@ -53,6 +55,9 @@ namespace CardioMonitor.Files
             {
                 dirPath = Path.GetDirectoryName(filePath);
             }
+
+            if (String.IsNullOrWhiteSpace(dirPath))
+                throw new InvalidOperationException("Directory for savin sessions not selected");
 
             try
             {

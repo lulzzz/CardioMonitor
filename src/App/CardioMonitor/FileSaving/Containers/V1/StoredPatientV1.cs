@@ -1,11 +1,8 @@
 ﻿using System;
 
-namespace CardioMonitor.BLL.CoreContracts.Patients
+namespace CardioMonitor.FileSaving.Containers.V1
 {
-    /// <summary>
-    /// Пациент
-    /// </summary>
-    public class Patient
+    internal class StoredPatientV1
     {
         /// <summary>
         /// Идентификатор

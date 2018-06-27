@@ -1,9 +1,9 @@
 ﻿using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 
-namespace CardioMonitor.Files
+namespace CardioMonitor.FileSaving
 {
-    public interface IFilesManager
+    public interface ISessionFileSavingManager
     {
         void SaveToFile(Patient patient, Session session, string filePath = null);
 

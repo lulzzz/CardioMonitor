@@ -8,7 +8,7 @@ using System.Windows.Input;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.SessionProcessing;
-using CardioMonitor.Files;
+using CardioMonitor.FileSaving;
 using CardioMonitor.Infrastructure.WpfCommon.Base;
 using CardioMonitor.Resources;
 using JetBrains.Annotations;
@@ -24,7 +24,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         #region Fields
 
         private readonly ILogger _logger;
-        private readonly IFilesManager _filesRepository;
+        private readonly ISessionFileSavingManager _sessionFileSavingRepository;
         private PatientFullName _patientName;
         private Patient _patient;
         private ICommand _saveCommand;
@@ -48,14 +48,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             ISessionsService sessionsService, 
             IPatientsService patientsService,
             ILogger logger,
-            IFilesManager filesRepository, 
+            ISessionFileSavingManager sessionFileSavingRepository, 
             [NotNull] ToastNotifications.Notifier notifier)
         {
             _sessionsService = sessionsService;
             _patientsService = patientsService;
 
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _filesRepository = filesRepository ?? throw new ArgumentNullException(nameof(filesRepository));
+            _sessionFileSavingRepository = sessionFileSavingRepository ?? throw new ArgumentNullException(nameof(sessionFileSavingRepository));
             _notifier = notifier;
 
             IsReadOnly = true;
@@ -207,7 +207,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = true;
                 BusyMessage = "Сохранение в файл...";
-           //     _filesRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
+           //     _sessionFileSavingRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
                 await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionDataViewModel_FileSaved);
                 _notifier.ShowSuccess("Сеанс успешно сохранен");
             }

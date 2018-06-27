@@ -322,7 +322,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 var message = String.Empty;
                 try
                 {
-                    var container = _filesRepository.LoadFromFile(loadDialog.FileName);
+                    var container = _sessionFileSavingRepository.LoadFromFile(loadDialog.FileName);
                 }
                 catch (ArgumentNullException)
                 {
