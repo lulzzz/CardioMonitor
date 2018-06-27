@@ -222,6 +222,11 @@ namespace CardioMonitor.Devices.Bed.Fake
             return (float) (_config.MaxAngleX * cycleElapsedTime.Ticks / _cycleDuration.Ticks);
         }
 
+        public Task<BedStatus> GetBedStatusAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public Guid DeviceId => FakeInversionTableDeviceId.DeviceId;
         public Guid DeviceTypeId => InversionTableDeviceTypeId.DeviceTypeId;
     }

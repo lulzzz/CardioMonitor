@@ -150,7 +150,9 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// </summary>
         /// <returns></returns>
         Task<float> GetAngleXAsync();
-        
+
+        Task<BedStatus> GetBedStatusAsync();
+
         #endregion
     }
 }

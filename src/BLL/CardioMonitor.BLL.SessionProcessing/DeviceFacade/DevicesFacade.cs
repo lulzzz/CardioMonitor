@@ -800,7 +800,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     return;
                 }
                 // запускаем кровать
-
+                if (await _bedController.GetBedStatusAsync() != BedStatus.Ready)
+                {
+                    _logger?.Trace($"{GetType().Name}: ошибка готовности кровати");
+                    OnException?.Invoke(
+                        this,
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.StartFailed,
+                            "Сеанс не будет запущен так как кровать не готова к старту"));
+                    return;
+                }
                 _logger?.Trace($"{GetType().Name}: старт сеанса");
                 await _bedController
                     .ExecuteCommandAsync(BedControlCommand.Start)

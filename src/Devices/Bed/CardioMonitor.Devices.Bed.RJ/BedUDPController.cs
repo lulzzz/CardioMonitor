@@ -169,9 +169,9 @@ namespace CardioMonitor.Devices.Bed.UDP
                 receiveMessage = await _udpClient.ReceiveAsync();
                 Thread.Sleep(100);
                 //todo здесь лучше сделать паузу ~100mc 
-                //sendMessage = message.SetCycleCountValueMessage((byte) _config.CyclesCount);
-                //await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-                //receiveMessage = await _udpClient.ReceiveAsync();
+                sendMessage = message.SetCycleCountValueMessage((byte) _config.CyclesCount);
+                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+                receiveMessage = await _udpClient.ReceiveAsync();
             }
             finally
             {
@@ -219,6 +219,22 @@ namespace CardioMonitor.Devices.Bed.UDP
                     && registerValues.BedStatus == BedStatus.Reverse)
                 {
                     OnReverseFromDeviceRequested(this, EventArgs.Empty);
+                }
+                if (_registerValues.BedStatus == BedStatus.SessionStarted &&
+                    registerValues.BedStatus == BedStatus.Pause)
+                {
+                    OnPauseFromDeviceRequested(this,EventArgs.Empty);
+                }
+
+                if (_registerValues.BedStatus == BedStatus.Pause &&
+                    registerValues.BedStatus == BedStatus.SessionStarted)
+                {
+                    OnResumeFromDeviceRequested(this, EventArgs.Empty);
+                }
+                if (_registerValues.BedStatus != BedStatus.EmergencyStop &&
+                    registerValues.BedStatus == BedStatus.EmergencyStop)
+                {
+                    OnEmeregencyStopFromDeviceRequested(this,EventArgs.Empty);
                 }
 
                 _registerValues = registerValues;
@@ -387,6 +403,14 @@ namespace CardioMonitor.Devices.Bed.UDP
             AssertRegisterIsNull();
             await Task.Yield();
             return  _sessionInfo.GetNextIterationNumberForEcgMeasuring(await GetCurrentIterationAsync());
+        }
+
+        public async Task<BedStatus> GetBedStatusAsync()
+        {
+            RiseExceptions();
+            AssertRegisterIsNull();
+            await Task.Yield();
+            return _registerValues.BedStatus;
         }
 
         public async Task<TimeSpan> GetRemainingTimeAsync()

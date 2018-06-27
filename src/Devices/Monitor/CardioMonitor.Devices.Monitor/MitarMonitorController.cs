@@ -366,21 +366,35 @@ namespace CardioMonitor.Devices.Monitor
             {
                 return Task.Factory.StartNew(() =>
                 {
-                    byte[] sendMessage = new byte[25]
+                    try
                     {
-                        0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22
-                    };
-                    _stream.WriteAsync(sendMessage, 0, sendMessage.Length);
-                   // Thread.Sleep(1000);
-                    _isPumpStarted = true;
-                    _pumpingReady.WaitOne(new TimeSpan(0, 1,
-                        0)); //todo по таймауту по идее должен кидаться эксепшн (подумать над необходимостью)
-                    _isPumpStarted = false;
-                    if (_pumpingStatus.IsPumpingError)
+
+
+                        byte[] sendMessage = new byte[25]
+                        {
+                            0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                            0x00,
+                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22
+                        };
+                        _stream.WriteAsync(sendMessage, 0, sendMessage.Length);
+                        
+                        _isPumpStarted = true;
+                        _pumpingReady.WaitOne(new TimeSpan(0, 1,
+                            0)); //todo по таймауту по идее должен кидаться эксепшн (подумать над необходимостью)
+                        _isPumpStarted = false;
+                        if (_pumpingStatus.IsPumpingError)
+                        {
+                            throw new ArgumentException(
+                                "Ошибка накачки давления "); //todo не знаю какого типа эксепшен вызывать
+                        }
+                    }
+                    catch (Exception)
                     {
-                        throw new ArgumentException(
-                            "Ошибка накачки давления "); //todo не знаю какого типа эксепшен вызывать
+                       // throw new DeviceConnectionException("Ошибка накачки давления");
+                    }
+                    finally
+                    {
+                        //RiseExceptions();
                     }
                 });
 
