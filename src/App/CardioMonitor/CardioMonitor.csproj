@@ -198,7 +198,19 @@
     <Compile Include="Devices\Configuration\Events\DeviceConfigChangedEvent.cs" />
     <Compile Include="Devices\Configuration\Events\DeviceConfigDeletedEvent.cs" />
     <Compile Include="Events\Settings\FileStorageLocationChanged.cs" />
-    <Compile Include="Files\IFilesManager.cs" />
+    <Compile Include="FileSaving\Containers\FileStorageDataContainer.cs" />
+    <Compile Include="FileSaving\Containers\V1\SessionContainerV1.cs" />
+    <Compile Include="FileSaving\Containers\V1\StoredDeviceValueStatusV1.cs" />
+    <Compile Include="FileSaving\Containers\V1\StoredDeviceValueV1.cs" />
+    <Compile Include="FileSaving\Containers\V1\StoredPatientParamsV1.cs" />
+    <Compile Include="FileSaving\Containers\V1\StoredPatientV1.cs" />
+    <Compile Include="FileSaving\Containers\V1\StoredSessionCycleV1.cs" />
+    <Compile Include="FileSaving\Containers\V1\StoredSessionStatusV1.cs" />
+    <Compile Include="FileSaving\Containers\V1\StoredSessionV1.cs" />
+    <Compile Include="FileSaving\Exceptions\FileNotFoundException.cs" />
+    <Compile Include="FileSaving\Exceptions\SavingException.cs" />
+    <Compile Include="FileSaving\ISessionFileSavingManager.cs" />
+    <Compile Include="FileSaving\Mappers\V1\SessionStatusMapperV1.cs" />
     <Compile Include="LogNames.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -208,9 +220,10 @@
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Settings\ICardioSettings.cs" />
     <Compile Include="Settings\SettingsConstants.cs" />
+    <Compile Include="Settings\SettingsException.cs" />
     <Compile Include="Settings\SettingsManager.cs" />
     <Compile Include="Threading\ThreadAssistant.cs" />
-    <Compile Include="Files\FilesManager.cs" />
+    <Compile Include="FileSaving\SessionFileSavingSavingManager.cs" />
     <Compile Include="Ui\Converters\SessionStatusToTextConverter.cs" />
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\SimpleInjectorPageCreator.cs" />
