@@ -6,7 +6,7 @@
     public enum SessionStatus
     {
         /// <summary>
-        /// Неизвестно
+        /// Не начат
         /// </summary>
         NotStarted = 0,
         /// <summary>

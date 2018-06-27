@@ -11,8 +11,16 @@ namespace CardioMonitor.BLL.Mappers
             {
                 case SessionCompletionStatus.Completed:
                     return SessionStatus.Completed;
-                case SessionCompletionStatus.Terminated:
+                case SessionCompletionStatus.TerminatedOnError:
                     return SessionStatus.TerminatedOnError;
+                case SessionCompletionStatus.NotStarted:
+                    return SessionStatus.NotStarted;
+                case SessionCompletionStatus.InProgress:
+                    return SessionStatus.InProgress;
+                case SessionCompletionStatus.Suspended:
+                    return SessionStatus.Suspended;
+                case SessionCompletionStatus.EmergencyStopped:
+                    return SessionStatus.EmergencyStopped;
                 default:
                     return SessionStatus.NotStarted;
             }
@@ -26,9 +34,17 @@ namespace CardioMonitor.BLL.Mappers
                 case SessionStatus.Completed:
                     return SessionCompletionStatus.Completed;
                 case SessionStatus.TerminatedOnError:
-                    return SessionCompletionStatus.Terminated;
+                    return SessionCompletionStatus.TerminatedOnError;
+                case SessionStatus.NotStarted:
+                    return SessionCompletionStatus.NotStarted;
+                case SessionStatus.InProgress:
+                    return SessionCompletionStatus.InProgress;
+                case SessionStatus.Suspended:
+                    return SessionCompletionStatus.Suspended;
+                case SessionStatus.EmergencyStopped:
+                    return SessionCompletionStatus.EmergencyStopped;
                 default:
-                    return SessionCompletionStatus.Unknown;
+                    return SessionCompletionStatus.NotStarted;
             }
         }
     }
