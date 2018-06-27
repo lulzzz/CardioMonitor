@@ -138,7 +138,7 @@ namespace CardioMonitor.BLL.CoreServices.Sessions
                     {
                         Id = sessionInfo.Id,
                         Status = sessionInfo.Status.ToSessionStatus(),
-                        DateTime = sessionInfo.DateTimeUtc,
+                        TimestampUtc = sessionInfo.TimestampUtc,
                         PatientId = sessionInfo.PatientId,
                         PatientFullName = patientNamesMap[sessionInfo.PatientId].Name
                     });

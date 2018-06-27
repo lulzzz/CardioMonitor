@@ -61,7 +61,7 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         public string PatientFullName { get; set; }
 
         /// <summary>
-        /// Дата и время сеанса
+        /// Дата и время сеанса (UTC)
         /// </summary>
         public DateTime TimestampUtc { get; set; }
 

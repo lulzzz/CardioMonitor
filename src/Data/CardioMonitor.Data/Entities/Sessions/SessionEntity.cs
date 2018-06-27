@@ -15,9 +15,9 @@ namespace CardioMonitor.Data.Ef.Entities.Sessions
         public int Id { get; set; }
         
         /// <summary>
-        /// Дата и время
+        /// Дата и время (UTC)
         /// </summary>
-        public DateTime DateTimeUtc { get; set; }
+        public DateTime TimestampUtc { get; set; }
         
         /// <summary>
         /// Статус завершения сеанса
