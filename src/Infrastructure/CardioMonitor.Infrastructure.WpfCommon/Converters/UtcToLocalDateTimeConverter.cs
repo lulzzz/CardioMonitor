@@ -13,7 +13,7 @@ namespace CardioMonitor.Infrastructure.WpfCommon.Converters
             CultureInfo culture)
         {
             if (value == null) throw new ArgumentNullException(nameof(value));
-            if (DateTime.TryParse(value.ToString(), out var dateTime))
+            if (!DateTime.TryParse(value.ToString(), out var dateTime))
                 throw new ArgumentException($"{nameof(value)} must be {typeof(DateTime)} type");
 
             return DateTime.SpecifyKind(dateTime, DateTimeKind.Utc).ToLocalTime();

@@ -6,11 +6,19 @@
              xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
              xmlns:controls="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
-             xmlns:sessions="clr-namespace:CardioMonitor.Ui.View.Sessions"
+             xmlns:sessions="clr-namespace:CardioMonitor.Ui.View.Sessions" 
+             xmlns:commonConverters="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Converters;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             xmlns:uiConverters="clr-namespace:CardioMonitor.Ui.Converters"
              xmlns:sessionProcessing="clr-namespace:CardioMonitor.BLL.SessionProcessing;assembly=CardioMonitor.BLL.SessionProcessing"
              d:DataContext="{d:DesignInstance Type=viewModel:SessionDataViewModel}"
              mc:Ignorable="d" 
              d:DesignHeight="700" d:DesignWidth="1000">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <uiConverters:SessionStatusToTextConverter x:Key="SessionStatusToTextConverter"/>
+            <commonConverters:UtcToLocalDateTimeConverter x:Key="UtcToLocalDateTimeConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <controls:BusyIndicator
         Style="{DynamicResource BusyIndicatorStylekey}"
         IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
@@ -29,14 +37,21 @@
             <TextBlock Text="{Binding PatientName}"
                    Style="{DynamicResource CmPageHeader}">
             </TextBlock>
-                <TextBlock Text="Дата и время сеанса:"
-                           Margin="25,10,10,10"
-                           Style="{DynamicResource CmPageHeader}"/>
             <TextBlock 
-                Text="{Binding SessionDateTimeLocal, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}"
-                       
-                       Style="{DynamicResource CmPageHeader}"/>
-        </StackPanel>
+                Text="Дата и время сеанса:"
+                Margin="25,10,10,10"
+                Style="{DynamicResource CmPageHeader}"/>
+            <TextBlock 
+                Text="{Binding SessionTimestampUtc, StringFormat='{}{0:dd.MM.yyyy HH:mm}', Converter={StaticResource UtcToLocalDateTimeConverter}}"
+                Style="{DynamicResource CmPageHeader}"/>
+            <TextBlock 
+                Text="Статус сеанса:"
+                Margin="25,10,10,10"
+                Style="{DynamicResource CmPageHeader}"/>
+            <TextBlock 
+                Text="{Binding SessionStatus, Converter={StaticResource SessionStatusToTextConverter}}"
+                Style="{DynamicResource CmPageHeader}"/>
+            </StackPanel>
         <DataGrid Grid.Row="1"
                   ItemsSource="{Binding Patients}"
                   Style="{DynamicResource CmDataGrid}"

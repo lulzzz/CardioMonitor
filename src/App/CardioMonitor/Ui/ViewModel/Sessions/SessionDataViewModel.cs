@@ -40,7 +40,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private bool _isReadOnly;
 
         private SessionStatus _sessionStatus;
-        private DateTime _sessionDateTimeLocal;
+        private DateTime _sessionTimestampUtc;
         private int _selectedCycleTab;
         #endregion
 
@@ -159,13 +159,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
-        public DateTime SessionDateTimeLocal
+        public DateTime SessionTimestampUtc
         {
-            get => _sessionDateTimeLocal;
+            get => _sessionTimestampUtc;
             set
             {
-                _sessionDateTimeLocal = value;
-                RisePropertyChanged(nameof(SessionDateTimeLocal));
+                _sessionTimestampUtc = value;
+                RisePropertyChanged(nameof(SessionTimestampUtc));
             }
         }
         
@@ -272,7 +272,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 }
 
                 SessionStatus = session.Status;
-                SessionDateTimeLocal = session.DateTimeUtc.ToLocalTime();
+                SessionTimestampUtc = session.TimestampUtc;
                 SelectedCycleTab = 0;
                 
                 PatientParamsPerCycles = patientParamsPerCycles;

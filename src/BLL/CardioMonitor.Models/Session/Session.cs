@@ -21,7 +21,7 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         /// <summary>
         /// Дата и время (UTC)
         /// </summary>
-        public DateTime DateTimeUtc { get; set; }
+        public DateTime TimestampUtc { get; set; }
         
         /// <summary>
         /// Статус сеанса
@@ -35,7 +35,7 @@ namespace CardioMonitor.BLL.CoreContracts.Session
         /// </summary>
         public Session()
         {
-            DateTimeUtc = new DateTime();
+            TimestampUtc = new DateTime();
             Status = SessionStatus.NotStarted;
         }
     }

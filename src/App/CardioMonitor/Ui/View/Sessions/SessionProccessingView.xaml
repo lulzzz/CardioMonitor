@@ -10,16 +10,17 @@
              xmlns:sessionProcessing="clr-namespace:CardioMonitor.BLL.SessionProcessing;assembly=CardioMonitor.BLL.SessionProcessing"
 
              xmlns:converters="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Converters;assembly=CardioMonitor.Infrastructure.WpfCommon"
-             xmlns:sessionStatusToStatusVisibilityConverters="clr-namespace:CardioMonitor.Ui.View.Sessions.Converters"
              xmlns:controls1="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             xmlns:converters1="clr-namespace:CardioMonitor.Ui.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="1000"
              d:DataContext="{d:DesignInstance  Type=sessionViewModels:SessionProcessingViewModel}">
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters1:SessionStatusToTextConverter x:Key="SessionStatusToTextConverter"/>
         <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
-        <sessionStatusToStatusVisibilityConverters:CompletedSessionStatusToVisibilityConverter x:Key="CompletedSessionStatusToVisibilityConverter"/>
-        <sessionStatusToStatusVisibilityConverters:NotCompletedSessionStatusToVisibilityConverter x:Key="NotCompletedSessionStatusToVisibilityConverter"/>
+        <converters1:CompletedSessionStatusToVisibilityConverter x:Key="CompletedSessionStatusToVisibilityConverter"/>
+        <converters1:NotCompletedSessionStatusToVisibilityConverter x:Key="NotCompletedSessionStatusToVisibilityConverter"/>
 
         <Style x:Key="CmSessionProcessingToggleButtons"
                TargetType="{x:Type ToggleButton}"
@@ -78,8 +79,10 @@
                 <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
                 <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
+                </Grid.ColumnDefinitions>
             <TextBlock Text="Дата:"
                        Grid.Column="0"
                        Style="{DynamicResource CmLabel}"/>
@@ -92,7 +95,17 @@
             <TextBlock Text="{Binding Source={x:Static sys:DateTime.Now}, StringFormat='{}{0:HH:mm}'}"
                        Grid.Column="3"
                        Style="{DynamicResource CmLabel}"/>
-        </Grid>
+            <TextBlock Text="Статус сеанса:"
+                       Grid.Column="4"
+                       Style="{DynamicResource CmLabel}"/>
+            <TextBlock Text="{Binding 
+                            SessionStatus, 
+                            Mode=OneWay, 
+                            UpdateSourceTrigger=PropertyChanged, 
+                            Converter={StaticResource SessionStatusToTextConverter}}"
+                       Grid.Column="5"
+                       Style="{DynamicResource CmLabel}"/>
+            </Grid>
         <Grid
             Grid.Row="2">
             <Grid.Resources>

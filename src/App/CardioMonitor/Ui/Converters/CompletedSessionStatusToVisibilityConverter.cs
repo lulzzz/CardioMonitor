@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Data;
 using CardioMonitor.BLL.CoreContracts.Session;
 
-namespace CardioMonitor.Ui.View.Sessions.Converters
+namespace CardioMonitor.Ui.Converters
 {
     public class CompletedSessionStatusToVisibilityConverter : IValueConverter
     {

@@ -211,6 +211,7 @@
     <Compile Include="Settings\SettingsManager.cs" />
     <Compile Include="Threading\ThreadAssistant.cs" />
     <Compile Include="Files\FilesManager.cs" />
+    <Compile Include="Ui\Converters\SessionStatusToTextConverter.cs" />
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\SimpleInjectorPageCreator.cs" />
     <Compile Include="Ui\StoryboardIds.cs" />
@@ -244,8 +245,8 @@
       <DependentUpon>PatientView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Ui\ViewModel\Patients\PatientsViewModel.cs" />
-    <Compile Include="Ui\View\Sessions\Converters\CompletedSessionStatusToVisibilityConverter.cs" />
-    <Compile Include="Ui\View\Sessions\Converters\NotCompletedSessionStatusToVisibilityConverter.cs" />
+    <Compile Include="Ui\Converters\CompletedSessionStatusToVisibilityConverter.cs" />
+    <Compile Include="Ui\Converters\NotCompletedSessionStatusToVisibilityConverter.cs" />
     <Compile Include="Ui\View\Sessions\SessionProcessingInitView.xaml.cs">
       <DependentUpon>SessionProcessingInitView.xaml</DependentUpon>
     </Compile>

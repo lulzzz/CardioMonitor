@@ -79,7 +79,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private bool _isSessionSaved;
 
-        private DateTime _sessionTimeUtc;
+        private DateTime _sessionTimestampUtc;
 
         private bool _isSessionStarted;
 
@@ -522,7 +522,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         await StartAsync().ConfigureAwait(true);
                         StartButtonText = _pauseText;
                         IsSessionStarted = true;
-                        _sessionTimeUtc = DateTime.UtcNow;
+                        _sessionTimestampUtc = DateTime.UtcNow;
                         break;
                 }
             }
@@ -671,7 +671,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 Status = SessionStatus,
                 PatientId = Patient.Id,
-                DateTimeUtc = _sessionTimeUtc,
+                TimestampUtc = _sessionTimestampUtc,
                 Cycles = PatientParamsPerCycles
                     .Select(
                         //todo mappers

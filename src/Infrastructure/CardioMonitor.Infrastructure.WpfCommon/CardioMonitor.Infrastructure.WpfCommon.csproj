@@ -52,6 +52,7 @@
     <Compile Include="Communication\AccessMode.cs" />
     <Compile Include="Controls\BusyIndicator.cs" />
     <Compile Include="Converters\InvertedBooleanToVisibilityConverter.cs" />
+    <Compile Include="Converters\UtcToLocalDateTimeConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
