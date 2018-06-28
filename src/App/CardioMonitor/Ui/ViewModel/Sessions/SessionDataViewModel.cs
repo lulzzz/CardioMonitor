@@ -24,7 +24,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         #region Fields
 
         private readonly ILogger _logger;
-        private readonly ISessionFileSavingManager _sessionFileSavingRepository;
+        private readonly ISessionFileManager _sessionFileRepository;
         private PatientFullName _patientName;
         private Patient _patient;
         private ICommand _saveCommand;
@@ -48,14 +48,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             ISessionsService sessionsService, 
             IPatientsService patientsService,
             ILogger logger,
-            ISessionFileSavingManager sessionFileSavingRepository, 
+            ISessionFileManager sessionFileRepository, 
             [NotNull] ToastNotifications.Notifier notifier)
         {
             _sessionsService = sessionsService;
             _patientsService = patientsService;
 
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _sessionFileSavingRepository = sessionFileSavingRepository ?? throw new ArgumentNullException(nameof(sessionFileSavingRepository));
+            _sessionFileRepository = sessionFileRepository ?? throw new ArgumentNullException(nameof(sessionFileRepository));
             _notifier = notifier;
 
             IsReadOnly = true;

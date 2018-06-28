@@ -105,6 +105,10 @@
       <HintPath>..\..\packages\Npgsql.2.2.7\lib\net45\Mono.Security.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+      <HintPath>..\..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="NLog.StructuredEvents, Version=0.4.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\..\packages\NLog.StructuredEvents.0.4.0\lib\net35\NLog.StructuredEvents.dll</HintPath>
     </Reference>
@@ -209,7 +213,7 @@
     <Compile Include="FileSaving\Containers\V1\StoredSessionV1.cs" />
     <Compile Include="FileSaving\Exceptions\FileNotFoundException.cs" />
     <Compile Include="FileSaving\Exceptions\SavingException.cs" />
-    <Compile Include="FileSaving\ISessionFileSavingManager.cs" />
+    <Compile Include="FileSaving\ISessionFileManager.cs" />
     <Compile Include="FileSaving\Mappers\V1\DeviceValueMapperV1.cs" />
     <Compile Include="FileSaving\Mappers\V1\PatientMapperV1.cs" />
     <Compile Include="FileSaving\Mappers\V1\PatientParamsMapperV1.cs" />
@@ -230,9 +234,11 @@
     <Compile Include="Settings\SettingsException.cs" />
     <Compile Include="Settings\SettingsManager.cs" />
     <Compile Include="Threading\ThreadAssistant.cs" />
-    <Compile Include="FileSaving\SessionFileSavingSavingManager.cs" />
+    <Compile Include="FileSaving\SessionFileManager.cs" />
     <Compile Include="Ui\Converters\SessionStatusToTextConverter.cs" />
+    <Compile Include="Ui\ISessionsFileUiManager.cs" />
     <Compile Include="Ui\MessageHelper.cs" />
+    <Compile Include="Ui\SessionsFileUiManager.cs" />
     <Compile Include="Ui\SimpleInjectorPageCreator.cs" />
     <Compile Include="Ui\StoryboardIds.cs" />
     <Compile Include="Ui\ViewModel\Devices\DeviceConfigsViewModelPageContext.cs" />

@@ -61,7 +61,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _saveSessionToFileCommand;
 
         private readonly ILogger _logger;
-        private readonly ISessionFileSavingManager _sessionFileSavingRepository;
+        private readonly ISessionFileManager _sessionFileRepository;
         private readonly ISessionsService _sessionsService;
         [NotNull] private readonly IDeviceControllerFactory _deviceControllerFactory;
 
@@ -364,7 +364,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public SessionProcessingViewModel(
             [NotNull] ILogger logger,
-            [NotNull] ISessionFileSavingManager sessionFileSavingRepository,
+            [NotNull] ISessionFileManager sessionFileRepository,
             [NotNull] ISessionsService sessionsService,
             [NotNull] IDeviceControllerFactory deviceControllerFactory,
             [NotNull] IWorkerController workerController,
@@ -375,7 +375,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] IEventBus eventBus)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _sessionFileSavingRepository = sessionFileSavingRepository ?? throw new ArgumentNullException(nameof(sessionFileSavingRepository));
+            _sessionFileRepository = sessionFileRepository ?? throw new ArgumentNullException(nameof(sessionFileRepository));
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _deviceControllerFactory = deviceControllerFactory ??
                                        throw new ArgumentNullException(nameof(deviceControllerFactory));

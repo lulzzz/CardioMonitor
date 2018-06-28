@@ -148,7 +148,7 @@ namespace CardioMonitor
         {
             container.Register<IPatientsService, PatientService>(Lifestyle.Transient);
             container.Register<ISessionsService, SessionsService>(Lifestyle.Transient);
-            container.Register<ISessionFileSavingManager, SessionFileSavingSavingManager>(Lifestyle.Transient);
+            container.Register<ISessionFileManager, SessionFileManager>(Lifestyle.Transient);
             container.RegisterSingleton<ISessionParamsValidator, SessionParamsValidator>();
         }
 

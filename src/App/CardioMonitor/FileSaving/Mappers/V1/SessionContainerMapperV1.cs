@@ -18,7 +18,7 @@ namespace CardioMonitor.FileSaving.Mappers.V1
             };
         }
         
-        public static StoredSessionContainerV1 ToStored([NotNull] this SessionContainer container)
+        public static StoredSessionContainerV1 ToStoredV1([NotNull] this SessionContainer container)
         {
             if (container == null) throw new ArgumentNullException(nameof(container));
             

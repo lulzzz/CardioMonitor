@@ -14,5 +14,15 @@ namespace CardioMonitor.Settings
     /// </remarks>
     internal class SettingsException : Exception
     {
+        public SettingsException()
+        {
+            
+        }
+
+        public SettingsException(string message)
+            : base(message)
+        {
+            
+        }
     }
 }
