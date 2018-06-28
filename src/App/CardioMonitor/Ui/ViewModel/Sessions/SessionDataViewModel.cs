@@ -24,12 +24,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         #region Fields
 
         private readonly ILogger _logger;
-        private readonly ISessionFileManager _sessionFileRepository;
+        [NotNull]
+        private readonly ISessionsFileUiManager _sessionFileUiManager;
+
         private PatientFullName _patientName;
         private Patient _patient;
+        private Session _session;
         private ICommand _saveCommand;
-        private readonly ISessionsService _sessionsService;
-        private readonly IPatientsService _patientsService;
+
         [NotNull]
         private readonly ToastNotifications.Notifier _notifier;
 
@@ -44,18 +46,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private int _selectedCycleTab;
         #endregion
 
-        public SessionDataViewModel(
-            ISessionsService sessionsService, 
-            IPatientsService patientsService,
-            ILogger logger,
-            ISessionFileManager sessionFileRepository, 
+        public SessionDataViewModel(ILogger logger,
+            [NotNull] ISessionsFileUiManager sessionFileUiManager, 
             [NotNull] ToastNotifications.Notifier notifier)
         {
-            _sessionsService = sessionsService;
-            _patientsService = patientsService;
-
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _sessionFileRepository = sessionFileRepository ?? throw new ArgumentNullException(nameof(sessionFileRepository));
+            _sessionFileUiManager = sessionFileUiManager ?? throw new ArgumentNullException(nameof(sessionFileUiManager));
+
             _notifier = notifier;
 
             IsReadOnly = true;
@@ -197,52 +194,32 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         #endregion
 
-        public async void SaveToFile()
+        public void SaveToFile()
         {
-            var saveFileDialog = new SaveFileDialog {Filter = Localisation.FileRepository_SeansFileFilter};
-            var dialogResult = saveFileDialog.ShowDialog();
-            if (dialogResult != DialogResult.OK) return;
-
             try
             {
                 IsBusy = true;
                 BusyMessage = "Сохранение в файл...";
-           //     _sessionFileSavingRepository.SaveToFile(Patient, Session.Session, saveFileDialog.FileName);
-                await MessageHelper.Instance.ShowMessageAsync(Localisation.SessionDataViewModel_FileSaved);
-                _notifier.ShowSuccess("Сеанс успешно сохранен");
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"{GetType().Name}: Ошибка сохранения сессии в файл. Причина: {ex.Message}", ex);
-                _notifier.ShowError("Ошибка сохранения сеанса в файл");
+                _sessionFileUiManager.Save(_patient, _session);
             }
             finally
             {
                 IsBusy = false;
             }
         }
-
-        public async void LoadFromFile()
-        {
-            //todo what?
-            await MessageHelper.Instance.ShowMessageAsync("Opened!").ConfigureAwait(true);
-        }
         
         public void Dispose()
         {
         }
 
-        private async Task LoadSessionInfoAsync(int sessionId, int patientId)
+        private  Task LoadSessionInfoAsync([NotNull] Session session, [NotNull] Patient patient)
         {
+            if (session == null) throw new ArgumentNullException(nameof(session));
+            if (patient == null) throw new ArgumentNullException(nameof(patient));
             try
             {
                 IsBusy = true;
                 BusyMessage = "Загрузка информации о сеансе...";
-                var session =  await _sessionsService
-                    .GetAsync(sessionId)
-                    .ConfigureAwait(true);
-                if (session?.Cycles == null) throw new ArgumentException(
-                    $"Сессия с Id {sessionId} не получена или не получены информация о повторениях");
 
                 var patientParamsPerCycles = new List<CycleData>(session.Cycles.Count);
                 foreach (var sessionCycle in session.Cycles)
@@ -271,15 +248,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     patientParamsPerCycles.Add(cycleData);
                 }
 
+                _session = session;
                 SessionStatus = session.Status;
                 SessionTimestampUtc = session.TimestampUtc;
                 SelectedCycleTab = 0;
                 
                 PatientParamsPerCycles = patientParamsPerCycles;
                 
-                var patient =  await _patientsService
-                    .GetPatientAsync(patientId)
-                    .ConfigureAwait(true);
                 Patient = patient;
             }
             catch (Exception ex)
@@ -291,6 +266,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = false;
             }
+            return Task.CompletedTask;
         }
 
 
@@ -303,13 +279,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         public Task OpenAsync(IStoryboardPageContext context)
         {
-            if (!(context is SessionDataViewingPageContext pageContext)) throw new ArgumentException("Incorrect type of arguments");
+            if (!(context is SessionDataViewingPageContext pageContext))
+                throw new ArgumentException("Incorrect type of arguments");
 
-            if (String.IsNullOrEmpty(pageContext.FileFullPath))
-            {
-                Task.Factory.StartNew(
-                    async () => await LoadSessionInfoAsync(pageContext.SessionId, pageContext.PatientId));
-            }
+            Task.Factory.StartNew(
+                async () => await LoadSessionInfoAsync(pageContext.Session, pageContext.Patient));
+
 
             return Task.CompletedTask;
         }

@@ -22,7 +22,7 @@ namespace CardioMonitor.Ui.View.Patients
 
         private void SearTB_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (0 == SearTB.Text.Length)
+            if (0 == SearTb.Text.Length)
             {
                // _viewModel.CancelSearch();
             }

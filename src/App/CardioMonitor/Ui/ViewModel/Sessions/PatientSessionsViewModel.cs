@@ -19,7 +19,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     {
         #region Fields
 
+        [NotNull]
         private readonly ISessionsService _sessionsService;
+        [NotNull]
+        private readonly IPatientsService _patientsService;
         private readonly ILogger _logger;
         private PatientFullName _patientName;
         private SessionInfo _selectedSessionInfo;
@@ -51,7 +54,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] ToastNotifications.Notifier notifier, 
             [NotNull] SessionAddedEventHandler sessionAddedEventHandler, 
             [NotNull] SessionChangedEventHandler sessionChangedEventHandler, 
-            [NotNull] SessionDeletedEventHandler sessionDeletedEventHandler)
+            [NotNull] SessionDeletedEventHandler sessionDeletedEventHandler, 
+            [NotNull] IPatientsService patientsService)
         {
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -59,6 +63,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _sessionAddedEventHandler = sessionAddedEventHandler ?? throw new ArgumentNullException(nameof(sessionAddedEventHandler));
             _sessionChangedEventHandler = sessionChangedEventHandler ?? throw new ArgumentNullException(nameof(sessionChangedEventHandler));
             _sessionDeletedEventHandler = sessionDeletedEventHandler ?? throw new ArgumentNullException(nameof(sessionDeletedEventHandler));
+            _patientsService = patientsService ?? throw new ArgumentNullException(nameof(patientsService));
 
             _sessionAddedEventHandler.SessionAdded += delegate { _isSessionListChanged = true; };
             _sessionChangedEventHandler.SessionChanged += delegate { _isSessionListChanged = true; };
@@ -213,16 +218,38 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private async Task ShowResultsAsync()
         {
-            await PageTransitionRequested.InvokeAsync(
-                    this,
-                    new TransitionRequest(
-                        PageIds.SessionDataViewingPageId,
-                        new SessionDataViewingPageContext
-                        {
-                            PatientId = _patient.Id,
-                            SessionId = SelectedSessionInfo.Id
-                        }))
-                .ConfigureAwait(true);
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Подготовка данных...";
+                var session = await _sessionsService
+                    .GetAsync(SelectedSessionInfo.Id)
+                    .ConfigureAwait(true);
+                
+                var patient = await  _patientsService
+                    .GetPatientAsync(session.PatientId)
+                    .ConfigureAwait(true);
+
+                await PageTransitionRequested.InvokeAsync(
+                        this,
+                        new TransitionRequest(
+                            PageIds.SessionDataViewingPageId,
+                            new SessionDataViewingPageContext
+                            {
+                                Patient = patient,
+                                Session = session
+                            }))
+                    .ConfigureAwait(true);
+            }
+            catch (Exception e)
+            {
+                _notifier.ShowError("Ошибка подготовки данных для отображения результатов сеанса");
+                _logger.Error($"{GetType().Name}: ошибка подготовки данных для отображения результатов сеанса. Причина: {e.Message}", e);
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         public void Clear()

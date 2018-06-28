@@ -23,7 +23,7 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBox x:Name="SearTB"
+            <TextBox x:Name="SearTb"
                  x:FieldModifier="private"
                  Visibility="Collapsed"
                  Margin="0, 10, 0, 10"
@@ -44,7 +44,7 @@
                     </Style>
                 </TextBox.Style>
                 <TextBox.InputBindings>
-                    <KeyBinding Command="{Binding PatientSearchCommand}" CommandParameter="{Binding ElementName=SearTB, Path=Text}" Key="Enter"/>
+                    <KeyBinding Command="{Binding PatientSearchCommand}" CommandParameter="{Binding ElementName=SearTb, Path=Text}" Key="Enter"/>
                 </TextBox.InputBindings>
             </TextBox>
             <DataGrid x:Name="PatientsDg"
@@ -69,34 +69,24 @@
             </DataGrid>
             <StackPanel Grid.Row="2"
                     Style="{DynamicResource CmBottomPanel}">
-                <Button x:Name="AddPatientB"
-                    x:FieldModifier="private"
+                <Button
                     Command="{Binding AddNewPatientCommand}"
                     Content="Добавить"
                     Style="{DynamicResource CmCommandButton}"/>
-                <Button x:Name="EditPatientB"
-                    x:FieldModifier="private"
+                <Button
                     Command="{Binding EditPatientCommand}"
                     CommandParameter="{Binding ElementName=PatientsDg, Path=SelectedItem}"
                     Content="Редактровать "
                     Style="{DynamicResource CmCommandButton}"/>
-                <Button x:Name="DeletePatientB"
-                    x:FieldModifier="private"
+                <Button
                     Command="{Binding DeletePatientCommnad}"
                     CommandParameter="{Binding ElementName=PatientsDg, Path=SelectedItem}"
                     Content="Удалить "
                     Style="{DynamicResource CmCommandButton}"/>
 
-                <Button x:Name="OpenSessionsB"
-                    x:FieldModifier="private"
+                <Button
                     Content="Открыть сеансы"
                     Command="{Binding OpenSessionsCommand}"
-                    Style="{DynamicResource CmCommandButton}"/>
-
-                <Button x:Name="OpenFileResultsB"
-                    x:FieldModifier="private"
-                    Content="Открыть файл"
-                    Command="{Binding OpenSessionCommand}"
                     Style="{DynamicResource CmCommandButton}"/>
             </StackPanel>
         </Grid>

@@ -31,6 +31,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _startSessionCommand;
         private ICommand _deleteSessionCommand;
         private ICommand _showResultsCommand;
+        private ICommand _loadSessionFromFileCommand;
         private string _busyMessage;
 
         private bool _isBusy;
@@ -44,6 +45,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private bool _isSessionListChanged;
 
+        [NotNull]
+        private ISessionsFileUiManager _sessionFileManager;
+
         #endregion
 
         public SessionsViewModel(
@@ -53,7 +57,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] ToastNotifications.Notifier notifier, 
             [NotNull] SessionAddedEventHandler sessionAddedEventHandler, 
             [NotNull] SessionChangedEventHandler sessionChangedEventHandler, 
-            [NotNull] SessionDeletedEventHandler sessionDeletedEventHandler)
+            [NotNull] SessionDeletedEventHandler sessionDeletedEventHandler, 
+            [NotNull] ISessionsFileUiManager sessionFileManager)
         {
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _patientsService = patientsService;
@@ -62,6 +67,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _sessionAddedEventHandler = sessionAddedEventHandler ?? throw new ArgumentNullException(nameof(sessionAddedEventHandler));
             _sessionChangedEventHandler = sessionChangedEventHandler ?? throw new ArgumentNullException(nameof(sessionChangedEventHandler));
             _sessionDeletedEventHandler = sessionDeletedEventHandler ?? throw new ArgumentNullException(nameof(sessionDeletedEventHandler));
+            _sessionFileManager = sessionFileManager;
 
             _sessionAddedEventHandler.SessionAdded += delegate { _isSessionListChanged = true; };
             _sessionChangedEventHandler.SessionChanged += delegate { _isSessionListChanged = true; };
@@ -155,6 +161,18 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+        public ICommand LoadSessionFromFileCommand
+        {
+            get
+            {
+                return _loadSessionFromFileCommand ?? (_loadSessionFromFileCommand = new SimpleCommand
+                {
+                    CanExecuteDelegate = x => true,
+                    ExecuteDelegate = x => LoadSessionFromFileCommandExecute()
+                });
+            }
+        }
+
         #endregion
 
         private async Task StartSessionAsync()
@@ -212,6 +230,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 var patient = await  _patientsService
                     .GetPatientAsync(SelectedSessionInfo.PatientId)
                     .ConfigureAwait(true);
+                var session = await _sessionsService
+                    .GetAsync(SelectedSessionInfo.Id)
+                    .ConfigureAwait(true);
 
                 await PageTransitionRequested.InvokeAsync(
                         this,
@@ -219,14 +240,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                             PageIds.SessionDataViewingPageId,
                             new SessionDataViewingPageContext
                             {
-                                PatientId = patient.Id,
-                                SessionId = SelectedSessionInfo.Id
+                                Patient = patient,
+                                Session = session
                             }))
                     .ConfigureAwait(true);
             }
             catch (Exception e)
             {
-                _notifier.ShowError("Ошибка подготовка данных");
+                _notifier.ShowError("Ошибка подготовки данных для отображения результатов сеанса");
                 _logger.Error($"{GetType().Name}: ошибка подготовка данных для отображения результатов сеанса. Причина: {e.Message}", e);
             }
             finally
@@ -235,6 +256,32 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+        private async Task LoadSessionFromFileCommandExecute()
+        {
+            try
+            {
+                var sessionContainer = _sessionFileManager.Load();
+                if (sessionContainer == null) return;
+                await PageTransitionRequested.InvokeAsync(
+                        this,
+                        new TransitionRequest(
+                            PageIds.SessionDataViewingPageId,
+                            new SessionDataViewingPageContext
+                            {
+                                Patient = sessionContainer.Patient,
+                                Session = sessionContainer.Session
+                            }))
+                    .ConfigureAwait(true);
+            }
+            catch (Exception e)
+            {
+                _notifier.ShowError("Ошибка просмотра сеанса из файла");
+                _logger.Error(
+                    $"{GetType().Name}: ошибка просмотра сеанса из файла. Причина: {e.Message}",
+                    e);
+            }
+        }
+        
         public void Clear()
         {
             SelectedSessionInfo = null;

@@ -29,7 +29,6 @@ namespace CardioMonitor.Ui.ViewModel.Patients
 
         #endregion
 
-
         private readonly IPatientsService _patientsService;
         [NotNull]
         private readonly ToastNotifications.Notifier _notifier;

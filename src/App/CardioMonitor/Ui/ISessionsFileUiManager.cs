@@ -11,7 +11,7 @@ namespace CardioMonitor.Ui
     /// <remarks>
     /// Содержит диалоговые окна для выбора места сохранения
     /// </remarks>
-    internal interface ISessionsFileUiManager
+    public interface ISessionsFileUiManager
     {
         void Save([NotNull] Patient patient, [NotNull] Session session);
         

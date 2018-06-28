@@ -82,6 +82,11 @@
                     CommandParameter="{Binding ElementName=SessionsDG, Path=SelectedItem}"
                     Content="Открыть результаты"
                     Style="{DynamicResource CmCommandButton}"/>
+                
+                <Button
+                    Content="Открыть из файла"
+                    Command="{Binding LoadSessionFromFileCommand}"
+                    Style="{DynamicResource CmCommandButton}"/>
         </StackPanel>
     </Grid>
     </controls:BusyIndicator>

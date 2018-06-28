@@ -23,7 +23,17 @@ namespace CardioMonitor.Ui
         private readonly ISessionFileManager _fileManager;
         [NotNull]
         private readonly ILogger _logger;
-        
+
+        public SessionsFileUiManager(
+            [NotNull] Notifier notifier, 
+            [NotNull] ISessionFileManager fileManager, 
+            [NotNull] ILogger logger)
+        {
+            _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
+            _fileManager = fileManager ?? throw new ArgumentNullException(nameof(fileManager));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
         /// <inheritdoc />
         public void Save(Patient patient, Session session)
         {

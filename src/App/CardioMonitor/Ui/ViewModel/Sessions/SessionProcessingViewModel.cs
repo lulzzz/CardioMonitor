@@ -61,7 +61,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private ICommand _saveSessionToFileCommand;
 
         private readonly ILogger _logger;
-        private readonly ISessionFileManager _sessionFileRepository;
+        private readonly ISessionsFileUiManager _sessionFileManager;
         private readonly ISessionsService _sessionsService;
         [NotNull] private readonly IDeviceControllerFactory _deviceControllerFactory;
 
@@ -364,7 +364,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         /// </summary>
         public SessionProcessingViewModel(
             [NotNull] ILogger logger,
-            [NotNull] ISessionFileManager sessionFileRepository,
+            [NotNull] ISessionsFileUiManager sessionFileManager,
             [NotNull] ISessionsService sessionsService,
             [NotNull] IDeviceControllerFactory deviceControllerFactory,
             [NotNull] IWorkerController workerController,
@@ -375,7 +375,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             [NotNull] IEventBus eventBus)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _sessionFileRepository = sessionFileRepository ?? throw new ArgumentNullException(nameof(sessionFileRepository));
+            _sessionFileManager = sessionFileManager ?? throw new ArgumentNullException(nameof(sessionFileManager));
             _sessionsService = sessionsService ?? throw new ArgumentNullException(nameof(sessionsService));
             _deviceControllerFactory = deviceControllerFactory ??
                                        throw new ArgumentNullException(nameof(deviceControllerFactory));
@@ -719,7 +719,16 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private async Task SaveSessionToFileAsync()
         {
-            return;
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Сохранение в файл...";
+                _sessionFileManager.Save(_patient, GetSession());
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private bool CanReverseCommandExecute()
