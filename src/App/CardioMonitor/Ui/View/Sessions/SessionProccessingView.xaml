@@ -20,6 +20,7 @@
         <converters1:SessionStatusToTextConverter x:Key="SessionStatusToTextConverter"/>
         <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
         <converters1:CompletedSessionStatusToVisibilityConverter x:Key="CompletedSessionStatusToVisibilityConverter"/>
+        <converters1:SessionStatusToSaveToFileButtonVisibilityConverter x:Key="SessionStatusToSaveToFileButtonVisibilityConverter"/>
         <converters1:NotCompletedSessionStatusToVisibilityConverter x:Key="NotCompletedSessionStatusToVisibilityConverter"/>
 
         <Style x:Key="CmSessionProcessingToggleButtons"
@@ -157,7 +158,7 @@
                     Command="{Binding SaveSessionToFileCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                         Content="Сохранить в файл"
                         Style="{DynamicResource CmSessionProcessingButtons}"
-                        Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CompletedSessionStatusToVisibilityConverter}}"/>
+                        Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource SessionStatusToSaveToFileButtonVisibilityConverter}}"/>
 
                 <!--Ручное измерение в последней точке-->
                 <Button

@@ -235,6 +235,7 @@
     <Compile Include="Settings\SettingsManager.cs" />
     <Compile Include="Threading\ThreadAssistant.cs" />
     <Compile Include="FileSaving\SessionFileManager.cs" />
+    <Compile Include="Ui\Converters\SessionStatusToSaveToFileButtonVisibilityConverter.cs" />
     <Compile Include="Ui\Converters\SessionStatusToTextConverter.cs" />
     <Compile Include="Ui\ISessionsFileUiManager.cs" />
     <Compile Include="Ui\MessageHelper.cs" />

@@ -822,7 +822,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         this,
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.StartFailed,
-                            "Сеанс не будет запущен так как кровать не готова к старту"));
+                            "Сеанс не будет запущен, так как кровать не готова к старту"));
                     return;
                 }
                 _logger?.Trace($"{GetType().Name}: старт сеанса");

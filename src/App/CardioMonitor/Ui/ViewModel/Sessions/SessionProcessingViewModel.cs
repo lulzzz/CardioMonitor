@@ -412,8 +412,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _notifier.ShowInformation($"Завершилось повторение № {completedCycleNumber}");
 
             // если выбрана другая вкладка, то ничего делать не будем
-            if (SelectedCycleTab != completedCycleNumber - 1) return;
-            SelectedCycleTab = completedCycleNumber;
+            var desiredCycleTab = completedCycleNumber -1 ;
+            if (SelectedCycleTab != desiredCycleTab - 1) return;
+            SelectedCycleTab = desiredCycleTab;
         }
 
         private void HandleReversedFromDevice(object sender, EventArgs eventArgs)

@@ -75,7 +75,7 @@ namespace CardioMonitor.Devices.Bed.Fake
 
             var checkPointIteration = 0;
 
-            for (var i = 0; i < _checkPointsCount; ++i)
+            for (var i = 1; i <= _checkPointsCount; ++i)
             {
                 checkPointIteration += iterationPerCheckPoint;
                 _checkPointIterationNumber.Add((short)checkPointIteration);
@@ -224,7 +224,7 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public Task<BedStatus> GetBedStatusAsync()
         {
-            throw new NotImplementedException();
+            return Task.FromResult(BedStatus.Ready);
         }
 
         public Guid DeviceId => FakeInversionTableDeviceId.DeviceId;
