@@ -199,7 +199,7 @@
     <Compile Include="Devices\Configuration\Events\DeviceConfigDeletedEvent.cs" />
     <Compile Include="Events\Settings\FileStorageLocationChanged.cs" />
     <Compile Include="FileSaving\Containers\FileStorageDataContainer.cs" />
-    <Compile Include="FileSaving\Containers\V1\SessionContainerV1.cs" />
+    <Compile Include="FileSaving\Containers\V1\StoredSessionContainerV1.cs" />
     <Compile Include="FileSaving\Containers\V1\StoredDeviceValueStatusV1.cs" />
     <Compile Include="FileSaving\Containers\V1\StoredDeviceValueV1.cs" />
     <Compile Include="FileSaving\Containers\V1\StoredPatientParamsV1.cs" />
@@ -210,6 +210,13 @@
     <Compile Include="FileSaving\Exceptions\FileNotFoundException.cs" />
     <Compile Include="FileSaving\Exceptions\SavingException.cs" />
     <Compile Include="FileSaving\ISessionFileSavingManager.cs" />
+    <Compile Include="FileSaving\Mappers\V1\DeviceValueMapperV1.cs" />
+    <Compile Include="FileSaving\Mappers\V1\PatientMapperV1.cs" />
+    <Compile Include="FileSaving\Mappers\V1\PatientParamsMapperV1.cs" />
+    <Compile Include="FileSaving\Mappers\V1\SessionContainerMapperV1.cs" />
+    <Compile Include="FileSaving\Mappers\V1\SessionCycleMapperV1.cs" />
+    <Compile Include="FileSaving\Mappers\V1\SessionDeviceValueStatusMapperV1.cs" />
+    <Compile Include="FileSaving\Mappers\V1\SessionMapperV1.cs" />
     <Compile Include="FileSaving\Mappers\V1\SessionStatusMapperV1.cs" />
     <Compile Include="LogNames.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">

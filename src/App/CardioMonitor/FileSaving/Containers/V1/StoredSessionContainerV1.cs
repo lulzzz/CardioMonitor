@@ -1,6 +1,6 @@
 ﻿namespace CardioMonitor.FileSaving.Containers.V1
 {
-    internal class SessionContainerV1
+    internal class StoredSessionContainerV1
     {
         /// <summary>
         /// Пациент

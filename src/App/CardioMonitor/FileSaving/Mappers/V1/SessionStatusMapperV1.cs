@@ -23,7 +23,7 @@ namespace CardioMonitor.FileSaving.Mappers.V1
                 case StoredSessionStatusV1.EmergencyStopped:
                     return SessionStatus.EmergencyStopped;
                 default:
-                    throw new ArgumentException();
+                    throw new ArgumentOutOfRangeException(nameof(status), status, null);
             }
         }
 
@@ -44,7 +44,7 @@ namespace CardioMonitor.FileSaving.Mappers.V1
                 case SessionStatus.EmergencyStopped:
                     return StoredSessionStatusV1.EmergencyStopped;
                 default:
-                    throw new ArgumentException();
+                    throw new ArgumentOutOfRangeException(nameof(status), status, null);
             }
         }
     }
