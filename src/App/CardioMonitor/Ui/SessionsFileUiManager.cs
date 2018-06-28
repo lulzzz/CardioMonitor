@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.FileSaving;
@@ -48,7 +49,7 @@ namespace CardioMonitor.Ui
             var dialogResult = dialog.ShowDialog() ?? false;
             if (!dialogResult) return;
 
-            var filePath = dialog.SafeFileName;
+            var filePath = dialog.FileName;
 
             try
             {
@@ -78,7 +79,7 @@ namespace CardioMonitor.Ui
             var dialogResult = dialog.ShowDialog() ?? false;
             if (!dialogResult) return null;
 
-            var filePath = dialog.SafeFileName;
+            var filePath = dialog.FileName;
 
             try
             {
