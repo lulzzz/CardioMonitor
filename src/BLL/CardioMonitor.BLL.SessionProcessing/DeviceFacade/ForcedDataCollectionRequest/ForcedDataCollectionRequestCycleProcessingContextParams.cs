@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionRequest
@@ -9,12 +10,19 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionR
 
         public Guid ParamsTypeId { get; } = ForcedDataCollectionRequestId;
         public Guid UniqObjectId { get; }
+        
+        public SemaphoreSlim BlockingSemaphore { get; }
 
         public ForcedDataCollectionRequestCycleProcessingContextParams(
             bool isRequested)
         {
             IsRequested = isRequested;
             UniqObjectId = Guid.NewGuid();
+            // чтобы ручной сбор данных завершался только после всех измерений
+            // todo Добавить поддержку ЭКГ
+            BlockingSemaphore = new SemaphoreSlim(2);
+            BlockingSemaphore.Wait();
+            BlockingSemaphore.Wait();
         }
 
         public bool IsRequested { get; }

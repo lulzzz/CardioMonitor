@@ -233,8 +233,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             pumpingManager.SetLogger(_logger);
             var pupmingManagerBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
                 context => pumpingManager.ProcessAsync(context));
-            var forcedCommandPupmingManagerBlock = new TransformBlock<CycleProcessingContext, CycleProcessingContext>(
-                context => pumpingManager.ProcessAsync(context));
 
             var pressureParamsProvider = new PatientPressureParamsProvider(
                 monitorController,
@@ -285,32 +283,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     PropagateCompletion = true
                 });
             checkPointCheckBlock.LinkTo(
-                forcedCommandPupmingManagerBlock,
-                new DataflowLinkOptions
-                {
-                    PropagateCompletion = true
-                }, context =>
-                {
-                    var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
-                    return pumpingManager.CanProcess(context) && forcedRequested;
-                });
-            checkPointCheckBlock.LinkTo(
                 mainBroadcastBlock,
                 new DataflowLinkOptions
                 {
                     PropagateCompletion = true
-                }, context =>
-                {
-                    var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
-                    return !forcedRequested;
                 });
 
-            forcedCommandPupmingManagerBlock.LinkTo(
-                mainBroadcastBlock,
-                new DataflowLinkOptions
-                {
-                    PropagateCompletion = true
-                });
 
             mainBroadcastBlock.LinkTo(
                 _pipelineFinishCollectorBlock,
@@ -334,11 +312,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 {
                     PropagateCompletion = true
                 },
-                context =>
-                {
-                    var forcedRequested = context?.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
-                    return pumpingManager.CanProcess(context) && !forcedRequested;
-                });
+                context => pumpingManager.CanProcess(context));
             
             pupmingManagerBlock.LinkTo(
                 pressureParamsProviderBlock,
@@ -799,10 +773,38 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     .ConnectAsync()
                     .ConfigureAwait(false);
 
+                
+                // запускаем кровать
+                var bedStatus = await _bedController
+                    .GetBedStatusAsync()
+                    .ConfigureAwait(false);
+                if (bedStatus != BedStatus.Ready)
+                {
+                    _logger?.Trace($"{GetType().Name}: ошибка готовности кровати");
+                    OnException?.Invoke(
+                        this,
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.StartFailed,
+                            "Сеанс не будет запущен, так как кровать не готова к старту"));
+                    return;
+                }
+                
                 // измерим перед стартом
                 _logger?.Trace($"{GetType().Name}: начальный запрос данных");
-                await InnerForceDataCollectionRequestAsync()
+                var forceCollectingResult = await InnerForceDataCollectionRequestAsync()
                     .ConfigureAwait(false);
+                // если ошибки измерения в первой точке - сеанс не начинаем
+                if (!forceCollectingResult)
+                {
+                    _logger?.Trace($"{GetType().Name}: ошибка сбора начальных данных");
+                    OnException?.Invoke(
+                        this, 
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.StartFailed, 
+                            "Сеанс не будет запущен из-за ошибки в получении начальных показателей пациента"));
+                    return;
+                    
+                }
                 // уведомление об ошибке уже сформировалось выше, просто не стартуем
                 if (_isFailedOnPumping)
                 {
@@ -812,17 +814,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.StartFailed, 
                             "Сеанс не будет запущен из-за ошибки накачки манжеты"));
-                    return;
-                }
-                // запускаем кровать
-                if (await _bedController.GetBedStatusAsync() != BedStatus.Ready)
-                {
-                    _logger?.Trace($"{GetType().Name}: ошибка готовности кровати");
-                    OnException?.Invoke(
-                        this,
-                        new SessionProcessingException(
-                            SessionProcessingErrorCodes.StartFailed,
-                            "Сеанс не будет запущен, так как кровать не готова к старту"));
                     return;
                 }
                 _logger?.Trace($"{GetType().Name}: старт сеанса");
@@ -1015,11 +1006,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             return Task.CompletedTask;
         }
 
-        private async Task InnerForceDataCollectionRequestAsync()
+        private async Task<bool> InnerForceDataCollectionRequestAsync()
         {
-            //todo может, вручную задавать номер итерации и цикла?
             var context = new CycleProcessingContext();
-            context.AddOrUpdate(new ForcedDataCollectionRequestCycleProcessingContextParams(true));
+            var forcedRequest = new ForcedDataCollectionRequestCycleProcessingContextParams(true);
+            context.AddOrUpdate(forcedRequest);
             context.AddOrUpdate(
                 new PumpingRequestContextParams(
                     _isAutoPumpingEnabled, 
@@ -1029,6 +1020,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             await _forcedRequestBlock
                 .SendAsync(context)
                 .ConfigureAwait(false);
+
+            await forcedRequest.BlockingSemaphore
+                .WaitAsync()
+                .ConfigureAwait(false);
+
+            var exceptions = context.TryGetExceptionContextParams();
+            return exceptions == null;
         }
 
         public void Dispose()

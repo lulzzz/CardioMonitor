@@ -122,6 +122,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             }
             finally
             {
+                var forcedRequest = context.TryGetForcedDataCollectionRequest();
+                forcedRequest?.BlockingSemaphore.Release();
                 _mutex.Release();
                 if (param == null)
                 {
