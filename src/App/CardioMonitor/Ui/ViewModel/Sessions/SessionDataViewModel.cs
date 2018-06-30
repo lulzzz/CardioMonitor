@@ -239,12 +239,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         };
                         return checkPoint;
                     });
-                    
-                    var cycleData = new CycleData
-                    {
-                        CycleNumber = (short) sessionCycle.CycleNumber,
-                        CycleParams = new ObservableCollection<CheckPointParams>(patientParamsPerCycle)
-                    };
+
+                    var cycleData = new CycleData((short) sessionCycle.CycleNumber);
+                    cycleData.AddCheckPoints(patientParamsPerCycle.ToList());
                     patientParamsPerCycles.Add(cycleData);
                 }
 

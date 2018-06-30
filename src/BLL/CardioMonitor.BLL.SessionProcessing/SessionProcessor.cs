@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -219,11 +218,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             var temp = new List<CycleData>(startParams.CycleCount);
             for (var index = 0; index < startParams.CycleCount; index++)
             {
-                temp.Add(new CycleData
-                {
-                    CycleNumber = (short) (index + 1),
-                    CycleParams = new ObservableCollection<CheckPointParams>()
-                });
+                temp.Add(new CycleData((short) (index + 1)));
             }
 
             _uiInvoker = uiInvoker ?? throw new ArgumentNullException(nameof(uiInvoker));
