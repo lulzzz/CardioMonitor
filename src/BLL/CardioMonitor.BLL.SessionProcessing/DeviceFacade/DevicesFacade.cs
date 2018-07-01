@@ -706,7 +706,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             _logger?.Info($"{GetType().Name}: автонакачка выключена");
         }
 
-        public Task StartAsync()
+        public Task<bool> StartAsync()
         {
             try
             {
@@ -719,6 +719,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 OnException?.Invoke(
                     this, 
                     e);
+                return Task.FromResult(false);
             }
             catch (Exception e)
             {
@@ -729,11 +730,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         SessionProcessingErrorCodes.UnhandledException,
                         e.Message, 
                         e));
+                return Task.FromResult(false);
             }
-            return Task.CompletedTask;
         }
 
-        private async Task InnerStartAsync(bool isCalledFromDevice)
+        private async Task<bool> InnerStartAsync(bool isCalledFromDevice)
         {
             if (_cycleProcessingSynchronizer.IsPaused)
             {
@@ -758,15 +759,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     .ConnectAsync()
                     .ConfigureAwait(false);
                
-
-                _logger?.Trace($"{GetType().Name}: инициализация контроллера кардиомонитора");
-                _monitorController.Init(_startParams.MonitorControllerConfig);
-                _logger?.Trace($"{GetType().Name}: подключение к кардиомонитору");
-                await _monitorController
-                    .ConnectAsync()
-                    .ConfigureAwait(false);
-
-                
                 // запускаем кровать
                 var bedStatus = await _bedController
                     .GetBedStatusAsync()
@@ -779,15 +771,25 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.StartFailed,
                             "Сеанс не будет запущен, так как кровать не готова к старту"));
-                    return;
+                    await _bedController
+                        .DisconnectAsync()
+                        .ConfigureAwait(false);
+                    return false;
                 }
-                
+
+                _logger?.Trace($"{GetType().Name}: инициализация контроллера кардиомонитора");
+                _monitorController.Init(_startParams.MonitorControllerConfig);
+                _logger?.Trace($"{GetType().Name}: подключение к кардиомонитору");
+                await _monitorController
+                    .ConnectAsync()
+                    .ConfigureAwait(false);
+
                 // измерим перед стартом
                 _logger?.Trace($"{GetType().Name}: начальный запрос данных");
-                var forceCollectingResult = await InnerForceDataCollectionRequestAsync()
+                var isForcedDataCollected = await InnerForceDataCollectionRequestAsync()
                     .ConfigureAwait(false);
                 // если ошибки измерения в первой точке - сеанс не начинаем
-                if (!forceCollectingResult)
+                if (!isForcedDataCollected)
                 {
                     _logger?.Trace($"{GetType().Name}: ошибка сбора начальных данных");
                     OnException?.Invoke(
@@ -795,7 +797,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.StartFailed, 
                             "Сеанс не будет запущен из-за ошибки в получении начальных показателей пациента"));
-                    return;
+                    await _bedController
+                        .DisconnectAsync()
+                        .ConfigureAwait(false);
+                    await _monitorController
+                        .DisconnectAsync()
+                        .ConfigureAwait(false);
+                    return false;
                     
                 }
                 _logger?.Trace($"{GetType().Name}: старт сеанса");
@@ -811,9 +819,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
                 _logger?.Info($"{GetType().Name}: сеанс запущен");
             }
+
+            return true;
         }
 
-        public Task EmergencyStopAsync()
+        public Task<bool> EmergencyStopAsync()
         {
             try
             {
@@ -827,6 +837,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 OnException?.Invoke(
                     this, 
                     e);
+                return Task.FromResult(false);
             }
             catch (Exception e)
             {
@@ -837,11 +848,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         SessionProcessingErrorCodes.UnhandledException,
                         e.Message, 
                         e));
+                return Task.FromResult(false);
             }
-            return Task.CompletedTask;
         }
 
-        private async Task InnerEmeregencyStopAsync(bool isCalledFromDevice)
+        private async Task<bool> InnerEmeregencyStopAsync(bool isCalledFromDevice)
         {
             _logger?.Trace($"{GetType().Name}: остановка сервиса синхронизации");
             _cycleProcessingSynchronizer.Stop();
@@ -862,9 +873,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 .DisconnectAsync()
                 .ConfigureAwait(false);
             //todo synchonizer
+
+            return true;
         }
 
-        public Task PauseAsync()
+        public Task<bool> PauseAsync()
         {
             try
             {
@@ -877,6 +890,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 OnException?.Invoke(
                     this, 
                     e);
+                return Task.FromResult(false);
             }
             catch (Exception e)
             {
@@ -887,11 +901,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         SessionProcessingErrorCodes.UnhandledException,
                         e.Message, 
                         e));
+                return Task.FromResult(false);
             }          
-            return Task.CompletedTask;
         }
 
-        private async Task InnerPauseAsync(bool isCalledFromDevice)
+        private async Task<bool> InnerPauseAsync(bool isCalledFromDevice)
         {
             _logger?.Trace($"{GetType().Name}: пауза сервиса синхронизации");
             _cycleProcessingSynchronizer.Pause();
@@ -902,10 +916,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     .ExecuteCommandAsync(BedControlCommand.Pause)
                     .ConfigureAwait(false);
             }
+
+            return true;
         }
 
 
-        public Task ProcessReverseRequestAsync()
+        public Task<bool> ProcessReverseRequestAsync()
         {
             if (_isReverseAlreadyRequested)
             {
@@ -924,6 +940,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 OnException?.Invoke(
                     this,
                     e);
+                return Task.FromResult(false);
             }
             catch (Exception e)
             {
@@ -934,11 +951,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         SessionProcessingErrorCodes.UnhandledException,
                         e.Message,
                         e));
+                return Task.FromResult(false);
             }
-            return Task.CompletedTask;
         }
 
-        private async Task InnerProcessReverseRequestAsync(bool isCalledFromDevice)
+        private async Task<bool> InnerProcessReverseRequestAsync(bool isCalledFromDevice)
         {
             if (_isReverseAlreadyRequested)
             {
@@ -954,9 +971,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             }
 
             _isReverseAlreadyRequested = true;
+            return true;
         }
 
-        public Task ForceDataCollectionRequestAsync()
+        public Task<bool> ForceDataCollectionRequestAsync()
         {
             if (_isStandartProcessingInProgress)
             {
@@ -974,6 +992,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 OnException?.Invoke(
                     this,
                     e);
+                return Task.FromResult(false);
             }
             catch (Exception e)
             {
@@ -984,8 +1003,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         SessionProcessingErrorCodes.UnhandledException,
                         e.Message,
                         e));
+                return Task.FromResult(false);
             }
-            return Task.CompletedTask;
         }
 
         private async Task<bool> InnerForceDataCollectionRequestAsync()

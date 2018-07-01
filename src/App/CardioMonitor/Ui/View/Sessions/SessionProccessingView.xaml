@@ -167,10 +167,10 @@
                         Style="{DynamicResource CmSessionProcessingButtons}"
                         Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CompletedSessionStatusToVisibilityConverter}}"/>
                     <!--Старт-->
-                <ToggleButton
+                <Button
                     Command="{Binding StartCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
                               Content="{Binding StartButtonText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                              Style="{DynamicResource CmSessionProcessingToggleButtons}"
+                              Style="{DynamicResource CmSessionProcessingButtons}"
                               Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NotCompletedSessionStatusToVisibilityConverter}}"/>
                 <!--Реверс-->
                 <Button

@@ -38,14 +38,14 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         void DisableAutoPumping();
         
-        Task StartAsync();
+        Task<bool> StartAsync();
 
-        Task EmergencyStopAsync();
+        Task<bool> EmergencyStopAsync();
 
-        Task PauseAsync();
+        Task<bool> PauseAsync();
 
-        Task ProcessReverseRequestAsync();
+        Task<bool> ProcessReverseRequestAsync();
 
-        Task ForceDataCollectionRequestAsync();
+        Task<bool> ForceDataCollectionRequestAsync();
     }
 }

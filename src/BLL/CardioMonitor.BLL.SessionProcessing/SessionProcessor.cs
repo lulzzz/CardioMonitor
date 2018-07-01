@@ -234,16 +234,19 @@ namespace CardioMonitor.BLL.SessionProcessing
             _isInitialized = true;
         }
 
-        public async Task StartAsync()
+        public async Task<bool> StartAsync()
         {
             AssureInitialization();
 
-            await _devicesFacade
+            var isSuccessfull = await _devicesFacade
                 .StartAsync()
                 .ConfigureAwait(true);
-            _uiInvoker.Invoke(() => {
-                SessionStatus = SessionStatus.InProgress;
-            });
+            if (isSuccessfull)
+            {
+                _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.InProgress; });
+            }
+
+            return isSuccessfull;
         }
 
         private void AssureInitialization()
@@ -251,38 +254,57 @@ namespace CardioMonitor.BLL.SessionProcessing
             if (!_isInitialized) throw new InvalidOperationException($"{nameof(SessionProcessor)} не инициализирован. Необходимо сначала вызвать метод {nameof(Init)}");
         }
 
-        public Task EmeregencyStopAsync()
+        public async Task<bool> EmeregencyStopAsync()
         {
             AssureInitialization();
 
+            var isSuccessfull = await _devicesFacade
+                .EmergencyStopAsync()
+                .ConfigureAwait(false);
+            if (isSuccessfull)
+            {
+                _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.EmergencyStopped; });
+            }
 
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.EmergencyStopped; });
-            return _devicesFacade.EmergencyStopAsync();
+            return isSuccessfull;
         }
 
-        public Task PauseAsync()
+        public async Task<bool> PauseAsync()
         {
             AssureInitialization();
+            var isSuccessfull = await _devicesFacade
+                .PauseAsync()
+                .ConfigureAwait(false);
+            if (isSuccessfull)
+            {
+                _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.Suspended; });
+            }
 
-
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.Suspended; });
-            return _devicesFacade.PauseAsync();
+            return isSuccessfull;
         }
 
-        public Task ResumeAsync()
+        public async Task<bool> ResumeAsync()
         {
             AssureInitialization();
 
+            var isSuccessfull = await _devicesFacade
+                .StartAsync()
+                .ConfigureAwait(false);
+            if (isSuccessfull)
+            {
+                _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.InProgress; });
+            }
 
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.InProgress; });
-            return _devicesFacade.StartAsync();
+            return isSuccessfull;
         }
 
-        public Task ReverseAsync()
+        public async Task<bool> ReverseAsync()
         {
             AssureInitialization();
-            
-            return _devicesFacade.ProcessReverseRequestAsync();
+
+            return await _devicesFacade
+                .ProcessReverseRequestAsync()
+                .ConfigureAwait(false);
         }
 
         public void EnableAutoPumping()
@@ -299,11 +321,13 @@ namespace CardioMonitor.BLL.SessionProcessing
             _devicesFacade.DisableAutoPumping();
         }
 
-        public Task RequestManualDataUpdateAsync()
+        public async Task<bool> RequestManualDataUpdateAsync()
         {
             AssureInitialization();
 
-            return _devicesFacade.ForceDataCollectionRequestAsync();
+            return await _devicesFacade
+                .ForceDataCollectionRequestAsync()
+                .ConfigureAwait(false);
         }
 
         public void Dispose()

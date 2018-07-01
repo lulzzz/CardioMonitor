@@ -520,10 +520,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         actionName = "старта";
                         await InitAsync().ConfigureAwait(true);
                         UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
-                        await StartAsync().ConfigureAwait(true);
-                        StartButtonText = _pauseText;
-                        IsSessionStarted = true;
-                        _sessionTimestampUtc = DateTime.UtcNow;
+                        var isSuccessfully = await StartAsync()
+                            .ConfigureAwait(true);
+                        if (isSuccessfully)
+                        {
+                            StartButtonText = _pauseText;
+                            IsSessionStarted = true;
+                            _sessionTimestampUtc = DateTime.UtcNow;
+                        }
                         break;
                 }
             }

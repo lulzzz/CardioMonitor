@@ -308,8 +308,8 @@ namespace CardioMonitor.Devices.Monitor
             try
             {
                 _mitar.Stop();
-                Thread.Sleep(100);
                 _workerController.CloseWorker(_syncWorker);
+                Thread.Sleep(100);
                  
                  _mitar = null;
                 _stream?.Dispose();
@@ -338,6 +338,7 @@ namespace CardioMonitor.Devices.Monitor
 
         public void Dispose()
         {
+            _mitar?.Stop();
             _workerController.CloseWorker(_syncWorker);
             _stream?.Dispose();
             _tcpClient?.Dispose();
@@ -351,10 +352,10 @@ namespace CardioMonitor.Devices.Monitor
         /// накачка давления
         /// </summary>
         /// <returns></returns>
-        public Task PumpCuffAsync()
+        public async Task PumpCuffAsync()
         {
             AssertConnection();
-            return Task.Factory.StartNew(async () =>
+            await Task.Factory.StartNew(async () =>
             {
                 try
                 {
@@ -386,7 +387,7 @@ namespace CardioMonitor.Devices.Monitor
                 {
                     throw new DeviceProcessingException("Ошибка накачки давления", ex);
                 }
-            });
+            }).ConfigureAwait(false);
         }
 
         private void RiseExceptions()
