@@ -54,6 +54,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             {
                 _logger?.Trace($"{GetType().Name}: получение данных не будет выполнено, " +
                                $"т.к. накачка манжеты завершилась неудачно");
+                var forcedRequest = context.TryGetForcedDataCollectionRequest();
+                forcedRequest?.BlockingSemaphore.Release();
                 return context;
             }
 
@@ -65,6 +67,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                 _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
                                  $"Новый запрос не будет выполнен, т.к. прошло больше " +
                                  $"{_blockWaitingTimeout.TotalMilliseconds} мс");
+                var forcedRequest = context.TryGetForcedDataCollectionRequest();
+                forcedRequest?.BlockingSemaphore.Release();
                 return context;
             }
 

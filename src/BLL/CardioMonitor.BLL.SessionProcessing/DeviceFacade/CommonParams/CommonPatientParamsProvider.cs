@@ -46,7 +46,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             var angleParams = context.TryGetAngleParam();
-            if (angleParams == null) return context;
+            if (angleParams == null)
+            {
+                var forcedRequest = context.TryGetForcedDataCollectionRequest();
+                forcedRequest?.BlockingSemaphore.Release();
+                return context;
+            }
             
             var isBlocked = await _mutex
                 .WaitAsync(_blockWaitingTimeout)
@@ -55,6 +60,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             {
                 _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
                                  $"Новый запрос не будет выполнен, т.к. прошло больше {_blockWaitingTimeout.TotalMilliseconds} мс");
+
+                var forcedRequest = context.TryGetForcedDataCollectionRequest();
+                forcedRequest?.BlockingSemaphore.Release();
                 return context;
             }
 

@@ -12,7 +12,8 @@ namespace CardioMonitor.Devices.Monitor.Infrastructure
 
             int iterationCount = (int)Math.Round((maxAngle / 1.5) * 2 - 3);
             int middlePoint = iterationCount / 2 + 1;
-            return new []{0, middlePoint,iterationCount};
+            return new []{1, middlePoint,iterationCount}; //todo не забыть - здесь первой точки вообще быть не должно 
+                                                          //todo- первое измерение происходит до начала цикла
 
         }
         

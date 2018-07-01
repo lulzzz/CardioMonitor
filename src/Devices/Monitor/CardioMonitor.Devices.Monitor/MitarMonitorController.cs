@@ -390,7 +390,7 @@ namespace CardioMonitor.Devices.Monitor
                     }
                     catch (Exception)
                     {
-                       // throw new DeviceConnectionException("Ошибка накачки давления");
+                        throw new DeviceConnectionException("Ошибка накачки давления");
                     }
                     finally
                     {
