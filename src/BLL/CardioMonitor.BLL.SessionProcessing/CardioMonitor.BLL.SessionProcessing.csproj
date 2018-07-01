@@ -37,6 +37,7 @@
     <Compile Include="CheckPointParams.cs" />
     <Compile Include="CycleData.cs" />
     <Compile Include="DeviceFacade\CycleProcessingSynchronizer.cs" />
+    <Compile Include="DeviceFacade\DeviceFacadeConstants.cs" />
     <Compile Include="DeviceFacade\DeviceFacadeMemoryCacheExtensions.cs" />
     <Compile Include="DeviceFacade\Exceptions\ExceptionCycleProcessingContextParams.cs" />
     <Compile Include="DeviceFacade\ForcedDataCollectionRequest\ForcedDataCollectionRequestCycleProcessingContextParams.cs" />

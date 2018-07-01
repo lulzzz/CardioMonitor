@@ -36,8 +36,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         #region Private fields
  
         private readonly TimeSpan _cachedEventLifetime = TimeSpan.FromSeconds(30);
-
-        private bool _isFailedOnPumping;
         
         [NotNull] private readonly IMonitorController _monitorController;
         [CanBeNull] private readonly ILogger _logger;
@@ -181,7 +179,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             _bedController.OnEmeregencyStopFromDeviceRequested += BedControllerOnEmeregencyStopFromDeviceRequested;
             
             _processedEventsCached = new MemoryCache(GetType().Name);
-            _isFailedOnPumping = false;
             _isReverseAlreadyRequested = false;
             _isSessionGlobalyCompleted = false;
             _completedCycles = new HashSet<int>();
@@ -351,11 +348,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 var exceptionParams = context.TryGetExceptionContextParams();
                 if (exceptionParams != null)
                 {
-                    if (exceptionParams.Exception.ErrorCode == SessionProcessingErrorCodes.PumpingError
-                        || exceptionParams.Exception.ErrorCode == SessionProcessingErrorCodes.PumpingTimeout)
-                    {
-                        _isFailedOnPumping = true;
-                    }
                     _logger?.Trace($"{GetType().Name}: ошибка в Pipeline: " +
                                    $"итерация {exceptionParams.Exception.IterationNumber}, " +
                                    $"сеанс {exceptionParams.Exception.CycleNumber}, " +
@@ -363,6 +355,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                                    $"причина: {exceptionParams.Exception.Message}",
                         exceptionParams.Exception);
                     RiseOnce(exceptionParams, () => OnException?.Invoke(this, exceptionParams.Exception));
+                    //todo а должны ли мы выставлять параметры при ошибке?
                     return HandleConnectionErrorsOnDemandAsync(exceptionParams);
                 }
 
@@ -805,17 +798,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     return;
                     
                 }
-                // уведомление об ошибке уже сформировалось выше, просто не стартуем
-                if (_isFailedOnPumping)
-                {
-                    _logger?.Trace($"{GetType().Name}: ошибка накачки давления.");
-                    OnException?.Invoke(
-                        this, 
-                        new SessionProcessingException(
-                            SessionProcessingErrorCodes.StartFailed, 
-                            "Сеанс не будет запущен из-за ошибки накачки манжеты"));
-                    return;
-                }
                 _logger?.Trace($"{GetType().Name}: старт сеанса");
                 await _bedController
                     .ExecuteCommandAsync(BedControlCommand.Start)
@@ -1022,8 +1004,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 .ConfigureAwait(false);
 
             await forcedRequest.BlockingSemaphore
-                .WaitAsync()
+                .WaitAsync(DeviceFacadeConstants.ForcedRequestBlockCounts)
                 .ConfigureAwait(false);
+
+            var pumpingResult = context.TryGetAutoPumpingResultParams();
+            if (pumpingResult == null) return false;
+
+            if (!pumpingResult.WasPumpingCompleted) return false;
 
             var exceptions = context.TryGetExceptionContextParams();
             return exceptions == null;

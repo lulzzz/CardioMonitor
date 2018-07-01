@@ -17,7 +17,7 @@ namespace CardioMonitor.Devices.Monitor
     /// </summary>
     public class MitarMonitorController : IMonitorController
     {
-        static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _updateDataSyncSemaphore;
         #region fields
 
         private const int IsRequestedValue = 1;
@@ -30,7 +30,7 @@ namespace CardioMonitor.Devices.Monitor
         private NetworkStream _stream;
         private TcpClient _tcpClient;
 
-        private MitarMonitorDataReceiver mitar;
+        private MitarMonitorDataReceiver _mitar;
 
         /// <remarks>
         /// NotNull помечено специально, чтобы анализатор не ругался. В каждом методе должны быть провеки методом <see cref="AssertInitParams"/>
@@ -50,14 +50,8 @@ namespace CardioMonitor.Devices.Monitor
         private readonly ManualResetEventSlim _commonParamsReady;
         private readonly ManualResetEventSlim _pressureParamsReady;
         private readonly ManualResetEventSlim _ecgParamsReady;
-        private readonly AutoResetEvent _pumpingReady;
-
-        // используется для блокировки с помощью lock - чтобы в один момент времени выполнялся только один метод
-        private readonly object _commonParamsRequestLockObject;
-        private readonly object _pressureParamsRequestLockObject;
-        private readonly object _ecgRequestLockObject;
-        private readonly object _pumpingLockObject;
-
+        private readonly ManualResetEventSlim _pumpingReady;
+        
         private int _isCommonParamsRequested;
         private int _isPressureParamsRequested;
         private int _isEcgParamsRequested;
@@ -67,8 +61,8 @@ namespace CardioMonitor.Devices.Monitor
         private DateTime _startedEcgCollectingTime;
         private TimeSpan _ecgCollectionDuration;
 
-        private bool _isPumpStarted;
-        private bool _isPumpStartPumping;
+        private bool _isPumpingRequested;
+        private bool _isPumpingStarted;
         
         [NotNull]
         private readonly ConcurrentQueue<Exception> _lastExceptions;
@@ -80,11 +74,6 @@ namespace CardioMonitor.Devices.Monitor
             _workerController = workerController ?? throw new ArgumentNullException(nameof(workerController));
 
             IsConnected = false;
-
-            _commonParamsRequestLockObject = new object();
-            _pressureParamsRequestLockObject = new object();
-            _ecgRequestLockObject = new object();
-            _pumpingLockObject = new object();
             
             _isCommonParamsRequested = 0;
             _isPressureParamsRequested = 0;
@@ -93,9 +82,11 @@ namespace CardioMonitor.Devices.Monitor
             _commonParamsReady = new ManualResetEventSlim(false);
             _pressureParamsReady = new ManualResetEventSlim(false);
             _ecgParamsReady = new ManualResetEventSlim(false);
-            _pumpingReady = new AutoResetEvent(false);
-            _pumpingStatus = new PumpingStatus(false,false);
-            
+            _pumpingReady = new ManualResetEventSlim(false);
+            _pumpingStatus = PumpingStatus.Completed;
+            _updateDataSyncSemaphore = new SemaphoreSlim(1, 1);
+
+
             _ecgValues = new ConcurrentQueue<short>();
             _lastExceptions = new ConcurrentQueue<Exception>();
         }
@@ -137,8 +128,8 @@ namespace CardioMonitor.Devices.Monitor
                 await _tcpClient.ConnectAsync(monitorIpAddress, _initParams.MonitorTcpPort)
                     .ConfigureAwait(false);
                 _stream = _tcpClient.GetStream();
-                mitar = new MitarMonitorDataReceiver(_stream);
-                mitar.Start();
+                _mitar = new MitarMonitorDataReceiver(_stream);
+                _mitar.Start();
                 // ReSharper disable once HeapView.CanAvoidClosure
                 _syncWorker = _workerController.StartWorker(_initParams.UpdateDataPeriod, async () =>
                 {
@@ -200,10 +191,10 @@ namespace CardioMonitor.Devices.Monitor
             var isPressureParamsRequested = _isPressureParamsRequested == IsRequestedValue;
             var isEcgParamsRequested = _isEcgParamsRequested == IsRequestedValue;
 
-            if (!isCommonParamsRequested && !isPressureParamsRequested && !isEcgParamsRequested && !_isPumpStarted) return;
+            if (!isCommonParamsRequested && !isPressureParamsRequested && !isEcgParamsRequested && !_isPumpingRequested) return;
             AssertConnection();
 
-            await semaphoreSlim.WaitAsync();
+            await _updateDataSyncSemaphore.WaitAsync();
 
             short[] ecgValue =  new short[2];
             try
@@ -230,25 +221,26 @@ namespace CardioMonitor.Devices.Monitor
                // }
 
                 
-                var commonParams = await mitar.GetCommonParams();
-                var pressureParams = await mitar.GetPressureParams();
-                _pumpingStatus = await mitar.GetPumpingStatus();
+                var commonParams = await _mitar.GetCommonParams();
+                var pressureParams = await _mitar.GetPressureParams();
+                _pumpingStatus = await _mitar.GetPumpingStatus();
                 //var pumpingResult = await mitar.GetPumpingStatus();
 
                 //todo вот тут как-то получить данные и скастовать их к нужному виду
                 /*await _stream.ReadAsync(message, 0, messageSize)
                     .ConfigureAwait(false);*/
                 //commonParams = monitorDataParser.GetPatientCommonParams(message);
-                if (_isPumpStarted)
+                if (_isPumpingRequested)
                 {
-                    if (!_isPumpStartPumping && _pumpingStatus.IsPumpingInProgress)
+                    if (!_isPumpingStarted && _pumpingStatus == PumpingStatus.InProgress)
                     {
-                        _isPumpStartPumping = true;
+                        _isPumpingStarted = true;
                     }
-                    if ( _isPumpStartPumping &&( _pumpingStatus.IsPumpingError || !_pumpingStatus.IsPumpingInProgress))
+                    if ( _isPumpingStarted 
+                         && ( _pumpingStatus != PumpingStatus.InProgress))
                     {
-                        _isPumpStartPumping = false;
-                        _isPumpStarted = false;
+                        _isPumpingStarted = false;
+                        _isPumpingRequested = false;
                         _pumpingReady.Set();
                     }
                 }
@@ -306,7 +298,7 @@ namespace CardioMonitor.Devices.Monitor
             }
             finally
             {
-                semaphoreSlim.Release();
+                _updateDataSyncSemaphore.Release();
             }
         }
 
@@ -315,11 +307,11 @@ namespace CardioMonitor.Devices.Monitor
         {
             try
             {
-                mitar.Stop();
+                _mitar.Stop();
                 Thread.Sleep(100);
                 _workerController.CloseWorker(_syncWorker);
                  
-                 mitar = null;
+                 _mitar = null;
                 _stream?.Dispose();
                 _stream = null;
                 _tcpClient?.Dispose();
@@ -362,46 +354,41 @@ namespace CardioMonitor.Devices.Monitor
         public Task PumpCuffAsync()
         {
             AssertConnection();
-            lock (_pumpingLockObject)
+            return Task.Factory.StartNew(async () =>
             {
-                return Task.Factory.StartNew(() =>
+                try
                 {
-                    try
+                    byte[] sendMessage =
                     {
-
-
-                        byte[] sendMessage = new byte[25]
-                        {
-                            0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                            0x00,
-                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22
-                        };
-                        _stream.WriteAsync(sendMessage, 0, sendMessage.Length);
-                        
-                        _isPumpStarted = true;
-                        _pumpingReady.WaitOne(new TimeSpan(0, 1,
-                            0)); //todo по таймауту по идее должен кидаться эксепшн (подумать над необходимостью)
-                        _isPumpStarted = false;
-                        if (_pumpingStatus.IsPumpingError)
-                        {
-                            throw new ArgumentException(
-                                "Ошибка накачки давления "); //todo не знаю какого типа эксепшен вызывать
-                        }
-                    }
-                    catch (Exception)
+                        0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                        0x00,
+                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22
+                    };
+                    await _stream
+                        .WriteAsync(sendMessage, 0, sendMessage.Length)
+                        .ConfigureAwait(false);
+                    _isPumpingRequested = true;
+                    _pumpingReady
+                        .Wait(TimeSpan.FromMinutes(1)); //todo использовать параметры из настроек
+                    _pumpingReady.Reset();
+                    _isPumpingRequested = false;
+                    if (_pumpingStatus == PumpingStatus.Error)
                     {
-                        throw new DeviceConnectionException("Ошибка накачки давления");
+                        throw new DeviceProcessingException(
+                            "Ошибка накачки давления ");
                     }
-                    finally
-                    {
-                        //RiseExceptions();
-                    }
-                });
-
-            
-            }
+                }
+                catch (DeviceProcessingException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    throw new DeviceProcessingException("Ошибка накачки давления", ex);
+                }
+            });
         }
-        
+
         private void RiseExceptions()
         {
             var exceptions = new List<Exception>(0);
@@ -432,87 +419,81 @@ namespace CardioMonitor.Devices.Monitor
         public Task<PatientCommonParams> GetPatientCommonParamsAsync()
         {
             AssertConnection();
-            lock (_commonParamsRequestLockObject)
+            return Task.Factory.StartNew(() =>
             {
-                return Task.Factory.StartNew(() =>
+                try
                 {
-                    try
-                    {
-                        Interlocked.Increment(ref _isCommonParamsRequested);
-                        _commonParamsReady.Wait();
-                        _commonParamsReady.Reset();
-                        return _lastCommonParams;
-                    }
-                    // тут могут быть только наши ошибки, сетевые генерятся в цикле
-                    catch (Exception ex)
-                    {
-                        throw new DeviceProcessingException("Программная ошибка в получении параметров пациента с кардиомонитора", ex);
-                    }
-                    finally
-                    {
-                        Interlocked.Decrement(ref _isCommonParamsRequested);
-                        RiseExceptions();
-                    }
-                });
-            }
+                    Interlocked.Increment(ref _isCommonParamsRequested);
+                    _commonParamsReady.Wait();
+                    _commonParamsReady.Reset();
+                    return _lastCommonParams;
+                }
+                // тут могут быть только наши ошибки, сетевые генерятся в цикле
+                catch (Exception ex)
+                {
+                    throw new DeviceProcessingException(
+                        "Программная ошибка в получении параметров пациента с кардиомонитора", ex);
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _isCommonParamsRequested);
+                    RiseExceptions();
+                }
+            });
         }
 
         public Task<PatientPressureParams> GetPatientPressureParamsAsync()
         {
             AssertConnection();
-            lock (_pressureParamsRequestLockObject)
+            return Task.Factory.StartNew(() =>
             {
-                return Task.Factory.StartNew(() =>
+                try
                 {
-                    try
-                    {
-                        Interlocked.Increment(ref _isPressureParamsRequested);
-                        _pressureParamsReady.Wait();
-                        _pressureParamsReady.Reset();
-                        return _lastPressureParams;
-                    }
-                    // тут могут быть только наши ошибки, сетевые генерятся в цикле
-                    catch (Exception ex)
-                    {
-                        throw new DeviceProcessingException("Программная ошибка в получении параметров давления пациента с кардиомонитора", ex);
-                    }
-                    finally
-                    {
-                        Interlocked.Decrement(ref _isPressureParamsRequested);
-                        RiseExceptions();
-                    }
-                });
-            }
+                    Interlocked.Increment(ref _isPressureParamsRequested);
+                    _pressureParamsReady.Wait();
+                    _pressureParamsReady.Reset();
+                    return _lastPressureParams;
+                }
+                // тут могут быть только наши ошибки, сетевые генерятся в цикле
+                catch (Exception ex)
+                {
+                    throw new DeviceProcessingException(
+                        "Программная ошибка в получении параметров давления пациента с кардиомонитора", ex);
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _isPressureParamsRequested);
+                    RiseExceptions();
+                }
+            });
         }
 
         public Task<PatientEcgParams> GetPatientEcgParamsAsync(TimeSpan duration)
         {
             AssertConnection();
-            lock (_ecgRequestLockObject)
+            return Task.Factory.StartNew(() =>
             {
-                return Task.Factory.StartNew(() =>
+                try
                 {
-                    try
-                    {
-                        _startedEcgCollectingTime = DateTime.UtcNow;
-                        _ecgCollectionDuration = duration;
-                        Interlocked.Increment(ref _isEcgParamsRequested);
-                        _ecgParamsReady.Wait();
-                        _ecgParamsReady.Reset();
-                        return _lastEcgParams;
-                    }
-                    // тут могут быть только наши ошибки, сетевые генерятся в цикле
-                    catch (Exception ex)
-                    {
-                        throw new DeviceProcessingException("Программная ошибка в получении параметров ЭКГ с кардиомонитора", ex);
-                    }
-                    finally
-                    {
-                        Interlocked.Decrement(ref _isEcgParamsRequested);
-                        RiseExceptions();
-                    }
-                });
-            }
+                    _startedEcgCollectingTime = DateTime.UtcNow;
+                    _ecgCollectionDuration = duration;
+                    Interlocked.Increment(ref _isEcgParamsRequested);
+                    _ecgParamsReady.Wait();
+                    _ecgParamsReady.Reset();
+                    return _lastEcgParams;
+                }
+                // тут могут быть только наши ошибки, сетевые генерятся в цикле
+                catch (Exception ex)
+                {
+                    throw new DeviceProcessingException(
+                        "Программная ошибка в получении параметров ЭКГ с кардиомонитора", ex);
+                }
+                finally
+                {
+                    Interlocked.Decrement(ref _isEcgParamsRequested);
+                    RiseExceptions();
+                }
+            });
         }
 
         #endregion

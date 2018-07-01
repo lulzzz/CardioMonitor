@@ -196,7 +196,7 @@ namespace CardioMonitor.BLL.SessionProcessing
                 logger);
 
             _devicesFacade.OnException += OnException;
-            _devicesFacade.OnException += HandleOnException;
+            _devicesFacade.OnException += HandleGettingPatientParamsException;
             _devicesFacade.OnSessionErrorStop += OnSessionErrorStop;
             _devicesFacade.OnSessionErrorStop += HandleOnSessionErrorStop;
             _devicesFacade.OnCycleCompleted += HandleOnCycleCompleted;
@@ -313,7 +313,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             if (_devicesFacade == null) return;
             
             _devicesFacade.OnException -= OnException;
-            _devicesFacade.OnException -= HandleOnException;
+            _devicesFacade.OnException -= HandleGettingPatientParamsException;
             _devicesFacade.OnSessionErrorStop -= OnSessionErrorStop;
             _devicesFacade.OnSessionErrorStop -= HandleOnSessionErrorStop;
             _devicesFacade.OnCycleCompleted -= HandleOnCycleCompleted;
@@ -351,7 +351,9 @@ namespace CardioMonitor.BLL.SessionProcessing
             });
         }
 
-        private void HandleOnException(object sender, [NotNull] SessionProcessingException exception)
+        private void HandleGettingPatientParamsException(
+            object sender, 
+            [NotNull] SessionProcessingException exception)
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
             if (PatientParamsPerCycles == null) throw new InvalidOperationException($"Необходимо сначала выполнить {nameof(Init)}");

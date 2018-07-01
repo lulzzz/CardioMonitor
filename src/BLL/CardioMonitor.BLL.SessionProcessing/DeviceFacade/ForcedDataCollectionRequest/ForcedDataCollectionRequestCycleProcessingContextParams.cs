@@ -20,9 +20,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionR
             UniqObjectId = Guid.NewGuid();
             // чтобы ручной сбор данных завершался только после всех измерений
             // todo Добавить поддержку ЭКГ
-            BlockingSemaphore = new SemaphoreSlim(2);
-            BlockingSemaphore.Wait();
-            BlockingSemaphore.Wait();
+            BlockingSemaphore = new SemaphoreSlim(DeviceFacadeConstants.ForcedRequestBlockCounts);
+            for (var i = 0; i < DeviceFacadeConstants.ForcedRequestBlockCounts; ++i)
+            {
+                BlockingSemaphore.Wait();
+            }
         }
 
         public bool IsRequested { get; }

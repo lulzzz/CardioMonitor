@@ -79,7 +79,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                 await policyWrap
                     .ExecuteAsync(_monitorController.PumpCuffAsync)
                     .ConfigureAwait(false);
-                wasPumpingComleted = true;
+                wasPumpingComleted = true;                                          
             }
             catch (DeviceConnectionException e)
             {
@@ -97,6 +97,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PumpingTimeout,
+                            e.Message,
+                            e)));
+                wasPumpingComleted = false;
+            }
+            catch (DeviceProcessingException e)
+            {
+                context.AddOrUpdate(
+                    new ExceptionCycleProcessingContextParams(
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.PumpingError,
                             e.Message,
                             e)));
                 wasPumpingComleted = false;

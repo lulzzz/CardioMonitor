@@ -19,8 +19,7 @@ namespace CardioMonitor.Devices.Monitor
         private short _systolicArterialPressure;
         private short _diastolicArterialPressure;
         private short _averageArterialPressure;
-        private bool _isPumpingError;
-        private bool _isPumpingInProgress;
+        private PumpingStatus _status;
 
         #endregion
         
@@ -52,7 +51,7 @@ namespace CardioMonitor.Devices.Monitor
 
         public Task<PumpingStatus> GetPumpingStatus()
         {
-            return Task.Factory.StartNew(() => new PumpingStatus(_isPumpingError,_isPumpingInProgress));
+            return Task.FromResult(_status);
         }
 
         private async void GetDataFromStream()
@@ -156,8 +155,22 @@ namespace CardioMonitor.Devices.Monitor
             byte low = (byte)(valueLowFirst + (valueHighFirst << 4));
             byte high = (byte)(valueLowSecond + (valueHighSecond << 4));
 
-            _isPumpingError = high != 128;
-            _isPumpingInProgress = low != 0;
+            var isPumpingError = high != 128;
+            var isPumpingInProgress = low != 0;
+
+            if (isPumpingError)
+            {
+                _status = PumpingStatus.Error;
+                return;
+            }
+
+            if (isPumpingInProgress)
+            {
+                _status = PumpingStatus.InProgress;
+                return;
+            }
+
+            _status = PumpingStatus.Completed;
         }
             
         
