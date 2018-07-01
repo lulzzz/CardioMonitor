@@ -14,6 +14,7 @@ using CardioMonitor.Devices.Bed.Infrastructure;
 using CardioMonitor.Devices.Configuration;
 using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.FileSaving;
+using CardioMonitor.Infrastructure;
 using CardioMonitor.Infrastructure.Workers;
 using CardioMonitor.Infrastructure.WpfCommon.Base;
 using CardioMonitor.Resources;
@@ -29,12 +30,10 @@ using Notifier = ToastNotifications.Notifier;
 
 namespace CardioMonitor.Ui.ViewModel.Sessions
 {
-
-
     /// <summary>
     /// ViewModel для сеанса
     /// </summary>
-    public class SessionProcessingViewModel : SessionProcessor, IStoryboardPageViewModel
+    public class SessionProcessingViewModel : Infrastructure.WpfCommon.Base.Notifier, IStoryboardPageViewModel
     {
         #region Constants
 
@@ -74,6 +73,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         [NotNull] private readonly Notifier _notifier;
 
         [NotNull] private readonly IEventBus _eventBus;
+        [NotNull] private readonly SessionProcessor _sessionProcessor;
 
         [CanBeNull] private int? _savedSessionId;
 
@@ -93,6 +93,12 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private bool _isAutoPumpingChangingEnabled;
 
         private bool _isAutoPumpingEnabled;
+        
+        private TimeSpan _elapsedTime;
+        private TimeSpan _remainingTime;
+        private short _currentCycleNumber;
+        private float _currentXAngle;
+        private SessionStatus _sessionStatus;
 
         #endregion
 
@@ -203,15 +209,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         }
 
 
-        public bool IsAutoPumpingChangingEnabled
-        {
-            get => _isAutoPumpingChangingEnabled;
-            private set
-            {
-                _isAutoPumpingChangingEnabled = value;
-                RisePropertyChanged(nameof(IsAutoPumpingChangingEnabled));
-            }
-        }
+        public bool IsAutoPumpingChangingEnabled => SessionStatus == SessionStatus.InProgress
+                                                    || SessionStatus == SessionStatus.Suspended
+                                                    || SessionStatus == SessionStatus.NotStarted;
 
 
         public bool IsAutoPumpingEnabled
@@ -263,6 +263,85 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 IsSessionSaved = true;
             }
         }
+
+        /// <summary>
+        /// Текущий номер цикла
+        /// </summary>
+        public short CurrentCycleNumber
+        {
+            get => _currentCycleNumber;
+            set
+            {
+                var oldValue = _currentCycleNumber;
+                _currentCycleNumber = value;
+                if (oldValue != _currentCycleNumber)
+                {
+                    RisePropertyChanged(nameof(CurrentCycleNumber));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Текущий угол наклона кровати по оси X
+        /// </summary>
+        public float CurrentXAngle
+        {
+            get => _currentXAngle;
+            set
+            {
+                if (Math.Abs(_currentXAngle - value) > CardioMonitorConstants.Tolerance)
+                {
+                    _currentXAngle = value;
+                    RisePropertyChanged(nameof(CurrentXAngle));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Прошедшее время с начала сеанса
+        /// </summary>
+        public TimeSpan ElapsedTime
+        {
+            get => _elapsedTime;
+            set
+            {
+                _elapsedTime = value;
+                RisePropertyChanged(nameof(ElapsedTime));
+            }
+        }
+
+        /// <summary>
+        /// Оставшееся время до конца сеанса
+        /// </summary>
+        public TimeSpan RemainingTime
+        {
+            get => _remainingTime;
+            set
+            {
+                _remainingTime = value;
+                RisePropertyChanged(nameof(RemainingTime));
+            }
+        }
+
+        /// <summary>
+        /// Статус сеанса
+        /// </summary>
+        public SessionStatus SessionStatus
+        {
+            get => _sessionStatus;
+            set
+            {
+                _sessionStatus = value;
+                RisePropertyChanged(nameof(SessionStatus));
+                RisePropertyChanged(nameof(StartCommand));
+                RisePropertyChanged(nameof(ReverseCommand));
+                RisePropertyChanged(nameof(EmergencyStopCommand));
+                RisePropertyChanged(nameof(ManualRequestCommand));
+                RisePropertyChanged(nameof(IsSavingToDbEnabled));
+                RisePropertyChanged(nameof(IsAutoPumpingChangingEnabled));
+            }
+        }
+
 
         public bool IsSavingToDbEnabled => (SessionStatus == SessionStatus.Completed
                                               || SessionStatus == SessionStatus.EmergencyStopped
@@ -387,18 +466,20 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _notifier = notifier ?? throw new ArgumentNullException(nameof(notifier));
             _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
 
+            _sessionProcessor = new SessionProcessor();
+
             CanManualDataCommandExecute = true;
-            IsAutoPumpingChangingEnabled = true;
+            SessionStatus = SessionStatus.NotStarted;
             StartButtonText = _startText;
-            OnException += HandleOnException;
-            OnSessionErrorStop += HandleSessionErrorStop;
-            OnSessionCompleted += HandleSessionCompleted;
-            OnPausedFromDevice += HanlePausedFromDevice;
-            OnResumedFromDevice += HandleResumedFromDevice;
-            OnEmeregencyStoppedFromDevice += HandleEmeregencyStoppedFromDevice;
-            OnReversedFromDevice += HandleReversedFromDevice;
-            OnSessionStatusChanged += HandleSessionStatusChanged;
-            OnCycleCompleted += HandleCycleCompleted;
+            _sessionProcessor.ExceptionOccured += HandleOnException;
+            _sessionProcessor.SessionOnErrorStoped += HandleSessionErrorStop;
+            _sessionProcessor.SessionCompleted += HandleSessionCompleted;
+            _sessionProcessor.PausedFromDevice += HanlePausedFromDevice;
+            _sessionProcessor.ResumedFromDevice += HandleResumedFromDevice;
+            _sessionProcessor.EmeregencyStoppedFromDevice += HandleEmeregencyStoppedFromDevice;
+            _sessionProcessor.ReversedFromDevice += HandleReversedFromDevice;
+            _sessionProcessor.SessionStatusChanged += HandleSessionStatusChanged;
+            _sessionProcessor.CycleCompleted += HandleCycleCompleted;
         }
 
 
@@ -454,17 +535,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             Task.Factory.StartNew(async () => await SaveSessionToDbAsync());
         }
 
-        private void HandleSessionStatusChanged(object sender, EventArgs eventArgs)
+        private void HandleSessionStatusChanged(object sender, SessionStatus status)
         {
-            RisePropertyChanged(nameof(StartCommand));
-            RisePropertyChanged(nameof(ReverseCommand));
-            RisePropertyChanged(nameof(EmergencyStopCommand));
-            RisePropertyChanged(nameof(ManualRequestCommand));
-            RisePropertyChanged(nameof(IsSavingToDbEnabled));
-
-            IsAutoPumpingChangingEnabled = SessionStatus == SessionStatus.InProgress
-                                           || SessionStatus == SessionStatus.Suspended
-                                           || SessionStatus == SessionStatus.NotStarted;
+            SessionStatus = status;
         }
 
         private void HandleOnException(object sender, SessionProcessingException sessionProcessingException)
@@ -485,11 +558,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         {
             if (isAutoPumpingEnabled)
             {
-                EnableAutoPumping();
+                _sessionProcessor.EnableAutoPumping();
             }
             else
             {
-                DisableAutoPumping();
+                _sessionProcessor.DisableAutoPumping();
             }
         }
 
@@ -507,20 +580,20 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 {
                     case SessionStatus.InProgress:
                         actionName = "паузы";
-                        await PauseAsync().ConfigureAwait(true);
+                        await _sessionProcessor.PauseAsync().ConfigureAwait(true);
                         StartButtonText = _resumeText;
                         break;
                     case SessionStatus.Suspended:
                         actionName = "продолжения";
                         UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
-                        await ResumeAsync().ConfigureAwait(true);
+                        await _sessionProcessor.ResumeAsync().ConfigureAwait(true);
                         StartButtonText = _pauseText;
                         break;
                     default:
                         actionName = "старта";
                         await InitAsync().ConfigureAwait(true);
                         UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
-                        await StartAsync().ConfigureAwait(true);
+                        await _sessionProcessor.StartAsync().ConfigureAwait(true);
                         StartButtonText = _pauseText;
                         IsSessionStarted = true;
                         _sessionTimestampUtc = DateTime.UtcNow;
@@ -594,7 +667,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 context.PumpingNumberOfAttemptsOnStartAndFinish,
                 context.PumpingNumberOfAttemptsOnProcessing);
 
-            Init(
+            _sessionProcessor.Init(
                 startParams,
                 bedController,
                 monitorController,
@@ -748,7 +821,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = true;
                 BusyMessage = "Реверс сеанса...";
-                await ReverseAsync().ConfigureAwait(true);
+                await _sessionProcessor
+                    .ReverseAsync()
+                    .ConfigureAwait(true);
                 IsReverseAlreadyRequested = true;
             }
             catch (Exception e)
@@ -779,8 +854,11 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             {
                 IsBusy = true;
                 BusyMessage = "Экстренная остановка...";
-                await EmeregencyStopAsync().ConfigureAwait(true);
-                await SaveSessionToDbAsync().ConfigureAwait(true);
+                await _sessionProcessor
+                    .EmeregencyStopAsync()
+                    .ConfigureAwait(true);
+                await SaveSessionToDbAsync()
+                    .ConfigureAwait(true);
             }
             catch (Exception e)
             {
@@ -801,7 +879,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 IsBusy = true;
                 BusyMessage = "Обновление данных для последней точки...";
 
-                await RequestManualDataUpdateAsync().ConfigureAwait(true);
+                await _sessionProcessor
+                    .RequestManualDataUpdateAsync()
+                    .ConfigureAwait(true);
                 await SaveSessionToDbAsync().ConfigureAwait(true);
 
                 CanManualDataCommandExecute = false;
@@ -916,7 +996,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             try
             {
 
-                await EmeregencyStopAsync().ConfigureAwait(true);
+                await _sessionProcessor.EmeregencyStopAsync().ConfigureAwait(true);
                 await SaveSessionToDbAsync().ConfigureAwait(true);
                 ClearData();
             }
@@ -945,6 +1025,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         public event Func<TransitionEvent, Task> PageCompleted;
         public event Func<TransitionEvent, Task> PageBackRequested;
         public event Func<object, TransitionRequest, Task> PageTransitionRequested;
+
+        public void Dispose()
+        {
+        }
     }
 
     #endregion

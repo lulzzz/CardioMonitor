@@ -10,7 +10,7 @@ namespace CardioMonitor.BLL.SessionProcessing
     /// <summary>
     /// Значение параметров пациента в контрольной точке
     /// </summary>
-    public class CheckPointParams : INotifyPropertyChanged
+    public class CheckPointParams
     {
 
         public CheckPointParams(
@@ -37,6 +37,8 @@ namespace CardioMonitor.BLL.SessionProcessing
             HeartRate = new DeviceValue<short>(patientParams.HeartRate);
             RespirationRate = new DeviceValue<short>(patientParams.RespirationRate);
             Spo2 = new DeviceValue<short>(patientParams.Spo2);
+
+            CommonParamsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         internal void SetPressureParams([NotNull] PatientPressureParams pressureParams)
@@ -46,6 +48,8 @@ namespace CardioMonitor.BLL.SessionProcessing
             SystolicArterialPressure = new DeviceValue<short>(pressureParams.SystolicArterialPressure);
             DiastolicArterialPressure = new DeviceValue<short>(pressureParams.DiastolicArterialPressure);
             AverageArterialPressure = new DeviceValue<short>(pressureParams.AverageArterialPressure);
+
+            PressureParamsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         internal void HandleErrorOnCommoParamsProcessing()
@@ -56,6 +60,8 @@ namespace CardioMonitor.BLL.SessionProcessing
             HeartRate = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
             RespirationRate = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
             Spo2 = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
+
+            CommonParamsChanged?.Invoke(this, EventArgs.Empty);
         }
         
         internal void HandleErrorOnPressureParamsProcessing()
@@ -66,6 +72,8 @@ namespace CardioMonitor.BLL.SessionProcessing
             SystolicArterialPressure = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
             DiastolicArterialPressure = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
             AverageArterialPressure = new DeviceValue<short>(DeviceValueStatus.ErrorOccured);
+
+            PressureParamsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         #region Fields
@@ -90,90 +98,41 @@ namespace CardioMonitor.BLL.SessionProcessing
         /// <summary>п
         /// Частота сердечных сокращений (ЧСС)
         /// </summary>
-        public DeviceValue<short> HeartRate
-        {
-            get => _heartRate;
-            set
-            {
-                _heartRate = value;
-                OnPropertyChanged(nameof(HeartRate));
-            }
-        }
-        private DeviceValue<short> _heartRate;
+        public DeviceValue<short> HeartRate { get; private set; }
 
         /// <summary>
         /// Частота дыхания (ЧД)
         /// </summary>
-        public DeviceValue<short> RespirationRate
-        {
-            get => _respirationRate;
-            set
-            {
-                _respirationRate = value;
-                OnPropertyChanged(nameof(RespirationRate));
-            }
-        }
-        private DeviceValue<short> _respirationRate;
+        public DeviceValue<short> RespirationRate { get; private set; }
 
         /// <summary>
         /// SPO2
         /// </summary>
-        public DeviceValue<short> Spo2
-        {
-            get => _spo2;
-            set
-            {
-                _spo2 = value;
-                OnPropertyChanged(nameof(Spo2));
-            }
-        }
-        private DeviceValue<short> _spo2;
+        public DeviceValue<short> Spo2 { get; private set; }
 
 
         /// <summary>
         /// Систолическое артериальное давление
         /// </summary>
-        public DeviceValue<short> SystolicArterialPressure
-        {
-            get => _systolicArterialPressure;
-            set { _systolicArterialPressure = value; 
-                OnPropertyChanged(nameof(SystolicArterialPressure));}
-        }
-        private DeviceValue<short> _systolicArterialPressure;
+        public DeviceValue<short> SystolicArterialPressure { get;  private set; }
 
         /// <summary>
         /// Диастолическое артериальное давление
         /// </summary>
-        public DeviceValue<short> DiastolicArterialPressure
-        {
-            get => _diastolicArterialPressure;
-            set { _diastolicArterialPressure = value; 
-                OnPropertyChanged(nameof(DiastolicArterialPressure));}
-        }
-        private DeviceValue<short> _diastolicArterialPressure;
+        public DeviceValue<short> DiastolicArterialPressure { get; private set; }
 
         /// <summary>
         /// Среднее артериальное давлние 
         /// </summary>
-        public DeviceValue<short> AverageArterialPressure
-        {
-            get => _averageArterialPressure;
-            set { _averageArterialPressure = value; 
-                OnPropertyChanged(nameof(AverageArterialPressure));}
-        }
-        private DeviceValue<short> _averageArterialPressure;
-        
+        public DeviceValue<short> AverageArterialPressure { get; private set; }
+
         #endregion
         
-        #region Rise events 
+        #region Events 
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler CommonParamsChanged;
 
-        [NotifyPropertyChangedInvocator]
-        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        public event EventHandler PressureParamsChanged;
 
         #endregion
     }

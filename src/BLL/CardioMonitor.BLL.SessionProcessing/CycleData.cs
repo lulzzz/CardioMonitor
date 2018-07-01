@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing
@@ -9,12 +8,16 @@ namespace CardioMonitor.BLL.SessionProcessing
     {
         public short CycleNumber { get;  }
 
-        public ObservableCollection<CheckPointParams> CycleParams { get; }
+        public ICollection<CheckPointParams> CycleParams { get; }
+
+        //todo Add ecg data here 
+
+        public event EventHandler<CheckPointParams> CheckPointAdded;
         
         public CycleData(short cycleNumber)
         {
             CycleNumber = cycleNumber;
-            CycleParams = new ObservableCollection<CheckPointParams>();
+            CycleParams = new List<CheckPointParams>();
         }
 
         public void AddCheckPoint([NotNull] CheckPointParams checkPoint)
@@ -22,6 +25,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             if (checkPoint == null) throw new ArgumentNullException(nameof(checkPoint));
 
             CycleParams.Add(checkPoint);
+            CheckPointAdded?.Invoke(this, checkPoint);
         }
 
         public void AddCheckPoints([NotNull] ICollection<CheckPointParams> checkPoint)

@@ -23,7 +23,7 @@ namespace CardioMonitor.BLL.SessionProcessing
     /// По факту высокоуровнеая обертка над всем процессом получения данных. Аргегируют данные в удобный для конечного потребителя вид.
     /// Сделан для того, чтобы потом могли легко портироваться на другой UI, чтобы не было жесткой завязки на WPF
     /// </remarks>
-    public class SessionProcessor :  INotifyPropertyChanged, IDisposable
+    public class SessionProcessor :  IDisposable
     {
         [CanBeNull] 
         private SessionParams _startParams;
@@ -34,10 +34,7 @@ namespace CardioMonitor.BLL.SessionProcessing
         /// </summary>
         [NotNull]
         private IDevicesFacade _devicesFacade;
-
-        [NotNull]
-        private IUiInvoker _uiInvoker;
-
+        
 
         [NotNull]
         private readonly object _cycleDataLocker = new object();
@@ -87,60 +84,19 @@ namespace CardioMonitor.BLL.SessionProcessing
             }
         }
         private short _currentCycleNumber;
+        
 
-        /// <summary>
-        /// Текущий угол наклона кровати по оси X
-        /// </summary>
-        public float CurrentXAngle
-        {
-            get => _currentXAngle;
-            set
-            {
-                if (Math.Abs(_currentXAngle - value) > CardioMonitorConstants.Tolerance)
-                {
-                    _currentXAngle = value;
-                    RisePropertyChanged(nameof(CurrentXAngle));
-                }
-            }
-        }
-        private float _currentXAngle;
-
-        /// <summary>
-        /// Прошедшее время с начала сеанса
-        /// </summary>
-        public TimeSpan ElapsedTime
-        {
-            get => _elapsedTime;
-            set { _elapsedTime = value;
-                RisePropertyChanged(nameof(ElapsedTime)); }
-        }
-        private TimeSpan _elapsedTime;
-
-        /// <summary>
-        /// Оставшееся время до конца сеанса
-        /// </summary>
-        public TimeSpan RemainingTime
-        {
-            get => _remainingTime;
-            set
-            {
-                _remainingTime = value; 
-                RisePropertyChanged(nameof(RemainingTime));
-            }
-        }
-        private TimeSpan _remainingTime;
-
-        /// <summary>
-        /// Статус сеанса
-        /// </summary>
         public SessionStatus SessionStatus
         {
             get => _sessionStatus;
             set
             {
+                var oldValue = _sessionStatus;
                 _sessionStatus = value;
-                RisePropertyChanged(nameof(SessionStatus));
-                OnSessionStatusChanged?.Invoke(this, EventArgs.Empty);
+                if (_sessionStatus != oldValue)
+                {
+                    SessionStatusChanged?.Invoke(this, value);
+                }
             }
         }
 
@@ -150,24 +106,29 @@ namespace CardioMonitor.BLL.SessionProcessing
 
         #region Events
 
-        public event EventHandler<SessionProcessingException> OnException;
+        public event EventHandler<SessionProcessingException> ExceptionOccured;
         
-        public event EventHandler<Exception> OnSessionErrorStop;
+        public event EventHandler<Exception> SessionOnErrorStoped;
        
-        public event EventHandler OnSessionCompleted;
+        public event EventHandler SessionCompleted;
 
-        public event EventHandler<short> OnCycleCompleted;
+        public event EventHandler<short> CycleCompleted;
 
-        public event EventHandler OnPausedFromDevice;
+        public event EventHandler PausedFromDevice;
         
-        public event EventHandler OnResumedFromDevice;
+        public event EventHandler ResumedFromDevice;
         
-        public event EventHandler OnEmeregencyStoppedFromDevice;
+        public event EventHandler EmeregencyStoppedFromDevice;
         
-        public event EventHandler OnReversedFromDevice;
+        public event EventHandler ReversedFromDevice;
 
-        public event EventHandler OnSessionStatusChanged;
+        public event EventHandler<SessionStatus> SessionStatusChanged;
 
+        public event EventHandler<TimeSpan> ElapsedTimeChanged;
+
+        public event EventHandler<TimeSpan> RemainingTimeChanged;
+
+        public event EventHandler<float> CurrentAgnleXChanged;
 
 
         #endregion
@@ -194,23 +155,23 @@ namespace CardioMonitor.BLL.SessionProcessing
                 workerController,
                 logger);
 
-            _devicesFacade.OnException += OnException;
+            _devicesFacade.OnException += ExceptionOccured;
             _devicesFacade.OnException += HandleOnException;
-            _devicesFacade.OnSessionErrorStop += OnSessionErrorStop;
+            _devicesFacade.OnSessionErrorStop += SessionOnErrorStoped;
             _devicesFacade.OnSessionErrorStop += HandleOnSessionErrorStop;
             _devicesFacade.OnCycleCompleted += HandleOnCycleCompleted;
-            _devicesFacade.OnCycleCompleted += OnCycleCompleted;
+            _devicesFacade.OnCycleCompleted += CycleCompleted;
             _devicesFacade.OnElapsedTimeChanged += HandleOnElapsedTimeChanged;
             _devicesFacade.OnRemainingTimeChanged += HandleOnRemainingTimeChanged;
-            _devicesFacade.OnSessionCompleted += OnSessionCompleted;
+            _devicesFacade.OnSessionCompleted += SessionCompleted;
             _devicesFacade.OnSessionCompleted += HandleOnSessionCompleted;
-            _devicesFacade.OnPausedFromDevice += OnPausedFromDevice;
+            _devicesFacade.OnPausedFromDevice += PausedFromDevice;
             _devicesFacade.OnPausedFromDevice += HandleOnPausedFromDevice;
-            _devicesFacade.OnResumedFromDevice += OnResumedFromDevice;
+            _devicesFacade.OnResumedFromDevice += ResumedFromDevice;
             _devicesFacade.OnResumedFromDevice += HandleOnResumedFromDevice;
-            _devicesFacade.OnEmeregencyStoppedFromDevice += OnEmeregencyStoppedFromDevice;
+            _devicesFacade.OnEmeregencyStoppedFromDevice += EmeregencyStoppedFromDevice;
             _devicesFacade.OnEmeregencyStoppedFromDevice += HandleOnEmeregencyStoppedFromDevice;
-            _devicesFacade.OnReversedFromDevice += OnReversedFromDevice;
+            _devicesFacade.OnReversedFromDevice += ReversedFromDevice;
             _devicesFacade.OnCurrentAngleXRecieved += HandleOnCurrentAngleXRecieved;
             _devicesFacade.OnCommonPatientParamsRecieved += HandleOnCommonPatientParamsRecieved;
             _devicesFacade.OnPatientPressureParamsRecieved += HandleOnPatientPressureParamsRecieved;
@@ -220,8 +181,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             {
                 temp.Add(new CycleData((short) (index + 1)));
             }
-
-            _uiInvoker = uiInvoker ?? throw new ArgumentNullException(nameof(uiInvoker));
+            
             _uiInvoker.Invoke(() =>
             {
                 PatientParamsPerCycles = temp;
@@ -236,9 +196,8 @@ namespace CardioMonitor.BLL.SessionProcessing
             await _devicesFacade
                 .StartAsync()
                 .ConfigureAwait(true);
-            _uiInvoker.Invoke(() => {
-                SessionStatus = SessionStatus.InProgress;
-            });
+
+            SessionStatus = SessionStatus.InProgress;
         }
 
         private void AssureInitialization()
@@ -251,7 +210,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             AssureInitialization();
 
 
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.EmergencyStopped; });
+            SessionStatus = SessionStatus.EmergencyStopped;
             return _devicesFacade.EmergencyStopAsync();
         }
 
@@ -260,7 +219,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             AssureInitialization();
 
 
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.Suspended; });
+            SessionStatus = SessionStatus.Suspended;
             return _devicesFacade.PauseAsync();
         }
 
@@ -269,7 +228,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             AssureInitialization();
 
 
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.InProgress; });
+            SessionStatus = SessionStatus.InProgress;
             return _devicesFacade.StartAsync();
         }
 
@@ -307,22 +266,22 @@ namespace CardioMonitor.BLL.SessionProcessing
             // ReSharper disable once HeuristicUnreachableCode
             if (_devicesFacade == null) return;
             
-            _devicesFacade.OnException -= OnException;
+            _devicesFacade.OnException -= ExceptionOccured;
             _devicesFacade.OnException -= HandleOnException;
-            _devicesFacade.OnSessionErrorStop -= OnSessionErrorStop;
+            _devicesFacade.OnSessionErrorStop -= SessionOnErrorStoped;
             _devicesFacade.OnSessionErrorStop -= HandleOnSessionErrorStop;
             _devicesFacade.OnCycleCompleted -= HandleOnCycleCompleted;
             _devicesFacade.OnElapsedTimeChanged -= HandleOnElapsedTimeChanged;
             _devicesFacade.OnRemainingTimeChanged -= HandleOnRemainingTimeChanged;
-            _devicesFacade.OnSessionCompleted -= OnSessionCompleted;
+            _devicesFacade.OnSessionCompleted -= SessionCompleted;
             _devicesFacade.OnSessionCompleted -= HandleOnSessionCompleted;
-            _devicesFacade.OnPausedFromDevice -= OnPausedFromDevice;
+            _devicesFacade.OnPausedFromDevice -= PausedFromDevice;
             _devicesFacade.OnPausedFromDevice -= HandleOnPausedFromDevice;
-            _devicesFacade.OnResumedFromDevice -= OnResumedFromDevice;
+            _devicesFacade.OnResumedFromDevice -= ResumedFromDevice;
             _devicesFacade.OnResumedFromDevice -= HandleOnResumedFromDevice;
-            _devicesFacade.OnEmeregencyStoppedFromDevice -= OnEmeregencyStoppedFromDevice;
+            _devicesFacade.OnEmeregencyStoppedFromDevice -= EmeregencyStoppedFromDevice;
             _devicesFacade.OnEmeregencyStoppedFromDevice -= HandleOnEmeregencyStoppedFromDevice;
-            _devicesFacade.OnReversedFromDevice -= OnReversedFromDevice;
+            _devicesFacade.OnReversedFromDevice -= ReversedFromDevice;
             _devicesFacade.OnCurrentAngleXRecieved -= HandleOnCurrentAngleXRecieved;
             _devicesFacade.OnCommonPatientParamsRecieved -= HandleOnCommonPatientParamsRecieved;
             _devicesFacade.OnPatientPressureParamsRecieved -= HandleOnPatientPressureParamsRecieved;
@@ -453,54 +412,42 @@ namespace CardioMonitor.BLL.SessionProcessing
 
         private void HandleOnCurrentAngleXRecieved(object sender, float value)
         {
-            _uiInvoker.Invoke(() => { CurrentXAngle = value; });
+            CurrentAgnleXChanged?.Invoke(this, value);
         }
         
-        private void HandleOnRemainingTimeChanged(object sender, TimeSpan timeSpan)
+        private void HandleOnRemainingTimeChanged(object sender, TimeSpan value)
         {
-            _uiInvoker.Invoke(() => { RemainingTime = timeSpan; });
+            RemainingTimeChanged?.Invoke(this, value);
         }
 
-        private void HandleOnElapsedTimeChanged(object sender, TimeSpan timeSpan)
+        private void HandleOnElapsedTimeChanged(object sender, TimeSpan value)
         {
-            _uiInvoker.Invoke(() => { ElapsedTime = timeSpan; });
+            ElapsedTimeChanged?.Invoke(this, value);
         }
         
         private void HandleOnPausedFromDevice(object sender, EventArgs eventArgs)
         {
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.Suspended; });
+            SessionStatus = SessionStatus.Suspended;
         }
 
         private void HandleOnEmeregencyStoppedFromDevice(object sender, EventArgs eventArgs)
         {
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.EmergencyStopped; });
+            SessionStatus = SessionStatus.EmergencyStopped;
         }
 
         private void HandleOnResumedFromDevice(object sender, EventArgs eventArgs)
         {
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.InProgress; });
+            SessionStatus = SessionStatus.InProgress;
         }
 
         private void HandleOnSessionCompleted(object sender, EventArgs eventArgs)
         {
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.Completed; });
+            SessionStatus = SessionStatus.Completed;
         }
 
         private void HandleOnSessionErrorStop(object sender, Exception exception)
         {
-            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.TerminatedOnError; });
-        }
-
-        #endregion
-
-
-        #region Rise events 
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void RisePropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+             SessionStatus = SessionStatus.TerminatedOnError;
         }
 
         #endregion
