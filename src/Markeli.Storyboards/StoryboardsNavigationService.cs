@@ -136,88 +136,150 @@ namespace Markeli.Storyboards
             return view;
         }
 
-        private Task ViewModelOnPageTransitionRequested(object sender, [NotNull] TransitionRequest transitionRequest)
+        private async Task<TransitionResult> ViewModelOnPageTransitionRequested(object sender,
+            [NotNull] TransitionRequest transitionRequest)
         {
             if (transitionRequest == null) throw new ArgumentNullException(nameof(transitionRequest));
 
-            return _invoker.InvokeAsync(() =>
+            var tcs = new TaskCompletionSource<TransitionResult>();
+            await _invoker.InvokeAsync(async () =>
             {
-                if (!(sender is IStoryboardPageViewModel viewModel)) throw new InvalidOperationException("Incorrect request of transition");
+                try
+                {
+                    if (!(sender is IStoryboardPageViewModel viewModel))
+                        throw new InvalidOperationException("Incorrect request of transition");
 
-                return GoToPageAsync(transitionRequest.DestinationPageId, viewModel.StoryboardId, transitionRequest.DestinationPageContext);
-            });
+                    var result = await GoToPageAsync(
+                            transitionRequest.DestinationPageId,
+                            viewModel.StoryboardId,
+                            transitionRequest.DestinationPageContext)
+                        .ConfigureAwait(true);
+                    tcs.SetResult(result);
+                }
+                catch (Exception e)
+                {
+                    tcs.SetException(e);
+                }
+            }).ConfigureAwait(false);
+            return await tcs.Task.ConfigureAwait(false);
         }
 
-        private async Task ViewModelOnPageCompleted([NotNull] TransitionEvent transitionEvent)
+        private Task<TransitionResult> ViewModelOnPageCompleted([NotNull] TransitionEvent transitionEvent)
         {
             if (transitionEvent == null) throw new ArgumentNullException(nameof(transitionEvent));
             if (!(transitionEvent.Sender is IStoryboardPageViewModel))
                 throw new InvalidOperationException("Incorrect request of transition");
             
-            await HandleViewModelTransitionsAsync(transitionEvent.Sender, PageTransitionTrigger.Completed, transitionEvent.Context).ConfigureAwait(false);
+            return HandleViewModelTransitionsAsync(
+                transitionEvent.Sender, 
+                PageTransitionTrigger.Completed, 
+                transitionEvent.Context);
         }
 
-        private Task HandleViewModelTransitionsAsync(object sender, PageTransitionTrigger trigger, IStoryboardPageContext context = null)
+        private async Task<TransitionResult> HandleViewModelTransitionsAsync(object sender, PageTransitionTrigger trigger, IStoryboardPageContext context = null)
         {
-            return _invoker.InvokeAsync(async () =>
+            var tcs = new TaskCompletionSource<TransitionResult>();
+            await _invoker.InvokeAsync(async () =>
             {
-                if (!(sender is IStoryboardPageViewModel viewModel))
-                    throw new InvalidOperationException("Incorrect request of transition");
-
-                await RemoveOpennedPageAsync().ConfigureAwait(true);
-
-                var storyboard = _storyboards.Values.FirstOrDefault(x => x.StoryboardId == viewModel.StoryboardId);
-                if (storyboard == null) throw new InvalidOperationException("Storyboard not found");
-
-                var destinationPageId = storyboard.GetDestinationPage(viewModel.PageId, trigger);
-                await GoToPageAsync(destinationPageId, storyboard.StoryboardId, context).ConfigureAwait(true);
-            });
-        }
-
-        private Task ViewModelOnPageCanceled([NotNull] TransitionEvent transitionEvent)
-        {
-            if (transitionEvent == null) throw new ArgumentNullException(nameof(transitionEvent));
-            if (!(transitionEvent.Sender is IStoryboardPageViewModel))
-                throw new InvalidOperationException("Incorrect request of transition");
-            return HandleViewModelTransitionsAsync(transitionEvent.Sender, PageTransitionTrigger.Canceled, transitionEvent.Context);
-        }
-
-        private Task ViewModelOnPageBackRequested([NotNull] TransitionEvent transitionEvent)
-        {
-            if (transitionEvent == null) throw new ArgumentNullException(nameof(transitionEvent));
-            if (!(transitionEvent.Sender is IStoryboardPageViewModel))
-                throw new InvalidOperationException("Incorrect request of transition");
-
-            return HandleViewModelTransitionsAsync(transitionEvent.Sender, PageTransitionTrigger.Back, transitionEvent.Context);
-        }
-
-        public Task GoToPageAsync(Guid pageId, Guid? storyboardId = null, IStoryboardPageContext pageContext = null)
-        {
-            return _invoker.InvokeAsync(() =>
-            {
-                var storyBoard = storyboardId.HasValue
-                    ? _storyboards.FirstOrDefault(x => x.Key == storyboardId.Value).Value
-                    : _activeStoryboard;
-
-                //first try to find desired page in current storyboard, then look up at all registered pages
-                var pageInfo = storyBoard != null
-                    ? _registeredPages.Keys.FirstOrDefault(x =>
-                        x.PageId == pageId && x.StoryboardId == storyBoard.StoryboardId)
-                    : _registeredPages.Keys.FirstOrDefault(x => x.PageId == pageId);
-                if (pageInfo == null)
+                try
                 {
-                    pageInfo = _registeredPages.Keys.FirstOrDefault(x => x.PageId == pageId);
+                    if (!(sender is IStoryboardPageViewModel viewModel))
+                        throw new InvalidOperationException("Incorrect request of transition");
+
+                    // todo is it correct? different behaviour of transition
+                    var removingResult = await RemoveOpennedPageAsync()
+                        .ConfigureAwait(true);
+                    if (removingResult == null)
+                    {
+                        tcs.SetResult(TransitionResult.Unavailable);
+                        return;
+                    }
+
+                    if (removingResult.Item2 != TransitionResult.Completed)
+                    {
+                        tcs.SetResult(removingResult.Item2);
+                        return;
+                    }
+
+                    var storyboard = _storyboards.Values.FirstOrDefault(x => x.StoryboardId == viewModel.StoryboardId);
+                    if (storyboard == null) throw new InvalidOperationException("Storyboard not found");
+
+                    var destinationPageId = storyboard.GetDestinationPage(viewModel.PageId, trigger);
+                    var result = await GoToPageAsync(destinationPageId, storyboard.StoryboardId, context)
+                        .ConfigureAwait(true);
+
+                    tcs.SetResult(result);
+                }
+                catch (Exception e)
+                {
+                    tcs.SetException(e);
+                }
+            }).ConfigureAwait(false);
+            return await tcs.Task.ConfigureAwait(false);
+        }
+
+        private Task<TransitionResult> ViewModelOnPageCanceled([NotNull] TransitionEvent transitionEvent)
+        {
+            if (transitionEvent == null) throw new ArgumentNullException(nameof(transitionEvent));
+            if (!(transitionEvent.Sender is IStoryboardPageViewModel))
+                throw new InvalidOperationException("Incorrect request of transition");
+            return HandleViewModelTransitionsAsync(
+                transitionEvent.Sender, 
+                PageTransitionTrigger.Canceled, 
+                transitionEvent.Context);
+        }
+
+        private Task<TransitionResult> ViewModelOnPageBackRequested([NotNull] TransitionEvent transitionEvent)
+        {
+            if (transitionEvent == null) throw new ArgumentNullException(nameof(transitionEvent));
+            if (!(transitionEvent.Sender is IStoryboardPageViewModel))
+                throw new InvalidOperationException("Incorrect request of transition");
+
+            return HandleViewModelTransitionsAsync(
+                transitionEvent.Sender, 
+                PageTransitionTrigger.Back, 
+                transitionEvent.Context);
+        }
+
+        public async Task<TransitionResult> GoToPageAsync(Guid pageId, Guid? storyboardId = null, IStoryboardPageContext pageContext = null)
+        {
+            var tcs = new TaskCompletionSource<TransitionResult>();
+            await _invoker.InvokeAsync(async () =>
+            {
+                try
+                {
+                    var storyBoard = storyboardId.HasValue
+                        ? _storyboards.FirstOrDefault(x => x.Key == storyboardId.Value).Value
+                        : _activeStoryboard;
+
+                    //first try to find desired page in current storyboard, then look up at all registered pages
+                    var pageInfo = storyBoard != null
+                        ? _registeredPages.Keys.FirstOrDefault(x =>
+                            x.PageId == pageId && x.StoryboardId == storyBoard.StoryboardId)
+                        : _registeredPages.Keys.FirstOrDefault(x => x.PageId == pageId);
                     if (pageInfo == null)
                     {
-                        throw new InvalidOperationException("Page not found");
+                        pageInfo = _registeredPages.Keys.FirstOrDefault(x => x.PageId == pageId);
+                        if (pageInfo == null)
+                        {
+                            throw new InvalidOperationException("Page not found");
+                        }
                     }
-                }
 
-                return OpenPageAsync(pageInfo, pageContext);
-            });
+                    var result = await OpenPageAsync(pageInfo, pageContext)
+                        .ConfigureAwait(true);
+                    tcs.SetResult(result);
+                }
+                catch (Exception e)
+                {
+                    tcs.SetException(e);
+                }
+            }).ConfigureAwait(false);
+            return await tcs.Task
+                .ConfigureAwait(false);
         }
 
-        private Task OpenPageAsync(
+        private async Task<TransitionResult> OpenPageAsync(
             [NotNull] InnerStoryboardPageInfo pageInfo,
             [CanBeNull] IStoryboardPageContext pageContext = null, 
             bool addToJournal = true)
@@ -227,61 +289,76 @@ namespace Markeli.Storyboards
                 throw new InvalidOperationException($"Storyboard {pageInfo.StoryboardId} does not registered");
             }
 
-            return _invoker.InvokeAsync(async () =>
+            var tcs = new TaskCompletionSource<TransitionResult>();
+            await _invoker.InvokeAsync(async () =>
             {
-                var storyboard = _storyboards[pageInfo.StoryboardId];
-
-                if (_activeStoryboard?.ActivePage != null)
+                try
                 {
-                    var previousPage = _activeStoryboard.ActivePage;
-                    var viewModel = previousPage.ViewModel;
+                    var storyboard = _storyboards[pageInfo.StoryboardId];
 
-                    var canLeave = await viewModel.CanLeaveAsync().ConfigureAwait(true);
-                    if (!canLeave) return;
+                    if (_activeStoryboard?.ActivePage != null)
+                    {
+                        var previousPage = _activeStoryboard.ActivePage;
+                        var viewModel = previousPage.ViewModel;
 
-                    await viewModel.LeaveAsync().ConfigureAwait(true);
-                }
-                
-                _activeInnerStoryboardPageInfo = pageInfo;
-                _activeStoryboard = storyboard;
+                        var canLeave = await viewModel.CanLeaveAsync().ConfigureAwait(true);
+                        if (!canLeave)
+                        {
+                            tcs.SetResult(TransitionResult.CanceledByUser);
+                            return;
+                        }
+
+                        await viewModel.LeaveAsync().ConfigureAwait(true);
+                    }
+
+                    _activeInnerStoryboardPageInfo = pageInfo;
+                    _activeStoryboard = storyboard;
                     ActiveStoryboardChanged?.Invoke(this, pageInfo.StoryboardId);
 
-                if (_cachedPages.ContainsKey(pageInfo.PageUniqueId))
-                {
-                    var page = _cachedPages[pageInfo.PageUniqueId];
-
-                    storyboard.ActivePage = page;
-                    _pageContexts.TryGetValue(pageInfo.PageUniqueId, out var restoredPageContext);
-
-                    _startPagesOpenningStat.TryGetValue(pageInfo.PageUniqueId, out var wasPageOpenned);
-                    if (wasPageOpenned)
+                    if (_cachedPages.ContainsKey(pageInfo.PageUniqueId))
                     {
-                        await page.ViewModel.ReturnAsync(pageContext ?? restoredPageContext).ConfigureAwait(true);
+                        var page = _cachedPages[pageInfo.PageUniqueId];
+
+                        storyboard.ActivePage = page;
+                        _pageContexts.TryGetValue(pageInfo.PageUniqueId, out var restoredPageContext);
+
+                        _startPagesOpenningStat.TryGetValue(pageInfo.PageUniqueId, out var wasPageOpenned);
+                        if (wasPageOpenned)
+                        {
+                            await page.ViewModel.ReturnAsync(pageContext ?? restoredPageContext).ConfigureAwait(true);
+                        }
+                        else
+                        {
+                            await page.ViewModel.OpenAsync(pageContext ?? restoredPageContext).ConfigureAwait(true);
+                            _startPagesOpenningStat[pageInfo.PageUniqueId] = true;
+                        }
+
                     }
                     else
                     {
-                        await page.ViewModel.OpenAsync(pageContext ?? restoredPageContext).ConfigureAwait(true);
-                        _startPagesOpenningStat[pageInfo.PageUniqueId] = true;
+                        var view = CreatePageView(pageInfo);
+                        storyboard.ActivePage = view;
+
+                        await view.ViewModel.OpenAsync(pageContext).ConfigureAwait(true);
+                        _pageContexts[pageInfo.PageUniqueId] = pageContext;
                     }
 
+                    //todo do not add to journal existed pages
+                    if (addToJournal)
+                    {
+                        _journal.AddLast(pageInfo);
+                    }
+
+                    RiseCanBackChanged();
+                    tcs.SetResult(TransitionResult.Completed);
                 }
-                else
+                catch (Exception e)
                 {
-                    var view = CreatePageView(pageInfo);
-                    storyboard.ActivePage = view;
-
-                    await view.ViewModel.OpenAsync(pageContext).ConfigureAwait(true);
-                    _pageContexts[pageInfo.PageUniqueId] = pageContext;
+                    tcs.SetException(e);
                 }
-
-
-                if (addToJournal)
-                {
-                    _journal.AddLast(pageInfo);
-                }
-
-                RiseCanBackChanged();
-            });
+               
+            }).ConfigureAwait(false);
+            return await tcs.Task.ConfigureAwait(false);
         }
 
         private void RiseCanBackChanged()
@@ -289,7 +366,7 @@ namespace Markeli.Storyboards
             CanBackChanged?.Invoke(this, EventArgs.Empty);
         }
        
-        public async Task GoToStoryboardAsync(Guid storyboardId)
+        public Task<TransitionResult> GoToStoryboardAsync(Guid storyboardId)
         {
             var pageInfo = _journal.LastOrDefault(x => x.StoryboardId == storyboardId);
             if (pageInfo == null)
@@ -299,27 +376,49 @@ namespace Markeli.Storyboards
                 if (pageInfo == null) throw new InvalidOperationException("Pages for storyboard does not registered");
 
             }
-            await OpenPageAsync(pageInfo).ConfigureAwait(true);
+            //todo clear journal
+            return OpenPageAsync(pageInfo);
         }
         
 
-        public Task GoBackAsync()
+        public async Task<TransitionResult> GoBackAsync()
         {
-            if (!CanGoBack()) return Task.CompletedTask;
-            if (_activeInnerStoryboardPageInfo == null) return Task.CompletedTask;
+            if (!CanGoBack()) return TransitionResult.Unavailable;
+            if (_activeInnerStoryboardPageInfo == null) return TransitionResult.Unavailable;
 
-            return _invoker.InvokeAsync(async () =>
+            var tcs = new TaskCompletionSource<TransitionResult>();
+            await _invoker.InvokeAsync(async () =>
             {
+                try
+                {
+                    var lastPageFromStoryboard = await RemoveOpennedPageAsync().ConfigureAwait(true);
+                    if (lastPageFromStoryboard == null)
+                    {
+                        tcs.SetResult(TransitionResult.Unavailable);
+                        return;
+                    }
 
-                var lastPageFromStoryboard = await RemoveOpennedPageAsync().ConfigureAwait(true);
-                if (lastPageFromStoryboard == null) return;
-                
-                // already have been added
-                await OpenPageAsync(lastPageFromStoryboard, addToJournal: false).ConfigureAwait(true);
-            });
+                    if (lastPageFromStoryboard.Item2 != TransitionResult.Completed)
+                    {
+                        tcs.SetResult(lastPageFromStoryboard.Item2);
+                        return;
+                    }
+
+                    // already have been added
+                    var result = await OpenPageAsync(lastPageFromStoryboard.Item1, addToJournal: false)
+                        .ConfigureAwait(true);
+                    tcs.SetResult(result);
+                }
+                catch (Exception e)
+                {
+                    tcs.SetException(e);
+                }
+
+            }).ConfigureAwait(false);
+            return await tcs.Task;
         }
 
-        private async Task<InnerStoryboardPageInfo> RemoveOpennedPageAsync()
+        private async Task<Tuple<InnerStoryboardPageInfo, TransitionResult>> RemoveOpennedPageAsync()
         {
             if (_activeInnerStoryboardPageInfo == null) return null;
 
@@ -330,7 +429,10 @@ namespace Markeli.Storyboards
                 var previousPage = _activeStoryboard.ActivePage;
                 var viewModel = previousPage.ViewModel;
                 var canClose = await viewModel.CanCloseAsync().ConfigureAwait(true);
-                if (!canClose) return null;
+                if (!canClose)
+                {
+                    return new Tuple<InnerStoryboardPageInfo, TransitionResult>(null, TransitionResult.CanceledByUser);
+                }
             }
             
 
@@ -345,7 +447,10 @@ namespace Markeli.Storyboards
             {
                 lastPageFromStoryboard =
                     _journal.LastOrDefault(x => x.StoryboardId != _activeInnerStoryboardPageInfo.StoryboardId);
-                if (lastPageFromStoryboard == null) return null;
+                if (lastPageFromStoryboard == null)
+                {
+                    return new Tuple<InnerStoryboardPageInfo, TransitionResult>(null, TransitionResult.Unavailable);
+                }
             }
 
 
@@ -387,7 +492,7 @@ namespace Markeli.Storyboards
                     _startPageContexts[_activeInnerStoryboardPageInfo.PageUniqueId];
             }
 
-            return lastPageFromStoryboard;
+            return new Tuple<InnerStoryboardPageInfo, TransitionResult>(lastPageFromStoryboard, TransitionResult.Completed);
         }
 
         public bool CanGoBack()
@@ -439,5 +544,12 @@ namespace Markeli.Storyboards
 
             public bool IsStartPage { get; set; }
         }
+    }
+
+    public enum TransitionResult
+    {
+        Completed = 0,
+        CanceledByUser = 1,
+        Unavailable = 2
     }
 }
