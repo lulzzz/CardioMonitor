@@ -22,6 +22,7 @@ using CardioMonitor.EventHandlers.Patients;
 using CardioMonitor.EventHandlers.Sessions;
 using CardioMonitor.FileSaving;
 using CardioMonitor.Infrastructure.Workers;
+using CardioMonitor.NavigationService;
 using CardioMonitor.Settings;
 using CardioMonitor.Ui;
 using CardioMonitor.Ui.View;
@@ -96,9 +97,9 @@ namespace CardioMonitor
             container.RegisterInstance(settings);
 
             container.Register<IStoryboardPageCreator, SimpleInjectorPageCreator>(Lifestyle.Transient);
-            container.Register<StoryboardsNavigationService>(Lifestyle.Singleton);
+            container.Register<StoryboardsNavigationService, CardioMonitorNavigationService>(Lifestyle.Singleton);
             container.Register<Infrastructure.IUiInvoker, WpfUiInvoker>(Lifestyle.Singleton);
-            container.Register<Markeli.Storyboards.IUiInvoker, WpfUiInvoker>(Lifestyle.Singleton);
+            container.Register<IUiInvoker, WpfUiInvoker>(Lifestyle.Singleton);
         }
 
         private static ICardioSettings GetSettings()

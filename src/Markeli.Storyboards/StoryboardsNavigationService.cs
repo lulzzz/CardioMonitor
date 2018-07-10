@@ -593,13 +593,12 @@ namespace Markeli.Storyboards
                             }
                             default:
                             {
-                                var orderdPagesToClose = new Stack<InnerStoryboardPageInfo>(pagesToClose);
+                                var orderedPagesToClose = new Stack<InnerStoryboardPageInfo>(pagesToClose);
 
                                 var storyboard = Storyboards[storyboardId];
-                                var pageInfo = orderdPagesToClose.Peek();
-                                while (!pageInfo.IsStartPage)
+                                var pageInfo = orderedPagesToClose.Pop();
+                                while (!pageInfo.IsStartPage && orderedPagesToClose.Count > 0)
                                 {
-                                    pageInfo = orderdPagesToClose.Pop();
                                     if (!CachedPages.ContainsKey(pageInfo.PageUniqueId)) 
                                         throw new InvalidOperationException($"Page with Id {pageInfo.PageUniqueId} not cached");
 
@@ -626,6 +625,8 @@ namespace Markeli.Storyboards
                                             pageInfo, 
                                             storyboard)
                                         .ConfigureAwait(true);
+                                    
+                                    pageInfo = orderedPagesToClose.Pop();
                                 }
                                 
                                 var result = await OpenPageAsync(
