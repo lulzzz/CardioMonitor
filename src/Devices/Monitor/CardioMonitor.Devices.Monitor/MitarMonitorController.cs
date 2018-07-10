@@ -18,7 +18,7 @@ namespace CardioMonitor.Devices.Monitor
     public class MitarMonitorController : IMonitorController
     {
         private readonly SemaphoreSlim _updateDataSyncSemaphore;
-        #region fields
+        #region Fields
 
         private const int IsRequestedValue = 1;
         
@@ -116,7 +116,7 @@ namespace CardioMonitor.Devices.Monitor
             try
             {
                 // очистим перед подключением все накопленные ошибки
-                while (_lastExceptions.TryDequeue(out var _))
+                while (_lastExceptions.TryDequeue(out _))
                 {
                 }
 

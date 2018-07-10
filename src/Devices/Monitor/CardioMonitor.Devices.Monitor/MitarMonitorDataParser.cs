@@ -3,6 +3,7 @@ using CardioMonitor.Devices.Monitor.Infrastructure;
 
 namespace CardioMonitor.Devices.Monitor
 {
+    [Obsolete("Не знаю, зачем он тут")]
     public class MitarMonitorDataParser
     {
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,9 +10,9 @@ namespace CardioMonitor.Devices.Monitor
     public class MitarMonitorDataReceiver
     {
         #region fields
-        static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
-        private NetworkStream _stream;
-        private short _pressureModuleStatus;
+
+        private readonly SemaphoreSlim _semaphoreSlim;
+        private readonly NetworkStream _stream;
         private bool _isNeedDataRead;
         private short _heartRate;
         private short _repsirationRate;
@@ -27,6 +28,7 @@ namespace CardioMonitor.Devices.Monitor
         public MitarMonitorDataReceiver(NetworkStream stream)
         {
             _stream = stream;
+            _semaphoreSlim = new SemaphoreSlim(1, 1);
         }
         public void Start()
         {
@@ -41,12 +43,12 @@ namespace CardioMonitor.Devices.Monitor
 
         public Task<PatientCommonParams> GetCommonParams()
         {
-            return Task.Factory.StartNew(() => new PatientCommonParams(_heartRate, _repsirationRate, _spo2));
+            return Task.FromResult(new PatientCommonParams(_heartRate, _repsirationRate, _spo2));
         }
 
         public Task<PatientPressureParams> GetPressureParams()
         {
-            return Task.Factory.StartNew(() => new PatientPressureParams(_systolicArterialPressure,_diastolicArterialPressure,_averageArterialPressure));
+            return Task.FromResult(new PatientPressureParams(_systolicArterialPressure,_diastolicArterialPressure,_averageArterialPressure));
         }
 
         public Task<PumpingStatus> GetPumpingStatus()
@@ -56,104 +58,100 @@ namespace CardioMonitor.Devices.Monitor
 
         private async void GetDataFromStream()
         {
-            await semaphoreSlim.WaitAsync();
+            await _semaphoreSlim.WaitAsync();
             try
             {
                 while (_isNeedDataRead)
                 {
-                    if (_stream != null)
+                    if (_stream == null) continue;
+                    
+                    var buffer = new byte[64];
+                    var buffSize = await _stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                    if (buffSize > 0)
                     {
-                        byte[] buffer = new byte[64];
-                        var buffSize = await _stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
-                        if (buffSize > 0)
-                        {
-                            Parse(buffer);
-                        }
+                        Parse(buffer);
                     }
                 }
             }
             finally
             {
-                semaphoreSlim.Release();
+                _semaphoreSlim.Release();
             }
         }
 
         private void Parse(byte[] packet)
         {
-            if (packet[0] >> 4 == 0xE)
+            if (packet[0] >> 4 != 0xE) return;
+            
+            var forcrc = new byte[63];
+            Array.ConstrainedCopy(packet, 0, forcrc, 0, 63);
+            if (packet[63] != Crc8Calculator.GetCRC8(forcrc)) return;
+            
+            //все правильно - это пакет
+
+            var a = packet[2] >> 4;
+            var b = packet[4] >> 4;
+            var idx = a + (b << 4);
+
+            switch (idx)
             {
-                byte[] forcrc = new byte[63];
-                Array.ConstrainedCopy(packet, 0, forcrc, 0, 63);
-                if (packet[63] == Crc8Calculator.GetCRC8(forcrc))
+                case 10:
                 {
-                    //все правильно - это пакет
-
-                    int a = packet[2] >> 4;
-                    int b = packet[4] >> 4;
-                    int idx = a + (b << 4);
-
-                    switch (idx)
-                    {
-                        case 10:
-                        {
-                            _repsirationRate = GetIdxParamData(packet);
-                            break;
-                        }
-                        case 12:
-                        {
-                            _heartRate = GetIdxParamData(packet);
-                            break;
-                        }
-                        case 13:
-                        {
-                            _spo2 = GetIdxParamData(packet);
-                            break;
-                        }
-                        case 17:
-                        {
-                            _systolicArterialPressure = GetIdxParamData(packet);
-                            break;
-                        }
-                        case 18:
-                        {
-                            _diastolicArterialPressure = GetIdxParamData(packet);
-                            break;
-                        }
-                        case 19:
-                        {
-                            _averageArterialPressure = GetIdxParamData(packet);
-                            break;
-                        }
-                        case 22:
-                        {
-                            StatusParseTest(packet);
-                            break;
-                        }
-
-                    }
+                    _repsirationRate = GetIdxParamData(packet);
+                    break;
+                }
+                case 12:
+                {
+                    _heartRate = GetIdxParamData(packet);
+                    break;
+                }
+                case 13:
+                {
+                    _spo2 = GetIdxParamData(packet);
+                    break;
+                }
+                case 17:
+                {
+                    _systolicArterialPressure = GetIdxParamData(packet);
+                    break;
+                }
+                case 18:
+                {
+                    _diastolicArterialPressure = GetIdxParamData(packet);
+                    break;
+                }
+                case 19:
+                {
+                    _averageArterialPressure = GetIdxParamData(packet);
+                    break;
+                }
+                case 22:
+                {
+                    StatusParseTest(packet);
+                    break;
                 }
             }
 
 
         }
 
-        private short GetIdxParamData(byte[] packet)
+        private short GetIdxParamData(IReadOnlyList<byte> packet)
         {
-            int valueLowFirst = packet[6] >> 4;
-            int valueHighFirst = packet[8] >> 4;
-            int valueLowSecond = packet[10] >> 4;
-            int valueHighSecond = packet[12] >> 4;
+            var valueLowFirst = packet[6] >> 4;
+            var valueHighFirst = packet[8] >> 4;
+            var valueLowSecond = packet[10] >> 4;
+            var valueHighSecond = packet[12] >> 4;
             return  (short)(valueLowFirst + (valueHighFirst << 4) + (valueLowSecond << 8) + (valueHighSecond << 12));
         }
 
-        private void StatusParseTest(byte[] packet)
+        private void StatusParseTest(IReadOnlyList<byte> packet)
         {
-            int valueLowFirst = packet[6] >> 4;
-            int valueHighFirst = packet[8] >> 4;
-            int valueLowSecond = packet[10] >> 4;
-            int valueHighSecond = packet[12] >> 4;
-            byte low = (byte)(valueLowFirst + (valueHighFirst << 4));
-            byte high = (byte)(valueLowSecond + (valueHighSecond << 4));
+            var valueLowFirst = packet[6] >> 4;
+            var valueHighFirst = packet[8] >> 4;
+            var valueLowSecond = packet[10] >> 4;
+            var valueHighSecond = packet[12] >> 4;
+            var low = (byte)(valueLowFirst + (valueHighFirst << 4));
+            var high = (byte)(valueLowSecond + (valueHighSecond << 4));
 
             var isPumpingError = high != 128;
             var isPumpingInProgress = low != 0;
