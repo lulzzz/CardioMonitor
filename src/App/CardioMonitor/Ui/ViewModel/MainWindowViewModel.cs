@@ -17,6 +17,7 @@ using JetBrains.Annotations;
 using MahApps.Metro.IconPacks;
 using Markeli.Storyboards;
 using Markeli.Utils.Logging;
+using ToastNotifications.Messages;
 
 namespace CardioMonitor.Ui.ViewModel{
 
@@ -25,6 +26,8 @@ namespace CardioMonitor.Ui.ViewModel{
     {
         private readonly StoryboardsNavigationService _storyboardsNavigationService;
         private readonly ILogger _logger;
+        [NotNull] 
+        private readonly ToastNotifications.Notifier _notifier;
 
         #region Свойства
 
@@ -131,10 +134,13 @@ namespace CardioMonitor.Ui.ViewModel{
             [NotNull] StoryboardsNavigationService storyboardsNavigationService,
             IStoryboardPageCreator pageCreator,
             IUiInvoker invoker,
-            [NotNull] ILogger logger)
+            [NotNull] ILogger logger,
+            [NotNull] ToastNotifications.Notifier notifier)
         {
+            if (notifier == null) throw new ArgumentNullException(nameof(notifier));
             _storyboardsNavigationService = storyboardsNavigationService ?? throw new ArgumentNullException(nameof(storyboardsNavigationService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _notifier = notifier;
             _storyboardsNavigationService.CanBackChanged += RiseCanGoBackChaned;
             _storyboardsNavigationService.SetUiInvoker(invoker);
 
@@ -254,7 +260,8 @@ namespace CardioMonitor.Ui.ViewModel{
 
             _storyboardsNavigationService.CreateStartPages(startPageContexts);
 
-            _storyboardsNavigationService.ActiveStoryboardChanged += StoryboardsNavigationServiceOnActiveStoryboardChanged;
+            _storyboardsNavigationService.ActiveStoryboardChanged += HandeActiveStoryboardChanged;
+            _storyboardsNavigationService.ExceptionOccured += HandleNavigationError;
 
             ItemStoryboards = new ObservableCollection<ExtendedStoryboard>(new []
             {
@@ -270,7 +277,7 @@ namespace CardioMonitor.Ui.ViewModel{
             });
         }
 
-        private void StoryboardsNavigationServiceOnActiveStoryboardChanged(object sender, Guid guid)
+        private void HandeActiveStoryboardChanged(object sender, Guid guid)
         {
             var storyboard =
                 ItemStoryboards.FirstOrDefault(x => x.StoryboardId == guid);
@@ -289,6 +296,12 @@ namespace CardioMonitor.Ui.ViewModel{
             CurrentOpennedStoryboard = storyboard;
         }
 
+        private void HandleNavigationError(object sender, Exception ex)
+        {
+            _notifier.ShowError("Произошла ошибка при переходе на другую страницу");
+            _logger.Error($"{GetType().Name}: Ошибка перехода на другую страницу. Причина: {ex.Message}", ex);
+        }
+        
         private void RiseCanGoBackChaned(object sender, EventArgs args)
         {
             RisePropertyChanged(nameof(MoveBackwardCommand));
@@ -301,6 +314,7 @@ namespace CardioMonitor.Ui.ViewModel{
                 {
                     try
                     {
+                        // called twice, fix it
                         await _storyboardsNavigationService.GoToStoryboardAsync(StoryboardIds.PatientsStoryboardId)
                             .ConfigureAwait(false);
                     }
@@ -310,35 +324,5 @@ namespace CardioMonitor.Ui.ViewModel{
                     }
                 });
         }
-        
-
-        private async void LoadSession(object sender, EventArgs args)
-        {
-            /*
-            var loadDialog = new OpenFileDialog {CheckFileExists = true, Filter = Localisation.FileRepository_SeansFileFilter};
-            var result = loadDialog.ShowDialog();
-            if (result == DialogResult.OK)
-            {
-                var message = String.Empty;
-                try
-                {
-                    var container = _sessionFileSavingRepository.LoadFromFile(loadDialog.FileName);
-                }
-                catch (ArgumentNullException)
-                {
-                    message = Localisation.ArgumentNullExceptionMessage;
-                }
-                catch (Exception ex)
-                {
-                    message = ex.Message;
-                }
-                if (!String.IsNullOrEmpty(message))
-                {
-                    await MessageHelper.Instance.ShowMessageAsync(message);
-                }
-            }*/
-        }
     }
-
-  
 }

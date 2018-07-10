@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 
 namespace Markeli.Storyboards
 {
+    //todo add can close app support
     public class StoryboardsNavigationService : IDisposable
     {
         protected readonly Dictionary<InnerStoryboardPageInfo, PageCreationInfo> RegisteredPages;
@@ -27,6 +28,8 @@ namespace Markeli.Storyboards
         public event EventHandler CanBackChanged;
 
         protected IUiInvoker Invoker;
+
+        public event EventHandler<Exception> ExceptionOccured;
 
         public StoryboardsNavigationService()
         {
@@ -78,7 +81,7 @@ namespace Markeli.Storyboards
                PageUniqueId = Guid.NewGuid()
            };
 
-            var creationInfo = new PageCreationInfo()
+            var creationInfo = new PageCreationInfo
             {
                 ViewModel = pageInfo.ViewModel,
                 View = pageInfo.View
@@ -158,11 +161,13 @@ namespace Markeli.Storyboards
                 }
                 catch (Exception e)
                 {
-                    tcs.SetException(e);
+                    ExceptionOccured?.Invoke(this, e);
+                    tcs.SetResult(TransitionResult.Failed);
                 }
             }).ConfigureAwait(false);
             return await tcs.Task.ConfigureAwait(false);
         }
+        
 
         private Task<TransitionResult> ViewModelOnPageCompleted([NotNull] TransitionEvent transitionEvent)
         {
@@ -215,7 +220,8 @@ namespace Markeli.Storyboards
                 }
                 catch (Exception e)
                 {
-                    tcs.SetException(e);
+                    ExceptionOccured?.Invoke(this, e);
+                    tcs.SetResult(TransitionResult.Failed);
                 }
             }).ConfigureAwait(false);
             return await tcs.Task.ConfigureAwait(false);
@@ -278,7 +284,8 @@ namespace Markeli.Storyboards
                 }
                 catch (Exception e)
                 {
-                    tcs.SetException(e);
+                    ExceptionOccured?.Invoke(this, e);
+                    tcs.SetResult(TransitionResult.Failed);
                 }
             }).ConfigureAwait(false);
             return await tcs.Task
@@ -350,27 +357,22 @@ namespace Markeli.Storyboards
                         PageContexts[pageInfo.PageUniqueId] = pageContext;
                     }
 
-                    //todo do not add to journal existed pages
                     if (addToJournal)
                     {
                         Journal.AddLast(pageInfo);
                     }
 
-                    RiseCanBackChanged();
                     tcs.SetResult(TransitionResult.Completed);
+                    CanBackChanged?.Invoke(this, EventArgs.Empty);
                 }
                 catch (Exception e)
                 {
-                    tcs.SetException(e);
+                    ExceptionOccured?.Invoke(this, e);
+                    tcs.SetResult(TransitionResult.Failed);
                 }
                
             }).ConfigureAwait(false);
             return await tcs.Task.ConfigureAwait(false);
-        }
-
-        protected void RiseCanBackChanged()
-        {
-            CanBackChanged?.Invoke(this, EventArgs.Empty);
         }
        
         public virtual Task<TransitionResult> GoToStoryboardAsync(Guid storyboardId)
@@ -421,7 +423,8 @@ namespace Markeli.Storyboards
                 }
                 catch (Exception e)
                 {
-                    tcs.SetException(e);
+                    ExceptionOccured?.Invoke(this, e);
+                    tcs.SetResult(TransitionResult.Failed);
                 }
 
             }).ConfigureAwait(false);
@@ -535,6 +538,5 @@ namespace Markeli.Storyboards
             });
         }
 
-        //todo add can close app support
     }
 }
