@@ -525,6 +525,99 @@ namespace Markeli.Storyboards
             });
         }
 
+        public virtual async Task<TransitionResult> GoToStoryboardStartPage(Guid storyboardId)
+        {
+            if (!Storyboards.ContainsKey(storyboardId))
+                throw new ArgumentException($"Storyboard with Id {storyboardId} not registered");
+
+            var tcs = new TaskCompletionSource<TransitionResult>();
+
+            await Invoker.InvokeAsync(async () =>
+                {
+                    try
+                    {
+                        var pagesToClose = Journal
+                            .Where(x => x.StoryboardId == storyboardId)
+                            .ToList();
+
+                        switch (pagesToClose.Count)
+                        {
+                            case 0:
+                            {
+                                var startPage =
+                                    RegisteredPages.Keys.FirstOrDefault(
+                                        x => x.StoryboardId == storyboardId && x.IsStartPage);
+                                if (startPage == null)
+                                    throw new InvalidOperationException("Pages for storyboard does not registered");
+
+                                var result = await OpenPageAsync(startPage).ConfigureAwait(true);
+                                tcs.SetResult(result);
+                                return;
+                            }
+                            case 1:
+                            {
+                                var result = await OpenPageAsync(
+                                        pagesToClose[0],
+                                        addToJournal: false)
+                                    .ConfigureAwait(true);
+                                tcs.SetResult(result);
+                                return;
+                            }
+                            default:
+                            {
+                                var orderdPagesToClose = new Stack<InnerStoryboardPageInfo>(pagesToClose);
+
+                                var pageInfo = orderdPagesToClose.Pop();
+                                do
+                                {
+                                    if (!CachedPages.ContainsKey(pageInfo.PageUniqueId)) 
+                                        throw new InvalidOperationException($"Page with Id {pageInfo.PageUniqueId} not cached");
+
+                                    var page = CachedPages[pageInfo.PageUniqueId];
+
+                                    var canClose = await page.ViewModel
+                                        .CanCloseAsync()
+                                        .ConfigureAwait(false);
+                                    if (!canClose)
+                                    {
+                                        // open page that user don't want to close
+                                        var openningResult = await OpenPageAsync(
+                                                pageInfo,
+                                                addToJournal: false)
+                                            .ConfigureAwait(true);
+
+                                        tcs.SetResult(openningResult == TransitionResult.Completed
+                                            ? TransitionResult.CanceledByUser // because user canceled transition to start page
+                                            : openningResult);
+                                        return;
+                                    }
+
+                                    await page.ViewModel
+                                        .CloseAsync()
+                                        .ConfigureAwait(true);
+
+                                } while (!pageInfo.IsStartPage);
+                                
+                                var result = await OpenPageAsync(
+                                        pageInfo,
+                                        addToJournal: false)
+                                    .ConfigureAwait(true);
+                                tcs.SetResult(result);
+                                return;
+                            }
+                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        tcs.SetResult(TransitionResult.Failed);
+                        ExceptionOccured?.Invoke(tcs, e);
+                    }
+
+                })
+                .ConfigureAwait(false);
+            return await tcs.Task.ConfigureAwait(false);
+        }
 
         public void Dispose()
         {

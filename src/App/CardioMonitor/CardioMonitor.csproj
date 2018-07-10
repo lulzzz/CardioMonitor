@@ -223,6 +223,7 @@
     <Compile Include="FileSaving\Mappers\V1\SessionMapperV1.cs" />
     <Compile Include="FileSaving\Mappers\V1\SessionStatusMapperV1.cs" />
     <Compile Include="LogNames.cs" />
+    <Compile Include="Navigation\CardioMonitorNavigationService.cs" />
     <Compile Include="Resources\Localisation.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
