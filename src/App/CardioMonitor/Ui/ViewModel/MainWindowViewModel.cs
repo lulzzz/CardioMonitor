@@ -93,7 +93,8 @@ namespace CardioMonitor.Ui.ViewModel{
                 RisePropertyChanged(nameof(SelectedItemStoryboard));
                 if (SelectedItemStoryboard != null)
                 {
-                    _storyboardsNavigationService.GoToStoryboardAsync(_selectedItemStoryboard.StoryboardId);
+                    //_storyboardsNavigationService.GoToStoryboardAsync(_selectedItemStoryboard.StoryboardId);
+                    _storyboardsNavigationService.GoToStoryboardStartPage(_selectedItemStoryboard.StoryboardId);
                 }
             }
         }
@@ -109,7 +110,8 @@ namespace CardioMonitor.Ui.ViewModel{
                 RisePropertyChanged(nameof(SelectedOptionsStoryboard));
                 if (SelectedOptionsStoryboard != null)
                 {
-                    _storyboardsNavigationService.GoToStoryboardAsync(_selectedOptionsStoryboard.StoryboardId);
+                    //_storyboardsNavigationService.GoToStoryboardAsync(_selectedOptionsStoryboard.StoryboardId);
+                    _storyboardsNavigationService.GoToStoryboardStartPage(_selectedOptionsStoryboard.StoryboardId);
                 }
                
             }
@@ -291,6 +293,8 @@ namespace CardioMonitor.Ui.ViewModel{
 
             storyboard =
                 OptionsStoryboards.FirstOrDefault(x => x.StoryboardId == guid);
+            if (storyboard == null) return;
+            
             SelectedOptionsStoryboard = storyboard;
             SelectedItemStoryboard = null;
             CurrentOpennedStoryboard = storyboard;
@@ -314,7 +318,6 @@ namespace CardioMonitor.Ui.ViewModel{
                 {
                     try
                     {
-                        // called twice, fix it
                         await _storyboardsNavigationService.GoToStoryboardAsync(StoryboardIds.PatientsStoryboardId)
                             .ConfigureAwait(false);
                     }
