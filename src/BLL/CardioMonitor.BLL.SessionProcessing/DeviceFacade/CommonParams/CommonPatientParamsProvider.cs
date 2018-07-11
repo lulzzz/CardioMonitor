@@ -49,20 +49,20 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             if (angleParams == null)
             {
                 var forcedRequest = context.TryGetForcedDataCollectionRequest();
-                forcedRequest?.BlockingSemaphore.Release();
+                forcedRequest?.CommonParamsSemaphore.SetResult(true);
                 return context;
             }
             
-            var isBlocked = await _mutex
+            var isFree = await _mutex
                 .WaitAsync(_blockWaitingTimeout)
                 .ConfigureAwait(false);
-            if (!isBlocked)
+            if (!isFree)
             {
                 _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
                                  $"Новый запрос не будет выполнен, т.к. прошло больше {_blockWaitingTimeout.TotalMilliseconds} мс");
 
                 var forcedRequest = context.TryGetForcedDataCollectionRequest();
-                forcedRequest?.BlockingSemaphore.Release();
+                forcedRequest?.CommonParamsSemaphore.SetResult(true);
                 return context;
             }
 
@@ -119,7 +119,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             finally
             {
                 var forcedRequest = context.TryGetForcedDataCollectionRequest();
-                forcedRequest?.BlockingSemaphore.Release();
+                forcedRequest?.CommonParamsSemaphore.SetResult(true);
                 _mutex.Release();
                 if (param == null)
                 {

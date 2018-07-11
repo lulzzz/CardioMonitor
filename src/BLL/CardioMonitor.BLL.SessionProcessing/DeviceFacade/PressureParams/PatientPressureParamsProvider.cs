@@ -55,20 +55,20 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                 _logger?.Trace($"{GetType().Name}: получение данных не будет выполнено, " +
                                $"т.к. накачка манжеты завершилась неудачно");
                 var forcedRequest = context.TryGetForcedDataCollectionRequest();
-                forcedRequest?.BlockingSemaphore.Release();
+                forcedRequest?.PressureParamsSemaphore.SetResult(true);
                 return context;
             }
 
-            var isBlocked = await _mutex
+            var isFree = await _mutex
                 .WaitAsync(_blockWaitingTimeout)
                 .ConfigureAwait(false);
-            if (!isBlocked)
+            if (!isFree)
             {
                 _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
                                  $"Новый запрос не будет выполнен, т.к. прошло больше " +
                                  $"{_blockWaitingTimeout.TotalMilliseconds} мс");
                 var forcedRequest = context.TryGetForcedDataCollectionRequest();
-                forcedRequest?.BlockingSemaphore.Release();
+                forcedRequest?.PressureParamsSemaphore.SetResult(true);
                 return context;
             }
 
@@ -127,7 +127,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             finally
             {
                 var forcedRequest = context.TryGetForcedDataCollectionRequest();
-                forcedRequest?.BlockingSemaphore.Release();
+                forcedRequest?.PressureParamsSemaphore.SetResult(true);
                 _mutex.Release();
                 if (param == null)
                 {

@@ -430,7 +430,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         _logger?.Trace($"{GetType().Name}: остановка синхронизатора сессии");
                         _cycleProcessingSynchronizer.Stop();
                     }
-                    
+
+                    var wasLastCycleDataCollected = false;
                     if ((_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber 
                          || isSessionCompleted) 
                         && !_completedCycles.Contains(sessionProcessingInfo.CurrentCycleNumber))
@@ -440,9 +441,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber; // по идеи, 
                         OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
                         _logger?.Info($"{GetType().Name}: закончился цикл {sessionProcessingInfo.CurrentCycleNumber}");
+                        wasLastCycleDataCollected = true;
                     }
 
-                    if (isSessionCompleted && !_isSessionGlobalyCompleted)
+                    if (isSessionCompleted 
+                        && !_isSessionGlobalyCompleted
+                        && wasLastCycleDataCollected)
                     {
                         _isSessionGlobalyCompleted = true;
                         _isStandartProcessingInProgress = false;
@@ -1023,7 +1027,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 .ConfigureAwait(false);
 
             await forcedRequest.BlockingSemaphore
-                .WaitAsync(DeviceFacadeConstants.ForcedRequestBlockCounts)
+                .WaitAsync()
                 .ConfigureAwait(false);
 
             var pumpingResult = context.TryGetAutoPumpingResultParams();

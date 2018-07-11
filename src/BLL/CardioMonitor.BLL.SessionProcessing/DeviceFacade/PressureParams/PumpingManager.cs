@@ -27,6 +27,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
 
         private readonly SemaphoreSlim _mutex;
         private readonly TimeSpan _blockWaitingTimeout;
+        
+        private readonly TimeSpan _defaultRetryTimeout = TimeSpan.FromSeconds(1);
 
         public PumpingManager([NotNull] IMonitorController monitorController,
             TimeSpan pumpingTimeout)
@@ -53,10 +55,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                 return context;
             }
 
-            var isBlocked = await _mutex
+            var isFree = await _mutex
                 .WaitAsync(_blockWaitingTimeout)
                 .ConfigureAwait(false);
-            if (!isBlocked)
+            if (!isFree)
             {
                 _logger?.Warning($"{GetType().Name}: предыдущий запрос еще выполняется. " +
                                  $"Новый запрос не будет выполнен, т.к. прошло больше {_blockWaitingTimeout.TotalMilliseconds} мс");
@@ -74,8 +76,15 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                     .TimeoutAsync(_pumpingTimeout);
                 var recilencePolicy = Policy
                     .Handle<Exception>()
-                    .RetryAsync(retryCounts);
-                var policyWrap = Policy.WrapAsync(timeoutPolicy, recilencePolicy);
+                    .WaitAndRetryAsync(
+                        retryCounts,
+                        retryAttemp => TimeSpan.FromSeconds(_defaultRetryTimeout.TotalSeconds),
+                        (exception, timeSpan, localContext) =>
+                        {
+                            _logger?.Trace($"{GetType().Name}: накачнка манжеты не выполена. Будет выполнена " +
+                                           "повторная попытка.");
+                        });
+                var policyWrap = Policy.WrapAsync(recilencePolicy, timeoutPolicy);
                 await policyWrap
                     .ExecuteAsync(_monitorController.PumpCuffAsync)
                     .ConfigureAwait(false);

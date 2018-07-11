@@ -362,6 +362,10 @@ namespace CardioMonitor.Devices.Monitor
                     .WaitAsync()
                     .ConfigureAwait(false);
                 _pumpingReady.Reset();
+                // ждем пока накачается
+                await Task
+                    .Delay(TimeSpan.FromSeconds(10))
+                    .ConfigureAwait(false);
                 _isPumpingRequested = false;
                 if (_pumpingStatus == PumpingStatus.Error)
                 {
