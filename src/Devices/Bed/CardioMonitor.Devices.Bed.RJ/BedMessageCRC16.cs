@@ -13,7 +13,7 @@ namespace CardioMonitor.Devices.Bed.UDP
 
             ushort crc = 0xffff;
 
-            for (int i = 0; i < inputMessage.Length; i++)
+            for (var i = 0; i < inputMessage.Length; i++)
             {
                 crc = Compute(inputMessage[i], crc);
             }
@@ -23,7 +23,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         private static ushort Compute(byte data, ushort seed)
         {
             for (byte bitsLeft = 8; bitsLeft > 0; bitsLeft--) {
-               byte temp = (byte)((seed ^ data) & 0x01);
+               var temp = (byte)((seed ^ data) & 0x01);
                 if (temp == 0) {
                     seed >>= 1;
                 } else {

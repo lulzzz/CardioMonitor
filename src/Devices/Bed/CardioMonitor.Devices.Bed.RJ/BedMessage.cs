@@ -25,7 +25,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <summary>
         /// размер пакета данных - в словах (байты * 2)
         /// </summary>
-        private byte messageLength;
+        private byte _messageLength;
 
         /// <summary>
         /// Адрес регистра, из которого/ с которого/ в который производится чтение/запись
@@ -39,10 +39,12 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         public BedMessage(){}
         
-        public BedMessage(BedMessageEventType eventType,  byte messageLength = 2) //при запросе всех регистров - Length всегда 2 (адрес и дата по 1 слову)
+        public BedMessage(
+            BedMessageEventType eventType,  
+            byte messageLength = 2) //при запросе всех регистров - Length всегда 2 (адрес и дата по 1 слову)
         {
             _eventType = eventType;
-            this.messageLength = messageLength;
+            _messageLength = messageLength;
             _idDevice = 1;
         }
 
@@ -53,7 +55,11 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <returns></returns>
         public byte[] SetBedBlockMessage(bool isBlock)
         {
-            return GetWriteRegisterMessage(BedBlockPosition, isBlock ? new byte[] {0x00, 0x01} : new byte[] {0x00, 0x00});
+            return GetWriteRegisterMessage(
+                BedBlockPosition, 
+                isBlock 
+                    ? new byte[] {0x00, 0x01} 
+                    : new byte[] {0x00, 0x00});
         }
 
         
@@ -178,17 +184,17 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <returns></returns>
         private byte[] PackageMessage(BedMessageEventType eventType, byte registerAddress, byte[] messageData)
         {
-            byte[] message = new byte[10];
+            var message = new byte[10];
             message[0] = (byte)_startMessageMarker;
-            message[1] = (byte) _idDevice;
+            message[1] = _idDevice;
             message[2] = (byte)eventType;
-            message[3] = messageLength;
+            message[3] = _messageLength;
             message[5] = registerAddress; 
             message[6] = messageData[0];
             message[7] = messageData[1];
-            byte[] messageForCRC = new byte[message.Length - 2];
+            var messageForCRC = new byte[message.Length - 2];
 
-            for (int i = 0; i < messageForCRC.Length; i++)
+            for (var i = 0; i < messageForCRC.Length; i++)
             {
                 messageForCRC[i] = message[i];
             }
@@ -201,6 +207,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             message[9] = crc[1];
             return message;
         } 
+        
         /// <summary>
         /// обработать полученное сообщение и извлечь из него данные
         /// </summary>
@@ -216,16 +223,16 @@ namespace CardioMonitor.Devices.Bed.UDP
             
             _idDevice = inputMessage[1];
             _eventType = (BedMessageEventType) inputMessage[2];
-            messageLength = inputMessage[3];
-            if (messageLength == 0) throw new ArgumentException("В пакете нет данных");
+            _messageLength = inputMessage[3];
+            if (_messageLength == 0) throw new ArgumentException("В пакете нет данных");
 
             //ответный пакет это заголовок(1 байт) + ID (1) + тип (1) + размер данных в словах(1)
             //затем данные и 2 байта CRC16
-            if (inputMessage.Length != 4 + messageLength * 2 + 2)  throw new ArgumentException("Неверный размер пакета");
+            if (inputMessage.Length != 4 + _messageLength * 2 + 2)  throw new ArgumentException("Неверный размер пакета");
             
-            byte[] messageForCRC = new byte[inputMessage.Length - 2]; //CRC считаем для пакета кроме самой суммы
+            var messageForCRC = new byte[inputMessage.Length - 2]; //CRC считаем для пакета кроме самой суммы
 
-            for (int i = 0; i < messageForCRC.Length; i++)
+            for (var i = 0; i < messageForCRC.Length; i++)
             {
                 messageForCRC[i] = inputMessage[i];
             }
@@ -238,17 +245,14 @@ namespace CardioMonitor.Devices.Bed.UDP
                 throw new ArgumentException("Неверная контрольная сумма");
             }
             
-            _messageData = new byte[messageLength * 2];
+            _messageData = new byte[_messageLength * 2];
 
             if (inputMessage.Length < _messageData.Length + 4) throw new ArgumentException("Неверный размер пакета");
 
-            for (int i = 0; i < _messageData.Length; i++)
+            for (var i = 0; i < _messageData.Length; i++)
             {
                 _messageData[i] = inputMessage[i + 4];
             }
-            
-           
-            
         }
 
         private short GetValuesFromBytes(byte first, byte second)

@@ -30,7 +30,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         [CanBeNull]
         private UdpClient _udpClient;
 
-        static SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _semaphoreSlim;
 
 
         /// <summary>
@@ -57,6 +57,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             _workerController = workerController ?? throw new ArgumentNullException(nameof(workerController));
             IsConnected = false;
             _lastExceptions = new ConcurrentQueue<Exception>();
+            _semaphoreSlim = new SemaphoreSlim(1, 1);
         }
       
        
@@ -86,9 +87,8 @@ namespace CardioMonitor.Devices.Bed.UDP
 
             try
             {
-                await Task.Yield();
                 // очистим перед подключением все накопленные ошибки
-                while (_lastExceptions.TryDequeue(out var _))
+                while (_lastExceptions.TryDequeue(out _))
                 {
                 }
                 _udpClient = new UdpClient(7777); //todo в конфиги
@@ -151,7 +151,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// </summary>
         private async Task SetInitParamsAsync()
         {
-            await semaphoreSlim.WaitAsync();
+            await _semaphoreSlim.WaitAsync();
             try
             {
                 AssertConnection();
@@ -161,6 +161,7 @@ namespace CardioMonitor.Devices.Bed.UDP
                 var sendMessage = message.SetMaxAngleValueMessage(_config.MaxAngleX);
                 await _udpClient.SendAsync(sendMessage, sendMessage.Length);
                 var receiveMessage = await _udpClient.ReceiveAsync();
+                //todo very very bad
                 Thread.Sleep(100);
                 //todo здесь лучше сделать паузу ~100mc 
                 sendMessage = message.SetFreqValueMessage(_config.MovementFrequency);
@@ -174,7 +175,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             }
             finally
             {
-                semaphoreSlim.Release();
+                _semaphoreSlim.Release();
             }
         }
 
@@ -189,7 +190,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             AssertConnection();
             if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
             await Task.Yield();
-            BedMessage message = new BedMessage();
+            var message = new BedMessage();
             var sendMessage = message.SetBedBlockMessage(isBlock);
             await _udpClient.SendAsync(sendMessage, sendMessage.Length);
         }
@@ -199,7 +200,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// </summary>
         private async Task UpdateRegistersValueAsync()
         {
-            await semaphoreSlim.WaitAsync();
+            await _semaphoreSlim.WaitAsync();
             try
             {
                 AssertConnection();
@@ -217,30 +218,30 @@ namespace CardioMonitor.Devices.Bed.UDP
                 if ((_registerValues.BedStatus == BedStatus.SessionStarted || _registerValues.BedStatus == BedStatus.Pause)
                     && registerValues.BedStatus == BedStatus.Reverse)
                 {
-                    OnReverseFromDeviceRequested(this, EventArgs.Empty);
+                    OnReverseFromDeviceRequested?.Invoke(this, EventArgs.Empty);
                 }
                 if (_registerValues.BedStatus == BedStatus.SessionStarted &&
                     registerValues.BedStatus == BedStatus.Pause)
                 {
-                    OnPauseFromDeviceRequested(this,EventArgs.Empty);
+                    OnPauseFromDeviceRequested?.Invoke(this,EventArgs.Empty);
                 }
 
                 if (_registerValues.BedStatus == BedStatus.Pause &&
                     registerValues.BedStatus == BedStatus.SessionStarted)
                 {
-                    OnResumeFromDeviceRequested(this, EventArgs.Empty);
+                    OnResumeFromDeviceRequested?.Invoke(this, EventArgs.Empty);
                 }
                 if (_registerValues.BedStatus != BedStatus.EmergencyStop &&
                     registerValues.BedStatus == BedStatus.EmergencyStop)
                 {
-                    OnEmeregencyStopFromDeviceRequested(this,EventArgs.Empty);
+                    OnEmeregencyStopFromDeviceRequested?.Invoke(this,EventArgs.Empty);
                 }
 
                 _registerValues = registerValues;
             }
             finally
             {
-                semaphoreSlim.Release();
+                _semaphoreSlim.Release();
             }
         }
         
@@ -286,21 +287,21 @@ namespace CardioMonitor.Devices.Bed.UDP
         
         public async Task ExecuteCommandAsync(BedControlCommand command)
         {
-            await semaphoreSlim.WaitAsync();
+            await _semaphoreSlim.WaitAsync();
             try
             {
                 RiseExceptions();
                 AssertConnection();
                 if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
-                await Task.Yield();
-                BedMessage message = new BedMessage(BedMessageEventType.Write);
+                
+                var message = new BedMessage(BedMessageEventType.Write);
                 var sendMessage = message.GetBedCommandMessage(command);
                 await _udpClient.SendAsync(sendMessage, sendMessage.Length);
                 var receiveMessage = await _udpClient.ReceiveAsync();
             }
             finally
             {
-                semaphoreSlim.Release();
+                _semaphoreSlim.Release();
             }
         }
 
@@ -344,88 +345,85 @@ namespace CardioMonitor.Devices.Bed.UDP
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return   _sessionInfo.GetCycleDuration(await GetIterationsCountAsync());
+            var iterationsCount = await GetIterationsCountAsync()
+                .ConfigureAwait(false);
+            return  _sessionInfo.GetCycleDuration(iterationsCount);
         }
 
-        public async Task<short> GetCyclesCountAsync()
+        public Task<short> GetCyclesCountAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return  _config.CyclesCount;
+            return Task.FromResult(_config.CyclesCount);
         }
 
-        public async Task<short> GetCurrentCycleNumberAsync()
+        public Task<short> GetCurrentCycleNumberAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return  _registerValues.CurrentCycle;
+            return Task.FromResult(_registerValues.CurrentCycle);
         }
 
-        public async Task<short> GetIterationsCountAsync()
+        public Task<short> GetIterationsCountAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return _sessionInfo.GetIterationsCount(_config.MaxAngleX);
+            return Task.FromResult(_sessionInfo.GetIterationsCount(_config.MaxAngleX));
         }
 
-        public async Task<short> GetCurrentIterationAsync()
+        public Task<short> GetCurrentIterationAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return  _registerValues.CurrentIteration;
+            return Task.FromResult(_registerValues.CurrentIteration);
         }
 
         public async Task<short> GetNextIterationNumberForPressureMeasuringAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return  _sessionInfo.GetNextIterationNumberForPressureMeasuring(await GetCurrentIterationAsync());
+            var currentIteation = await GetCurrentIterationAsync()
+                .ConfigureAwait(false);
+            return  _sessionInfo.GetNextIterationNumberForPressureMeasuring(currentIteation);
         }
 
         public async Task<short> GetNextIterationNumberForCommonParamsMeasuringAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return _sessionInfo.GetNextIterationNumberForCommonParamsMeasuring(await GetCurrentIterationAsync());
+            var currentIteation = await GetCurrentIterationAsync()
+                .ConfigureAwait(false);
+            return _sessionInfo.GetNextIterationNumberForCommonParamsMeasuring(currentIteation);
         }
 
         public async Task<short> GetNextIterationNumberForEcgMeasuringAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return  _sessionInfo.GetNextIterationNumberForEcgMeasuring(await GetCurrentIterationAsync());
+            var currentIteation = await GetCurrentIterationAsync()
+                .ConfigureAwait(false);
+            return  _sessionInfo.GetNextIterationNumberForEcgMeasuring(currentIteation);
         }
 
-        public async Task<BedStatus> GetBedStatusAsync()
+        public Task<BedStatus> GetBedStatusAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return _registerValues.BedStatus;
+            return Task.FromResult(_registerValues.BedStatus);
         }
 
-        public async Task<TimeSpan> GetRemainingTimeAsync()
+        public Task<TimeSpan> GetRemainingTimeAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return  _registerValues.RemainingTime;
+            return Task.FromResult(_registerValues.RemainingTime);
         }
 
-        public async Task<TimeSpan> GetElapsedTimeAsync()
+        public Task<TimeSpan> GetElapsedTimeAsync()
         {
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return  _registerValues.ElapsedTime;
+            return Task.FromResult(_registerValues.ElapsedTime);
         }
 
         public Task<StartFlag> GetStartFlagAsync()
@@ -442,13 +440,12 @@ namespace CardioMonitor.Devices.Bed.UDP
             throw new NotImplementedException(); //todo не помню где лежит
         }
 
-        public async Task<float> GetAngleXAsync() 
+        public Task<float> GetAngleXAsync() 
         {
             
             RiseExceptions();
             AssertRegisterIsNull();
-            await Task.Yield();
-            return _registerValues.BedTargetAngleX;
+            return Task.FromResult(_registerValues.BedTargetAngleX);
 
         }
 

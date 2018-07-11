@@ -15,7 +15,7 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// Уникальный номер кровати
         /// </summary>
         //todo а нужно ли нам это сейчас? - конкретно сейчас нет, но может пригодится чуть позже 
-        public int BedID { get; set; }
+        public int BedId { get; set; }
 
         
         /// <summary>
