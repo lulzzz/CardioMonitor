@@ -15,12 +15,14 @@ namespace CardioMonitor.Devices.Monitor
     /// <summary>
     /// Контроллер взаимодействия с кардиомонитором МИТАР
     /// </summary>
+    //todo использовать параметры таймаута из настроек
     public class MitarMonitorController : IMonitorController
     {
-        private readonly SemaphoreSlim _updateDataSyncSemaphore;
         #region Fields
 
         private const int IsRequestedValue = 1;
+        
+        private readonly SemaphoreSlim _updateDataSyncSemaphore;
         
         //todo оставил, чтобы пока помнить адресс
 //        private readonly int localUdpPort = 30304;
@@ -47,10 +49,10 @@ namespace CardioMonitor.Devices.Monitor
 
         private PumpingStatus _pumpingStatus;
 
-        private readonly ManualResetEventSlim _commonParamsReady;
-        private readonly ManualResetEventSlim _pressureParamsReady;
-        private readonly ManualResetEventSlim _ecgParamsReady;
-        private readonly ManualResetEventSlim _pumpingReady;
+        private readonly Nito.AsyncEx.AsyncManualResetEvent _commonParamsReady;
+        private readonly Nito.AsyncEx.AsyncManualResetEvent _pressureParamsReady;
+        private readonly Nito.AsyncEx.AsyncManualResetEvent _ecgParamsReady;
+        private readonly Nito.AsyncEx.AsyncManualResetEvent _pumpingReady;
         
         private int _isCommonParamsRequested;
         private int _isPressureParamsRequested;
@@ -79,10 +81,10 @@ namespace CardioMonitor.Devices.Monitor
             _isPressureParamsRequested = 0;
             _isEcgParamsRequested = 0;
 
-            _commonParamsReady = new ManualResetEventSlim(false);
-            _pressureParamsReady = new ManualResetEventSlim(false);
-            _ecgParamsReady = new ManualResetEventSlim(false);
-            _pumpingReady = new ManualResetEventSlim(false);
+            _commonParamsReady = new Nito.AsyncEx.AsyncManualResetEvent(false);
+            _pressureParamsReady = new Nito.AsyncEx.AsyncManualResetEvent(false);
+            _ecgParamsReady = new Nito.AsyncEx.AsyncManualResetEvent(false);
+            _pumpingReady = new Nito.AsyncEx.AsyncManualResetEvent(false);
             _pumpingStatus = PumpingStatus.Completed;
             _updateDataSyncSemaphore = new SemaphoreSlim(1, 1);
 
@@ -224,12 +226,7 @@ namespace CardioMonitor.Devices.Monitor
                 var commonParams = await _mitar.GetCommonParams();
                 var pressureParams = await _mitar.GetPressureParams();
                 _pumpingStatus = await _mitar.GetPumpingStatus();
-                //var pumpingResult = await mitar.GetPumpingStatus();
 
-                //todo вот тут как-то получить данные и скастовать их к нужному виду
-                /*await _stream.ReadAsync(message, 0, messageSize)
-                    .ConfigureAwait(false);*/
-                //commonParams = monitorDataParser.GetPatientCommonParams(message);
                 if (_isPumpingRequested)
                 {
                     if (!_isPumpingStarted && _pumpingStatus == PumpingStatus.InProgress)
@@ -355,39 +352,37 @@ namespace CardioMonitor.Devices.Monitor
         public async Task PumpCuffAsync()
         {
             AssertConnection();
-            await Task.Factory.StartNew(async () =>
+            try
             {
-                try
+                byte[] sendMessage =
                 {
-                    byte[] sendMessage =
-                    {
-                        0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                        0x00,
-                        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22
-                    };
-                    await _stream
-                        .WriteAsync(sendMessage, 0, sendMessage.Length)
-                        .ConfigureAwait(false);
-                    _isPumpingRequested = true;
-                    _pumpingReady
-                        .Wait(TimeSpan.FromMinutes(1)); //todo использовать параметры из настроек
-                    _pumpingReady.Reset();
-                    _isPumpingRequested = false;
-                    if (_pumpingStatus == PumpingStatus.Error)
-                    {
-                        throw new DeviceProcessingException(
-                            "Ошибка накачки давления ");
-                    }
-                }
-                catch (DeviceProcessingException)
+                    0x70, 0x10, 0x50, 0x50, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                    0x00,
+                    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x22
+                };
+                await _stream
+                    .WriteAsync(sendMessage, 0, sendMessage.Length)
+                    .ConfigureAwait(false);
+                _isPumpingRequested = true;
+                _pumpingReady
+                    .WaitAsync()
+                    .ConfigureAwait(false);
+                _pumpingReady.Reset();
+                _isPumpingRequested = false;
+                if (_pumpingStatus == PumpingStatus.Error)
                 {
-                    throw;
+                    throw new DeviceProcessingException(
+                        "Ошибка накачки давления ");
                 }
-                catch (Exception ex)
-                {
-                    throw new DeviceProcessingException("Ошибка накачки давления", ex);
-                }
-            }).ConfigureAwait(false);
+            }
+            catch (DeviceProcessingException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                throw new DeviceProcessingException("Ошибка накачки давления", ex);
+            }
         }
 
         private void RiseExceptions()
@@ -417,84 +412,81 @@ namespace CardioMonitor.Devices.Monitor
                     $"Соединение с монитором не уставнолено. Установите соединение с помощью метода {nameof(ConnectAsync)}");
         }
 
-        public Task<PatientCommonParams> GetPatientCommonParamsAsync()
+        public async Task<PatientCommonParams> GetPatientCommonParamsAsync()
         {
             AssertConnection();
-            return Task.Factory.StartNew(() =>
+            try
             {
-                try
-                {
-                    Interlocked.Increment(ref _isCommonParamsRequested);
-                    _commonParamsReady.Wait();
-                    _commonParamsReady.Reset();
-                    return _lastCommonParams;
-                }
-                // тут могут быть только наши ошибки, сетевые генерятся в цикле
-                catch (Exception ex)
-                {
-                    throw new DeviceProcessingException(
-                        "Программная ошибка в получении параметров пациента с кардиомонитора", ex);
-                }
-                finally
-                {
-                    Interlocked.Decrement(ref _isCommonParamsRequested);
-                    RiseExceptions();
-                }
-            });
+                Interlocked.Increment(ref _isCommonParamsRequested);
+                await _commonParamsReady
+                    .WaitAsync()
+                    .ConfigureAwait(false);
+                _commonParamsReady.Reset();
+                return _lastCommonParams;
+            }
+            // тут могут быть только наши ошибки, сетевые генерятся в цикле
+            catch (Exception ex)
+            {
+                throw new DeviceProcessingException(
+                    "Программная ошибка в получении параметров пациента с кардиомонитора", ex);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _isCommonParamsRequested);
+                RiseExceptions();
+            }
         }
 
-        public Task<PatientPressureParams> GetPatientPressureParamsAsync()
+        public async Task<PatientPressureParams> GetPatientPressureParamsAsync()
         {
             AssertConnection();
-            return Task.Factory.StartNew(() =>
+            try
             {
-                try
-                {
-                    Interlocked.Increment(ref _isPressureParamsRequested);
-                    _pressureParamsReady.Wait();
-                    _pressureParamsReady.Reset();
-                    return _lastPressureParams;
-                }
-                // тут могут быть только наши ошибки, сетевые генерятся в цикле
-                catch (Exception ex)
-                {
-                    throw new DeviceProcessingException(
-                        "Программная ошибка в получении параметров давления пациента с кардиомонитора", ex);
-                }
-                finally
-                {
-                    Interlocked.Decrement(ref _isPressureParamsRequested);
-                    RiseExceptions();
-                }
-            });
+                Interlocked.Increment(ref _isPressureParamsRequested);
+                await _pressureParamsReady
+                    .WaitAsync()
+                    .ConfigureAwait(false);
+                _pressureParamsReady.Reset();
+                return _lastPressureParams;
+            }
+            // тут могут быть только наши ошибки, сетевые генерятся в цикле
+            catch (Exception ex)
+            {
+                throw new DeviceProcessingException(
+                    "Программная ошибка в получении параметров давления пациента с кардиомонитора", ex);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _isPressureParamsRequested);
+                RiseExceptions();
+            }
         }
 
-        public Task<PatientEcgParams> GetPatientEcgParamsAsync(TimeSpan duration)
+        public async Task<PatientEcgParams> GetPatientEcgParamsAsync(TimeSpan duration)
         {
             AssertConnection();
-            return Task.Factory.StartNew(() =>
+            try
             {
-                try
-                {
-                    _startedEcgCollectingTime = DateTime.UtcNow;
-                    _ecgCollectionDuration = duration;
-                    Interlocked.Increment(ref _isEcgParamsRequested);
-                    _ecgParamsReady.Wait();
-                    _ecgParamsReady.Reset();
-                    return _lastEcgParams;
-                }
-                // тут могут быть только наши ошибки, сетевые генерятся в цикле
-                catch (Exception ex)
-                {
-                    throw new DeviceProcessingException(
-                        "Программная ошибка в получении параметров ЭКГ с кардиомонитора", ex);
-                }
-                finally
-                {
-                    Interlocked.Decrement(ref _isEcgParamsRequested);
-                    RiseExceptions();
-                }
-            });
+                _startedEcgCollectingTime = DateTime.UtcNow;
+                _ecgCollectionDuration = duration;
+                Interlocked.Increment(ref _isEcgParamsRequested);
+                await _ecgParamsReady
+                    .WaitAsync()
+                    .ConfigureAwait(false);
+                _ecgParamsReady.Reset();
+                return _lastEcgParams;
+            }
+            // тут могут быть только наши ошибки, сетевые генерятся в цикле
+            catch (Exception ex)
+            {
+                throw new DeviceProcessingException(
+                    "Программная ошибка в получении параметров ЭКГ с кардиомонитора", ex);
+            }
+            finally
+            {
+                Interlocked.Decrement(ref _isEcgParamsRequested);
+                RiseExceptions();
+            }
         }
 
         #endregion
