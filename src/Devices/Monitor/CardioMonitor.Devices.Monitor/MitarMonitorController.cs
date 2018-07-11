@@ -23,12 +23,6 @@ namespace CardioMonitor.Devices.Monitor
         private const int IsRequestedValue = 1;
         
         private readonly SemaphoreSlim _updateDataSyncSemaphore;
-        
-        //todo оставил, чтобы пока помнить адресс
-//        private readonly int localUdpPort = 30304;
-//        private IPAddress remoteMonitorIpAddress;
-//        private readonly int remoteMonitorTcpPort = 9761;
-
         private NetworkStream _stream;
         private TcpClient _tcpClient;
 
