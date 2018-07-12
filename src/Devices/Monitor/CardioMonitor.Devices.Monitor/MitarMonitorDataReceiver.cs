@@ -7,7 +7,7 @@ using CardioMonitor.Devices.Monitor.Infrastructure;
 
 namespace CardioMonitor.Devices.Monitor
 {
-    public class MitarMonitorDataReceiver
+    public class MitarMonitorDataReceiver : IDisposable
     {
         #region fields
 
@@ -24,7 +24,6 @@ namespace CardioMonitor.Devices.Monitor
 
         #endregion
         
-
         public MitarMonitorDataReceiver(NetworkStream stream)
         {
             _stream = stream;
@@ -58,7 +57,9 @@ namespace CardioMonitor.Devices.Monitor
 
         private async void GetDataFromStream()
         {
-            await _semaphoreSlim.WaitAsync();
+            await _semaphoreSlim
+                .WaitAsync()
+                .ConfigureAwait(false);
             try
             {
                 while (_isNeedDataRead)
@@ -66,7 +67,9 @@ namespace CardioMonitor.Devices.Monitor
                     if (_stream == null) continue;
                     
                     var buffer = new byte[64];
-                    var buffSize = await _stream.ReadAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                    var buffSize = await _stream
+                        .ReadAsync(buffer, 0, buffer.Length)
+                        .ConfigureAwait(false);
                     if (buffSize > 0)
                     {
                         Parse(buffer);
@@ -170,7 +173,13 @@ namespace CardioMonitor.Devices.Monitor
 
             _status = PumpingStatus.Completed;
         }
-            
-        
+
+
+        public void Dispose()
+        {
+            _semaphoreSlim?.Dispose();
+            _stream?.Close();
+            _stream?.Dispose();
+        }
     }
 }

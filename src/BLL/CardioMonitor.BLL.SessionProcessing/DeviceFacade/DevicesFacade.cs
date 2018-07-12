@@ -1040,16 +1040,28 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         public void Dispose()
         {
-            _cycleProcessingSynchronizer.Stop();
-            _cycleProcessingSynchronizer.Dispose();
+            if (_cycleProcessingSynchronizer != null)
+            {
+                _cycleProcessingSynchronizer.Stop();
+                _cycleProcessingSynchronizer.Dispose();
+            }
+
+            if (_bedController != null)
+            {
+                _bedController.OnPauseFromDeviceRequested -= BedControllerOnPauseFromDeviceRequested;
+                _bedController.OnResumeFromDeviceRequested -= BedControllerOnResumeFromDeviceRequested;
+                _bedController.OnReverseFromDeviceRequested -= BedControllerOnReverseFromDeviceRequested;
+                _bedController.OnEmeregencyStopFromDeviceRequested -= BedControllerOnEmeregencyStopFromDeviceRequested;
             
-            _bedController.OnPauseFromDeviceRequested -= BedControllerOnPauseFromDeviceRequested;
-            _bedController.OnResumeFromDeviceRequested -= BedControllerOnResumeFromDeviceRequested;
-            _bedController.OnReverseFromDeviceRequested -= BedControllerOnReverseFromDeviceRequested;
-            _bedController.OnEmeregencyStopFromDeviceRequested -= BedControllerOnEmeregencyStopFromDeviceRequested;
+                _bedController.Dispose();
+                
+            }
+
+            if (_monitorController != null)
+            {
+                _monitorController.Dispose();
+            }
             
-            _bedController.Dispose();
-            _monitorController.Dispose();
             _pipelineOnTimeStartBlock.Complete();
             _pipelineFinishCollectorBlock.Completion.ConfigureAwait(false).GetAwaiter().GetResult();
         }

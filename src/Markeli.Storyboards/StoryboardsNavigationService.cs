@@ -165,7 +165,7 @@ namespace Markeli.Storyboards
                     tcs.SetResult(TransitionResult.Failed);
                 }
             }).ConfigureAwait(false);
-            return await tcs.Task.ConfigureAwait(false);
+            return await tcs.Task.ConfigureAwait(true);
         }
         
 
@@ -489,7 +489,7 @@ namespace Markeli.Storyboards
 
                     await viewModel.CloseAsync().ConfigureAwait(true);
                     storyboard.ActivePage = null;
-
+                    viewModel.Dispose();
                 }
             }
 

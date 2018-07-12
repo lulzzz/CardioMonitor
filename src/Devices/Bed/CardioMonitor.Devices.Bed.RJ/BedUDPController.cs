@@ -151,27 +151,41 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// </summary>
         private async Task SetInitParamsAsync()
         {
-            await _semaphoreSlim.WaitAsync();
+            await _semaphoreSlim
+                .WaitAsync()
+                .ConfigureAwait(false);
             try
             {
                 AssertConnection();
                 if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
-                await Task.Yield();
-                BedMessage message = new BedMessage(BedMessageEventType.Write);
+                
+                var message = new BedMessage(BedMessageEventType.Write);
                 var sendMessage = message.SetMaxAngleValueMessage(_config.MaxAngleX);
-                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-                var receiveMessage = await _udpClient.ReceiveAsync();
+                await _udpClient
+                    .SendAsync(sendMessage, sendMessage.Length)
+                    .ConfigureAwait(false);
+                var receiveMessage = await _udpClient
+                    .ReceiveAsync()
+                    .ConfigureAwait(false);
                 //todo very very bad
                 Thread.Sleep(100);
                 //todo здесь лучше сделать паузу ~100mc 
                 sendMessage = message.SetFreqValueMessage(_config.MovementFrequency);
-                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-                receiveMessage = await _udpClient.ReceiveAsync();
+                await _udpClient
+                    .SendAsync(sendMessage, sendMessage.Length)
+                    .ConfigureAwait(false);
+                receiveMessage = await _udpClient
+                    .ReceiveAsync()
+                    .ConfigureAwait(false);
                 Thread.Sleep(100);
                 //todo здесь лучше сделать паузу ~100mc 
                 sendMessage = message.SetCycleCountValueMessage((byte) _config.CyclesCount);
-                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-                receiveMessage = await _udpClient.ReceiveAsync();
+                await _udpClient
+                    .SendAsync(sendMessage, sendMessage.Length)
+                    .ConfigureAwait(false);
+                receiveMessage = await _udpClient
+                    .ReceiveAsync()
+                    .ConfigureAwait(false);
             }
             finally
             {
@@ -192,7 +206,9 @@ namespace CardioMonitor.Devices.Bed.UDP
             await Task.Yield();
             var message = new BedMessage();
             var sendMessage = message.SetBedBlockMessage(isBlock);
-            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+            await _udpClient
+                .SendAsync(sendMessage, sendMessage.Length)
+                .ConfigureAwait(false);
         }
         
         /// <summary>
@@ -208,12 +224,15 @@ namespace CardioMonitor.Devices.Bed.UDP
                     throw new DeviceConnectionException("Ошибка подключения к инверсионному столу"); //todo 
                 //todo здесь получение массива с регистрами и обновление результатов в _registerList
                 //todo никакой обработки ошибок делать не надо
-                await Task.Yield();
                 //здесь короче запрос данных и их парсинг 
                 var message = new BedMessage(BedMessageEventType.ReadAll);
                 var getAllRegister = message.GetAllRegisterMessage();
-                await _udpClient.SendAsync(getAllRegister, getAllRegister.Length);
-                var receiveMessage = await _udpClient.ReceiveAsync();
+                await _udpClient
+                    .SendAsync(getAllRegister, getAllRegister.Length)
+                    .ConfigureAwait(false);
+                var receiveMessage = await _udpClient
+                    .ReceiveAsync()
+                    .ConfigureAwait(false);
                 var registerValues = message.GetAllRegisterValues(receiveMessage.Buffer);
                 if ((_registerValues.BedStatus == BedStatus.SessionStarted || _registerValues.BedStatus == BedStatus.Pause)
                     && registerValues.BedStatus == BedStatus.Reverse)
@@ -260,6 +279,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             {
                 await Task.Yield();
                 _workerController.CloseWorker(_syncWorker);
+                _udpClient?.Close();
                 _udpClient?.Dispose();
 
             }
@@ -296,8 +316,12 @@ namespace CardioMonitor.Devices.Bed.UDP
                 
                 var message = new BedMessage(BedMessageEventType.Write);
                 var sendMessage = message.GetBedCommandMessage(command);
-                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-                var receiveMessage = await _udpClient.ReceiveAsync();
+                await _udpClient
+                    .SendAsync(sendMessage, sendMessage.Length)
+                    .ConfigureAwait(false);
+                var receiveMessage = await _udpClient
+                    .ReceiveAsync()
+                    .ConfigureAwait(false);
             }
             finally
             {
@@ -454,7 +478,14 @@ namespace CardioMonitor.Devices.Bed.UDP
         public void Dispose()
         {
             _workerController.CloseWorker(_syncWorker);
-            _udpClient?.Dispose();
+            try
+            {
+                _udpClient?.Close();
+            }
+            finally 
+            {
+                _udpClient?.Dispose();
+            }
         }
 
         public Guid DeviceId => InversionTableV2UdpDeviceId.DeviceId;

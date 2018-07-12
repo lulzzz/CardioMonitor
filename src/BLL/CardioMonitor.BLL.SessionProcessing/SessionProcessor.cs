@@ -240,7 +240,7 @@ namespace CardioMonitor.BLL.SessionProcessing
 
             var isSuccessfull = await _devicesFacade
                 .StartAsync()
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
             if (isSuccessfull)
             {
                 _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.InProgress; });
@@ -335,6 +335,8 @@ namespace CardioMonitor.BLL.SessionProcessing
             // ReSharper disable once ConditionIsAlwaysTrueOrFalse
             // ReSharper disable once HeuristicUnreachableCode
             if (_devicesFacade == null) return;
+            
+            _devicesFacade.Dispose();
             
             _devicesFacade.OnException -= OnException;
             _devicesFacade.OnException -= HandleGettingPatientParamsException;
@@ -463,21 +465,20 @@ namespace CardioMonitor.BLL.SessionProcessing
                     var iterationNumber = commonPatientParams.IterationNumber;
 
                     var inclinationAngle = commonPatientParams.InclinationAngle;
-                    if (cycleNumber != 0)
+                    if (cycleNumber == 0) return;
+                    
+                    var checkPoint = PatientParamsPerCycles[cycleNumber - 1].CycleParams
+                        .FirstOrDefault(x => x.IterationNumber == iterationNumber);
+                    if (checkPoint == null)
                     {
-                        var checkPoint = PatientParamsPerCycles[cycleNumber - 1].CycleParams
-                            .FirstOrDefault(x => x.IterationNumber == iterationNumber);
-                        if (checkPoint == null)
-                        {
-                            checkPoint = new CheckPointParams(
-                                cycleNumber,
-                                iterationNumber,
-                                inclinationAngle);
-                            PatientParamsPerCycles[cycleNumber - 1].CycleParams.Add(checkPoint);
-                        }
-
-                        checkPoint.SetCommonParams(commonPatientParams);
+                        checkPoint = new CheckPointParams(
+                            cycleNumber,
+                            iterationNumber,
+                            inclinationAngle);
+                        PatientParamsPerCycles[cycleNumber - 1].CycleParams.Add(checkPoint);
                     }
+
+                    checkPoint.SetCommonParams(commonPatientParams);
                 });
             }
         }

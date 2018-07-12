@@ -34,7 +34,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     /// <summary>
     /// ViewModel для сеанса
     /// </summary>
-    public class SessionProcessingViewModel : SessionProcessor, IStoryboardPageViewModel
+    public class SessionProcessingViewModel : 
+        SessionProcessor, 
+        IStoryboardPageViewModel
     {
         #region Constants
 
@@ -507,13 +509,15 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 {
                     case SessionStatus.InProgress:
                         actionName = "паузы";
-                        await PauseAsync().ConfigureAwait(true);
+                        await PauseAsync()
+                            .ConfigureAwait(true);
                         StartButtonText = _resumeText;
                         break;
                     case SessionStatus.Suspended:
                         actionName = "продолжения";
                         UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
-                        await ResumeAsync().ConfigureAwait(true);
+                        await ResumeAsync()
+                            .ConfigureAwait(true);
                         StartButtonText = _pauseText;
                         break;
                     default:
@@ -923,6 +927,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 await EmeregencyStopAsync().ConfigureAwait(true);
                 await SaveSessionToDbAsync().ConfigureAwait(true);
                 ClearData();
+                Dispose();
             }
             catch (Exception e)
             {

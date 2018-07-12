@@ -7,7 +7,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
     /// <summary>
     /// Фасад для всей подсистемы взаимодействия с оборудованием
     /// </summary>
-    internal interface IDevicesFacade
+    internal interface IDevicesFacade : IDisposable
     {
         event EventHandler<TimeSpan> OnElapsedTimeChanged;
         event EventHandler<TimeSpan> OnRemainingTimeChanged;
