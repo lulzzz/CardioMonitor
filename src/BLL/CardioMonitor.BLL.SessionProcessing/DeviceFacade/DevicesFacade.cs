@@ -343,7 +343,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             {
                 _logger?.Trace($"{GetType().Name}: агрегация данных...");
 
-                var isForcedCollectionRequested = context.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
+                var isForcedCollectionRequested = context.TryGetForcedDataCollectionRequest() != null;
                 
                 var exceptionParams = context.TryGetExceptionContextParams();
                 if (exceptionParams != null)
@@ -1014,7 +1014,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private async Task<bool> InnerForceDataCollectionRequestAsync()
         {
             var context = new CycleProcessingContext();
-            var forcedRequest = new ForcedDataCollectionRequestCycleProcessingContextParams(true);
+            var forcedRequest = new ForcedDataCollectionRequestCycleProcessingContextParams();
             context.AddOrUpdate(forcedRequest);
             context.AddOrUpdate(
                 new PumpingRequestContextParams(
@@ -1026,8 +1026,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 .SendAsync(context)
                 .ConfigureAwait(false);
 
-            await forcedRequest.BlockingSemaphore
-                .WaitAsync()
+            await forcedRequest.ResultingTask
                 .ConfigureAwait(false);
 
             var pumpingResult = context.TryGetAutoPumpingResultParams();

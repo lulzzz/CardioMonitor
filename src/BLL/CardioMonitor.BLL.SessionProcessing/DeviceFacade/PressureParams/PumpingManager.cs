@@ -145,7 +145,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var forcedRequest = context.TryGetForcedDataCollectionRequest();
-            if (forcedRequest != null && forcedRequest.IsRequested)
+            if (forcedRequest != null)
             {
                 return true;
             }
