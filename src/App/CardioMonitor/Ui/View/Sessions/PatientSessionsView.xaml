@@ -1,0 +1,96 @@
+﻿<UserControl x:Class="CardioMonitor.Ui.View.Sessions.PatientSessionsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
+             xmlns:commonConverters="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Converters;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             xmlns:uiConverters="clr-namespace:CardioMonitor.Ui.Converters"
+             xmlns:controls="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             d:DataContext="{d:DesignInstance Type=viewModel:PatientSessionsViewModel}"
+             mc:Ignorable="d" 
+        d:DesignHeight="300" d:DesignWidth="800">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <uiConverters:SessionStatusToTextConverter x:Key="SessionStatusToTextConverter"/>
+            <commonConverters:UtcToLocalDateTimeConverter x:Key="UtcToLocalDateTimeConverter"/>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.TextBox.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.datagrid.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <controls:BusyIndicator
+        Style="{DynamicResource BusyIndicatorStylekey}"
+        IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+        Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+        <Grid
+            Margin="10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="{Binding PatientName}"
+                       Style="{DynamicResource CmPageHeader}">
+            </TextBlock>
+
+            <DataGrid x:Name="SessionsDG"
+                  x:FieldModifier="private"
+                  Grid.Row="1"
+                  ItemsSource="{Binding SessionInfos}"
+                  SelectedItem="{Binding SelectedSessionInfo}"
+                      ColumnWidth="*"
+                  Style="{DynamicResource CmDataGrid}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Дата сеанса"
+                                    Binding="{Binding TimestampUtc, StringFormat='{}{0:dd.MM.yyyy}', Converter={StaticResource UtcToLocalDateTimeConverter}}"/>
+                <DataGridTextColumn Header="Время сеанса"
+                                    Binding="{Binding TimestampUtc, StringFormat='{}{0:H:mm}', Converter={StaticResource UtcToLocalDateTimeConverter}}"/>
+
+                <DataGridTextColumn Header="Статус сеанса"
+                                    Binding="{Binding Status, Converter={StaticResource SessionStatusToTextConverter}}"/>
+                </DataGrid.Columns>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow"
+                       BasedOn="{StaticResource MetroDataGridRow}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Status}" Value="Terminated">
+                            <Setter Property="Background" Value="Red"></Setter>
+                            </DataTrigger>
+                        <DataTrigger Binding="{Binding Status}" Value="TerminatedOnError">
+                            <Setter Property="Background" Value="Red"></Setter>
+                        </DataTrigger>
+                        </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+        </DataGrid>
+        <StackPanel Grid.Row="2"
+                    Style="{DynamicResource CmBottomPanel}">
+            <Button x:Name="StartTreatmentSessinB"
+                    x:FieldModifier="private"
+                    Command="{Binding StartSessionCommand}"
+                    Content="Начать сеанс"
+                    Style="{DynamicResource CmCommandButton}"/>
+            <Button x:Name="DeleteTreatmentSessionB"
+                    x:FieldModifier="private"
+                    Command="{Binding DeleteSessionCommand}"
+                    CommandParameter="{Binding ElementName=SessionsDG, Path=SelectedItem}"
+                    Content="Удалить "
+                    Style="{DynamicResource CmCommandButton}"/>
+            <Button x:Name="OpenTreatmentSessionDataB"
+                    x:FieldModifier="private"
+                    Command="{Binding ShowResultsCommand}"
+                    CommandParameter="{Binding ElementName=SessionsDG, Path=SelectedItem}"
+                    Content="Открыть результаты"
+                    Style="{DynamicResource CmCommandButton}"/>
+        </StackPanel>
+    </Grid>
+    </controls:BusyIndicator>
+</UserControl>
+
+    
+    
+
+    
+    

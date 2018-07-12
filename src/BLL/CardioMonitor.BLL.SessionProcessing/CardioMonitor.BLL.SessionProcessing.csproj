@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B95D28FB-7EA5-4E4B-BDA3-441F9BA2F898}</ProjectGuid>
+    <ProjectTypeGuids>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>CardioMonitor.BLL.SessionProcessing</RootNamespace>
+    <AssemblyName>CardioMonitor.BLL.SessionProcessing</AssemblyName>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="CheckPointParams.cs" />
+    <Compile Include="CycleData.cs" />
+    <Compile Include="DeviceFacade\CycleProcessingSynchronizer.cs" />
+    <Compile Include="DeviceFacade\DeviceFacadeMemoryCacheExtensions.cs" />
+    <Compile Include="DeviceFacade\Exceptions\ExceptionCycleProcessingContextParams.cs" />
+    <Compile Include="DeviceFacade\ForcedDataCollectionRequest\ForcedDataCollectionRequestCycleProcessingContextParams.cs" />
+    <Compile Include="DeviceFacade\ICycleProcessingContextParams.cs" />
+    <Compile Include="DeviceFacade\Iterations\IterationCycleProcessingContextParams.cs" />
+    <Compile Include="DeviceFacade\Iterations\IterationParamsProvider.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PumpingManager.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PumpingRequestContextParams.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PumpingRequestContextParamsExntensions.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PressureParamsContextExntensions.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PumpingResultContextParams.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PumpingResultContextParamsExtensions.cs" />
+    <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoContextParamses.cs" />
+    <Compile Include="DeviceFacade\SessionProcessingInfo\SessionProcessingInfoProvider.cs" />
+    <Compile Include="ISessionParamsValidator.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Exceptions\SessionProcessingErrorCodes.cs" />
+    <Compile Include="Exceptions\SessionProcessingException.cs" />
+    <Compile Include="DeviceFacade\Angle\AngleXContextParams.cs" />
+    <Compile Include="DeviceFacade\Angle\AngleReciever.cs" />
+    <Compile Include="DeviceFacade\CheckPoints\IterationBasedCheckPointChecker.cs" />
+    <Compile Include="DeviceFacade\CheckPoints\CheckPointCycleProcessingContextParams.cs" />
+    <Compile Include="DeviceFacade\CommonPatientParams.cs" />
+    <Compile Include="DeviceFacade\CommonParams\CommonPatientCycleProcessingContextParams.cs" />
+    <Compile Include="DeviceFacade\CommonParams\CommonPatientParamsProvider.cs" />
+    <Compile Include="DeviceFacade\IDevicesFacade.cs" />
+    <Compile Include="DeviceFacade\ICycleProcessingPipelineElement.cs" />
+    <Compile Include="DeviceFacade\PatientPressureParams.cs" />
+    <Compile Include="DeviceFacade\DevicesFacade.cs" />
+    <Compile Include="DeviceFacade\CycleProcessingContext.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PatientPressureParamsProvider.cs" />
+    <Compile Include="DeviceFacade\PressureParams\PressureCycleProcessingContextParams.cs" />
+    <Compile Include="SessionContext.cs" />
+    <Compile Include="SessionParams.cs" />
+    <Compile Include="SessionParamsConstants.cs" />
+    <Compile Include="SessionParamsValidator.cs" />
+    <Compile Include="SessionProcessor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="JetBrains.Annotations, Version=11.1.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\JetBrains.Annotations.11.1.0\lib\net20\JetBrains.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="Polly, Version=5.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Polly.5.8.0\lib\net45\Polly.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.Reflection">
+      <HintPath>..\..\packages\System.Reflection.4.3.0\lib\net462\System.Reflection.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime">
+      <HintPath>..\..\packages\System.Runtime.4.3.0\lib\net462\System.Runtime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.Extensions">
+      <HintPath>..\..\packages\System.Runtime.Extensions.4.3.0\lib\net462\System.Runtime.Extensions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Dataflow, Version=4.6.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+      <HintPath>..\..\packages\System.Threading.Tasks.Dataflow.4.8.0\lib\netstandard2.0\System.Threading.Tasks.Dataflow.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Devices\Bed\CardioMonitor.Devices.Bed.Abstract\CardioMonitor.Devices.Bed.Infrastructure.csproj">
+      <Project>{bae2b28a-93f6-40a9-852c-2badd360e4fd}</Project>
+      <Name>CardioMonitor.Devices.Bed.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Devices\CardioMonitor.Devices\CardioMonitor.Devices.csproj">
+      <Project>{c8ee2e87-12dd-43e4-bab0-04e09de9a651}</Project>
+      <Name>CardioMonitor.Devices</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Devices\Monitor\CardioMonitor.Devices.Monitor.Infrastructure\CardioMonitor.Devices.Monitor.Infrastructure.csproj">
+      <Project>{e773219c-f1da-42a3-8e80-68bedac3e4f8}</Project>
+      <Name>CardioMonitor.Devices.Monitor.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure.Workers\CardioMonitor.Infrastructure.Workers.csproj">
+      <Project>{060dd75d-d142-47f9-a949-fdb171cde123}</Project>
+      <Name>CardioMonitor.Infrastructure.Workers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Infrastructure\CardioMonitor.Infrastructure\CardioMonitor.Infrastructure.csproj">
+      <Project>{60422aeb-3748-4b0f-928e-689b1378a5ee}</Project>
+      <Name>CardioMonitor.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Infrastructure\Logging\Scout.Utils.Logging\Markeli.Utils.Logging.csproj">
+      <Project>{540c94ce-85ab-4b97-9fe7-9baf8429b080}</Project>
+      <Name>Markeli.Utils.Logging</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CardioMonitor.Models\CardioMonitor.BLL.CoreContracts.csproj">
+      <Project>{33247b5d-3763-4034-a97c-4c7922b04f9f}</Project>
+      <Name>CardioMonitor.BLL.CoreContracts</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

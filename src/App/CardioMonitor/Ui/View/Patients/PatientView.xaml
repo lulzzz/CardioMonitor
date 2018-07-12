@@ -1,0 +1,70 @@
+﻿<UserControl x:Class="CardioMonitor.Ui.View.Patients.PatientView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:controls="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Patients"
+             xmlns:controls1="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             d:DataContext="{d:DesignInstance Type=viewModel:PatientViewModel}"
+             mc:Ignorable="d" 
+             d:DesignHeight="350" d:DesignWidth="400">
+    <controls1:BusyIndicator
+        Style="{DynamicResource BusyIndicatorStylekey}"
+        IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+        Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+        <Grid VerticalAlignment="Center"
+              Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBlock Text="{Binding Title}"
+                   Style="{DynamicResource CmPageHeader}"/>
+        <TextBox Grid.Row="1"
+                   Text="{Binding LastName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                   controls:TextBoxHelper.Watermark="Фамилия"
+                   controls:TextBoxHelper.UseFloatingWatermark="True"
+                   Style="{DynamicResource CmCenteredTextBox}"/>
+        <TextBox Grid.Row="2"
+                   Text="{Binding FirstName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                   controls:TextBoxHelper.Watermark="Имя"
+                   controls:TextBoxHelper.UseFloatingWatermark="True"
+                 Style="{DynamicResource CmCenteredTextBox}"/>
+        <TextBox Grid.Row="3"
+                Text="{Binding PatronymicName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                controls:TextBoxHelper.Watermark="Отчество"
+                controls:TextBoxHelper.UseFloatingWatermark="True"
+                 Style="{DynamicResource CmCenteredTextBox}"/>
+        <Grid Grid.Row="4"
+              Width="350"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center"
+              Margin="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       Text="Дата рождения"
+                       Style="{DynamicResource CmLabel}"/>
+            <DatePicker Grid.Column="1"
+                    SelectedDate="{Binding BirthDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                    controls:TextBoxHelper.Watermark="Дата рождения"
+                    controls:TextBoxHelper.UseFloatingWatermark="True"
+                    Margin="10,0,10,0"/>
+        </Grid>
+        <StackPanel Grid.Row="5"
+                    Style="{DynamicResource CmBottomPanel}">
+            <Button Content="Сохранить"
+                    Command="{Binding SaveCommand}"
+                    Style="{DynamicResource CmCommandButton}"/>
+        </StackPanel>
+        </Grid>
+    </controls1:BusyIndicator>
+</UserControl>
+

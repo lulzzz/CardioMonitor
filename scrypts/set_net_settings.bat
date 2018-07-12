@@ -1,0 +1,1 @@
+netsh interface ip set address Ethernet static 192.168.56.5 255.255.0.0 192.168.0.1 1

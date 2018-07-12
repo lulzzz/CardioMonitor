@@ -1,0 +1,99 @@
+﻿<UserControl x:Class="CardioMonitor.Ui.View.Sessions.SessionDataView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel.Sessions"
+             xmlns:controls="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             xmlns:sessions="clr-namespace:CardioMonitor.Ui.View.Sessions" 
+             xmlns:commonConverters="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Converters;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             xmlns:uiConverters="clr-namespace:CardioMonitor.Ui.Converters"
+             xmlns:sessionProcessing="clr-namespace:CardioMonitor.BLL.SessionProcessing;assembly=CardioMonitor.BLL.SessionProcessing"
+             d:DataContext="{d:DesignInstance Type=viewModel:SessionDataViewModel}"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <uiConverters:SessionStatusToTextConverter x:Key="SessionStatusToTextConverter"/>
+            <commonConverters:UtcToLocalDateTimeConverter x:Key="UtcToLocalDateTimeConverter"/>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <controls:BusyIndicator
+        Style="{DynamicResource BusyIndicatorStylekey}"
+        IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+        Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+        <Grid
+            Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center">
+            <TextBlock Text="{Binding PatientName}"
+                   Style="{DynamicResource CmPageHeader}">
+            </TextBlock>
+            <TextBlock 
+                Text="Дата и время сеанса:"
+                Margin="25,10,10,10"
+                Style="{DynamicResource CmPageHeader}"/>
+            <TextBlock 
+                Text="{Binding SessionTimestampUtc, StringFormat='{}{0:dd.MM.yyyy HH:mm}', Converter={StaticResource UtcToLocalDateTimeConverter}}"
+                Style="{DynamicResource CmPageHeader}"/>
+            <TextBlock 
+                Text="Статус сеанса:"
+                Margin="25,10,10,10"
+                Style="{DynamicResource CmPageHeader}"/>
+            <TextBlock 
+                Text="{Binding SessionStatus, Converter={StaticResource SessionStatusToTextConverter}}"
+                Style="{DynamicResource CmPageHeader}"/>
+            </StackPanel>
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding Patients}"
+                  Style="{DynamicResource CmDataGrid}"
+                  ColumnWidth="*">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Фамилия"
+                                    Binding="{Binding LastName}"/>
+                <DataGridTextColumn Header="Имя"
+                                    Binding="{Binding FirstName}"/>
+                <DataGridTextColumn Header="Отчество"
+                                    Binding="{Binding PatronymicName}"/>
+                <DataGridTextColumn Header="Дата рождения"
+                                    Binding="{Binding BirthDate, StringFormat='{}{0:dd.MM.yyyy}'}"/>
+                <DataGridTextColumn Header="Ид"
+                                    Binding="{Binding Id}"/>
+            </DataGrid.Columns>
+        </DataGrid>
+            <mah:MetroAnimatedSingleRowTabControl
+                Grid.Row="2"
+                ItemsSource="{Binding PatientParamsPerCycles, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                SelectedIndex="{Binding SelectedCycleTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                TabStripPlacement="Left"
+                mah:TabControlHelper.Underlined="TabItems"
+                DisplayMemberPath="CycleNumber">
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <sessions:SessionCycleView
+                            d:DataContext="{d:DesignInstance Type=sessionProcessing:CycleData}"/>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </mah:MetroAnimatedSingleRowTabControl>
+            <StackPanel
+                Grid.Row="3"
+                Style="{DynamicResource CmBottomPanel}">
+                <Button x:Name="SaveB"
+                        Command="{Binding SaveCommand}"
+                        Content="Сохранить в файл"
+                        Style="{DynamicResource CmCommandButton}"></Button>
+            </StackPanel>
+        </Grid>
+    </controls:BusyIndicator>
+</UserControl>
+
+
+

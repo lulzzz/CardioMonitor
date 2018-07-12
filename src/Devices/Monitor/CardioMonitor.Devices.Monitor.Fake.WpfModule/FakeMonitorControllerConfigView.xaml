@@ -1,0 +1,55 @@
+﻿<UserControl x:Class="CardioMonitor.Devices.Monitor.Fake.WpfModule.FakeMonitorControllerConfigView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CardioMonitor.Devices.Monitor.Fake.WpfModule"
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=local:FakeMonitorControllerConfigViewModel}"
+             d:DesignHeight="450" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </UserControl.Resources>
+    <Grid VerticalAlignment="Center"
+          HorizontalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TextBox Grid.Row="0"
+            Text="{Binding UpdateDataPeriodMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+            mah:TextBoxHelper.Watermark="Период обновления данных, мс"
+                 Style="{DynamicResource CmCenteredTextBox}"/>
+        <TextBox Grid.Row="1"
+            Text="{Binding TimeoutMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+            mah:TextBoxHelper.Watermark="Таймаут, мс"
+                 Style="{DynamicResource CmCenteredTextBox}"/>
+        <TextBox Grid.Row="2"
+                 Text="{Binding DelayMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                 mah:TextBoxHelper.Watermark="Длительность операций, мс"
+                 Style="{DynamicResource CmCenteredTextBox}"/>
+        <TextBox Grid.Row="3"
+                 Text="{Binding PumpingDelayMs, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                 mah:TextBoxHelper.Watermark="Длительность накачки, мс"
+                 Style="{DynamicResource CmCenteredTextBox}"/>
+
+        <mah:ToggleSwitch 
+            Grid.Row="4"
+            IsChecked="{Binding NeedReconnect, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            OffLabel="Не переподключаться"
+            OnLabel="Переподключаться" 
+            Style="{DynamicResource CmSettingsToggleSwitch}"/>
+
+        <TextBox Grid.Row="5"
+                 Text="{Binding ReconnectionTimeoutSec, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
+                 mah:TextBoxHelper.Watermark="Таймаут перед повторынм подключением, с"
+                 Style="{DynamicResource CmCenteredTextBox}"
+                 Visibility="{Binding NeedReconnect, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+    </Grid>
+</UserControl>

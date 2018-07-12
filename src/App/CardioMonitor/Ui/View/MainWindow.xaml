@@ -1,0 +1,117 @@
+﻿<controls:MetroWindow
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+    x:Class="CardioMonitor.Ui.View.MainWindow"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:iconPacks1="http://metro.mahapps.com/winfx/xaml/iconpacks"
+    xmlns:viewModel="clr-namespace:CardioMonitor.Ui.ViewModel"
+    xmlns:converters="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Converters;assembly=CardioMonitor.Infrastructure.WpfCommon"
+    Title="Cardio monitor" 
+    Height="350" 
+    Width="925"
+    WindowStartupLocation="CenterScreen"
+    GlowBrush="{DynamicResource AccentColorBrush}"
+    d:DataContext="{d:DesignInstance Type=viewModel:MainWindowViewModel}"
+    WindowState="Maximized" 
+    mc:Ignorable="d" 
+    Loaded="MetroWindow_Loaded" 
+    Closing="MetroWindow_Closing"
+>
+    <controls:MetroWindow.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/Icons.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/controls.buttons.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Themes/HamburgerMenuTemplate.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Clean/Clean.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:InvertedBooleanToVisibilityConverter x:Key="InvertedBooleanToVisibilityConverter"/>
+
+            <!--  This is the template for the menu items.  -->
+            <DataTemplate x:Key="MenuItemTemplate" DataType="{x:Type viewModel:ExtendedStoryboard}">
+                <Grid Height="48">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="48" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <ContentControl Grid.Column="0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Content="{Binding Icon}"
+                                    Focusable="False"
+                                    IsTabStop="False" />
+                    <TextBlock Grid.Column="1"
+                               VerticalAlignment="Center"
+                               FontSize="16"
+                               Text="{Binding Name}" />
+                </Grid>
+            </DataTemplate>
+
+            <Style x:Key="HamburgerMenuCreatorsItemStyle"
+                   BasedOn="{StaticResource HamburgerMenuItemStyle}">
+                <Setter Property="controls:ItemHelper.ActiveSelectionBackgroundBrush" Value="Transparent" />
+                <Setter Property="controls:ItemHelper.ActiveSelectionForegroundBrush" Value="{DynamicResource AccentBaseColorBrush}" />
+                <Setter Property="controls:ItemHelper.DisabledForegroundBrush" Value="{DynamicResource GrayNormalBrush}" />
+                <Setter Property="controls:ItemHelper.DisabledSelectedBackgroundBrush" Value="Transparent" />
+                <Setter Property="controls:ItemHelper.DisabledSelectedForegroundBrush" Value="{DynamicResource GrayNormalBrush}" />
+                <Setter Property="controls:ItemHelper.HoverBackgroundBrush" Value="{DynamicResource GrayBrush9}" />
+                <Setter Property="controls:ItemHelper.HoverSelectedBackgroundBrush" Value="{DynamicResource GrayBrush9}" />
+                <Setter Property="controls:ItemHelper.SelectedBackgroundBrush" Value="Transparent" />
+                <Setter Property="controls:ItemHelper.SelectedForegroundBrush" Value="{DynamicResource AccentBaseColorBrush}" />
+               
+            </Style>
+
+            <Style x:Key="HamburgerMenuCreatorsStyle"
+                   BasedOn="{StaticResource {x:Type controls:HamburgerMenu}}"
+                   TargetType="{x:Type controls:HamburgerMenu}">
+                <Setter Property="PaneBackground" Value="{DynamicResource WhiteBrush}" />
+                <Setter Property="PaneForeground" Value="{DynamicResource TextBrush}" />
+                <Setter Property="ShowSelectionIndicator" Value="True" />
+            </Style>
+
+        </ResourceDictionary>
+    </controls:MetroWindow.Resources>
+    <controls:MetroWindow.LeftWindowCommands>
+        <controls:WindowCommands ShowSeparators="False">
+            <Button x:Name="GoBackButton"
+                    Width="{Binding ElementName=HamburgerMenuControl, Path=CompactPaneLength}"
+                    Command="{Binding MoveBackwardCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    Visibility="{Binding RelativeSource={RelativeSource Self}, Path=IsEnabled, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <iconPacks1:PackIconMaterial Kind="ArrowLeft" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Button>
+            <Image 
+                Source="../../Resources/usbHeart.ico"
+                Width="{Binding ElementName=HamburgerMenuControl, Path=CompactPaneLength}"
+                Visibility="{Binding ElementName=GoBackButton, Path=IsEnabled, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"/>
+        </controls:WindowCommands>
+    </controls:MetroWindow.LeftWindowCommands>
+    <controls:HamburgerMenu x:Name="HamburgerMenuControl"
+                            HamburgerWidth="48"
+                            IsPaneOpen="True"
+                            ContentTransition="LeftReplace"
+                            Content="{Binding CurrentOpennedStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            SelectedItem="{Binding SelectedItemStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            ItemTemplate="{StaticResource MenuItemTemplate}"
+                            ItemsSource="{Binding ItemStoryboards, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                            SelectedOptionsItem="{Binding SelectedOptionsStoryboard, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                            OptionsItemTemplate="{StaticResource MenuItemTemplate}"
+                            OptionsItemsSource="{Binding OptionsStoryboards, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                            OpenPaneLength="150"
+                            Style="{StaticResource HamburgerMenuCreatorsStyle}"
+                            VerticalScrollBarOnLeftSide="False">
+
+
+        <controls:HamburgerMenu.ContentTemplate>
+            <DataTemplate DataType="{x:Type viewModel:ExtendedStoryboard}">
+
+                <ContentControl Focusable="False"
+                                Foreground="{DynamicResource BlackBrush}"
+                                Content="{Binding ActivePage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </DataTemplate>
+        </controls:HamburgerMenu.ContentTemplate>
+
+    </controls:HamburgerMenu>
+
+</controls:MetroWindow>

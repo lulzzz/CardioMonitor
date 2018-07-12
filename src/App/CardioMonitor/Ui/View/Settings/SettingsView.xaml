@@ -1,0 +1,227 @@
+﻿<UserControl x:Class="CardioMonitor.Ui.View.Settings.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+             xmlns:settings="clr-namespace:CardioMonitor.Ui.ViewModel.Settings"
+             xmlns:controls1="clr-namespace:CardioMonitor.Infrastructure.WpfCommon.Controls;assembly=CardioMonitor.Infrastructure.WpfCommon"
+             d:DataContext="{d:DesignInstance Type=settings:SettingsViewModel}">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources/Icons.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/FlatSlider.xaml"/>
+
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.ListBox.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.ComboBox.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+           <Ellipse x:Key="AccentMenuIcon"
+                     x:Shared="False"
+                     Width="16"
+                     Height="16"
+                     Fill="{Binding ColorBrush, Mode=OneWay}" />
+
+            
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <controls1:BusyIndicator
+        Style="{DynamicResource BusyIndicatorStylekey}"
+        IsBusy="{Binding IsBusy, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+        Status="{Binding BusyMessage, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}">
+        <ScrollViewer
+            Margin="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0"
+                                        Margin="5,5,5,5"
+                                        Orientation="Vertical"
+                                        Width="450">
+                    <Expander Header="Внешний вид"
+                              Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Text="Theme:"
+                                       VerticalAlignment="Center" 
+                                       Margin="0,0,16,4" />
+                            <ComboBox Grid.Row="0" 
+                                      Grid.Column="1" 
+                                      ItemsSource="{Binding AppThemes, Mode=OneWay}"
+                                      SelectedItem="{Binding SelectedAppTheme}"
+                                      VerticalAlignment="Center" 
+                                      Margin="0,0,0,4">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse Margin="5,5,10,5"
+                                                     Width="16"
+                                                     Height="16"
+                                                     StrokeThickness="1"
+                                                     Stroke="{Binding BorderColorBrush, Mode=OneWay}"
+                                                     Fill="{Binding ColorBrush, Mode=OneWay}" />
+                                            <TextBlock Text="{Binding Name}"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <TextBlock Text="Accent color:"
+                                       Grid.Column="0"
+                                       Grid.Row="1"
+                                       VerticalAlignment="Top" 
+                                       Margin="0,10,16,4" />
+                            <ComboBox x:Name="ColorsLB"
+                                     Grid.Column="1"
+                                     Grid.Row="1"
+                                     ItemsSource="{Binding AccentColors}"
+                                     SelectedItem="{Binding SelectedAccentColor, Mode=TwoWay}"
+                                     Margin="0,0,0,16">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="2" 
+                                                    Orientation="Horizontal">
+                                            <Rectangle Width="15" 
+                                                       Height="15" 
+                                                       Fill="{Binding ColorBrush}"
+                                                       Margin="5,5,10,5"/>
+                                            <TextBlock Text="{Binding Name}"
+                                                       HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                             </ComboBox>
+                        </Grid>
+
+                    </Expander>
+                    <Expander Header="База данных"
+                              Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                                <RowDefinition />
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0"
+                                       Text="Сервер:"
+                                       VerticalAlignment="Center" 
+                                       Margin="0,0,16,4" />
+                            <TextBox Grid.Column="1"
+                                     Grid.Row="0"
+                                     Text="{Binding DbServerName,
+                                                    ValidatesOnDataErrors=True,
+                                                    UpdateSourceTrigger=LostFocus,
+                                                    NotifyOnSourceUpdated=True,
+                                                    NotifyOnValidationError=True}"
+                                     VerticalAlignment="Center" 
+                                     Margin="0,5,0,5" />
+                            <TextBlock Grid.Row="1"
+                                       Grid.Column="0"
+                                       Text="База данных:"
+                                       VerticalAlignment="Center" 
+                                       Margin="0,0,16,4" />
+                            <TextBox Grid.Column="1"
+                                     Grid.Row="1"
+                                     Text="{Binding DbName,
+                                                    ValidatesOnDataErrors=True,
+                                                    UpdateSourceTrigger=LostFocus,
+                                                    NotifyOnSourceUpdated=True,
+                                                    NotifyOnValidationError=True}"
+                                     VerticalAlignment="Center" 
+                                     Margin="0,5,0,5" />
+                            <TextBlock Grid.Row="2"
+                                       Grid.Column="0"
+                                       Text="Логин:"
+                                       VerticalAlignment="Center" 
+                                       Margin="0,0,16,4" />
+                            <TextBox Grid.Column="1"
+                                     Grid.Row="2"
+                                     Text="{Binding DbLogin,
+                                                    ValidatesOnDataErrors=True,
+                                                    UpdateSourceTrigger=LostFocus,
+                                                    NotifyOnSourceUpdated=True,
+                                                    NotifyOnValidationError=True}"
+                                     VerticalAlignment="Center" 
+                                     Margin="0,5,0,5" />
+                            <TextBlock Grid.Row="3"
+                                       Grid.Column="0"
+                                       Text="Пароль:"
+                                       VerticalAlignment="Center" 
+                                       Margin="0,0,16,4" />
+                            <TextBox Grid.Column="1"
+                                     Grid.Row="3"
+                                     Text="{Binding DbPassword,
+                                                    ValidatesOnDataErrors=True,
+                                                    UpdateSourceTrigger=LostFocus,
+                                                    NotifyOnSourceUpdated=True,
+                                                    NotifyOnValidationError=True}"
+                                     VerticalAlignment="Center" 
+                                     Margin="0,5,0,5"  />
+                        </Grid>
+                    </Expander>
+                    <Expander Header="Результаты сеанса">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Каталог для хранения:"
+                                       VerticalAlignment="Center" 
+                                       Margin="0,0,16,4" />
+                            <TextBox x:Name="FilesDirecotryPathTB"
+                                     Grid.Column="1"
+                                     Text="{Binding SessionsFilesDirectoryPath,
+                                                    ValidatesOnDataErrors=True,
+                                                    UpdateSourceTrigger=PropertyChanged,
+                                                    NotifyOnSourceUpdated=True,
+                                                    NotifyOnValidationError=True}"
+                                     VerticalAlignment="Center" 
+                                     Margin="0,0,5,0" />
+                            <Button Content="..."
+                                    Grid.Column="2"
+                                    Command="{Binding ChooseFolderCommand}"/>
+                        </Grid>
+                    </Expander>
+                </StackPanel>
+                <StackPanel Grid.Row="2"
+                                        Orientation="Horizontal"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                    <Button x:Name="SaveSettingsB"
+                            Content="Сохранить"
+                            MinHeight="30"
+                            MinWidth="150"
+                            Margin="40,10"
+                            Command="{Binding SaveCommand}"/>
+                    <Button x:Name="CancelSettingsB"
+                            Content="Отмена"
+                            Command="{Binding CancelCommand}"
+                            MinHeight="30"
+                            MinWidth="150"
+                            Margin="40,10"/>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </controls1:BusyIndicator>
+</UserControl>
+
