@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Windows.Threading;
 using Cardiomonitor.Devices.Monitor.Mitar.WpfModule;
 using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
@@ -48,6 +49,8 @@ namespace CardioMonitor
     public partial class App
     {
         private static string NLogConfigName = "NLog.config";
+        
+        private readonly ILogger _logger; 
 
         private static readonly List<WpfDeviceModule> Modules = new List<WpfDeviceModule>
         {
@@ -64,8 +67,17 @@ namespace CardioMonitor
             var mainWindow = new MainWindow(mainWindowViewModel);
             InitNotifictionSubstem(container);
             InitDevices(container, Modules);
+            DispatcherUnhandledException += OnDispatcherUnhandledException; 
+ 
+            var loggerFactory = container.GetInstance<ILoggerFactory>(); 
+            _logger = loggerFactory.CreateLogger(LogNames.MainLog);
             mainWindow.Show();
-        }
+        } 
+ 
+        private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) 
+        { 
+            _logger?.Error($"{GetType().Name}: Необработанная ошибка, которая привела к завершению работы прилоежния: {e.Exception.Message}", e); 
+        } 
 
         private static Container Bootstrap()
         {

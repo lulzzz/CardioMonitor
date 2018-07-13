@@ -342,8 +342,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             try
             {
                 _logger?.Trace($"{GetType().Name}: агрегация данных...");
-
-                var isForcedCollectionRequested = context.TryGetForcedDataCollectionRequest() != null;
                 
                 var exceptionParams = context.TryGetExceptionContextParams();
                 if (exceptionParams != null)
@@ -408,6 +406,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 }
 
                 // чтобы не было рекурсии: форсированный сбор нужен для получения параметров, а не обновления данных о сеансе
+                
+                var isForcedCollectionRequested = context.TryGetForcedDataCollectionRequest() != null;
                 if (isForcedCollectionRequested) return Task.CompletedTask;
                 
                 if (angleParams != null)
@@ -423,6 +423,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
                     // считаем, что сессия завершилась, когда оставшееся время равно 0
                     var isSessionCompleted = sessionProcessingInfo.RemainingTime <= TimeSpan.Zero 
+                                             && sessionProcessingInfo.ElapsedTime > TimeSpan.Zero
                                              && sessionProcessingInfo.CurrentCycleNumber == sessionProcessingInfo.CyclesCount;
                     // чтобы не было лишних вызовов в случае долгого обновления в последней фазе
                     if (isSessionCompleted)
@@ -434,18 +435,17 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     var wasLastCycleDataCollected = false;
                     if ((_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber 
                          || isSessionCompleted) 
-                        && !_completedCycles.Contains(sessionProcessingInfo.CurrentCycleNumber))
+                        && !_completedCycles.Contains(_previouslyKnownCycleNumber))
                     {
-                        _completedCycles.Add(sessionProcessingInfo.CurrentCycleNumber);
+                        _completedCycles.Add(_previouslyKnownCycleNumber);
                         await InnerForceDataCollectionRequestAsync().ConfigureAwait(false);
-                        _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber; // по идеи, 
                         OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
-                        _logger?.Info($"{GetType().Name}: закончился цикл {sessionProcessingInfo.CurrentCycleNumber}");
+                        _logger?.Info($"{GetType().Name}: закончился цикл {_previouslyKnownCycleNumber}");
+                        _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber; // по идеи, 
                         wasLastCycleDataCollected = true;
                     }
 
                     if (isSessionCompleted 
-                        && !_isSessionGlobalyCompleted
                         && wasLastCycleDataCollected)
                     {
                         _isSessionGlobalyCompleted = true;
@@ -1026,9 +1026,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 .SendAsync(context)
                 .ConfigureAwait(false);
 
+            _logger?.Trace($"{GetType().Name}: ожидание завершения ручного сбора показателей пациента"); 
             await forcedRequest.ResultingTask
                 .ConfigureAwait(false);
-
+            _logger?.Trace($"{GetType().Name}: ручной сбор показателей пациента завершен"); 
+            
             var pumpingResult = context.TryGetAutoPumpingResultParams();
             if (pumpingResult == null) return false;
 

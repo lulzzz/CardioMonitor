@@ -85,7 +85,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private bool _isSessionStarted;
 
-        private int _selectedCycleTab;
+        private int _selectedCycleTabIndex;
 
         private bool _isBusy;
         private string _busyMessage;
@@ -141,13 +141,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
-        public int SelectedCycleTab
+        public int SelectedCycleTabIndex
         {
-            get => _selectedCycleTab;
+            get => _selectedCycleTabIndex;
             set
             {
-                _selectedCycleTab = value;
-                RisePropertyChanged(nameof(SelectedCycleTab));
+                _selectedCycleTabIndex = value;
+                RisePropertyChanged(nameof(SelectedCycleTabIndex));
             }
         }
 
@@ -414,9 +414,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _notifier.ShowInformation($"Завершилось повторение № {completedCycleNumber}");
 
             // если выбрана другая вкладка, то ничего делать не будем
-            var desiredCycleTab = completedCycleNumber -1 ;
-            if (SelectedCycleTab != desiredCycleTab - 1) return;
-            SelectedCycleTab = desiredCycleTab;
+            var desiredCycleTabIndex = completedCycleNumber -1 ;
+            if (SelectedCycleTabIndex != desiredCycleTabIndex - 1) return;
+            SelectedCycleTabIndex = desiredCycleTabIndex;
         }
 
         private void HandleReversedFromDevice(object sender, EventArgs eventArgs)
@@ -609,7 +609,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 _workerController,
                 _logger,
                 _uiInvoker);
-            SelectedCycleTab = 0;
+            SelectedCycleTabIndex = 0;
         }
 
         /// <summary>

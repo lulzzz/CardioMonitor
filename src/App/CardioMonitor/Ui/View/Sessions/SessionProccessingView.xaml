@@ -120,7 +120,7 @@
                 Visibility="{Binding IsSessionStarted, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource InvertedBooleanToVisibilityConverter}}"/>
                 <controls:MetroAnimatedSingleRowTabControl
                         ItemsSource="{Binding PatientParamsPerCycles, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                        SelectedIndex="{Binding SelectedCycleTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        SelectedIndex="{Binding SelectedCycleTabIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                         TabStripPlacement="Left"
                         controls:TabControlHelper.Underlined="TabItems"
                         DisplayMemberPath="CycleNumber">
