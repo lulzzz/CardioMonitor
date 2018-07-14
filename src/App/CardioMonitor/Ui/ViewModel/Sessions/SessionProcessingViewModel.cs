@@ -509,12 +509,14 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 {
                     case SessionStatus.InProgress:
                         actionName = "паузы";
+                        BusyMessage = "Пауза сеанса...";
                         await PauseAsync()
                             .ConfigureAwait(true);
                         StartButtonText = _resumeText;
                         break;
                     case SessionStatus.Suspended:
                         actionName = "продолжения";
+                        BusyMessage = "Продолжение сеанса";
                         UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
                         await ResumeAsync()
                             .ConfigureAwait(true);
@@ -522,8 +524,10 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                         break;
                     default:
                         actionName = "старта";
+                        BusyMessage = "Инициализация сеанса...";
                         await InitAsync().ConfigureAwait(true);
                         UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
+                        BusyMessage = "Старт сеанса...";
                         var isSuccessfully = await StartAsync()
                             .ConfigureAwait(true);
                         if (isSuccessfully)
@@ -537,7 +541,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
             catch (Exception e)
             {
-                _notifier.ShowError($"Ошибка {actionName} сеанса");
+                _notifier.ShowError($"Ошибка {actionName} сеанса. Причина: {e.Message}");
                 _logger.Error($"{GetType().Name}: Ошибка {actionName} сеанса. Причина: {e.Message}", e);
             }
             finally

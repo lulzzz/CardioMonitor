@@ -76,7 +76,8 @@ namespace CardioMonitor
  
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e) 
         { 
-            _logger?.Error($"{GetType().Name}: Необработанная ошибка, которая привела к завершению работы прилоежния: {e.Exception.Message}", e); 
+            _logger?.Error($"{GetType().Name}: Необработанная ошибка, которая привела к завершению работы прилоежния: " +
+                           $"{e.Exception.Message}", e); 
         } 
 
         private static Container Bootstrap()
