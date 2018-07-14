@@ -122,6 +122,15 @@ namespace CardioMonitor.Devices.Bed.UDP
             {
                 throw new ArgumentException("Не верно указан адрес подключения к кровати. Требуемый формат - ip:port");
             }
+            
+            // немного подождем, чтобы завершилось начатое обновление данных
+            var waitingTimeout = GetWaitingTimeout();
+            var isFree = await _semaphoreSlim
+                .WaitAsync(waitingTimeout)
+                .ConfigureAwait(false);
+            if (!isFree)
+                throw new DeviceConnectionException(
+                    $"Не удалось подключиться к инверсинному столу в течение {waitingTimeout.TotalMilliseconds} мс");
 
             try
             {
@@ -205,16 +214,15 @@ namespace CardioMonitor.Devices.Bed.UDP
                 throw new InvalidOperationException("Инициализация уже выполняется");
 
             Interlocked.Exchange(ref _initialisingStatus, DeviceIsInitialising);
-            // немного подождем, чтобы завершилось начато обновление данныхы
-            await Task.Delay(_config.UpdateDataPeriod)
-                .ConfigureAwait(false);
-
+            
+            // немного подождем, чтобы завершилось начатое обновление данных
+            var waitingTimeout = GetWaitingTimeout();
             var isFree = await _semaphoreSlim
-                .WaitAsync(_config.UpdateDataPeriod)
+                .WaitAsync(waitingTimeout)
                 .ConfigureAwait(false);
             if (!isFree)
                 throw new DeviceConnectionException(
-                    $"Не удалось подключиться к инверсинному столу в течение {_config.Timeout.TotalMilliseconds} мс");
+                    $"Не удалось подключиться к инверсинному столу в течение {waitingTimeout.TotalMilliseconds} мс");
 
             try
             {
@@ -267,6 +275,11 @@ namespace CardioMonitor.Devices.Bed.UDP
             }
         }
 
+        private TimeSpan GetWaitingTimeout()
+        {
+            return TimeSpan.FromMilliseconds(_config.UpdateDataPeriod.TotalMilliseconds * 2);
+        }
+
         /// <summary>
         /// Установить/снять блокировку кровати (на время измерения с КМ)
         /// </summary>
@@ -278,12 +291,41 @@ namespace CardioMonitor.Devices.Bed.UDP
         {
             AssertInitParams();
             AssertConnection();
-            var message = new BedMessage();
-            var sendMessage = message.SetBedBlockMessage(isBlock);
-            //todo а получить подтверждение
-            await _udpSendingClient
-                .SendAsync(sendMessage, sendMessage.Length)
+            
+            // немного подождем, чтобы завершилось начатое обновление данных
+            var waitingTimeout = GetWaitingTimeout();
+            var isFree = await _semaphoreSlim
+                .WaitAsync(waitingTimeout)
                 .ConfigureAwait(false);
+            if (!isFree)
+                throw new DeviceConnectionException(
+                    $"Не удалось подключиться к инверсинному столу в течение {waitingTimeout.TotalMilliseconds} мс");
+
+            await Task.Factory.StartNew(() =>
+            {
+                try
+                {
+                    var message = new BedMessage();
+                    var sendMessage = message.SetBedBlockMessage(isBlock);
+                    //todo а получить подтверждение
+                    _udpSendingClient.Send(sendMessage, sendMessage.Length);
+                }
+                catch (SocketException e)
+                {
+                    IsConnected = false;
+                    throw new DeviceConnectionException("Ошибка отключения от инверсионного стола", e);
+                }
+                catch (ObjectDisposedException e)
+                {
+                    IsConnected = false;
+                    throw new DeviceConnectionException("Ошибка отключения от инверсионного стола", e);
+                }
+                catch (Exception e)
+                {
+                    IsConnected = false;
+                    throw new DeviceProcessingException("Ошибка отключения от инверсионного стола", e);
+                }
+            }).ConfigureAwait(false);
         }
         
         /// <summary>
@@ -293,11 +335,16 @@ namespace CardioMonitor.Devices.Bed.UDP
         {
             AssertConnection();
             
+            
+            // немного подождем, чтобы завершилось начатое обновление данных
+            var waitingTimeout = GetWaitingTimeout();
             var isFree = await _semaphoreSlim
-                .WaitAsync(_config.UpdateDataPeriod)
+                .WaitAsync(waitingTimeout)
                 .ConfigureAwait(false);
-            // может, кидать исключение?
-            if (!isFree) return;
+            if (!isFree)
+                throw new DeviceConnectionException(
+                    $"Не удалось подключиться к инверсинному столу в течение {waitingTimeout.TotalMilliseconds} мс");
+            
             await Task.Factory.StartNew(() => {
                 try
                 { 
@@ -411,6 +458,21 @@ namespace CardioMonitor.Devices.Bed.UDP
                         _udpSendingClient.Send(sendMessage, sendMessage.Length);
                         //todo зачем после каждой отправки мы ожидаем ответа? Мы делаем из UDP свой TCP
                         _udpReceivingClient.Receive(ref _remoteRecievedIpEndPoint);
+                    }
+                    catch (SocketException e)
+                    {
+                        IsConnected = false;
+                        throw new DeviceConnectionException("Ошибка соединения с инверсионным столом", e);
+                    }
+                    catch (ObjectDisposedException e)
+                    {
+                        IsConnected = false;
+                        throw new DeviceConnectionException("Ошибка соединения с инверсионным столом", e);
+                    }
+                    catch (Exception e)
+                    {
+                        IsConnected = false;
+                        throw new DeviceProcessingException("Ошибка отправки команды инверсионному столу", e);
                     }
                     finally
                     {
@@ -574,10 +636,12 @@ namespace CardioMonitor.Devices.Bed.UDP
             try
             {
                 _udpSendingClient?.Close();
+                _udpReceivingClient?.Close();
             }
             finally 
             {
                 _udpSendingClient?.Dispose();
+                _udpReceivingClient?.Dispose();
             }
         }
 
