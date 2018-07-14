@@ -43,14 +43,16 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// <remarks>
         /// Необходимо выполнять инициализацию перед всеми действиями
         /// </remarks>
-        void Init(IBedControllerConfig config);
+        void InitController(IBedControllerConfig config);
+
+        Task PrepareDeviceForSessionAsync();
         
         /// <summary>
         /// Устанавливает подключение к инверсионному столу
         /// </summary>
         /// <returns></returns>
         /// <remarks>
-        /// Перед подключением необходмо проинициализировать контроллер с помощью метода <see cref="Init"/>
+        /// Перед подключением необходмо проинициализировать контроллер с помощью метода <see cref="InitController"/>
         /// </remarks>
         Task ConnectAsync();
 

@@ -757,7 +757,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             {
                 _logger?.Info($"{GetType().Name}: вызван старт сеанса");
                 _logger?.Trace($"{GetType().Name}: инициализация контроллера инверсионного стола");
-                _bedController.Init(_startParams.BedControllerConfig);
+                _bedController.InitController(_startParams.BedControllerConfig);
                 _logger?.Trace($"{GetType().Name}: подключение к инверсионному столу");
                 await _bedController
                     .ConnectAsync()
@@ -810,6 +810,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     return false;
                     
                 }
+                _logger?.Trace($"{GetType().Name}: подготовка инверсионного стола к сеансу");
+                await _bedController
+                    .PrepareDeviceForSessionAsync()
+                    .ConfigureAwait(false);    
                 _logger?.Trace($"{GetType().Name}: старт сеанса");
                 await _bedController
                     .ExecuteCommandAsync(BedControlCommand.Start)
