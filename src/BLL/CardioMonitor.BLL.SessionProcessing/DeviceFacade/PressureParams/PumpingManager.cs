@@ -45,6 +45,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
         public async Task<CycleProcessingContext> ProcessAsync(CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            
+            if (!context.IsValid())
+            {
+                _logger.Warning($"{GetType().Name}: действие не будет выполнено, т.к. в обработке сеанса возникли ошибки");
+                return context;
+            }
+            
             var needPumping = context.TryGetAutoPumpingRequestParams()?.IsAutoPumpingEnabled ?? false;
 
             _logger?.Trace($"{GetType().Name}: накачка манжеты...");
