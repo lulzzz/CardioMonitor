@@ -113,7 +113,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             if (IsConnected) throw new InvalidOperationException($"{GetType().Name} уже подключен к устройству");
             if (!IpEndPointParser.TryParse(_config.BedIpEndpoint, out _bedIpEndPoint))
             {
-                throw new ArgumentException($"Не верно указан адрес подключения к кровати. Требуемый формат - ip:port");
+                throw new ArgumentException("Не верно указан адрес подключения к кровати. Требуемый формат - ip:port");
             }
 
             try
