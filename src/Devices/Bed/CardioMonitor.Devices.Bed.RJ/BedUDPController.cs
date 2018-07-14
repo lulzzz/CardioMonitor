@@ -132,7 +132,7 @@ namespace CardioMonitor.Devices.Bed.UDP
                     }
                 }; 
                 
-                _udpReceivingClient = new UdpClient
+                _udpReceivingClient = new UdpClient(_bedIpEndPoint.Port)
                 {
                     Client =
                     {
@@ -274,7 +274,7 @@ namespace CardioMonitor.Devices.Bed.UDP
                     var message = new BedMessage(BedMessageEventType.ReadAll);
                     var getAllRegister = message.GetAllRegisterMessage();
                     _udpSendingClient.Send(getAllRegister, getAllRegister.Length);
-                    var receiveMessage = _udpSendingClient.Receive(ref _remoteRecievedIpEndPoint);
+                    var receiveMessage = _udpReceivingClient.Receive(ref _remoteRecievedIpEndPoint);
                     var previouslRegisterValues = _registerValues;
                     _registerValues = message.GetAllRegisterValues(receiveMessage);
                     
@@ -300,6 +300,21 @@ namespace CardioMonitor.Devices.Bed.UDP
                     {
                         OnEmeregencyStopFromDeviceRequested?.Invoke(this,EventArgs.Empty);
                     }
+                }
+                catch (SocketException e)
+                {
+                    IsConnected = false;
+                    throw new DeviceConnectionException("Ошибка соедининия с инверсионным столом", e);
+                }
+                catch (ObjectDisposedException e)
+                {
+                    IsConnected = false;
+                    throw new DeviceConnectionException("Ошибка соедининия с инверсионным столом", e);
+                }
+                catch (Exception e)
+                {
+                    IsConnected = false;
+                    throw new DeviceProcessingException("Ошибка получения данных от инверсионного стола", e);
                 }
                 finally
                 {
