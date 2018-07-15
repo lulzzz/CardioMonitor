@@ -169,6 +169,15 @@ namespace CardioMonitor.BLL.SessionProcessing
 
         public event EventHandler OnSessionStatusChanged;
 
+        public event EventHandler<ReconnectionEventArgs> OnInversionTableReconnectionStarted;
+        public event EventHandler<ReconnectionEventArgs> OnInversionTableReconnectionWaiting;
+        public event EventHandler OnInversionTableReconnected;
+        public event EventHandler OnInversionTableReconnectionFailed;
+        
+        public event EventHandler<ReconnectionEventArgs> OnMonitorReconnectionStarted;
+        public event EventHandler<ReconnectionEventArgs> OnMonitorReconnectionWaiting;
+        public event EventHandler OnMonitorReconnected;
+        public event EventHandler OnMonitorReconnectionFailed;
 
 
         #endregion
@@ -208,6 +217,14 @@ namespace CardioMonitor.BLL.SessionProcessing
             _devicesFacade.OnCurrentAngleXRecieved += HandleOnCurrentAngleXRecieved;
             _devicesFacade.OnCommonPatientParamsRecieved += HandleOnCommonPatientParamsRecieved;
             _devicesFacade.OnPatientPressureParamsRecieved += HandleOnPatientPressureParamsRecieved;
+            _devicesFacade.OnInversionTableReconnected += OnInversionTableReconnected;
+            _devicesFacade.OnInversionTableReconnectionFailed += OnInversionTableReconnectionFailed;
+            _devicesFacade.OnInversionTableReconnectionStarted += OnInversionTableReconnectionStarted;
+            _devicesFacade.OnInversionTableReconnectionWaiting += OnInversionTableReconnectionWaiting;
+            _devicesFacade.OnMonitorReconnected += OnMonitorReconnected;
+            _devicesFacade.OnMonitorReconnectionFailed += OnMonitorReconnectionFailed;
+            _devicesFacade.OnMonitorReconnectionStarted += OnMonitorReconnectionStarted;
+            _devicesFacade.OnMonitorReconnectionWaiting += OnMonitorReconnectionWaiting;
 
             var temp = new List<CycleData>(startParams.CycleCount);
             for (var index = 0; index < startParams.CycleCount; index++)
@@ -341,6 +358,15 @@ namespace CardioMonitor.BLL.SessionProcessing
             _devicesFacade.OnCurrentAngleXRecieved -= HandleOnCurrentAngleXRecieved;
             _devicesFacade.OnCommonPatientParamsRecieved -= HandleOnCommonPatientParamsRecieved;
             _devicesFacade.OnPatientPressureParamsRecieved -= HandleOnPatientPressureParamsRecieved;
+            
+            _devicesFacade.OnInversionTableReconnected -= OnInversionTableReconnected;
+            _devicesFacade.OnInversionTableReconnectionFailed -= OnInversionTableReconnectionFailed;
+            _devicesFacade.OnInversionTableReconnectionStarted -= OnInversionTableReconnectionStarted;
+            _devicesFacade.OnInversionTableReconnectionWaiting -= OnInversionTableReconnectionWaiting;
+            _devicesFacade.OnMonitorReconnected -= OnMonitorReconnected;
+            _devicesFacade.OnMonitorReconnectionFailed -= OnMonitorReconnectionFailed;
+            _devicesFacade.OnMonitorReconnectionStarted -= OnMonitorReconnectionStarted;
+            _devicesFacade.OnMonitorReconnectionWaiting -= OnMonitorReconnectionWaiting;
         }
 
         #endregion

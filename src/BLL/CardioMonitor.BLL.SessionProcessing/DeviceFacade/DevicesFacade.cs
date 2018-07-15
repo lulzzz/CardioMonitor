@@ -142,10 +142,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         public event EventHandler<ReconnectionEventArgs> OnInversionTableReconnectionStarted;
         public event EventHandler<ReconnectionEventArgs> OnInversionTableReconnectionWaiting;
-
         public event EventHandler OnInversionTableReconnected;
-        
         public event EventHandler OnInversionTableReconnectionFailed;
+        
         public event EventHandler<ReconnectionEventArgs> OnMonitorReconnectionStarted;
         public event EventHandler<ReconnectionEventArgs> OnMonitorReconnectionWaiting;
         public event EventHandler OnMonitorReconnected;
@@ -613,19 +612,18 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         retryAttemp => reconnectionTimeout,
                         (exception, timeSpan, localContext) =>
                         {
-                            reconnectionEventArgs = new ReconnectionEventArgs(reconnectionTimeout, localContext.Count);
                             _logger?.Error($"{GetType().Name}: попытка восстановления соединения с инверсионным столом " +
-                                           $"номер {localContext.Count} завершилась не удачно. Причина: {exception.Message}",
+                                           $"номер {reconnectionEventArgs.ReconnectionRetryNumber} завершилась не удачно. Причина: {exception.Message}",
                                 exception);
+                            reconnectionEventArgs = new ReconnectionEventArgs(
+                                reconnectionTimeout, 
+                                reconnectionEventArgs.ReconnectionRetryNumber+1);
                             OnInversionTableReconnectionWaiting?.Invoke(this, reconnectionEventArgs);
                         });
                 return await recilencePolicy.ExecuteAsync(async () =>
                 {
                     if (_bedController.IsConnected) return true;
                     OnInversionTableReconnectionStarted?.Invoke(this, reconnectionEventArgs);
-                    await _bedController
-                        .DisconnectAsync()
-                        .ConfigureAwait(false);
                     await _bedController
                         .ConnectAsync()
                         .ConfigureAwait(false);
@@ -685,19 +683,17 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                         retryAttemp => reconnectionTimeout,
                         (exception, timeSpan, localContext) =>
                         {
-                            reconnectionEventArgs = new ReconnectionEventArgs(reconnectionTimeout, localContext.Count);
                             _logger?.Error($"{GetType().Name}: попытка восстановления соединения с кардиомонитором номер " +
-                                           $"{localContext.Count} завершилась не удачно. Причина: {exception.Message}",
+                                           $"{reconnectionEventArgs.ReconnectionRetryNumber} завершилась не удачно. Причина: {exception.Message}",
                                 exception);
+                            reconnectionEventArgs = new ReconnectionEventArgs(reconnectionTimeout, 
+                                reconnectionEventArgs.ReconnectionRetryNumber+1);
                             OnMonitorReconnectionWaiting?.Invoke(this, reconnectionEventArgs);
                         });
                 return await recilencePolicy.ExecuteAsync(async () =>
                 {
                     if (_monitorController.IsConnected) return true;
                     OnMonitorReconnectionStarted?.Invoke(this, reconnectionEventArgs);
-                    await _monitorController
-                        .DisconnectAsync()
-                        .ConfigureAwait(false);
                     await _monitorController
                         .ConnectAsync()
                         .ConfigureAwait(false);

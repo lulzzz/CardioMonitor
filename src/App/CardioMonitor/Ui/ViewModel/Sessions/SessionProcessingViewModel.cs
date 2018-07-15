@@ -8,6 +8,7 @@ using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreContracts.Session.Events;
 using CardioMonitor.BLL.SessionProcessing;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
@@ -401,12 +402,106 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             OnReversedFromDevice += HandleReversedFromDevice;
             OnSessionStatusChanged += HandleSessionStatusChanged;
             OnCycleCompleted += HandleCycleCompleted;
+            OnInversionTableReconnected += OnOnInversionTableReconnected;
+            OnInversionTableReconnectionFailed += HandleInversionTableReconnectionFailed;
+            OnInversionTableReconnectionStarted += HandleInversionTableReconnectionStarted;
+            OnInversionTableReconnectionWaiting += HandleInversionTableReconnectionWaiting;
+            OnMonitorReconnected += HandleMonitorReconnected;
+            OnMonitorReconnectionFailed += HandleMonitorReconnectionFailed;
+            OnMonitorReconnectionStarted += HandleMonitorReconnectionStarted;
+            OnMonitorReconnectionWaiting += HandleMonitorReconnectionWaiting;
         }
-
-
 
         #region Device events hadnling
 
+        private void HandleMonitorReconnectionWaiting(object sender, ReconnectionEventArgs e)
+        {
+            _uiInvoker.Invoke(() => IsBusy = true);
+            Task.Factory.StartNew(async () =>
+            {
+                var remainingSeconds = Convert.ToInt32( e.ReconnectionTimeout.TotalSeconds);
+                var delayTime = TimeSpan.FromSeconds(1);
+                while (remainingSeconds > 0)
+                {
+                    _uiInvoker.Invoke(() =>
+                        BusyMessage = $"Переподключение к кардиомонитору через {remainingSeconds}...");
+                    await Task.Delay(delayTime).ConfigureAwait(false);
+                    remainingSeconds--;
+                }
+            });
+        }
+
+        private void HandleMonitorReconnectionStarted(object sender, ReconnectionEventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = true;
+                BusyMessage = $"{e.ReconnectionRetryNumber} попытка переподключения к кардиомонитору...";
+            });
+        }
+
+        private void HandleMonitorReconnectionFailed(object sender, EventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = false;
+                _notifier.ShowError("Не удалось восстановить соединение с кардиомонитором");
+            });
+        }
+
+        private void HandleMonitorReconnected(object sender, EventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = false;
+                _notifier.ShowSuccess("Восстановлено соединение с кардиомонитором");
+            });
+        }
+
+        private void HandleInversionTableReconnectionWaiting(object sender, ReconnectionEventArgs e)
+        {
+            _uiInvoker.Invoke(() => IsBusy = true);
+            Task.Factory.StartNew(async () =>
+            {
+                var remainingSeconds = Convert.ToInt32(e.ReconnectionTimeout.TotalSeconds);
+                var delayTime = TimeSpan.FromSeconds(1);
+                while (remainingSeconds > 0)
+                {
+                    _uiInvoker.Invoke(() =>
+                        BusyMessage = $"Переподключение к инверсионному столу через {remainingSeconds}...");
+                    await Task.Delay(delayTime).ConfigureAwait(false);
+                    remainingSeconds--;
+                }
+            });
+        }
+
+        private void HandleInversionTableReconnectionStarted(object sender, ReconnectionEventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = true;
+                BusyMessage = $"{e.ReconnectionRetryNumber} попытка переподключения к инверсионному столу...";
+            });
+        }
+
+        private void HandleInversionTableReconnectionFailed(object sender, EventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = false;
+                _notifier.ShowError("Не удалось восстановить соединение с инверсионным столом");
+            });
+        }
+
+        private void OnOnInversionTableReconnected(object sender, EventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = false;
+                _notifier.ShowSuccess("Восстановлено соединение с инверсионным столом");
+            });
+        }
+        
         private void HandleCycleCompleted(object sender, short completedCycleNumber)
         {
             if (completedCycleNumber == PatientParamsPerCycles.Count) return;
