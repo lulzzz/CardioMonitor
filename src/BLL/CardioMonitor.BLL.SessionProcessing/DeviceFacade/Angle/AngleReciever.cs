@@ -89,8 +89,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
-                            SessionProcessingErrorCodes.UpdateAngleError,
-                            e.Message,
+                            SessionProcessingErrorCodes.InversionTableTimeout,
+                            "Получение текущего угла по оси X прервано по таймауту",
                             e,
                             cycleNumber,
                             iterationNumber)));

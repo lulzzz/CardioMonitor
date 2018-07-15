@@ -121,8 +121,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
-                            SessionProcessingErrorCodes.InversionTableProcessingError,
-                            e.Message,
+                            SessionProcessingErrorCodes.InversionTableTimeout,
+                            "Получение информации об итерациях прервано по таймауту",
                             e,
                             cycleNumber)));
             }

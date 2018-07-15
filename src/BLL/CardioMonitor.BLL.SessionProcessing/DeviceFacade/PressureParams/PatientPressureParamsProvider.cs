@@ -114,7 +114,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PatientPressureParamsRequestTimeout,
-                            e.Message,
+                            "Получение показателей давления пациента прервано по таймауту",
                             e,
                             cycleNumber,
                             iterationNumber)));

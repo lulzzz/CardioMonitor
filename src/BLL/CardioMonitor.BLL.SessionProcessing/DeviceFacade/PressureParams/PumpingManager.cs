@@ -10,6 +10,7 @@ using CardioMonitor.Devices.Monitor.Infrastructure;
 using JetBrains.Annotations;
 using Markeli.Utils.Logging;
 using Polly;
+using Polly.Timeout;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
 {
@@ -107,13 +108,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                             e)));
                 wasPumpingComleted = false;
             }
-            catch (TimeoutException e)
+            catch (TimeoutRejectedException e)
             {
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PumpingTimeout,
-                            e.Message,
+                            "Накачка манжеты прервана по таймауту",
                             e)));
                 wasPumpingComleted = false;
             }

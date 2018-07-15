@@ -106,7 +106,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PatientCommonParamsRequestTimeout,
-                            e.Message,
+                            "Получение общих параметров пациента прервано по таймауту",
                             e,
                             cycleNumber,
                             iterationNumber)));

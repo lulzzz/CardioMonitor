@@ -8,6 +8,7 @@ using CardioMonitor.Devices.Bed.Infrastructure;
 using JetBrains.Annotations;
 using Markeli.Utils.Logging;
 using Polly;
+using Polly.Timeout;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
 {
@@ -123,12 +124,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
                             ex.Message,
                             ex)));
             }
-            catch (DeviceProcessingException ex)
+            catch (TimeoutRejectedException ex)
             {
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
-                        new SessionProcessingException(SessionProcessingErrorCodes.InversionTableProcessingError,
-                            ex.Message,
+                        new SessionProcessingException(
+                            SessionProcessingErrorCodes.InversionTableTimeout,
+                            "Получение информации о сеансе прервано по таймауту",
                             ex)));
 
             }
