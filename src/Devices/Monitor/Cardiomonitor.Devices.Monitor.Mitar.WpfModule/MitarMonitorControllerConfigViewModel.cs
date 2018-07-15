@@ -17,6 +17,9 @@ namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
         private const int DefaultTcpPort = 9761;
         private const int DefaultTimeoutMs = 5000;
         private const int DefaultUpdateDataPeriodMs = 500;
+        private const int DefaultReconnectionTimeoutSec = 5;
+        private const int DefaultReconnectionRetriesCount = 3;
+        
 
         #endregion
 
@@ -30,7 +33,7 @@ namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
         private int _reconnectionTimeoutSec;
         private bool _isDataChanged;
 
-        private int _deviceReconectionsRetriesCount;
+        private int _reconectionsRetriesCount;
         private readonly MitarMonitorControllerConfigBuilder _configBuilder;
 
         #endregion
@@ -110,13 +113,13 @@ namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
             }
         }
         
-        public int DeviceReconectionsRetriesCount
+        public int ReconectionsRetriesCount
         {
-            get => _deviceReconectionsRetriesCount;
+            get => _reconectionsRetriesCount;
             set
             {
-                _deviceReconectionsRetriesCount = value;
-                RisePropertyChanged(nameof(DeviceReconectionsRetriesCount));
+                _reconectionsRetriesCount = value;
+                RisePropertyChanged(nameof(ReconectionsRetriesCount));
                 RisePropertyChanged(nameof(CanGetConfig));
                 IsDataChanged = true;
             }
@@ -154,7 +157,9 @@ namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
 
         private void SetDefaults()
         {
-            NeedReconnect = false;
+            NeedReconnect = true;
+            ReconnectionTimeoutSec = DefaultReconnectionTimeoutSec;
+            ReconectionsRetriesCount = DefaultReconnectionRetriesCount;
             UpdateDataPeriodMs = DefaultUpdateDataPeriodMs;
             TimeoutMs = DefaultTimeoutMs;
             MonitorBroadcastUdpPort = DefaultUdpPort;
@@ -174,7 +179,7 @@ namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
                 ? TimeSpan.FromSeconds(ReconnectionTimeoutSec)
                 : default(TimeSpan?);
             var reconnectionRetriesCount = NeedReconnect
-                ? DeviceReconectionsRetriesCount
+                ? ReconectionsRetriesCount
                 : default(int?);
             var config = new MitarMonitorControlerConfig(
                 TimeSpan.FromMilliseconds(UpdateDataPeriodMs),
@@ -204,7 +209,7 @@ namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
 
             MonitorBroadcastUdpPort = config.MonitorBroadcastUdpPort;
             MonitorTcpPort = config.MonitorTcpPort;
-            DeviceReconectionsRetriesCount = config.DeviceReconectionsRetriesCount ?? 0;
+            ReconectionsRetriesCount = config.DeviceReconectionsRetriesCount ?? 0;
             IsDataChanged = false;
         }
 
@@ -251,10 +256,10 @@ namespace Cardiomonitor.Devices.Monitor.Mitar.WpfModule
                         return "Необходимо задать целое положительное число";
                     }
                 }
-                if ((String.IsNullOrWhiteSpace(columnName) || Equals(columnName, nameof(DeviceReconectionsRetriesCount))) &&
+                if ((String.IsNullOrWhiteSpace(columnName) || Equals(columnName, nameof(ReconectionsRetriesCount))) &&
                      _needReconnect)
                 {
-                    if (DeviceReconectionsRetriesCount < 0)
+                    if (ReconectionsRetriesCount < 0)
                     {
                         return "Необходимо задать целое положительное число";
                     }

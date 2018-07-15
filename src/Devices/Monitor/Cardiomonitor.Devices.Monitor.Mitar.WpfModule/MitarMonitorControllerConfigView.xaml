@@ -58,7 +58,7 @@
             Minimum="0"
             Interval="1"
             NumericInputMode="Numbers"
-            Value="{Binding DeviceReconectionsRetriesCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Value="{Binding ReconectionsRetriesCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
             Visibility="{Binding NeedReconnect, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}, ValidatesOnDataErrors=True}"  
             Style="{DynamicResource CmNumericUpDown}"/>
         </Grid>
