@@ -3,14 +3,14 @@ using JetBrains.Annotations;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
 {
-    internal class SessionProcessingInfoContextParamses: ICycleProcessingContextParams
+    internal class SessionProcessingInfoContextParams: ICycleProcessingContextParams
     {
         public static readonly Guid TypeId = new Guid("91941aeb-69ea-4955-b533-13b717a4768d");
         
         public Guid ParamsTypeId { get; } = TypeId;
         public Guid UniqObjectId { get; }
 
-        public SessionProcessingInfoContextParamses(
+        public SessionProcessingInfoContextParams(
             TimeSpan elapsedTime, 
             TimeSpan remainingTime, 
             TimeSpan cycleDuration, 
@@ -57,11 +57,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
     internal static class TimeParamContextExtensions
     {
         [CanBeNull]
-        public static SessionProcessingInfoContextParamses TryGetSessionProcessingInfo([NotNull] this CycleProcessingContext context)
+        public static SessionProcessingInfoContextParams TryGetSessionProcessingInfo([NotNull] this CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             
-            return context.TryGet(SessionProcessingInfoContextParamses.TypeId) as SessionProcessingInfoContextParamses;
+            return context.TryGet(SessionProcessingInfoContextParams.TypeId) as SessionProcessingInfoContextParams;
         }
     }
 }

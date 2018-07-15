@@ -107,7 +107,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.SessionProcessingInfo
                     currentCycleNumber = StartCycleNumber;
                 }
 
-                var sessionProcessingInfo = new SessionProcessingInfoContextParamses(
+                var sessionProcessingInfo = new SessionProcessingInfoContextParams(
                     elapsedTime,
                     remainingTime,
                     cycleDuration,

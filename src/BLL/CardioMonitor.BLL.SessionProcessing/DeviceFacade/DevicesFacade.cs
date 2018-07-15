@@ -70,7 +70,16 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         /// Небольшой костыль, чтобы дважды не срабатывало информирование о завершении сеанса
         /// </remarks>
         private bool _isSessionGlobalyCompleted;
+        
+        
+        private readonly SemaphoreSlim _inversionTableRecconectionMutex;
+        private readonly SemaphoreSlim _monitorRecconectionMutex;
 
+        private AngleXContextParams _lastAngleXContextParams;
+        private CheckPointCycleProcessingContextParams _lastChecPointReachedContextParams;
+        private IterationCycleProcessingContextParams _lastIterationContextParams;
+        private SessionProcessingInfoContextParams _lastSessionInfoContextParams;
+        
         #endregion
 
         #region Events
@@ -151,9 +160,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         public event EventHandler OnMonitorReconnectionFailed;
 
         #endregion
-        
-        private readonly SemaphoreSlim _inversionTableRecconectionMutex;
-        private readonly SemaphoreSlim _monitorRecconectionMutex;
         
         public DevicesFacade(
             [NotNull] SessionParams startParams,
@@ -266,12 +272,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     PropagateCompletion = true
                 });
 
-            _forcedRequestBlock.LinkTo(
-                sessionInfoProvidingBlock,
-                new DataflowLinkOptions
-                {
-                    PropagateCompletion = true
-                });
+            
 
             sessionInfoProvidingBlock.LinkTo(
                 iterationProvidingBlock,
@@ -299,7 +300,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 {
                     PropagateCompletion = true
                 });
-
+            
+            _forcedRequestBlock.LinkTo(
+                mainBroadcastBlock,
+                new DataflowLinkOptions
+                {
+                    PropagateCompletion = true
+                });
 
             mainBroadcastBlock.LinkTo(
                 _pipelineFinishCollectorBlock,
@@ -401,6 +408,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     _logger?.Warning($"{GetType().Name}: не удалось получить информацию о сеансе");
                     return Task.CompletedTask;
                 }
+                _lastSessionInfoContextParams = sessionProcessingInfo;
 
                 var iterationsInfo = context.TryGetIterationParams();
                 if (iterationsInfo == null)
@@ -408,12 +416,15 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     _logger?.Warning($"{GetType().Name}: не удалось получить информацию об итерациях");
                     return Task.CompletedTask;
                 }
+                _lastIterationContextParams = iterationsInfo;
 
                 var angleParams = context.TryGetAngleParam();
                 var angleX = angleParams?.CurrentAngle == null
                     ? 0
                     : (float)(Math.Round(angleParams.CurrentAngle * 2, MidpointRounding.AwayFromZero) / 2);
+                _lastAngleXContextParams = angleParams;
 
+                _lastChecPointReachedContextParams = context.TryGetCheckPointParams();
 
                 var pressureParams = context.TryGetPressureParams();
                 if (pressureParams != null)
@@ -1199,24 +1210,21 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         private async Task<bool> InnerForceDataCollectionRequestAsync()
         {
-            var context = new CycleProcessingContext();
+            var context = GetContextForManualRequest();
+
             var forcedRequest = new ForcedDataCollectionRequestCycleProcessingContextParams();
             context.AddOrUpdate(forcedRequest);
-            context.AddOrUpdate(
-                new PumpingRequestContextParams(
-                    _isAutoPumpingEnabled, 
-                    _startParams.PumpingNumberOfAttemptsOnStartAndFinish));
-
+            
             _logger?.Trace($"{GetType().Name}: запуск pipeline для ручного сбора показателей пациента");
             await _forcedRequestBlock
                 .SendAsync(context)
                 .ConfigureAwait(false);
 
-            _logger?.Trace($"{GetType().Name}: ожидание завершения ручного сбора показателей пациента"); 
+            _logger?.Trace($"{GetType().Name}: ожидание завершения ручного сбора показателей пациента");
             await forcedRequest.ResultingTask
                 .ConfigureAwait(false);
-            _logger?.Trace($"{GetType().Name}: ручной сбор показателей пациента завершен"); 
-            
+            _logger?.Trace($"{GetType().Name}: ручной сбор показателей пациента завершен");
+
             var pumpingResult = context.TryGetAutoPumpingResultParams();
             if (pumpingResult == null) return false;
 
@@ -1224,6 +1232,83 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
             var exceptions = context.TryGetExceptionContextParams();
             return exceptions == null;
+        }
+
+        private CycleProcessingContext GetContextForManualRequest()
+        {
+            var context = new CycleProcessingContext();
+            context.AddOrUpdate(
+                new PumpingRequestContextParams(
+                    _isAutoPumpingEnabled,
+                    _startParams.PumpingNumberOfAttemptsOnStartAndFinish));
+            var lastAngleXContextParams = _lastAngleXContextParams;
+            if (lastAngleXContextParams != null)
+            {
+                context.AddOrUpdate(
+                    new AngleXContextParams(lastAngleXContextParams.CurrentAngle));
+            }
+            else
+            {
+                context.AddOrUpdate(new AngleXContextParams(0));
+            }
+
+            var lastSessionInfoContextParams = _lastSessionInfoContextParams;
+            if (lastSessionInfoContextParams != null)
+            {
+                context.AddOrUpdate(
+                    new SessionProcessingInfoContextParams(
+                        lastSessionInfoContextParams.ElapsedTime,
+                        lastSessionInfoContextParams.RemainingTime,
+                        lastSessionInfoContextParams.CycleDuration,
+                        lastSessionInfoContextParams.CurrentCycleNumber,
+                        lastSessionInfoContextParams.CyclesCount));
+            }
+            else
+            {context.AddOrUpdate(
+                new SessionProcessingInfoContextParams(
+                    TimeSpan.Zero, 
+                    TimeSpan.Zero, 
+                    TimeSpan.Zero, 
+                    1,
+                    _startParams.CycleCount));
+                
+            }
+
+            var lastIterationsInfoContextParams = _lastIterationContextParams;
+            if (lastIterationsInfoContextParams != null)
+            {
+                context.AddOrUpdate(new IterationCycleProcessingContextParams(
+                    lastIterationsInfoContextParams.CurrentIteration,
+                    lastIterationsInfoContextParams.IterationToGetCommonParams,
+                    lastIterationsInfoContextParams.IterationToGetPressureParams,
+                    lastIterationsInfoContextParams.IterationToGetEcg));
+            }
+            else
+            {
+                context.AddOrUpdate(new IterationCycleProcessingContextParams(
+                    1,
+                    1,
+                    1,
+                    1));
+            }
+
+            var lastCheckPointContextParams = _lastChecPointReachedContextParams;
+            if (lastIterationsInfoContextParams != null)
+            {
+                context.AddOrUpdate(new CheckPointCycleProcessingContextParams(
+                    lastCheckPointContextParams.NeedRequestEcg,
+                    lastCheckPointContextParams.NeedRequestCommonParams,
+                    lastCheckPointContextParams.NeedRequestPressureParams));
+            }
+            else
+            {
+                context.AddOrUpdate(new CheckPointCycleProcessingContextParams(
+                    true,
+                    true,
+                    true));
+            }
+
+            return context;
         }
 
         public void Dispose()
