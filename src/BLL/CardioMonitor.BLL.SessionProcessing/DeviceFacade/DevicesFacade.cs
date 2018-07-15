@@ -461,7 +461,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 
                 if (angleParams != null)
                 {
-                    _logger?.Trace($"{GetType().Name}: текущий угол наклона кровати по оси Х - {angleParams}");
+                    _logger?.Trace($"{GetType().Name}: текущий угол наклона кровати по оси Х - {angleParams.CurrentAngle}");
                     RiseOnce(angleParams, () => OnCurrentAngleXRecieved?.Invoke(this, angleParams.CurrentAngle));
                 }
 
