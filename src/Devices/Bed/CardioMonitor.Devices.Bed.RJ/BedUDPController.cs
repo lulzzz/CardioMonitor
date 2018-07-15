@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Caching;
 using System.Threading;
 using System.Threading.Tasks;
 using CardioMonitor.Devices.Bed.Infrastructure;
@@ -84,6 +85,9 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         private int _initialisingStatus;
 
+        private readonly MemoryCache _lastCommandsCache;
+        private readonly TimeSpan _cachedItemLifetime = TimeSpan.FromSeconds(1);
+
         // ReSharper disable once NotNullMemberIsNotInitialized
         /// <inheritdoc />
         public BedUDPController([NotNull] IWorkerController workerController)
@@ -94,6 +98,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             _semaphoreSlim = new SemaphoreSlim(1, 1);
             _bedInitStepDelay = TimeSpan.FromMilliseconds(100);
             _initialisingStatus = DeviceIsNotInitialising;
+            _lastCommandsCache = new MemoryCache(nameof(_lastCommandsCache));
         }
       
         #region Управление взаимодействием и обработка событий
@@ -362,25 +367,29 @@ namespace CardioMonitor.Devices.Bed.UDP
 
                     if ((previouslRegisterValues.BedStatus == BedStatus.SessionStarted
                          || previouslRegisterValues.BedStatus == BedStatus.Pause)
-                        && _registerValues.BedStatus == BedStatus.Reverse)
+                        && _registerValues.BedStatus == BedStatus.Reverse
+                        && !_lastCommandsCache.Contains(BedControlCommand.Reverse.ToString()))
                     {
                         OnReverseFromDeviceRequested?.Invoke(this, EventArgs.Empty);
                     }
 
-                    if (previouslRegisterValues.BedStatus == BedStatus.SessionStarted &&
-                        _registerValues.BedStatus == BedStatus.Pause)
+                    if (previouslRegisterValues.BedStatus == BedStatus.SessionStarted 
+                        && _registerValues.BedStatus == BedStatus.Pause
+                        && !_lastCommandsCache.Contains(BedControlCommand.Pause.ToString()))
                     {
                         OnPauseFromDeviceRequested?.Invoke(this, EventArgs.Empty);
                     }
 
                     if (previouslRegisterValues.BedStatus == BedStatus.Pause &&
-                        _registerValues.BedStatus == BedStatus.SessionStarted)
+                        _registerValues.BedStatus == BedStatus.SessionStarted
+                        && !_lastCommandsCache.Contains(BedControlCommand.Start.ToString()))
                     {
                         OnResumeFromDeviceRequested?.Invoke(this, EventArgs.Empty);
                     }
 
                     if (previouslRegisterValues.BedStatus != BedStatus.EmergencyStop &&
-                        _registerValues.BedStatus == BedStatus.EmergencyStop)
+                        _registerValues.BedStatus == BedStatus.EmergencyStop
+                        && !_lastCommandsCache.Contains(BedControlCommand.EmergencyStop.ToString()))
                     {
                         OnEmeregencyStopFromDeviceRequested?.Invoke(this, EventArgs.Empty);
                     }
@@ -488,6 +497,13 @@ namespace CardioMonitor.Devices.Bed.UDP
                         _udpSendingClient.Send(sendMessage, sendMessage.Length);
                         //todo зачем после каждой отправки мы ожидаем ответа? Мы делаем из UDP свой TCP
                         _udpReceivingClient.Receive(ref _remoteRecievedIpEndPoint);
+                        _lastCommandsCache.Add(
+                            new CacheItem(command.ToString()),
+                            new CacheItemPolicy
+                            {
+                                AbsoluteExpiration =
+                                    DateTimeOffset.UtcNow.AddMilliseconds(_cachedItemLifetime.TotalMilliseconds)
+                            });
                     }
                     catch (DeviceConnectionException)
                     {
