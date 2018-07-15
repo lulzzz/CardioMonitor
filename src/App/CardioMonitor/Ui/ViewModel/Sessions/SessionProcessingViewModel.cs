@@ -57,6 +57,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private string _startButtonText;
 
         private ICommand _startCommand;
+        private ICommand _pauseCommand;
+        private ICommand _resumeCommand;
         private ICommand _reverseCommand;
         private ICommand _emergencyStopCommand;
         private ICommand _manualRequestCommand;
@@ -287,6 +289,30 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 {
                     CanExecuteDelegate = o => CanStartCommandExecute(),
                     ExecuteDelegate = async o => await StartCommandExecuteAsync().ConfigureAwait(true)
+                });
+            }
+        }
+
+        public ICommand PauseCommand
+        {
+            get
+            {
+                return _pauseCommand ?? (_pauseCommand = new SimpleCommand
+                {
+                    CanExecuteDelegate = o => CanPauseCommandExecute(),
+                    ExecuteDelegate = async o => await PauseCommandExecuteAsync().ConfigureAwait(true)
+                });
+            }
+        }
+        
+        public ICommand ResumeCommand
+        {
+            get
+            {
+                return _resumeCommand ?? (_resumeCommand= new SimpleCommand
+                {
+                    CanExecuteDelegate = o => CanResumeCommandExecute(),
+                    ExecuteDelegate = async o => await ResumeCommandExecuteAsync().ConfigureAwait(true)
                 });
             }
         }
@@ -558,6 +584,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             RisePropertyChanged(nameof(EmergencyStopCommand));
             RisePropertyChanged(nameof(ManualRequestCommand));
             RisePropertyChanged(nameof(IsSavingToDbEnabled));
+            RisePropertyChanged(nameof(PauseCommand));
+            RisePropertyChanged(nameof(ResumeCommand));
 
             IsAutoPumpingChangingEnabled = SessionStatus == SessionStatus.InProgress
                                            || SessionStatus == SessionStatus.Suspended
@@ -571,12 +599,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         #endregion
 
-        private bool CanStartCommandExecute()
-        {
-            return SessionStatus == SessionStatus.NotStarted
-                   || SessionStatus == SessionStatus.InProgress
-                   || SessionStatus == SessionStatus.Suspended;
-        }
 
         private void UpdateAutoPumpingStateUnsafe(bool isAutoPumpingEnabled)
         {
@@ -590,54 +612,91 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+        private bool CanStartCommandExecute()
+        {
+            return SessionStatus == SessionStatus.NotStarted;
+        }
+        
+        
         /// <summary>
         /// Обрабатывает нажатие на кнопку старт/пауза
         /// </summary>
         private async Task StartCommandExecuteAsync()
         {
-            var actionName = String.Empty;
             try
             {
                 IsBusy = true;
-                BusyMessage = String.Empty;
-                switch (SessionStatus)
+                BusyMessage = "Инициализация сеанса...";
+                await InitAsync().ConfigureAwait(true);
+                UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
+                BusyMessage = "Старт сеанса...";
+                var isSuccessfully = await StartAsync()
+                    .ConfigureAwait(true);
+                if (isSuccessfully)
                 {
-                    case SessionStatus.InProgress:
-                        actionName = "паузы";
-                        BusyMessage = "Пауза сеанса...";
-                        await PauseAsync()
-                            .ConfigureAwait(true);
-                        StartButtonText = _resumeText;
-                        break;
-                    case SessionStatus.Suspended:
-                        actionName = "продолжения";
-                        BusyMessage = "Продолжение сеанса";
-                        UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
-                        await ResumeAsync()
-                            .ConfigureAwait(true);
-                        StartButtonText = _pauseText;
-                        break;
-                    default:
-                        actionName = "старта";
-                        BusyMessage = "Инициализация сеанса...";
-                        await InitAsync().ConfigureAwait(true);
-                        UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
-                        BusyMessage = "Старт сеанса...";
-                        var isSuccessfully = await StartAsync()
-                            .ConfigureAwait(true);
-                        if (isSuccessfully)
-                        {
-                            StartButtonText = _pauseText;
-                            IsSessionStarted = true;
-                            _sessionTimestampUtc = DateTime.UtcNow;
-                        }
-                        break;
+                    StartButtonText = _pauseText;
+                    IsSessionStarted = true;
+                    _sessionTimestampUtc = DateTime.UtcNow;
                 }
             }
             catch (Exception e)
             {
-                _notifier.ShowError($"Ошибка {actionName} сеанса. Причина: {e.Message}");
-                _logger.Error($"{GetType().Name}: Ошибка {actionName} сеанса. Причина: {e.Message}", e);
+                _notifier.ShowError($"Ошибка старта сеанса. Причина: {e.Message}");
+                _logger.Error($"{GetType().Name}: Ошибка старта сеанса. Причина: {e.Message}", e);
+            }
+            finally
+            {
+                IsBusy = false;
+                BusyMessage = String.Empty;
+            }
+        }
+        
+        private bool CanPauseCommandExecute()
+        {
+            return SessionStatus == SessionStatus.InProgress;
+        }
+
+        private async Task PauseCommandExecuteAsync()
+        {
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Пауза сеанса...";
+                await PauseAsync()
+                    .ConfigureAwait(true);
+            }
+            catch (Exception e)
+            {
+                _notifier.ShowError($"Ошибка паузы сеанса. Причина: {e.Message}");
+                _logger.Error($"{GetType().Name}: Ошибка паузы сеанса. Причина: {e.Message}", e);
+            }
+            finally
+            {
+                IsBusy = false;
+                BusyMessage = String.Empty;
+            }
+        }
+
+
+        private bool CanResumeCommandExecute()
+        {
+            return SessionStatus == SessionStatus.Suspended;
+        }
+        
+         private async Task ResumeCommandExecuteAsync()
+        {
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Продолжение сеанса...";
+                UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
+                await ResumeAsync()
+                    .ConfigureAwait(true);
+            }
+            catch (Exception e)
+            {
+                _notifier.ShowError($"Ошибка продолжения сеанса. Причина: {e.Message}");
+                _logger.Error($"{GetType().Name}: Ошибка продолжения сеанса. Причина: {e.Message}", e);
             }
             finally
             {

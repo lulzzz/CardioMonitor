@@ -22,6 +22,9 @@
         <converters1:CompletedSessionStatusToVisibilityConverter x:Key="CompletedSessionStatusToVisibilityConverter"/>
         <converters1:SessionStatusToSaveToFileButtonVisibilityConverter x:Key="SessionStatusToSaveToFileButtonVisibilityConverter"/>
         <converters1:NotCompletedSessionStatusToVisibilityConverter x:Key="NotCompletedSessionStatusToVisibilityConverter"/>
+        <converters1:NotStartedSessionStatusToVisibilityConverter x:Key="NotStartedSessionStatusToVisibilityConverter"/>
+        <converters1:InProgressSessionStatusToVisibilityConverter x:Key="InProgressSessionStatusToVisibilityConverter"/>
+        <converters1:SuspenedSessionStatusToVisibilityConverter x:Key="SuspenedSessionStatusToVisibilityConverter"/>
 
         <Style x:Key="CmSessionProcessingToggleButtons"
                TargetType="{x:Type ToggleButton}"
@@ -166,12 +169,34 @@
                         Content="Обновить данные"
                         Style="{DynamicResource CmSessionProcessingButtons}"
                         Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource CompletedSessionStatusToVisibilityConverter}}"/>
-                    <!--Старт-->
+                <!--Старт-->
                 <Button
                     Command="{Binding StartCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
-                              Content="{Binding StartButtonText, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                              Content="Старт"
                               Style="{DynamicResource CmSessionProcessingButtons}"
-                              Visibility="{Binding SessionStatus, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource NotCompletedSessionStatusToVisibilityConverter}}"/>
+                              Visibility="{Binding SessionStatus, 
+                                    Mode=OneWay, 
+                                    UpdateSourceTrigger=PropertyChanged, 
+                                    Converter={StaticResource NotStartedSessionStatusToVisibilityConverter}}"/>
+                <!--Пауза-->
+                <Button
+                    Command="{Binding PauseCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    Content="Пауза"
+                    Style="{DynamicResource CmSessionProcessingButtons}"
+                    Visibility="{Binding SessionStatus, 
+                                    Mode=OneWay, 
+                                    UpdateSourceTrigger=PropertyChanged, 
+                                    Converter={StaticResource InProgressSessionStatusToVisibilityConverter}}"/>
+                <!--Продоложение-->
+                <Button
+                    Command="{Binding ResumeCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                    Content="Продолжить"
+                    Style="{DynamicResource CmSessionProcessingButtons}"
+                    Visibility="{Binding SessionStatus, 
+                                    Mode=OneWay, 
+                                    UpdateSourceTrigger=PropertyChanged, 
+                                    Converter={StaticResource SuspenedSessionStatusToVisibilityConverter}}"/>
+                
                 <!--Реверс-->
                 <Button
                     Command="{Binding ReverseCommand, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
