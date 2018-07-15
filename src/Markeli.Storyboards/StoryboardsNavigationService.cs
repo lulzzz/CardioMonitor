@@ -164,7 +164,7 @@ namespace Markeli.Storyboards
                     ExceptionOccured?.Invoke(this, e);
                     tcs.SetResult(TransitionResult.Failed);
                 }
-            }).ConfigureAwait(false);
+            }).ConfigureAwait(true);
             return await tcs.Task.ConfigureAwait(true);
         }
         
@@ -223,8 +223,8 @@ namespace Markeli.Storyboards
                     ExceptionOccured?.Invoke(this, e);
                     tcs.SetResult(TransitionResult.Failed);
                 }
-            }).ConfigureAwait(false);
-            return await tcs.Task.ConfigureAwait(false);
+            }).ConfigureAwait(true);
+            return await tcs.Task.ConfigureAwait(true);
         }
 
         private Task<TransitionResult> ViewModelOnPageCanceled([NotNull] TransitionEvent transitionEvent)
@@ -287,9 +287,9 @@ namespace Markeli.Storyboards
                     ExceptionOccured?.Invoke(this, e);
                     tcs.SetResult(TransitionResult.Failed);
                 }
-            }).ConfigureAwait(false);
+            }).ConfigureAwait(true);
             return await tcs.Task
-                .ConfigureAwait(false);
+                .ConfigureAwait(true);
         }
 
         protected virtual async Task<TransitionResult> OpenPageAsync(
@@ -314,14 +314,18 @@ namespace Markeli.Storyboards
                         var previousPage = ActiveStoryboard.ActivePage;
                         var viewModel = previousPage.ViewModel;
 
-                        var canLeave = await viewModel.CanLeaveAsync().ConfigureAwait(true);
+                        var canLeave = await viewModel
+                            .CanLeaveAsync()
+                            .ConfigureAwait(true);
                         if (!canLeave)
                         {
                             tcs.SetResult(TransitionResult.CanceledByUser);
                             return;
                         }
 
-                        await viewModel.LeaveAsync().ConfigureAwait(true);
+                        await viewModel
+                            .LeaveAsync()
+                            .ConfigureAwait(true);
                     }
 
                     var storyboardsWasChanged = ActiveStoryboard == null
@@ -344,11 +348,15 @@ namespace Markeli.Storyboards
                         StartPagesOpenningStat.TryGetValue(pageInfo.PageUniqueId, out var wasPageOpenned);
                         if (wasPageOpenned)
                         {
-                            await page.ViewModel.ReturnAsync(pageContext ?? restoredPageContext).ConfigureAwait(true);
+                            await page.ViewModel
+                                .ReturnAsync(pageContext ?? restoredPageContext)
+                                .ConfigureAwait(true);
                         }
                         else
                         {
-                            await page.ViewModel.OpenAsync(pageContext ?? restoredPageContext).ConfigureAwait(true);
+                            await page.ViewModel
+                                .OpenAsync(pageContext ?? restoredPageContext)
+                                .ConfigureAwait(true);
                             StartPagesOpenningStat[pageInfo.PageUniqueId] = true;
                         }
 
@@ -358,7 +366,9 @@ namespace Markeli.Storyboards
                         var view = CreatePageView(pageInfo);
                         storyboard.ActivePage = view;
 
-                        await view.ViewModel.OpenAsync(pageContext).ConfigureAwait(true);
+                        await view.ViewModel
+                            .OpenAsync(pageContext)
+                            .ConfigureAwait(true);
                         PageContexts[pageInfo.PageUniqueId] = pageContext;
                     }
 
@@ -376,8 +386,8 @@ namespace Markeli.Storyboards
                     tcs.SetResult(TransitionResult.Failed);
                 }
                
-            }).ConfigureAwait(false);
-            return await tcs.Task.ConfigureAwait(false);
+            }).ConfigureAwait(true);
+            return await tcs.Task.ConfigureAwait(true);
         }
        
         public virtual Task<TransitionResult> GoToStoryboardAsync(Guid storyboardId)
@@ -446,7 +456,9 @@ namespace Markeli.Storyboards
             {
                 var previousPage = ActiveStoryboard.ActivePage;
                 var viewModel = previousPage.ViewModel;
-                var canClose = await viewModel.CanCloseAsync().ConfigureAwait(true);
+                var canClose = await viewModel
+                    .CanCloseAsync()
+                    .ConfigureAwait(true);
                 if (!canClose)
                 {
                     return new Tuple<InnerStoryboardPageInfo, TransitionResult>(null, TransitionResult.CanceledByUser);
@@ -487,7 +499,9 @@ namespace Markeli.Storyboards
                     viewModel.PageCompleted -= ViewModelOnPageCompleted;
                     viewModel.PageTransitionRequested -= ViewModelOnPageTransitionRequested;
 
-                    await viewModel.CloseAsync().ConfigureAwait(true);
+                    await viewModel
+                        .CloseAsync()
+                        .ConfigureAwait(true);
                     storyboard.ActivePage = null;
                     viewModel.Dispose();
                 }
@@ -552,7 +566,9 @@ namespace Markeli.Storyboards
                             var previousPage = ActiveStoryboard.ActivePage;
                             var viewModel = previousPage.ViewModel;
 
-                            var canLeave = await viewModel.CanLeaveAsync().ConfigureAwait(true);
+                            var canLeave = await viewModel
+                                .CanLeaveAsync()
+                                .ConfigureAwait(true);
                             if (!canLeave)
                             {
                                 tcs.SetResult(TransitionResult.CanceledByUser);
@@ -560,7 +576,8 @@ namespace Markeli.Storyboards
                             }
 
                             await viewModel
-                                .LeaveAsync().ConfigureAwait(true);
+                                .LeaveAsync()
+                                .ConfigureAwait(true);
                         }
                         
                         var pagesToClose = Journal
@@ -578,7 +595,8 @@ namespace Markeli.Storyboards
                                 if (startPage == null)
                                     throw new InvalidOperationException("Pages for storyboard does not registered");
 
-                                var result = await OpenPageAsync(startPage).ConfigureAwait(true);
+                                var result = await OpenPageAsync(startPage)
+                                    .ConfigureAwait(true);
                                 tcs.SetResult(result);
                                 return;
                             }
@@ -606,7 +624,7 @@ namespace Markeli.Storyboards
 
                                     var canClose = await page.ViewModel
                                         .CanCloseAsync()
-                                        .ConfigureAwait(false);
+                                        .ConfigureAwait(true);
                                     if (!canClose)
                                     {
                                         // open page that user don't want to close
@@ -647,8 +665,8 @@ namespace Markeli.Storyboards
                     }
 
                 })
-                .ConfigureAwait(false);
-            return await tcs.Task.ConfigureAwait(false);
+                .ConfigureAwait(true);
+            return await tcs.Task.ConfigureAwait(true);
         }
 
         public void Dispose()
