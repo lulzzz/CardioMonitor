@@ -279,6 +279,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     : new ObservableCollection<SessionInfo>();
 
                 _isSessionListChanged = false;
+                PatientName = new PatientFullName
+                {
+                    PatientId = _patient.Id,
+                    LastName = _patient.LastName,
+                    FirstName = _patient.FirstName,
+                    PatronymicName = _patient.PatronymicName
+                };
             }
             catch (Exception ex)
             {

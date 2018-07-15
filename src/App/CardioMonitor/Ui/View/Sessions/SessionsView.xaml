@@ -55,7 +55,7 @@
                 <Style TargetType="DataGridRow"
                        BasedOn="{StaticResource MetroDataGridRow}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding Status}" Value="Terminated">
+                        <DataTrigger Binding="{Binding Status}" Value="EmergencyStopped">
                             <Setter Property="Background" Value="Red"></Setter>
                         </DataTrigger>
 

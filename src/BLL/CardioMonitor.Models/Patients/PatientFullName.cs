@@ -28,13 +28,7 @@ namespace CardioMonitor.BLL.CoreContracts.Patients
         /// <summary>
         /// Полное имя пациента
         /// </summary>
-        public string Name
-        {
-            get
-            {
-                return String.Format("{0} {1} {2}", LastName, FirstName, PatronymicName);
-            }
-        }
+        public string Name => $"{LastName} {FirstName} {PatronymicName}";
 
         /// <summary>
         /// Возвращает полное имя пациента
