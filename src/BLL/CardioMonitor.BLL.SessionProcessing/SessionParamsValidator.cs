@@ -1,4 +1,8 @@
-﻿namespace CardioMonitor.BLL.SessionProcessing
+﻿using System;
+using System.Collections.Generic;
+using CardioMonitor.Infrastructure;
+
+namespace CardioMonitor.BLL.SessionProcessing
 {
     public class SessionParamsValidator : ISessionParamsValidator
     {
@@ -10,8 +14,16 @@
 
         public bool IsMaxXAngleValid(float maxXAngle)
         {
-            return SessionParamsConstants.MinValueMaxXAngle <= maxXAngle
-                   && maxXAngle <= SessionParamsConstants.MaxValueMaxXAngle;
+            if (SessionParamsConstants.MinValueMaxXAngle > maxXAngle
+                || maxXAngle > SessionParamsConstants.MaxValueMaxXAngle) return false;
+
+            var availableValues = new HashSet<double>();
+            for (var availableValue = SessionParamsConstants.MinValueMaxXAngle; availableValue <= SessionParamsConstants.MaxValueMaxXAngle; availableValue += SessionParamsConstants.MaxXAngleStep)
+            {
+                availableValues.Add(availableValue);
+            }
+
+            return availableValues.Contains(maxXAngle);
         }
 
         public bool IsMovementFrequencyValid(float movementFrequency)

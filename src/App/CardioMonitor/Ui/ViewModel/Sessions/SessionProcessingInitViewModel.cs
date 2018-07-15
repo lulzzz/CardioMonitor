@@ -593,7 +593,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                     if (!result)
                     {
                         return $"Нужно указать максимальный угол по оси X в диапазоне [{SessionParamsConstants.MinValueMaxXAngle}; " +
-                               $"{SessionParamsConstants.MaxValueMaxXAngle}]";
+                               $"{SessionParamsConstants.MaxValueMaxXAngle}],кратный 1.5";
                     }
                 }
                 if (String.IsNullOrEmpty(columnName) || columnName == nameof(CyclesCount))
