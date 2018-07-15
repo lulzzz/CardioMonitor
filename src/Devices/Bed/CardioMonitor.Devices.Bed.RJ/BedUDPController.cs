@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,17 +19,46 @@ namespace CardioMonitor.Devices.Bed.UDP
     /// </summary>
     public class BedUDPController : IBedController
     {
+        private const int DeviceIsInitialising = 1;
+
+        private const int DeviceIsNotInitialising = 0;
+        
         //todo оставил, чтобы пока помнить адресс
         //private IPEndPoint _bedIpEndPoint = new IPEndPoint(IPAddress.Parse("192.168.56.3"), 7777);
 
+        private IPEndPoint _bedIpEndPoint;
+        
+        
+        /// <summary>
+        /// Конечная точка, от которой была получена Udp дейтаграмма в ходе операции получения данных
+        /// </summary>
+        private IPEndPoint _remoteRecievedIpEndPoint;
+        private readonly TimeSpan _bedInitStepDelay;
+        
         /// <remarks>
         /// NotNull помечено специально, чтобы анализатор не ругался. В каждом методе должны быть провеки методом <see cref="AssertInitParams"/>
         /// </remarks>
         [NotNull] 
         private BedUdpControllerConfig _config;
 
-        [CanBeNull]
-        private UdpClient _udpClient;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// NotNull помечено специально, чтобы анализатор не ругался. В каждом методе должны быть провеки методом <see cref="AssertConnection"/>
+        /// </remarks>
+        [NotNull]
+        private UdpClient _udpSendingClient;
+        
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>
+        /// NotNull помечено специально, чтобы анализатор не ругался. В каждом методе должны быть провеки методом <see cref="AssertConnection"/>
+        /// </remarks>
+        [NotNull]
+        private UdpClient _udpReceivingClient;
 
         private readonly SemaphoreSlim _semaphoreSlim;
 
@@ -52,16 +82,20 @@ namespace CardioMonitor.Devices.Bed.UDP
         [NotNull]
         private readonly ConcurrentQueue<Exception> _lastExceptions;
 
+        private int _initialisingStatus;
+
+        // ReSharper disable once NotNullMemberIsNotInitialized
+        /// <inheritdoc />
         public BedUDPController([NotNull] IWorkerController workerController)
         {
             _workerController = workerController ?? throw new ArgumentNullException(nameof(workerController));
             IsConnected = false;
             _lastExceptions = new ConcurrentQueue<Exception>();
             _semaphoreSlim = new SemaphoreSlim(1, 1);
+            _bedInitStepDelay = TimeSpan.FromMilliseconds(100);
+            _initialisingStatus = DeviceIsNotInitialising;
         }
       
-       
-
         #region Управление взаимодействием и обработка событий
 
         public event EventHandler OnPauseFromDeviceRequested;
@@ -71,7 +105,7 @@ namespace CardioMonitor.Devices.Bed.UDP
 
         public bool IsConnected { get; private set; }
         
-        public void Init([NotNull] IBedControllerConfig initParams)
+        public void InitController([NotNull] IBedControllerConfig initParams)
         {
             if (initParams == null) throw new ArgumentNullException(nameof(initParams));
             var udpControllerInitParams = initParams as BedUdpControllerConfig;
@@ -84,6 +118,10 @@ namespace CardioMonitor.Devices.Bed.UDP
         {
             AssertInitParams();
             if (IsConnected) throw new InvalidOperationException($"{GetType().Name} уже подключен к устройству");
+            if (!IpEndPointParser.TryParse(_config.BedIpEndpoint, out _bedIpEndPoint))
+            {
+                throw new ArgumentException("Не верно указан адрес подключения к кровати. Требуемый формат - ip:port");
+            }
 
             try
             {
@@ -91,25 +129,40 @@ namespace CardioMonitor.Devices.Bed.UDP
                 while (_lastExceptions.TryDequeue(out _))
                 {
                 }
-                _udpClient = new UdpClient(7777); //todo в конфиги
 
+                await InternalDisconectAsync().ConfigureAwait(false);
 
-                var endPoint = IpEndPointParser.Parse(_config.BedIpEndpoint);
-                _udpClient.Connect(endPoint);
+                _udpSendingClient = new UdpClient
+                {
+                    Client =
+                    {
+                        ReceiveTimeout = (int) _config.Timeout.TotalMilliseconds,
+                        SendTimeout = (int) _config.Timeout.TotalMilliseconds
+                    }
+                };
+
+                _udpReceivingClient = new UdpClient(_bedIpEndPoint.Port)
+                {
+                    Client =
+                    {
+                        ReceiveTimeout = (int) _config.Timeout.TotalMilliseconds,
+                        SendTimeout = (int) _config.Timeout.TotalMilliseconds
+                    }
+                };
+                _udpSendingClient.Connect(_bedIpEndPoint);
+                _udpReceivingClient.Connect(_bedIpEndPoint);
+
                 IsConnected = true;
                 await UpdateRegistersValueAsync()
                     .ConfigureAwait(false);
-                await SetInitParamsAsync().ConfigureAwait(false);
-                await RiseEventOnCommandFromDeviceAsync()
-                    .ConfigureAwait(false);
                 _syncWorker = _workerController.StartWorker(_config.UpdateDataPeriod, async () =>
                 {
+                    if (_initialisingStatus == DeviceIsInitialising) return;
+
                     try
                     {
                         //todo сюды бы токен отмены
                         await UpdateRegistersValueAsync()
-                            .ConfigureAwait(false);
-                        await RiseEventOnCommandFromDeviceAsync()
                             .ConfigureAwait(false);
                     }
                     catch (Exception e)
@@ -120,7 +173,12 @@ namespace CardioMonitor.Devices.Bed.UDP
                     }
 
                 });
-                
+
+            }
+            catch (DeviceConnectionException)
+            {
+                IsConnected = false;
+                throw;
             }
             catch (SocketException e)
             {
@@ -142,41 +200,85 @@ namespace CardioMonitor.Devices.Bed.UDP
         
         private void AssertInitParams()
         {
-            if (_config == null)throw new InvalidOperationException($"Контроллер не инициализирован. Необходимо сначала вызвать метод {nameof(Init)}");
+            if (_config == null)throw new InvalidOperationException($"Контроллер не инициализирован. Необходимо сначала вызвать метод {nameof(InitController)}");
         }
-        
-        
-        /// <summary>
-        /// Отправить стартовые параметры на кровать перед запуском
-        /// </summary>
-        private async Task SetInitParamsAsync()
+
+        public async Task PrepareDeviceForSessionAsync()
         {
-            await _semaphoreSlim.WaitAsync();
+            AssertInitParams();
+
+            if (_initialisingStatus == DeviceIsInitialising)
+                throw new InvalidOperationException("Инициализация уже выполняется");
+
+            Interlocked.Exchange(ref _initialisingStatus, DeviceIsInitialising);
+            
+            // немного подождем, чтобы завершилось начатое обновление данных
+            var waitingTimeout = GetWaitingTimeout();
+            var isFree = await _semaphoreSlim
+                .WaitAsync(waitingTimeout)
+                .ConfigureAwait(false);
+            if (!isFree)
+                throw new DeviceConnectionException(
+                    $"Не удалось подключиться к инверсинному столу в течение {waitingTimeout.TotalMilliseconds} мс");
+            AssertConnection();
+            
             try
             {
-                AssertConnection();
-                if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
-                await Task.Yield();
-                BedMessage message = new BedMessage(BedMessageEventType.Write);
-                var sendMessage = message.SetMaxAngleValueMessage(_config.MaxAngleX);
-                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-                var receiveMessage = await _udpClient.ReceiveAsync();
-                //todo very very bad
-                Thread.Sleep(100);
-                //todo здесь лучше сделать паузу ~100mc 
-                sendMessage = message.SetFreqValueMessage(_config.MovementFrequency);
-                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-                receiveMessage = await _udpClient.ReceiveAsync();
-                Thread.Sleep(100);
-                //todo здесь лучше сделать паузу ~100mc 
-                sendMessage = message.SetCycleCountValueMessage((byte) _config.CyclesCount);
-                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-                receiveMessage = await _udpClient.ReceiveAsync();
+                // очистим перед подключением все накопленные ошибки
+                while (_lastExceptions.TryDequeue(out _))
+                {
+                }
+
+                await Task.Factory.StartNew(async () =>
+                    {
+
+                        var message = new BedMessage(BedMessageEventType.Write);
+                        var sendMessage = message.SetMaxAngleValueMessage(_config.MaxAngleX);
+                        _udpSendingClient.Send(sendMessage, sendMessage.Length);
+                        _udpReceivingClient.Receive(ref _remoteRecievedIpEndPoint);
+
+                        await Task.Delay(_bedInitStepDelay)
+                            .ConfigureAwait(false);
+                        sendMessage = message.SetFreqValueMessage(_config.MovementFrequency);
+                        _udpSendingClient.Send(sendMessage, sendMessage.Length);
+                        _udpReceivingClient.Receive(ref _remoteRecievedIpEndPoint);
+
+                        await Task.Delay(_bedInitStepDelay)
+                            .ConfigureAwait(false);
+                        sendMessage = message.SetCycleCountValueMessage((byte) _config.CyclesCount);
+                        _udpSendingClient.Send(sendMessage, sendMessage.Length);
+                        _udpReceivingClient.Receive(ref _remoteRecievedIpEndPoint);
+                    })
+                    .ConfigureAwait(false);
+            }
+            catch (SocketException e)
+            {
+                IsConnected = false;
+                throw new DeviceConnectionException("Ошибка подключения к инверсионному столу", e);
+            }
+            catch (ObjectDisposedException e)
+            {
+                IsConnected = false;
+                throw new DeviceConnectionException("Ошибка подключения к инверсионному столу", e);
+            }
+            catch (Exception e)
+            {
+                IsConnected = false;
+                throw new DeviceProcessingException("Ошибка старта сеанса инверсионного стола", e);
             }
             finally
             {
+                Interlocked.Exchange(ref _initialisingStatus, DeviceIsNotInitialising);
                 _semaphoreSlim.Release();
             }
+        }
+
+        private TimeSpan GetWaitingTimeout()
+        {
+            // ждем, пока завершится предыдущий этап обновления данных с учетом таймаута
+            return TimeSpan.FromMilliseconds(
+                _config.UpdateDataPeriod.TotalMilliseconds 
+                + _config.Timeout.TotalMilliseconds*2);
         }
 
         /// <summary>
@@ -185,14 +287,50 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// <param name="isBlock"></param>
         /// <returns></returns>
         /// <exception cref="DeviceConnectionException"></exception>
+        //todo fix
         public async Task SetBedBlock(bool isBlock)
         {
+            AssertInitParams();
             AssertConnection();
-            if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
-            await Task.Yield();
-            var message = new BedMessage();
-            var sendMessage = message.SetBedBlockMessage(isBlock);
-            await _udpClient.SendAsync(sendMessage, sendMessage.Length);
+            
+            // немного подождем, чтобы завершилось начатое обновление данных
+            var waitingTimeout = GetWaitingTimeout();
+            var isFree = await _semaphoreSlim
+                .WaitAsync(waitingTimeout)
+                .ConfigureAwait(false);
+            if (!isFree)
+                throw new DeviceConnectionException(
+                    $"Не удалось подключиться к инверсинному столу в течение {waitingTimeout.TotalMilliseconds} мс");
+
+            await Task.Factory.StartNew(() =>
+            {
+                try
+                {
+                    var message = new BedMessage();
+                    var sendMessage = message.SetBedBlockMessage(isBlock);
+                    //todo а получить подтверждение
+                    _udpSendingClient.Send(sendMessage, sendMessage.Length);
+                }
+                catch (SocketException e)
+                {
+                    IsConnected = false;
+                    throw new DeviceConnectionException("Ошибка отключения от инверсионного стола", e);
+                }
+                catch (ObjectDisposedException e)
+                {
+                    IsConnected = false;
+                    throw new DeviceConnectionException("Ошибка отключения от инверсионного стола", e);
+                }
+                catch (Exception e)
+                {
+                    IsConnected = false;
+                    throw new DeviceProcessingException("Ошибка отключения от инверсионного стола", e);
+                }
+                finally
+                {
+                    _semaphoreSlim.Release();
+                }
+            }).ConfigureAwait(false);
         }
         
         /// <summary>
@@ -200,68 +338,105 @@ namespace CardioMonitor.Devices.Bed.UDP
         /// </summary>
         private async Task UpdateRegistersValueAsync()
         {
-            await _semaphoreSlim.WaitAsync();
-            try
-            {
-                AssertConnection();
-                if (_udpClient == null)
-                    throw new DeviceConnectionException("Ошибка подключения к инверсионному столу"); //todo 
-                //todo здесь получение массива с регистрами и обновление результатов в _registerList
-                //todo никакой обработки ошибок делать не надо
-                await Task.Yield();
-                //здесь короче запрос данных и их парсинг 
-                var message = new BedMessage(BedMessageEventType.ReadAll);
-                var getAllRegister = message.GetAllRegisterMessage();
-                await _udpClient.SendAsync(getAllRegister, getAllRegister.Length);
-                var receiveMessage = await _udpClient.ReceiveAsync();
-                var registerValues = message.GetAllRegisterValues(receiveMessage.Buffer);
-                if ((_registerValues.BedStatus == BedStatus.SessionStarted || _registerValues.BedStatus == BedStatus.Pause)
-                    && registerValues.BedStatus == BedStatus.Reverse)
+            // немного подождем, чтобы завершилось начатое обновление данных
+            var waitingTimeout = GetWaitingTimeout();
+            var isFree = await _semaphoreSlim
+                .WaitAsync(waitingTimeout)
+                .ConfigureAwait(false);
+            if (!isFree)
+                throw new DeviceConnectionException(
+                    $"Не удалось подключиться к инверсинному столу в течение {waitingTimeout.TotalMilliseconds} мс");
+            
+            
+            await Task.Factory.StartNew(() => {
+                try
                 {
-                    OnReverseFromDeviceRequested?.Invoke(this, EventArgs.Empty);
-                }
-                if (_registerValues.BedStatus == BedStatus.SessionStarted &&
-                    registerValues.BedStatus == BedStatus.Pause)
-                {
-                    OnPauseFromDeviceRequested?.Invoke(this,EventArgs.Empty);
-                }
+                    AssertConnection();
+                    //здесь запрос данных и их парсинг 
+                    var message = new BedMessage(BedMessageEventType.ReadAll);
+                    var getAllRegister = message.GetAllRegisterMessage();
+                    _udpSendingClient.Send(getAllRegister, getAllRegister.Length);
+                    var receiveMessage = _udpReceivingClient.Receive(ref _remoteRecievedIpEndPoint);
+                    var previouslRegisterValues = _registerValues;
+                    _registerValues = message.GetAllRegisterValues(receiveMessage);
 
-                if (_registerValues.BedStatus == BedStatus.Pause &&
-                    registerValues.BedStatus == BedStatus.SessionStarted)
-                {
-                    OnResumeFromDeviceRequested?.Invoke(this, EventArgs.Empty);
-                }
-                if (_registerValues.BedStatus != BedStatus.EmergencyStop &&
-                    registerValues.BedStatus == BedStatus.EmergencyStop)
-                {
-                    OnEmeregencyStopFromDeviceRequested?.Invoke(this,EventArgs.Empty);
-                }
+                    if ((previouslRegisterValues.BedStatus == BedStatus.SessionStarted
+                         || previouslRegisterValues.BedStatus == BedStatus.Pause)
+                        && _registerValues.BedStatus == BedStatus.Reverse)
+                    {
+                        OnReverseFromDeviceRequested?.Invoke(this, EventArgs.Empty);
+                    }
 
-                _registerValues = registerValues;
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
-            }
+                    if (previouslRegisterValues.BedStatus == BedStatus.SessionStarted &&
+                        _registerValues.BedStatus == BedStatus.Pause)
+                    {
+                        OnPauseFromDeviceRequested?.Invoke(this, EventArgs.Empty);
+                    }
+
+                    if (previouslRegisterValues.BedStatus == BedStatus.Pause &&
+                        _registerValues.BedStatus == BedStatus.SessionStarted)
+                    {
+                        OnResumeFromDeviceRequested?.Invoke(this, EventArgs.Empty);
+                    }
+
+                    if (previouslRegisterValues.BedStatus != BedStatus.EmergencyStop &&
+                        _registerValues.BedStatus == BedStatus.EmergencyStop)
+                    {
+                        OnEmeregencyStopFromDeviceRequested?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+                catch (DeviceConnectionException)
+                {
+                    IsConnected = false;
+                    throw;
+                }
+                catch (SocketException e)
+                {
+                    IsConnected = false;
+                    throw new DeviceConnectionException("Ошибка соедининия с инверсионным столом", e);
+                }
+                catch (ObjectDisposedException e)
+                {
+                    IsConnected = false;
+                    throw new DeviceConnectionException("Ошибка соедининия с инверсионным столом", e);
+                }
+                catch (Exception e)
+                {
+                    IsConnected = false;
+                    throw new DeviceProcessingException("Ошибка получения данных от инверсионного стола", e);
+                }
+                finally
+                {
+                    _semaphoreSlim.Release();
+                }
+            }).ConfigureAwait(false);
         }
         
-        /// <summary>
-        /// Вызывает подписчиков событий на команды от кровати
-        /// </summary>
-        private async Task RiseEventOnCommandFromDeviceAsync()
-        {
-            await Task.Yield();
-        }
-
-        public async Task DisconnectAsync()
+        public Task DisconnectAsync()
         {
             AssertConnection();
+            return InternalDisconectAsync();
+        }
+
+        private async Task InternalDisconectAsync()
+        {
+            _workerController.CloseWorker(_syncWorker);
+
+            // немного подождем, чтобы завершилось начатое обновление данных
+            var waitingTimeout = GetWaitingTimeout();
+            var isFree = await _semaphoreSlim
+                .WaitAsync(waitingTimeout)
+                .ConfigureAwait(false);
+            if (!isFree)
+                throw new DeviceConnectionException(
+                    $"Не удалось отключиться от инверсинного стола в течение {waitingTimeout.TotalMilliseconds} мс");
+
             try
             {
-                await Task.Yield();
-                _workerController.CloseWorker(_syncWorker);
-                _udpClient?.Dispose();
-
+                 _udpSendingClient?.Close();
+                _udpSendingClient?.Dispose();
+                _udpReceivingClient?.Close();
+                _udpReceivingClient?.Dispose();
             }
             catch (SocketException e)
             {
@@ -278,43 +453,83 @@ namespace CardioMonitor.Devices.Bed.UDP
                 IsConnected = false;
                 throw new DeviceProcessingException("Ошибка отключения от инверсионного стола", e);
             }
-        }
-
-        private void AssertConnection()
-        {
-            if (!IsConnected) throw new InvalidOperationException($"Соединение с кроватью не установлено. Установите соединение с помощью метода {nameof(ConnectAsync)}");
-        }
-        
-        public async Task ExecuteCommandAsync(BedControlCommand command)
-        {
-            await _semaphoreSlim.WaitAsync();
-            try
-            {
-                RiseExceptions();
-                AssertConnection();
-                if (_udpClient == null) throw new DeviceConnectionException("Ошибка подключения к инверсионному столу");
-                
-                var message = new BedMessage(BedMessageEventType.Write);
-                var sendMessage = message.GetBedCommandMessage(command);
-                await _udpClient.SendAsync(sendMessage, sendMessage.Length);
-                var receiveMessage = await _udpClient.ReceiveAsync();
-            }
             finally
             {
                 _semaphoreSlim.Release();
             }
         }
 
+        private void AssertConnection()
+        {
+            if (!IsConnected || _udpSendingClient == null || _udpReceivingClient == null) throw new DeviceConnectionException(
+                $"Соединение с инверсионным столом не установлено. Установите соединение с помощью метода {nameof(ConnectAsync)}");
+        }
+        
+        //todo fix sending
+        public async Task ExecuteCommandAsync(BedControlCommand command)
+        {
+            AssertInitParams();
+            
+            var isFree = await _semaphoreSlim
+                .WaitAsync(_config.Timeout)
+                .ConfigureAwait(false);
+            if (!isFree) throw new DeviceConnectionException(
+                $"Не удалось подключиться к инверсионному столу в течение {_config.Timeout.TotalMilliseconds}");
+
+            
+            await Task.Factory.StartNew(() =>
+                {
+                    try
+                    {
+                        AssertConnection();
+
+                        var message = new BedMessage(BedMessageEventType.Write);
+                        var sendMessage = message.GetBedCommandMessage(command);
+                        _udpSendingClient.Send(sendMessage, sendMessage.Length);
+                        //todo зачем после каждой отправки мы ожидаем ответа? Мы делаем из UDP свой TCP
+                        _udpReceivingClient.Receive(ref _remoteRecievedIpEndPoint);
+                    }
+                    catch (DeviceConnectionException)
+                    {
+                        IsConnected = false;
+                        throw;
+                    }
+                    catch (SocketException e)
+                    {
+                        IsConnected = false;
+                        throw new DeviceConnectionException("Ошибка соединения с инверсионным столом", e);
+                    }
+                    catch (ObjectDisposedException e)
+                    {
+                        IsConnected = false;
+                        throw new DeviceConnectionException("Ошибка соединения с инверсионным столом", e);
+                    }
+                    catch (Exception e)
+                    {
+                        IsConnected = false;
+                        throw new DeviceProcessingException("Ошибка отправки команды инверсионному столу", e);
+                    }
+                    finally
+                    {
+                        _semaphoreSlim.Release();
+                    }
+                })
+                .ConfigureAwait(false);
+            
+        }
+
         private void RiseExceptions()
         {
             var exceptions = new List<Exception>(0);
-            while (_lastExceptions.TryPeek(out var temp))
+            while (_lastExceptions.TryDequeue(out var temp))
             {
                 exceptions.Add(temp);
             }
             if (exceptions.Count == 0) return;
+            
             var hasConnectionExceptions = exceptions.Any(x =>
-                x.GetType() == typeof(SocketException) || x.GetType() == typeof(ObjectDisposedException));
+                x.GetType() == typeof(SocketException) || x.GetType() == typeof(ObjectDisposedException)
+                || x.GetType() == typeof(DeviceConnectionException));
             var agregatedException = new AggregateException(exceptions);
 
             if (hasConnectionExceptions)
@@ -338,7 +553,8 @@ namespace CardioMonitor.Devices.Bed.UDP
         private void AssertRegisterIsNull()
         {
             if (_registerValues == null) 
-                throw new InvalidOperationException($"Не было получено данных от кровати. Необходмо выполнить подключение методом {nameof(ConnectAsync)} или дождаться получения данных");
+                throw new InvalidOperationException(
+                    $"Не было получено данных от кровати. Необходмо выполнить подключение методом {nameof(ConnectAsync)} или дождаться получения данных");
         }
 
         public async Task<TimeSpan> GetCycleDurationAsync()
@@ -454,7 +670,16 @@ namespace CardioMonitor.Devices.Bed.UDP
         public void Dispose()
         {
             _workerController.CloseWorker(_syncWorker);
-            _udpClient?.Dispose();
+            try
+            {
+                _udpSendingClient?.Close();
+                _udpReceivingClient?.Close();
+            }
+            finally 
+            {
+                _udpSendingClient?.Dispose();
+                _udpReceivingClient?.Dispose();
+            }
         }
 
         public Guid DeviceId => InversionTableV2UdpDeviceId.DeviceId;

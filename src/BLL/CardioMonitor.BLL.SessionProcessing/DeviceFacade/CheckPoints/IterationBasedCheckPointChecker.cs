@@ -24,17 +24,21 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
             _ecgParamsCheckPoints = new HashSet<IterationBasedCheckPoint>();
         }
 
-        public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
+        public Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             
-            await Task.Yield();
+            if (!context.IsValid())
+            {
+                _logger.Warning($"{GetType().Name}: действие не будет выполнено, т.к. в обработке сеанса возникли ошибки");
+                return Task.FromResult(context);
+            }
 
             var sessionProcessingInfo = context.TryGetSessionProcessingInfo();
-            if (sessionProcessingInfo == null) return context;
+            if (sessionProcessingInfo == null) return Task.FromResult(context);
             
             var iterationParams = context.TryGetIterationParams();
-            if (iterationParams == null) return context;
+            if (iterationParams == null) return Task.FromResult(context);
             
             
             var cycleNumber = sessionProcessingInfo.CurrentCycleNumber;
@@ -110,7 +114,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CheckPoints
                             iterationNumber)));
             }
             
-            return context;
+            return Task.FromResult(context);
         }
 
         public bool CanProcess([NotNull] CycleProcessingContext context)

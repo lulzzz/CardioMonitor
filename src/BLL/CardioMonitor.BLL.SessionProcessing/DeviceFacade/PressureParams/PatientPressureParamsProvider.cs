@@ -43,12 +43,18 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             // считаем стандартным период обновления данных в Pipeline 1 секунду, 
             // если за пол секунлы этот метод не выполнился, что-то идет не так 
             _blockWaitingTimeout = TimeSpan.FromMilliseconds(500);
-
         }
 
         public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            
+            if (!context.IsValid())
+            {
+                _logger.Warning($"{GetType().Name}: действие не будет выполнено, т.к. в обработке сеанса возникли ошибки");
+                return context;
+            }
+            
             var pumpingResult = context.TryGetAutoPumpingResultParams();
             if (!(pumpingResult?.WasPumpingCompleted ?? false))
             {
@@ -108,7 +114,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PatientPressureParamsRequestTimeout,
-                            e.Message,
+                            "Получение показателей давления пациента прервано по таймауту",
                             e,
                             cycleNumber,
                             iterationNumber)));
@@ -135,7 +141,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
                 }
             }
 
-            _logger?.Trace($"{nameof(GetType)}: текущие показатели давления: систолическиое - {param.SystolicArterialPressure}, " +
+            _logger?.Trace($"{GetType().Name}: текущие показатели давления: систолическиое - {param.SystolicArterialPressure}, " +
                            $"диастолическое - {param.DiastolicArterialPressure}, " +
                            $"среднее - {param.AverageArterialPressure}");
             UpdateContex(param, context);
@@ -161,7 +167,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.PressureParams
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var forcedRequest = context.TryGetForcedDataCollectionRequest();
-            if (forcedRequest != null && forcedRequest.IsRequested)
+            if (forcedRequest != null)
             {
                 return true;
             }

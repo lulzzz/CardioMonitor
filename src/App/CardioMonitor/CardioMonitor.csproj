@@ -239,8 +239,11 @@
     <Compile Include="Settings\SettingsManager.cs" />
     <Compile Include="Threading\ThreadAssistant.cs" />
     <Compile Include="FileSaving\SessionFileManager.cs" />
+    <Compile Include="Ui\Converters\InProgressSessionStatusToVisibilityConverter.cs" />
+    <Compile Include="Ui\Converters\NotStartedSessionStatusToVisibilityConverter.cs" />
     <Compile Include="Ui\Converters\SessionStatusToSaveToFileButtonVisibilityConverter.cs" />
     <Compile Include="Ui\Converters\SessionStatusToTextConverter.cs" />
+    <Compile Include="Ui\Converters\SuspenedSessionStatusToVisibilityConverter.cs" />
     <Compile Include="Ui\ISessionsFileUiManager.cs" />
     <Compile Include="Ui\MessageHelper.cs" />
     <Compile Include="Ui\SessionsFileUiManager.cs" />

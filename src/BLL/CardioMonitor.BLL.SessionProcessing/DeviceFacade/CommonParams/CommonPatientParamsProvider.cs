@@ -45,6 +45,13 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
         public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+            
+            if (!context.IsValid())
+            {
+                _logger.Warning($"{GetType().Name}: действие не будет выполнено, т.к. в обработке сеанса возникли ошибки");
+                return context;
+            }
+            
             var angleParams = context.TryGetAngleParam();
             if (angleParams == null)
             {
@@ -99,7 +106,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
                             SessionProcessingErrorCodes.PatientCommonParamsRequestTimeout,
-                            e.Message,
+                            "Получение общих параметров пациента прервано по таймауту",
                             e,
                             cycleNumber,
                             iterationNumber)));
@@ -144,7 +151,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.CommonParams
             if (context == null) throw new ArgumentNullException(nameof(context));
 
             var forcedRequest = context.TryGetForcedDataCollectionRequest();
-            if (forcedRequest != null && forcedRequest.IsRequested)
+            if (forcedRequest != null)
             {
                 return true;
             }

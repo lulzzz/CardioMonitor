@@ -29,6 +29,7 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
         private int _timeoutMs;
         private bool _needReconnect;
         private int _reconnectionTimeoutSec;
+        private int _deviceReconectionsRetriesCount;
         
         private int _connectDelayMs;
         private int _disconnectDelayMs;
@@ -140,6 +141,18 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
             }
         }
 
+        public int DeviceReconectionsRetriesCount
+        {
+            get => _deviceReconectionsRetriesCount;
+            set
+            {
+                _deviceReconectionsRetriesCount = value;
+                RisePropertyChanged(nameof(DeviceReconectionsRetriesCount));
+                RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = true;
+            }
+        }
+        
         public bool CanGetConfig => String.IsNullOrEmpty(Error);
 
 
@@ -192,6 +205,9 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
             var reconnectionTimeout = NeedReconnect
                 ? TimeSpan.FromSeconds(ReconnectionTimeoutSec)
                 : default(TimeSpan?);
+            var reconnectionRetriesCount = NeedReconnect
+                ? DeviceReconectionsRetriesCount
+                : default(int?);
             var config = new FakeBedControllerConfig(
                 default(float),
                 default(short),
@@ -202,6 +218,7 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 TimeSpan.FromMilliseconds(DisconnectDelayMs),
                 TimeSpan.FromMilliseconds(DelayMs),
                 TimeSpan.FromSeconds(CycleWithMaxAngelDurationSec),
+                reconnectionRetriesCount,
                 reconnectionTimeout);
             return _configBuilder.Build(config);
         }
@@ -226,7 +243,7 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
             ConnectDelayMs = (int)config.ConnectDelay.TotalMilliseconds;
             DisconnectDelayMs = (int)config.DisconnectDelay.TotalMilliseconds;
             CycleWithMaxAngelDurationSec = (int)config.CycleWithMaxAngleDuration.TotalSeconds;
-
+            DeviceReconectionsRetriesCount = config.DeviceReconectionsRetriesCount ?? 0;
 
             IsDataChanged = false;
         }
@@ -269,14 +286,14 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                 {
                     if (TimeoutMs < 100)
                     {
-                        return "Должен быть не меньше 100 мс";
+                        return "Должен быть больше 100 мс";
                     }
                 }
                 if (String.IsNullOrEmpty(columnName) || Equals(columnName, nameof(UpdateDataPeriodMs)))
                 {
                     if (UpdateDataPeriodMs <= 300)
                     {
-                        return "Должно быть не меньше 300 мс";
+                        return "Должно быть больше 300 мс";
                     }
                 }
 
@@ -288,13 +305,19 @@ namespace CardioMonitor.Devices.Bed.Fake.WpfModule
                         return "Необходимо задать целое положительное число";
                     }
                 }
-
+                if ((String.IsNullOrWhiteSpace(columnName) || Equals(columnName, nameof(DeviceReconectionsRetriesCount))) &&
+                    _needReconnect)
+                {
+                    if (DeviceReconectionsRetriesCount < 0)
+                    {
+                        return "Необходимо задать целое положительное число";
+                    }
+                }
                 return String.Empty;
             }
         }
 
         public string Error => this[String.Empty];
-
 
         #endregion
     }

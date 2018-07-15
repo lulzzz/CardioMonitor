@@ -18,6 +18,7 @@ using CardioMonitor.Devices.Monitor.Infrastructure;
 using CardioMonitor.Infrastructure.Workers;
 using JetBrains.Annotations;
 using Markeli.Utils.Logging;
+using Polly;
 
 namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 {
@@ -28,10 +29,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
     /// Управляет и запрашивает данные с устройств согласно бизнес-логике
     /// </remarks>
     internal class DevicesFacade : 
-        IDevicesFacade,
-        IDisposable
+        IDevicesFacade
     {
         private const short StartCycleNumber = 1;
+        private readonly TimeSpan ReconnectionWaitingTimeout = TimeSpan.FromMilliseconds(2);
         
         #region Private fields
  
@@ -138,11 +139,21 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         /// Событие реверса, выполненное с кровати
         /// </summary>
         public event EventHandler OnReversedFromDevice;
+
+        public event EventHandler<ReconnectionEventArgs> OnInversionTableReconnectionStarted;
+        public event EventHandler<ReconnectionEventArgs> OnInversionTableReconnectionWaiting;
+        public event EventHandler OnInversionTableReconnected;
+        public event EventHandler OnInversionTableReconnectionFailed;
         
+        public event EventHandler<ReconnectionEventArgs> OnMonitorReconnectionStarted;
+        public event EventHandler<ReconnectionEventArgs> OnMonitorReconnectionWaiting;
+        public event EventHandler OnMonitorReconnected;
+        public event EventHandler OnMonitorReconnectionFailed;
+
         #endregion
         
-        private readonly object _inversionTableRecconectionSyncObject = new object();
-        private readonly object _monitorRecconectionSyncObject = new object();
+        private readonly SemaphoreSlim _inversionTableRecconectionMutex;
+        private readonly SemaphoreSlim _monitorRecconectionMutex;
         
         public DevicesFacade(
             [NotNull] SessionParams startParams,
@@ -182,6 +193,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             _isReverseAlreadyRequested = false;
             _isSessionGlobalyCompleted = false;
             _completedCycles = new HashSet<int>();
+            
+            _monitorRecconectionMutex = new SemaphoreSlim(1,1);
+            _inversionTableRecconectionMutex = new SemaphoreSlim(1,1);
         }
 
         private void CreatePipeline(
@@ -342,9 +356,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             try
             {
                 _logger?.Trace($"{GetType().Name}: агрегация данных...");
-
-                var isForcedCollectionRequested = context.TryGetForcedDataCollectionRequest()?.IsRequested ?? false;
                 
+                var isForcedCollectionRequested = context.TryGetForcedDataCollectionRequest() != null;
                 var exceptionParams = context.TryGetExceptionContextParams();
                 if (exceptionParams != null)
                 {
@@ -354,9 +367,31 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                                    $"код ошибки {exceptionParams.Exception.ErrorCode}, " +
                                    $"причина: {exceptionParams.Exception.Message}",
                         exceptionParams.Exception);
-                    RiseOnce(exceptionParams, () => OnException?.Invoke(this, exceptionParams.Exception));
-                    //todo а должны ли мы выставлять параметры при ошибке?
-                    return HandleConnectionErrorsOnDemandAsync(exceptionParams);
+                    if (IsFatalErrorOccured(exceptionParams))
+                    {
+                        _cycleProcessingSynchronizer.Stop();
+                        OnSessionErrorStop?.Invoke(this, exceptionParams.Exception);
+                        return Task.CompletedTask;
+                    }
+
+                    var canReconnectToMonitor = CanReconnectToMonitor(exceptionParams.Exception);
+                    var canReconnectoToInversionTable = CanReconnectToInversionTable(exceptionParams.Exception);
+                    
+                    
+                    RiseOnce(exceptionParams, () =>
+                    {
+                        if (canReconnectToMonitor || canReconnectoToInversionTable)
+                        {
+                            _cycleProcessingSynchronizer.Pause();
+                        }
+                        OnException?.Invoke(this, exceptionParams.Exception);
+                    });
+                    ReconnectToDeviceAndRestorePipelineSaveAsync(
+                        exceptionParams.Exception,
+                        canReconnectoToInversionTable,
+                        canReconnectToMonitor);
+                    
+                    return Task.CompletedTask;
                 }
 
                 var sessionProcessingInfo = context.TryGetSessionProcessingInfo();
@@ -423,6 +458,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
                     // считаем, что сессия завершилась, когда оставшееся время равно 0
                     var isSessionCompleted = sessionProcessingInfo.RemainingTime <= TimeSpan.Zero 
+                                             && sessionProcessingInfo.ElapsedTime > TimeSpan.Zero
                                              && sessionProcessingInfo.CurrentCycleNumber == sessionProcessingInfo.CyclesCount;
                     // чтобы не было лишних вызовов в случае долгого обновления в последней фазе
                     if (isSessionCompleted)
@@ -434,18 +470,17 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     var wasLastCycleDataCollected = false;
                     if ((_previouslyKnownCycleNumber != sessionProcessingInfo.CurrentCycleNumber 
                          || isSessionCompleted) 
-                        && !_completedCycles.Contains(sessionProcessingInfo.CurrentCycleNumber))
+                        && !_completedCycles.Contains(_previouslyKnownCycleNumber))
                     {
-                        _completedCycles.Add(sessionProcessingInfo.CurrentCycleNumber);
+                        _completedCycles.Add(_previouslyKnownCycleNumber);
                         await InnerForceDataCollectionRequestAsync().ConfigureAwait(false);
-                        _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber; // по идеи, 
                         OnCycleCompleted?.Invoke(this, _previouslyKnownCycleNumber);
-                        _logger?.Info($"{GetType().Name}: закончился цикл {sessionProcessingInfo.CurrentCycleNumber}");
+                        _logger?.Info($"{GetType().Name}: закончился цикл {_previouslyKnownCycleNumber}");
+                        _previouslyKnownCycleNumber = sessionProcessingInfo.CurrentCycleNumber; // по идеи, 
                         wasLastCycleDataCollected = true;
                     }
 
                     if (isSessionCompleted 
-                        && !_isSessionGlobalyCompleted
                         && wasLastCycleDataCollected)
                     {
                         _isSessionGlobalyCompleted = true;
@@ -470,23 +505,72 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Попытается переподключиться к устройствам в случае ошибки соединения
-        /// </summary>
-        /// <param name="exceptionParams">Ошибки, возникшие в ходе сеанса</param>
-        /// <returns></returns>
-        [NotNull]
-        private Task HandleConnectionErrorsOnDemandAsync([NotNull] ExceptionCycleProcessingContextParams exceptionParams)
+        private bool IsFatalErrorOccured([NotNull] ExceptionCycleProcessingContextParams exceptionParams)
         {
             var exception = exceptionParams.Exception;
             switch (exception.ErrorCode)
             {
-                case SessionProcessingErrorCodes.InversionTableConnectionError:
-                    return ReconnectToInversionTableAsync();
-                case SessionProcessingErrorCodes.MonitorConnectionError:
-                    return ReconnectToMonitorAsync();
+                case SessionProcessingErrorCodes.Unknown:
+                case SessionProcessingErrorCodes.UnhandledException:
+                    return true;
                 default:
-                    return Task.CompletedTask;
+                    return false;
+            }
+        }
+
+       
+        private bool CanReconnectToInversionTable([NotNull] SessionProcessingException exception)
+        {
+            switch (exception.ErrorCode)
+            {
+                case SessionProcessingErrorCodes.InversionTableConnectionError:
+                case SessionProcessingErrorCodes.InversionTableTimeout:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        
+        private bool CanReconnectToMonitor([NotNull] SessionProcessingException exception)
+        {
+            switch (exception.ErrorCode)
+            {
+                case SessionProcessingErrorCodes.MonitorConnectionError:
+                case SessionProcessingErrorCodes.PatientCommonParamsRequestTimeout:
+                case SessionProcessingErrorCodes.PatientPressureParamsRequestTimeout:
+                case SessionProcessingErrorCodes.PumpingTimeout:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private async Task ReconnectToDeviceAndRestorePipelineSaveAsync(
+            [NotNull] Exception pipelineException,
+            bool canReconnectoToInversionTable, 
+            bool canReconnectToMonior)
+        {
+            if (!canReconnectoToInversionTable && !canReconnectToMonior) return;
+            var canRestorePipeline = true;
+            if (canReconnectoToInversionTable)
+            {
+                canRestorePipeline = await ReconnectToInversionTableSaveAsync()
+                    .ConfigureAwait(false);
+            }
+
+            if (canRestorePipeline && canReconnectToMonior)
+            {
+                canRestorePipeline = await ReconnectToMonitorSafeAsync();
+            }
+
+            if (!canRestorePipeline)
+            {
+                _cycleProcessingSynchronizer.Stop();
+                OnSessionErrorStop?.Invoke(this, pipelineException);
+            }
+            else
+            {
+                _cycleProcessingSynchronizer.Resume();
             }
         }
 
@@ -494,65 +578,140 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         /// Устанавливает повторное соединение с инверсионным столом
         /// </summary>
         /// <returns></returns>
-        private async Task ReconnectToInversionTableAsync()
+        private async Task<bool> ReconnectToInversionTableSaveAsync()
         {
-            if (_monitorController.IsConnected) return;
-            if (_startParams.BedControllerConfig.DeviceReconnectionTimeout == null) return;
-            
-            if (Monitor.TryEnter(_monitorRecconectionSyncObject))
+            if (_bedController.IsConnected) return true;
+            if (_startParams.BedControllerConfig.DeviceReconnectionTimeout == null
+                || _startParams.BedControllerConfig.DeviceReconectionsRetriesCount == null)
             {
-                _logger?.Info($"{GetType().Name}: повторное подключение к инверсионному столу...");
-                try
+                return false;
+            }
+
+            var reconnectionTimeout = _startParams.BedControllerConfig.DeviceReconnectionTimeout.Value;
+            var reconnectionsCount = _startParams.BedControllerConfig.DeviceReconectionsRetriesCount.Value;
+            if (reconnectionsCount > 0)
+            {
+                reconnectionsCount = reconnectionsCount - 1;
+            }
+
+            var isFree = await _inversionTableRecconectionMutex
+                .WaitAsync(ReconnectionWaitingTimeout)
+                .ConfigureAwait(false);
+            // кто-то другой уже переподключается
+            if (!isFree) return true;
+            if (_bedController.IsConnected) return true;
+
+            _logger?.Info($"{GetType().Name}: восстановление подключения к инверсионному столу...");
+            try
+            {
+                var reconnectionEventArgs = new ReconnectionEventArgs(reconnectionTimeout, 1);
+                var recilencePolicy = Policy
+                    .Handle<Exception>()
+                    .WaitAndRetryAsync(
+                        reconnectionsCount,
+                        retryAttemp => reconnectionTimeout,
+                        (exception, timeSpan, localContext) =>
+                        {
+                            _logger?.Error($"{GetType().Name}: попытка восстановления соединения с инверсионным столом " +
+                                           $"номер {reconnectionEventArgs.ReconnectionRetryNumber} завершилась не удачно. Причина: {exception.Message}",
+                                exception);
+                            reconnectionEventArgs = new ReconnectionEventArgs(
+                                reconnectionTimeout, 
+                                reconnectionEventArgs.ReconnectionRetryNumber+1);
+                            OnInversionTableReconnectionWaiting?.Invoke(this, reconnectionEventArgs);
+                        });
+                return await recilencePolicy.ExecuteAsync(async () =>
                 {
-                    if (_monitorController.IsConnected) return;
-                    await _monitorController.DisconnectAsync().ConfigureAwait(false);
-                    await Task.Delay(_startParams.BedControllerConfig.DeviceReconnectionTimeout.Value).ConfigureAwait(false);
-                    await _monitorController.ConnectAsync().ConfigureAwait(false);
-                    _logger?.Info($"{GetType().Name}: установлено подключение к инверсионному столу");
-                }
-                catch (Exception ex)
-                {
-                    _logger?.Error($"{GetType().Name}: ошибка повторного подключения к инверсионному столу. Причина: {ex.Message}", ex);
-                    OnSessionErrorStop?.Invoke(this, ex);
-                }
-                finally
-                {
-                    // Ensure that the lock is released.
-                    Monitor.Exit(_monitorRecconectionSyncObject);
-                }
+                    if (_bedController.IsConnected) return true;
+                    OnInversionTableReconnectionStarted?.Invoke(this, reconnectionEventArgs);
+                    await _bedController
+                        .ConnectAsync()
+                        .ConfigureAwait(false);
+                    _logger?.Info($"{GetType().Name}: восстановлено подключение к инверсионному столу");
+                    OnInversionTableReconnected?.Invoke(this, EventArgs.Empty);
+                    return true;
+                }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"{GetType().Name}: ошибка восстановления подключения к инверсионному столу. " +
+                               $"Причина: {ex.Message}", ex);
+                OnInversionTableReconnectionFailed?.Invoke(this, EventArgs.Empty);
+                return false;
+            }
+            finally
+            {
+                _inversionTableRecconectionMutex.Release();
             }
         }
-
+        
         /// <summary>
         /// Устанавливает повторное соединение с кардиомонитором
         /// </summary>
         /// <returns></returns>
-        private async Task ReconnectToMonitorAsync()
+        private async Task<bool> ReconnectToMonitorSafeAsync()
         { 
-            if (_bedController.IsConnected) return;
-            if (_startParams.MonitorControllerConfig.DeviceReconnectionTimeout == null) return;
-            
-            if (Monitor.TryEnter(_inversionTableRecconectionSyncObject))
+            if (_monitorController.IsConnected) return true;
+            if (_startParams.MonitorControllerConfig.DeviceReconnectionTimeout == null
+                || _startParams.MonitorControllerConfig.DeviceReconectionsRetriesCount == null)
             {
-                try
+                return false;
+            }
+
+            var reconnectionTimeout = _startParams.MonitorControllerConfig.DeviceReconnectionTimeout.Value;
+            var reconnectionsCount = _startParams.MonitorControllerConfig.DeviceReconectionsRetriesCount.Value;
+            if (reconnectionsCount > 0)
+            {
+                reconnectionsCount = reconnectionsCount - 1;
+            }
+
+            var isFree = await _monitorRecconectionMutex
+                .WaitAsync(ReconnectionWaitingTimeout)
+                .ConfigureAwait(false);
+            // кто-то другой уже переподключается
+            if (!isFree) return true;
+            if (_monitorController.IsConnected) return true;
+
+            _logger?.Info($"{GetType().Name}: восстановление подключения к кардиомонитору...");
+            try
+            {
+                var reconnectionEventArgs = new ReconnectionEventArgs(reconnectionTimeout, 1);
+                var recilencePolicy = Policy
+                    .Handle<Exception>()
+                    .WaitAndRetryAsync(
+                        reconnectionsCount,
+                        retryAttemp => reconnectionTimeout,
+                        (exception, timeSpan, localContext) =>
+                        {
+                            _logger?.Error($"{GetType().Name}: попытка восстановления соединения с кардиомонитором номер " +
+                                           $"{reconnectionEventArgs.ReconnectionRetryNumber} завершилась не удачно. Причина: {exception.Message}",
+                                exception);
+                            reconnectionEventArgs = new ReconnectionEventArgs(reconnectionTimeout, 
+                                reconnectionEventArgs.ReconnectionRetryNumber+1);
+                            OnMonitorReconnectionWaiting?.Invoke(this, reconnectionEventArgs);
+                        });
+                return await recilencePolicy.ExecuteAsync(async () =>
                 {
-                    _logger?.Info($"{GetType().Name}: повторное подключение к кардиомонитору...");
-                    if (_bedController.IsConnected) return;
-                    await _bedController.DisconnectAsync().ConfigureAwait(false);
-                    await Task.Delay(_startParams.MonitorControllerConfig.DeviceReconnectionTimeout.Value).ConfigureAwait(false);
-                    await _bedController.ConnectAsync().ConfigureAwait(false);
-                    _logger?.Info($"{GetType().Name}: установлено подключение к кардиомонитору");
-                }
-                catch (Exception ex)
-                {
-                    _logger?.Error($"{GetType().Name}: ошибка повторного подключения к кардиомонитору. Причина: {ex.Message}", ex);
-                    OnSessionErrorStop?.Invoke(this, ex);
-                }
-                finally
-                {
-                    // Ensure that the lock is released.
-                    Monitor.Exit(_inversionTableRecconectionSyncObject);
-                }
+                    if (_monitorController.IsConnected) return true;
+                    OnMonitorReconnectionStarted?.Invoke(this, reconnectionEventArgs);
+                    await _monitorController
+                        .ConnectAsync()
+                        .ConfigureAwait(false);
+                    _logger?.Info($"{GetType().Name}: восстановлено подключение к кардиомонитору");
+                    OnMonitorReconnected?.Invoke(this, EventArgs.Empty);
+                    return true;
+                }).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger?.Error($"{GetType().Name}: ошибка восстановления подключения к кардиомонитору. " +
+                               $"Причина: {ex.Message}", ex);
+                OnMonitorReconnectionFailed?.Invoke(this, EventArgs.Empty);
+                return false;
+            }
+            finally
+            {
+                _monitorRecconectionMutex.Release();
             }
             
         }
@@ -757,7 +916,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             {
                 _logger?.Info($"{GetType().Name}: вызван старт сеанса");
                 _logger?.Trace($"{GetType().Name}: инициализация контроллера инверсионного стола");
-                _bedController.Init(_startParams.BedControllerConfig);
+                _bedController.InitController(_startParams.BedControllerConfig);
                 _logger?.Trace($"{GetType().Name}: подключение к инверсионному столу");
                 await _bedController
                     .ConnectAsync()
@@ -810,6 +969,10 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     return false;
                     
                 }
+                _logger?.Trace($"{GetType().Name}: подготовка инверсионного стола к сеансу");
+                await _bedController
+                    .PrepareDeviceForSessionAsync()
+                    .ConfigureAwait(false);    
                 _logger?.Trace($"{GetType().Name}: старт сеанса");
                 await _bedController
                     .ExecuteCommandAsync(BedControlCommand.Start)
@@ -1014,7 +1177,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         private async Task<bool> InnerForceDataCollectionRequestAsync()
         {
             var context = new CycleProcessingContext();
-            var forcedRequest = new ForcedDataCollectionRequestCycleProcessingContextParams(true);
+            var forcedRequest = new ForcedDataCollectionRequestCycleProcessingContextParams();
             context.AddOrUpdate(forcedRequest);
             context.AddOrUpdate(
                 new PumpingRequestContextParams(
@@ -1026,10 +1189,11 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 .SendAsync(context)
                 .ConfigureAwait(false);
 
-            await forcedRequest.BlockingSemaphore
-                .WaitAsync()
+            _logger?.Trace($"{GetType().Name}: ожидание завершения ручного сбора показателей пациента"); 
+            await forcedRequest.ResultingTask
                 .ConfigureAwait(false);
-
+            _logger?.Trace($"{GetType().Name}: ручной сбор показателей пациента завершен"); 
+            
             var pumpingResult = context.TryGetAutoPumpingResultParams();
             if (pumpingResult == null) return false;
 
@@ -1041,16 +1205,28 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
 
         public void Dispose()
         {
-            _cycleProcessingSynchronizer.Stop();
-            _cycleProcessingSynchronizer.Dispose();
+            if (_cycleProcessingSynchronizer != null)
+            {
+                _cycleProcessingSynchronizer.Stop();
+                _cycleProcessingSynchronizer.Dispose();
+            }
+
+            if (_bedController != null)
+            {
+                _bedController.OnPauseFromDeviceRequested -= BedControllerOnPauseFromDeviceRequested;
+                _bedController.OnResumeFromDeviceRequested -= BedControllerOnResumeFromDeviceRequested;
+                _bedController.OnReverseFromDeviceRequested -= BedControllerOnReverseFromDeviceRequested;
+                _bedController.OnEmeregencyStopFromDeviceRequested -= BedControllerOnEmeregencyStopFromDeviceRequested;
             
-            _bedController.OnPauseFromDeviceRequested -= BedControllerOnPauseFromDeviceRequested;
-            _bedController.OnResumeFromDeviceRequested -= BedControllerOnResumeFromDeviceRequested;
-            _bedController.OnReverseFromDeviceRequested -= BedControllerOnReverseFromDeviceRequested;
-            _bedController.OnEmeregencyStopFromDeviceRequested -= BedControllerOnEmeregencyStopFromDeviceRequested;
+                _bedController.Dispose();
+                
+            }
+
+            if (_monitorController != null)
+            {
+                _monitorController.Dispose();
+            }
             
-            _bedController.Dispose();
-            _monitorController.Dispose();
             _pipelineOnTimeStartBlock.Complete();
             _pipelineFinishCollectorBlock.Completion.ConfigureAwait(false).GetAwaiter().GetResult();
         }

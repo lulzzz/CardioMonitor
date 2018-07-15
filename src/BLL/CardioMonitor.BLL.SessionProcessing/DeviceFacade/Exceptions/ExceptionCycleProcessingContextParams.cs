@@ -30,5 +30,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Exceptions
             return context.TryGet(ExceptionCycleProcessingContextParams.ExceptionContextParamsContextParamsId) as
                 ExceptionCycleProcessingContextParams;
         }
+
+        public static bool IsValid([NotNull] this CycleProcessingContext context)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            return context.TryGetExceptionContextParams() == null;
+        }
     }
 }

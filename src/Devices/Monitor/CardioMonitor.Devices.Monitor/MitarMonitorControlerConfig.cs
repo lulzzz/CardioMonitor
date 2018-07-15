@@ -13,13 +13,13 @@ namespace CardioMonitor.Devices.Monitor
             TimeSpan updateDataPeriod,
             TimeSpan timeout,
             int monitorBroadcastUdpPort,
-            int monitorTcpPort, 
-            TimeSpan? deviceReconnectionTimeout = null)
+            int monitorTcpPort, int? deviceReconectionsRetriesCount, TimeSpan? deviceReconnectionTimeout = null)
         {
             UpdateDataPeriod = updateDataPeriod;
             Timeout = timeout;
             MonitorBroadcastUdpPort = monitorBroadcastUdpPort;
             MonitorTcpPort = monitorTcpPort;
+            DeviceReconectionsRetriesCount = deviceReconectionsRetriesCount;
             DeviceReconnectionTimeout = deviceReconnectionTimeout;
             //todo нужно еще задавать IP //todo is it true?
         }
@@ -49,5 +49,8 @@ namespace CardioMonitor.Devices.Monitor
         /// IP можно узнать в результе broadcast'a от устройства, который надо слушать по порту <see cref="MonitorBroadcastUdpPort"/>
         /// </remarks>
         public int MonitorTcpPort { get; }
+        
+        // <inheritdoc />
+        public int? DeviceReconectionsRetriesCount { get; }
     }
 }

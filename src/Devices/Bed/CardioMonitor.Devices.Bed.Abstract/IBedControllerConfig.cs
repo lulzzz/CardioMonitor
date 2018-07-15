@@ -22,5 +22,13 @@ namespace CardioMonitor.Devices.Bed.Infrastructure
         /// Если null, то переподключения не будет
         /// </remarks>
         TimeSpan? DeviceReconnectionTimeout { get; }
+        
+        /// <summary>
+        /// Количество попыток переподключения
+        /// </summary>
+        /// <remarks>
+        /// Если null, то переподключения не будет
+        /// </remarks>
+        int? DeviceReconectionsRetriesCount { get; }
     }
 }

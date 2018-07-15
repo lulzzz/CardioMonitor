@@ -28,16 +28,20 @@ namespace CardioMonitor.Devices.Monitor.Fake
 
         public Task ConnectAsync()
         {
+            if (_config == null) return Task.CompletedTask;
             return Task.Delay(_config.DefaultDelay);
         }
 
         public Task DisconnectAsync()
         {
+            if (_config == null) return Task.CompletedTask;
+            
             return Task.Delay(_config.DefaultDelay);
         }
 
         public Task PumpCuffAsync()
         {
+            if (_config == null) return Task.CompletedTask;
             return Task.Delay(_config.PumpingDelay);
         }
 

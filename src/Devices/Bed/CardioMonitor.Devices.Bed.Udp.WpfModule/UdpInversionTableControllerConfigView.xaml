@@ -20,6 +20,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBox Grid.Row="0"
                  Text="{Binding Endpoint, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}"
@@ -46,5 +47,14 @@
                  mah:TextBoxHelper.Watermark="Таймаут перед повторынм подключением, с"
                  Style="{DynamicResource CmCenteredTextBox}"
                  Visibility="{Binding NeedReconnect, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <mah:NumericUpDown 
+            Grid.Row="5"
+            mah:TextBoxHelper.Watermark="Количество попыток переподключения"
+            Minimum="0"
+            Interval="1"
+            NumericInputMode="Numbers"
+            Value="{Binding DeviceReconectionsRetriesCount, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            Visibility="{Binding NeedReconnect, Mode=OneWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToVisibilityConverter}, ValidatesOnDataErrors=True}"  
+            Style="{DynamicResource CmNumericUpDown}"/>
     </Grid>
 </UserControl>

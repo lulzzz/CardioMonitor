@@ -17,6 +17,7 @@ namespace CardioMonitor.Devices.Monitor
                 TimeSpan.FromMilliseconds(innerConfig.TimeoutMs),
                 innerConfig.MonitorBroadcastUdpPort,
                 innerConfig.MonitorTcpPort,
+                innerConfig.DeviceReconectionsRetriesCount,
                 innerConfig.DeviceReconnectionTimeoutMs.HasValue
                     ? TimeSpan.FromMilliseconds(innerConfig.DeviceReconnectionTimeoutMs.Value)
                     : default(TimeSpan?)
@@ -31,6 +32,7 @@ namespace CardioMonitor.Devices.Monitor
             {
                 UpdateDataPeriodMs = typedConfig.UpdateDataPeriod.TotalMilliseconds,
                 DeviceReconnectionTimeoutMs = typedConfig.DeviceReconnectionTimeout?.TotalMilliseconds,
+                DeviceReconectionsRetriesCount = typedConfig.DeviceReconectionsRetriesCount,
                 TimeoutMs = typedConfig.Timeout.TotalMilliseconds,
                 MonitorBroadcastUdpPort = typedConfig.MonitorBroadcastUdpPort,
                 MonitorTcpPort = typedConfig.MonitorTcpPort
@@ -50,12 +52,17 @@ namespace CardioMonitor.Devices.Monitor
 
             [JsonProperty("DeviceReconnectionTimeout")]
             public double? DeviceReconnectionTimeoutMs { get; set; }
+            
+            [JsonProperty("DeviceReconectionsRetriesCount")]
+            public int? DeviceReconectionsRetriesCount { get; set; }
 
             [JsonProperty("MonitorBroadcastUdpPort")]
             public int MonitorBroadcastUdpPort { get; set; }
 
             [JsonProperty("MonitorTcpPort")]
             public int MonitorTcpPort { get; set; }
+            
+            
         }
     }
 }

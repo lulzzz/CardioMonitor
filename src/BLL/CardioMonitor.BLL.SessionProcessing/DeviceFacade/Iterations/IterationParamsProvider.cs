@@ -41,6 +41,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             
+            if (!context.IsValid())
+            {
+                _logger.Warning($"{GetType().Name}: действие не будет выполнено, т.к. в обработке сеанса возникли ошибки");
+                return context;
+            }
+            
             var isBlocked = await _mutex
                 .WaitAsync(_blockWaitingTimeout)
                 .ConfigureAwait(false);
@@ -115,8 +121,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Iterations
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
-                            SessionProcessingErrorCodes.InversionTableProcessingError,
-                            e.Message,
+                            SessionProcessingErrorCodes.InversionTableTimeout,
+                            "Получение информации об итерациях прервано по таймауту",
                             e,
                             cycleNumber)));
             }

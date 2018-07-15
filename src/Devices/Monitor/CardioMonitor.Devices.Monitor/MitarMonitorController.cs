@@ -174,7 +174,8 @@ namespace CardioMonitor.Devices.Monitor
             var localUdpIp = new IPEndPoint(IPAddress.Any, _initParams.MonitorBroadcastUdpPort);
             using (var udpClient = new UdpClient(localUdpIp))
             {
-                var response = await udpClient.ReceiveAsync()
+                var response = await udpClient
+                    .ReceiveAsync()
                     .ConfigureAwait(false);
 
                 return response.RemoteEndPoint.Address;
@@ -190,36 +191,22 @@ namespace CardioMonitor.Devices.Monitor
             if (!isCommonParamsRequested && !isPressureParamsRequested && !isEcgParamsRequested && !_isPumpingRequested) return;
             AssertConnection();
 
-            await _updateDataSyncSemaphore.WaitAsync();
+            await _updateDataSyncSemaphore
+                .WaitAsync()
+                .ConfigureAwait(false);
 
-            short[] ecgValue =  new short[2];
+            var ecgValue =  new short[2];
             try
             {
-                //MitarMonitorDataParser monitorDataParser = new MitarMonitorDataParser();
-                //const int messageSize = 6400;
-                //byte[] message = new byte[messageSize];
-                //int i = 0;
-                //while (i < messageSize)
-                //{
-                //    byte[] text = new byte[1024];
-                //    var buffSize = await _stream.ReadAsync(text, 0, text.Length).ConfigureAwait(false);
-                //    if (i + buffSize < messageSize)
-                //    {
-                //        Array.ConstrainedCopy(text, 0, message, i, buffSize);
-
-                //    }
-
-                //    i += buffSize;
-                //    //var data = GetECGValue(text);
-                //    //ECGData[i] = data[0];
-                //    //ECGData[i + 1] = data[1];
-                //    //i+=2;
-               // }
-
-                
-                var commonParams = await _mitar.GetCommonParams();
-                var pressureParams = await _mitar.GetPressureParams();
-                _pumpingStatus = await _mitar.GetPumpingStatus();
+                var commonParams = await _mitar
+                    .GetCommonParams()
+                    .ConfigureAwait(false);
+                var pressureParams = await _mitar
+                    .GetPressureParams()
+                    .ConfigureAwait(false);
+                _pumpingStatus = await _mitar
+                    .GetPumpingStatus()
+                    .ConfigureAwait(false);
 
                 if (_isPumpingRequested)
                 {
@@ -259,7 +246,7 @@ namespace CardioMonitor.Devices.Monitor
                         currentTime - _startedEcgCollectingTime >= _ecgCollectionDuration)
                     {
                         _lastEcgParams = new PatientEcgParams(_ecgValues.ToArray());
-                        while (_ecgValues.TryDequeue(out var _))
+                        while (_ecgValues.TryDequeue(out _))
                         {
                         }
 
@@ -293,7 +280,6 @@ namespace CardioMonitor.Devices.Monitor
             }
         }
 
-
         public Task DisconnectAsync()
         {
             try
@@ -303,8 +289,10 @@ namespace CardioMonitor.Devices.Monitor
                 Thread.Sleep(100);
                  
                  _mitar = null;
+                _stream?.Close();
                 _stream?.Dispose();
                 _stream = null;
+                _tcpClient?.Close();
                 _tcpClient?.Dispose();
                 _tcpClient = null;
                 return Task.CompletedTask;
@@ -326,12 +314,14 @@ namespace CardioMonitor.Devices.Monitor
             }
         }
 
-
         public void Dispose()
         {
             _mitar?.Stop();
+            _mitar?.Dispose();
             _workerController.CloseWorker(_syncWorker);
+            _stream?.Close();
             _stream?.Dispose();
+            _tcpClient?.Close();
             _tcpClient?.Dispose();
         }
 

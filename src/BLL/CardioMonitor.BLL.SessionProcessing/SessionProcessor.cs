@@ -169,6 +169,15 @@ namespace CardioMonitor.BLL.SessionProcessing
 
         public event EventHandler OnSessionStatusChanged;
 
+        public event EventHandler<ReconnectionEventArgs> OnInversionTableReconnectionStarted;
+        public event EventHandler<ReconnectionEventArgs> OnInversionTableReconnectionWaiting;
+        public event EventHandler OnInversionTableReconnected;
+        public event EventHandler OnInversionTableReconnectionFailed;
+        
+        public event EventHandler<ReconnectionEventArgs> OnMonitorReconnectionStarted;
+        public event EventHandler<ReconnectionEventArgs> OnMonitorReconnectionWaiting;
+        public event EventHandler OnMonitorReconnected;
+        public event EventHandler OnMonitorReconnectionFailed;
 
 
         #endregion
@@ -195,26 +204,27 @@ namespace CardioMonitor.BLL.SessionProcessing
                 workerController,
                 logger);
 
-            _devicesFacade.OnException += OnException;
             _devicesFacade.OnException += HandleGettingPatientParamsException;
-            _devicesFacade.OnSessionErrorStop += OnSessionErrorStop;
             _devicesFacade.OnSessionErrorStop += HandleOnSessionErrorStop;
             _devicesFacade.OnCycleCompleted += HandleOnCycleCompleted;
-            _devicesFacade.OnCycleCompleted += OnCycleCompleted;
             _devicesFacade.OnElapsedTimeChanged += HandleOnElapsedTimeChanged;
             _devicesFacade.OnRemainingTimeChanged += HandleOnRemainingTimeChanged;
-            _devicesFacade.OnSessionCompleted += OnSessionCompleted;
             _devicesFacade.OnSessionCompleted += HandleOnSessionCompleted;
-            _devicesFacade.OnPausedFromDevice += OnPausedFromDevice;
             _devicesFacade.OnPausedFromDevice += HandleOnPausedFromDevice;
-            _devicesFacade.OnResumedFromDevice += OnResumedFromDevice;
             _devicesFacade.OnResumedFromDevice += HandleOnResumedFromDevice;
-            _devicesFacade.OnEmeregencyStoppedFromDevice += OnEmeregencyStoppedFromDevice;
             _devicesFacade.OnEmeregencyStoppedFromDevice += HandleOnEmeregencyStoppedFromDevice;
             _devicesFacade.OnReversedFromDevice += OnReversedFromDevice;
             _devicesFacade.OnCurrentAngleXRecieved += HandleOnCurrentAngleXRecieved;
             _devicesFacade.OnCommonPatientParamsRecieved += HandleOnCommonPatientParamsRecieved;
             _devicesFacade.OnPatientPressureParamsRecieved += HandleOnPatientPressureParamsRecieved;
+            _devicesFacade.OnInversionTableReconnected += OnInversionTableReconnected;
+            _devicesFacade.OnInversionTableReconnectionFailed += OnInversionTableReconnectionFailed;
+            _devicesFacade.OnInversionTableReconnectionStarted += OnInversionTableReconnectionStarted;
+            _devicesFacade.OnInversionTableReconnectionWaiting += OnInversionTableReconnectionWaiting;
+            _devicesFacade.OnMonitorReconnected += OnMonitorReconnected;
+            _devicesFacade.OnMonitorReconnectionFailed += OnMonitorReconnectionFailed;
+            _devicesFacade.OnMonitorReconnectionStarted += OnMonitorReconnectionStarted;
+            _devicesFacade.OnMonitorReconnectionWaiting += OnMonitorReconnectionWaiting;
 
             var temp = new List<CycleData>(startParams.CycleCount);
             for (var index = 0; index < startParams.CycleCount; index++)
@@ -240,7 +250,7 @@ namespace CardioMonitor.BLL.SessionProcessing
 
             var isSuccessfull = await _devicesFacade
                 .StartAsync()
-                .ConfigureAwait(true);
+                .ConfigureAwait(false);
             if (isSuccessfull)
             {
                 _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.InProgress; });
@@ -261,10 +271,7 @@ namespace CardioMonitor.BLL.SessionProcessing
             var isSuccessfull = await _devicesFacade
                 .EmergencyStopAsync()
                 .ConfigureAwait(false);
-            if (isSuccessfull)
-            {
-                _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.EmergencyStopped; });
-            }
+            _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.EmergencyStopped; });
 
             return isSuccessfull;
         }
@@ -336,25 +343,30 @@ namespace CardioMonitor.BLL.SessionProcessing
             // ReSharper disable once HeuristicUnreachableCode
             if (_devicesFacade == null) return;
             
-            _devicesFacade.OnException -= OnException;
+            _devicesFacade.Dispose();
+            
             _devicesFacade.OnException -= HandleGettingPatientParamsException;
-            _devicesFacade.OnSessionErrorStop -= OnSessionErrorStop;
             _devicesFacade.OnSessionErrorStop -= HandleOnSessionErrorStop;
             _devicesFacade.OnCycleCompleted -= HandleOnCycleCompleted;
             _devicesFacade.OnElapsedTimeChanged -= HandleOnElapsedTimeChanged;
             _devicesFacade.OnRemainingTimeChanged -= HandleOnRemainingTimeChanged;
-            _devicesFacade.OnSessionCompleted -= OnSessionCompleted;
             _devicesFacade.OnSessionCompleted -= HandleOnSessionCompleted;
-            _devicesFacade.OnPausedFromDevice -= OnPausedFromDevice;
             _devicesFacade.OnPausedFromDevice -= HandleOnPausedFromDevice;
             _devicesFacade.OnResumedFromDevice -= OnResumedFromDevice;
             _devicesFacade.OnResumedFromDevice -= HandleOnResumedFromDevice;
-            _devicesFacade.OnEmeregencyStoppedFromDevice -= OnEmeregencyStoppedFromDevice;
             _devicesFacade.OnEmeregencyStoppedFromDevice -= HandleOnEmeregencyStoppedFromDevice;
-            _devicesFacade.OnReversedFromDevice -= OnReversedFromDevice;
             _devicesFacade.OnCurrentAngleXRecieved -= HandleOnCurrentAngleXRecieved;
             _devicesFacade.OnCommonPatientParamsRecieved -= HandleOnCommonPatientParamsRecieved;
             _devicesFacade.OnPatientPressureParamsRecieved -= HandleOnPatientPressureParamsRecieved;
+            
+            _devicesFacade.OnInversionTableReconnected -= OnInversionTableReconnected;
+            _devicesFacade.OnInversionTableReconnectionFailed -= OnInversionTableReconnectionFailed;
+            _devicesFacade.OnInversionTableReconnectionStarted -= OnInversionTableReconnectionStarted;
+            _devicesFacade.OnInversionTableReconnectionWaiting -= OnInversionTableReconnectionWaiting;
+            _devicesFacade.OnMonitorReconnected -= OnMonitorReconnected;
+            _devicesFacade.OnMonitorReconnectionFailed -= OnMonitorReconnectionFailed;
+            _devicesFacade.OnMonitorReconnectionStarted -= OnMonitorReconnectionStarted;
+            _devicesFacade.OnMonitorReconnectionWaiting -= OnMonitorReconnectionWaiting;
         }
 
         #endregion
@@ -373,6 +385,7 @@ namespace CardioMonitor.BLL.SessionProcessing
                     ? completedCycleNumber
                     : (short) (completedCycleNumber + 1);
             });
+            OnCycleCompleted?.Invoke(sender, completedCycleNumber);
         }
 
         private void HandleGettingPatientParamsException(
@@ -418,6 +431,7 @@ namespace CardioMonitor.BLL.SessionProcessing
                     break;
                 }
             }
+            OnException?.Invoke(sender, exception);
         }
 
         private void HandleOnPatientPressureParamsRecieved(
@@ -463,21 +477,20 @@ namespace CardioMonitor.BLL.SessionProcessing
                     var iterationNumber = commonPatientParams.IterationNumber;
 
                     var inclinationAngle = commonPatientParams.InclinationAngle;
-                    if (cycleNumber != 0)
+                    if (cycleNumber == 0) return;
+                    
+                    var checkPoint = PatientParamsPerCycles[cycleNumber - 1].CycleParams
+                        .FirstOrDefault(x => x.IterationNumber == iterationNumber);
+                    if (checkPoint == null)
                     {
-                        var checkPoint = PatientParamsPerCycles[cycleNumber - 1].CycleParams
-                            .FirstOrDefault(x => x.IterationNumber == iterationNumber);
-                        if (checkPoint == null)
-                        {
-                            checkPoint = new CheckPointParams(
-                                cycleNumber,
-                                iterationNumber,
-                                inclinationAngle);
-                            PatientParamsPerCycles[cycleNumber - 1].CycleParams.Add(checkPoint);
-                        }
-
-                        checkPoint.SetCommonParams(commonPatientParams);
+                        checkPoint = new CheckPointParams(
+                            cycleNumber,
+                            iterationNumber,
+                            inclinationAngle);
+                        PatientParamsPerCycles[cycleNumber - 1].CycleParams.Add(checkPoint);
                     }
+
+                    checkPoint.SetCommonParams(commonPatientParams);
                 });
             }
         }
@@ -500,26 +513,31 @@ namespace CardioMonitor.BLL.SessionProcessing
         private void HandleOnPausedFromDevice(object sender, EventArgs eventArgs)
         {
             _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.Suspended; });
+            OnPausedFromDevice?.Invoke(sender, eventArgs);
         }
 
         private void HandleOnEmeregencyStoppedFromDevice(object sender, EventArgs eventArgs)
         {
             _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.EmergencyStopped; });
+            OnEmeregencyStoppedFromDevice?.Invoke(sender, eventArgs);
         }
 
         private void HandleOnResumedFromDevice(object sender, EventArgs eventArgs)
         {
             _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.InProgress; });
+            OnResumedFromDevice?.Invoke(sender, eventArgs);
         }
 
         private void HandleOnSessionCompleted(object sender, EventArgs eventArgs)
         {
             _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.Completed; });
+            OnSessionCompleted?.Invoke(sender, eventArgs);
         }
 
         private void HandleOnSessionErrorStop(object sender, Exception exception)
         {
             _uiInvoker.Invoke(() => { SessionStatus = SessionStatus.TerminatedOnError; });
+            OnSessionErrorStop?.Invoke(sender, exception);
         }
 
         #endregion

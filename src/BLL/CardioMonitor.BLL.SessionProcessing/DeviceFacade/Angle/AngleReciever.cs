@@ -38,6 +38,12 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
         public async Task<CycleProcessingContext> ProcessAsync([NotNull] CycleProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
+
+            if (!context.IsValid())
+            {
+                _logger.Warning($"{GetType().Name}: действие не будет выполнено, т.к. в обработке сеанса возникли ошибки");
+                return context;
+            }
             
             var isBlocked = await _mutex
                 .WaitAsync(_blockWaitingTimeout)
@@ -83,8 +89,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.Angle
                 context.AddOrUpdate(
                     new ExceptionCycleProcessingContextParams(
                         new SessionProcessingException(
-                            SessionProcessingErrorCodes.UpdateAngleError,
-                            e.Message,
+                            SessionProcessingErrorCodes.InversionTableTimeout,
+                            "Получение текущего угла по оси X прервано по таймауту",
                             e,
                             cycleNumber,
                             iterationNumber)));

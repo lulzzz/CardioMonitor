@@ -13,44 +13,33 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade.ForcedDataCollectionR
 
         public Guid ParamsTypeId { get; } = ForcedDataCollectionRequestId;
         public Guid UniqObjectId { get; }
-        
-        public SemaphoreSlim BlockingSemaphore { get; }
+
+        public Task ResultingTask { get; }
 
         public TaskCompletionSource<bool> PressureParamsSemaphore { get; }
         
         public TaskCompletionSource<bool> CommonParamsSemaphore { get; }
-        
-        public ForcedDataCollectionRequestCycleProcessingContextParams(
-            bool isRequested)
+
+        public ForcedDataCollectionRequestCycleProcessingContextParams()
         {
-            IsRequested = isRequested;
             UniqObjectId = Guid.NewGuid();
             // чтобы ручной сбор данных завершался только после всех измерений
             // todo Добавить поддержку ЭКГ
-            BlockingSemaphore = new SemaphoreSlim(0,1);
-            
+
             PressureParamsSemaphore = new TaskCompletionSource<bool>();
             CommonParamsSemaphore = new TaskCompletionSource<bool>();
 
-            Task.Factory.StartNew(async () =>
+            var waitingTasks = new[]
             {
-                var waitingTasks = new[]
-                {
-                    PressureParamsSemaphore.Task,
-                    CommonParamsSemaphore.Task
-                };
-                await Task
-                    .WhenAll(waitingTasks)
-                    .ConfigureAwait(false);
-                BlockingSemaphore.Release();
-            });
+                PressureParamsSemaphore.Task,
+                CommonParamsSemaphore.Task
+            };
+            ResultingTask = Task.WhenAll(waitingTasks);
         }
-
-        public bool IsRequested { get; }
-
+       
         public void Dispose()
         {
-            BlockingSemaphore?.Dispose();
+            ResultingTask?.Dispose();
         }
     }
 

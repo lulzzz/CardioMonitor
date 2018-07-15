@@ -46,7 +46,7 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         public bool IsConnected { get; private set; }
 
-        public void Init(IBedControllerConfig config)
+        public void InitController(IBedControllerConfig config)
         {
             if (!(config is FakeBedControllerConfig localParms)) throw new ArgumentException();
 
@@ -99,6 +99,11 @@ namespace CardioMonitor.Devices.Bed.Fake
             _elapsedTime += _config.UpdateDataPeriod;
         }
 
+        public Task PrepareDeviceForSessionAsync()
+        {
+            return Task.Delay(_config.ConnectDelay);
+        }
+        
         public Task DisconnectAsync()
         {
             IsConnected = false;

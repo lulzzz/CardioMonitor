@@ -8,6 +8,7 @@ using CardioMonitor.BLL.CoreContracts.Patients;
 using CardioMonitor.BLL.CoreContracts.Session;
 using CardioMonitor.BLL.CoreContracts.Session.Events;
 using CardioMonitor.BLL.SessionProcessing;
+using CardioMonitor.BLL.SessionProcessing.DeviceFacade;
 using CardioMonitor.BLL.SessionProcessing.Exceptions;
 using CardioMonitor.Devices;
 using CardioMonitor.Devices.Bed.Infrastructure;
@@ -34,7 +35,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
     /// <summary>
     /// ViewModel для сеанса
     /// </summary>
-    public class SessionProcessingViewModel : SessionProcessor, IStoryboardPageViewModel
+    public class SessionProcessingViewModel : 
+        SessionProcessor, 
+        IStoryboardPageViewModel
     {
         #region Constants
 
@@ -54,6 +57,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
         private string _startButtonText;
 
         private ICommand _startCommand;
+        private ICommand _pauseCommand;
+        private ICommand _resumeCommand;
         private ICommand _reverseCommand;
         private ICommand _emergencyStopCommand;
         private ICommand _manualRequestCommand;
@@ -83,7 +88,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         private bool _isSessionStarted;
 
-        private int _selectedCycleTab;
+        private int _selectedCycleTabIndex;
 
         private bool _isBusy;
         private string _busyMessage;
@@ -139,13 +144,13 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
-        public int SelectedCycleTab
+        public int SelectedCycleTabIndex
         {
-            get => _selectedCycleTab;
+            get => _selectedCycleTabIndex;
             set
             {
-                _selectedCycleTab = value;
-                RisePropertyChanged(nameof(SelectedCycleTab));
+                _selectedCycleTabIndex = value;
+                RisePropertyChanged(nameof(SelectedCycleTabIndex));
             }
         }
 
@@ -288,6 +293,30 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+        public ICommand PauseCommand
+        {
+            get
+            {
+                return _pauseCommand ?? (_pauseCommand = new SimpleCommand
+                {
+                    CanExecuteDelegate = o => CanPauseCommandExecute(),
+                    ExecuteDelegate = async o => await PauseCommandExecuteAsync().ConfigureAwait(true)
+                });
+            }
+        }
+        
+        public ICommand ResumeCommand
+        {
+            get
+            {
+                return _resumeCommand ?? (_resumeCommand= new SimpleCommand
+                {
+                    CanExecuteDelegate = o => CanResumeCommandExecute(),
+                    ExecuteDelegate = async o => await ResumeCommandExecuteAsync().ConfigureAwait(true)
+                });
+            }
+        }
+
         /// <summary>
         /// Команда реверса
         /// </summary>
@@ -399,12 +428,106 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             OnReversedFromDevice += HandleReversedFromDevice;
             OnSessionStatusChanged += HandleSessionStatusChanged;
             OnCycleCompleted += HandleCycleCompleted;
+            OnInversionTableReconnected += OnOnInversionTableReconnected;
+            OnInversionTableReconnectionFailed += HandleInversionTableReconnectionFailed;
+            OnInversionTableReconnectionStarted += HandleInversionTableReconnectionStarted;
+            OnInversionTableReconnectionWaiting += HandleInversionTableReconnectionWaiting;
+            OnMonitorReconnected += HandleMonitorReconnected;
+            OnMonitorReconnectionFailed += HandleMonitorReconnectionFailed;
+            OnMonitorReconnectionStarted += HandleMonitorReconnectionStarted;
+            OnMonitorReconnectionWaiting += HandleMonitorReconnectionWaiting;
         }
-
-
 
         #region Device events hadnling
 
+        private void HandleMonitorReconnectionWaiting(object sender, ReconnectionEventArgs e)
+        {
+            _uiInvoker.Invoke(() => IsBusy = true);
+            Task.Factory.StartNew(async () =>
+            {
+                var remainingSeconds = Convert.ToInt32( e.ReconnectionTimeout.TotalSeconds);
+                var delayTime = TimeSpan.FromSeconds(1);
+                while (remainingSeconds > 0)
+                {
+                    _uiInvoker.Invoke(() =>
+                        BusyMessage = $"Переподключение к кардиомонитору через {remainingSeconds}...");
+                    await Task.Delay(delayTime).ConfigureAwait(false);
+                    remainingSeconds--;
+                }
+            });
+        }
+
+        private void HandleMonitorReconnectionStarted(object sender, ReconnectionEventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = true;
+                BusyMessage = $"{e.ReconnectionRetryNumber} попытка переподключения к кардиомонитору...";
+            });
+        }
+
+        private void HandleMonitorReconnectionFailed(object sender, EventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = false;
+                _notifier.ShowError("Не удалось восстановить соединение с кардиомонитором");
+            });
+        }
+
+        private void HandleMonitorReconnected(object sender, EventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = false;
+                _notifier.ShowSuccess("Восстановлено соединение с кардиомонитором");
+            });
+        }
+
+        private void HandleInversionTableReconnectionWaiting(object sender, ReconnectionEventArgs e)
+        {
+            _uiInvoker.Invoke(() => IsBusy = true);
+            Task.Factory.StartNew(async () =>
+            {
+                var remainingSeconds = Convert.ToInt32(e.ReconnectionTimeout.TotalSeconds);
+                var delayTime = TimeSpan.FromSeconds(1);
+                while (remainingSeconds > 0)
+                {
+                    _uiInvoker.Invoke(() =>
+                        BusyMessage = $"Переподключение к инверсионному столу через {remainingSeconds}...");
+                    await Task.Delay(delayTime).ConfigureAwait(false);
+                    remainingSeconds--;
+                }
+            });
+        }
+
+        private void HandleInversionTableReconnectionStarted(object sender, ReconnectionEventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = true;
+                BusyMessage = $"{e.ReconnectionRetryNumber} попытка переподключения к инверсионному столу...";
+            });
+        }
+
+        private void HandleInversionTableReconnectionFailed(object sender, EventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = false;
+                _notifier.ShowError("Не удалось восстановить соединение с инверсионным столом");
+            });
+        }
+
+        private void OnOnInversionTableReconnected(object sender, EventArgs e)
+        {
+            _uiInvoker.Invoke(() =>
+            {
+                IsBusy = false;
+                _notifier.ShowSuccess("Восстановлено соединение с инверсионным столом");
+            });
+        }
+        
         private void HandleCycleCompleted(object sender, short completedCycleNumber)
         {
             if (completedCycleNumber == PatientParamsPerCycles.Count) return;
@@ -412,9 +535,9 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             _notifier.ShowInformation($"Завершилось повторение № {completedCycleNumber}");
 
             // если выбрана другая вкладка, то ничего делать не будем
-            var desiredCycleTab = completedCycleNumber -1 ;
-            if (SelectedCycleTab != desiredCycleTab - 1) return;
-            SelectedCycleTab = desiredCycleTab;
+            var desiredCycleTabIndex = completedCycleNumber -1 ;
+            if (SelectedCycleTabIndex != desiredCycleTabIndex - 1) return;
+            SelectedCycleTabIndex = desiredCycleTabIndex;
         }
 
         private void HandleReversedFromDevice(object sender, EventArgs eventArgs)
@@ -461,6 +584,8 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             RisePropertyChanged(nameof(EmergencyStopCommand));
             RisePropertyChanged(nameof(ManualRequestCommand));
             RisePropertyChanged(nameof(IsSavingToDbEnabled));
+            RisePropertyChanged(nameof(PauseCommand));
+            RisePropertyChanged(nameof(ResumeCommand));
 
             IsAutoPumpingChangingEnabled = SessionStatus == SessionStatus.InProgress
                                            || SessionStatus == SessionStatus.Suspended
@@ -474,12 +599,6 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
 
         #endregion
 
-        private bool CanStartCommandExecute()
-        {
-            return SessionStatus == SessionStatus.NotStarted
-                   || SessionStatus == SessionStatus.InProgress
-                   || SessionStatus == SessionStatus.Suspended;
-        }
 
         private void UpdateAutoPumpingStateUnsafe(bool isAutoPumpingEnabled)
         {
@@ -493,48 +612,91 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
             }
         }
 
+        private bool CanStartCommandExecute()
+        {
+            return SessionStatus == SessionStatus.NotStarted;
+        }
+        
+        
         /// <summary>
         /// Обрабатывает нажатие на кнопку старт/пауза
         /// </summary>
         private async Task StartCommandExecuteAsync()
         {
-            var actionName = String.Empty;
             try
             {
                 IsBusy = true;
-                BusyMessage = String.Empty;
-                switch (SessionStatus)
+                BusyMessage = "Инициализация сеанса...";
+                await InitAsync().ConfigureAwait(true);
+                UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
+                BusyMessage = "Старт сеанса...";
+                var isSuccessfully = await StartAsync()
+                    .ConfigureAwait(true);
+                if (isSuccessfully)
                 {
-                    case SessionStatus.InProgress:
-                        actionName = "паузы";
-                        await PauseAsync().ConfigureAwait(true);
-                        StartButtonText = _resumeText;
-                        break;
-                    case SessionStatus.Suspended:
-                        actionName = "продолжения";
-                        UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
-                        await ResumeAsync().ConfigureAwait(true);
-                        StartButtonText = _pauseText;
-                        break;
-                    default:
-                        actionName = "старта";
-                        await InitAsync().ConfigureAwait(true);
-                        UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
-                        var isSuccessfully = await StartAsync()
-                            .ConfigureAwait(true);
-                        if (isSuccessfully)
-                        {
-                            StartButtonText = _pauseText;
-                            IsSessionStarted = true;
-                            _sessionTimestampUtc = DateTime.UtcNow;
-                        }
-                        break;
+                    StartButtonText = _pauseText;
+                    IsSessionStarted = true;
+                    _sessionTimestampUtc = DateTime.UtcNow;
                 }
             }
             catch (Exception e)
             {
-                _notifier.ShowError($"Ошибка {actionName} сеанса");
-                _logger.Error($"{GetType().Name}: Ошибка {actionName} сеанса. Причина: {e.Message}", e);
+                _notifier.ShowError($"Ошибка старта сеанса. Причина: {e.Message}");
+                _logger.Error($"{GetType().Name}: Ошибка старта сеанса. Причина: {e.Message}", e);
+            }
+            finally
+            {
+                IsBusy = false;
+                BusyMessage = String.Empty;
+            }
+        }
+        
+        private bool CanPauseCommandExecute()
+        {
+            return SessionStatus == SessionStatus.InProgress;
+        }
+
+        private async Task PauseCommandExecuteAsync()
+        {
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Пауза сеанса...";
+                await PauseAsync()
+                    .ConfigureAwait(true);
+            }
+            catch (Exception e)
+            {
+                _notifier.ShowError($"Ошибка паузы сеанса. Причина: {e.Message}");
+                _logger.Error($"{GetType().Name}: Ошибка паузы сеанса. Причина: {e.Message}", e);
+            }
+            finally
+            {
+                IsBusy = false;
+                BusyMessage = String.Empty;
+            }
+        }
+
+
+        private bool CanResumeCommandExecute()
+        {
+            return SessionStatus == SessionStatus.Suspended;
+        }
+        
+         private async Task ResumeCommandExecuteAsync()
+        {
+            try
+            {
+                IsBusy = true;
+                BusyMessage = "Продолжение сеанса...";
+                UpdateAutoPumpingStateUnsafe(IsAutoPumpingEnabled);
+                await ResumeAsync()
+                    .ConfigureAwait(true);
+            }
+            catch (Exception e)
+            {
+                _notifier.ShowError($"Ошибка продолжения сеанса. Причина: {e.Message}");
+                _logger.Error($"{GetType().Name}: Ошибка продолжения сеанса. Причина: {e.Message}", e);
             }
             finally
             {
@@ -605,7 +767,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 _workerController,
                 _logger,
                 _uiInvoker);
-            SelectedCycleTab = 0;
+            SelectedCycleTabIndex = 0;
         }
 
         /// <summary>
@@ -923,6 +1085,7 @@ namespace CardioMonitor.Ui.ViewModel.Sessions
                 await EmeregencyStopAsync().ConfigureAwait(true);
                 await SaveSessionToDbAsync().ConfigureAwait(true);
                 ClearData();
+                Dispose();
             }
             catch (Exception e)
             {
