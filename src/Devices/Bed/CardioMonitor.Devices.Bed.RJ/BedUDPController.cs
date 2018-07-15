@@ -503,13 +503,15 @@ namespace CardioMonitor.Devices.Bed.UDP
         private void RiseExceptions()
         {
             var exceptions = new List<Exception>(0);
-            while (_lastExceptions.TryPeek(out var temp))
+            while (_lastExceptions.TryDequeue(out var temp))
             {
                 exceptions.Add(temp);
             }
             if (exceptions.Count == 0) return;
+            
             var hasConnectionExceptions = exceptions.Any(x =>
-                x.GetType() == typeof(SocketException) || x.GetType() == typeof(ObjectDisposedException));
+                x.GetType() == typeof(SocketException) || x.GetType() == typeof(ObjectDisposedException)
+                || x.GetType() == typeof(DeviceConnectionException));
             var agregatedException = new AggregateException(exceptions);
 
             if (hasConnectionExceptions)
