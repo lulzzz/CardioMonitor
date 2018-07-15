@@ -410,6 +410,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 }
 
                 var angleParams = context.TryGetAngleParam();
+                var angleX = angleParams?.CurrentAngle == null
+                    ? 0
+                    : (float)(Math.Round(angleParams.CurrentAngle * 2, MidpointRounding.AwayFromZero) / 2);
 
 
                 var pressureParams = context.TryGetPressureParams();
@@ -419,7 +422,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     RiseOnce(pressureParams, () => OnPatientPressureParamsRecieved?.Invoke(
                         this,
                         new PatientPressureParams(
-                            angleParams?.CurrentAngle ?? 0,
+                            angleX,
                             pressureParams.SystolicArterialPressure,
                             pressureParams.DiastolicArterialPressure,
                             pressureParams.AverageArterialPressure,
@@ -434,7 +437,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                     RiseOnce(commonParams, () => OnCommonPatientParamsRecieved?.Invoke(
                         this,
                         new CommonPatientParams(
-                            angleParams?.CurrentAngle ?? 0,
+                            angleX,
                             commonParams.HeartRate,
                             commonParams.RepsirationRate,
                             commonParams.Spo2,
@@ -447,7 +450,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 
                 if (angleParams != null)
                 {
-                    _logger?.Trace($"{GetType().Name}: текущий угол наклона кровати по оси Х - {angleParams.CurrentAngle}");
+                    _logger?.Trace($"{GetType().Name}: текущий угол наклона кровати по оси Х - {angleParams}");
                     RiseOnce(angleParams, () => OnCurrentAngleXRecieved?.Invoke(this, angleParams.CurrentAngle));
                 }
 
