@@ -141,8 +141,8 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
         
         #endregion
         
-        private readonly object _inversionTableRecconectionSyncObject = new object();
-        private readonly object _monitorRecconectionSyncObject = new object();
+        private readonly SemaphoreSlim _inversionTableRecconectionMutex;
+        private readonly SemaphoreSlim _monitorRecconectionMutex;
         
         public DevicesFacade(
             [NotNull] SessionParams startParams,
@@ -182,6 +182,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             _isReverseAlreadyRequested = false;
             _isSessionGlobalyCompleted = false;
             _completedCycles = new HashSet<int>();
+            
+            _monitorRecconectionMutex = new SemaphoreSlim(1,1);
+            _inversionTableRecconectionMutex = new SemaphoreSlim(1,1);
         }
 
         private void CreatePipeline(
@@ -343,6 +346,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             {
                 _logger?.Trace($"{GetType().Name}: агрегация данных...");
                 
+                var isForcedCollectionRequested = context.TryGetForcedDataCollectionRequest() != null;
                 var exceptionParams = context.TryGetExceptionContextParams();
                 if (exceptionParams != null)
                 {
@@ -352,9 +356,19 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                                    $"код ошибки {exceptionParams.Exception.ErrorCode}, " +
                                    $"причина: {exceptionParams.Exception.Message}",
                         exceptionParams.Exception);
+                    if (IsFatalErrorOccured(exceptionParams))
+                    {
+                        _cycleProcessingSynchronizer.Stop();
+                        OnSessionErrorStop?.Invoke(this, exceptionParams.Exception);
+                        return Task.CompletedTask;
+                    }
+
+                    if (NeedToPausePipeline(exceptionParams))
+                    {
+                        _cycleProcessingSynchronizer.Pause();
+                    }
                     RiseOnce(exceptionParams, () => OnException?.Invoke(this, exceptionParams.Exception));
-                    //todo а должны ли мы выставлять параметры при ошибке?
-                    return HandleConnectionErrorsOnDemandAsync(exceptionParams);
+                    return HandleConnectionErrorsOnDemandAsync(exceptionParams, isForcedCollectionRequested);
                 }
 
                 var sessionProcessingInfo = context.TryGetSessionProcessingInfo();
@@ -406,8 +420,6 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 }
 
                 // чтобы не было рекурсии: форсированный сбор нужен для получения параметров, а не обновления данных о сеансе
-                
-                var isForcedCollectionRequested = context.TryGetForcedDataCollectionRequest() != null;
                 if (isForcedCollectionRequested) return Task.CompletedTask;
                 
                 if (angleParams != null)
@@ -470,20 +482,56 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             return Task.CompletedTask;
         }
 
+        private bool NeedToPausePipeline([NotNull] ExceptionCycleProcessingContextParams exceptionParams)
+        {
+            var exception = exceptionParams.Exception;
+            switch (exception.ErrorCode)
+            {
+                case SessionProcessingErrorCodes.InversionTableConnectionError:
+                case SessionProcessingErrorCodes.MonitorConnectionError:
+                case SessionProcessingErrorCodes.InversionTableTimeout:
+                case SessionProcessingErrorCodes.PatientCommonParamsRequestTimeout:
+                case SessionProcessingErrorCodes.PatientPressureParamsRequestTimeout:
+                case SessionProcessingErrorCodes.PumpingTimeout:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        private bool IsFatalErrorOccured([NotNull] ExceptionCycleProcessingContextParams exceptionParams)
+        {
+            var exception = exceptionParams.Exception;
+            switch (exception.ErrorCode)
+            {
+                case SessionProcessingErrorCodes.Unknown:
+                case SessionProcessingErrorCodes.UnhandledException:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         /// <summary>
         /// Попытается переподключиться к устройствам в случае ошибки соединения
         /// </summary>
         /// <param name="exceptionParams">Ошибки, возникшие в ходе сеанса</param>
         /// <returns></returns>
         [NotNull]
-        private Task HandleConnectionErrorsOnDemandAsync([NotNull] ExceptionCycleProcessingContextParams exceptionParams)
+        private Task HandleConnectionErrorsOnDemandAsync(
+            [NotNull] ExceptionCycleProcessingContextParams exceptionParams,
+            bool isForcedRequested)
         {
             var exception = exceptionParams.Exception;
             switch (exception.ErrorCode)
             {
                 case SessionProcessingErrorCodes.InversionTableConnectionError:
+                case SessionProcessingErrorCodes.InversionTableTimeout:
                     return ReconnectToInversionTableAsync();
                 case SessionProcessingErrorCodes.MonitorConnectionError:
+                case SessionProcessingErrorCodes.PatientCommonParamsRequestTimeout:
+                case SessionProcessingErrorCodes.PatientPressureParamsRequestTimeout:
+                case SessionProcessingErrorCodes.PumpingTimeout:
                     return ReconnectToMonitorAsync();
                 default:
                     return Task.CompletedTask;
@@ -499,8 +547,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             if (_monitorController.IsConnected) return;
             if (_startParams.BedControllerConfig.DeviceReconnectionTimeout == null) return;
             
-            if (Monitor.TryEnter(_monitorRecconectionSyncObject))
-            {
+            
                 _logger?.Info($"{GetType().Name}: повторное подключение к инверсионному столу...");
                 try
                 {
@@ -518,9 +565,9 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 finally
                 {
                     // Ensure that the lock is released.
-                    Monitor.Exit(_monitorRecconectionSyncObject);
+                    Monitor.Exit(_monitorRecconectionMutex);
                 }
-            }
+            
         }
 
         /// <summary>
@@ -532,7 +579,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
             if (_bedController.IsConnected) return;
             if (_startParams.MonitorControllerConfig.DeviceReconnectionTimeout == null) return;
             
-            if (Monitor.TryEnter(_inversionTableRecconectionSyncObject))
+            if (Monitor.TryEnter(_inversionTableRecconectionMutex))
             {
                 try
                 {
@@ -551,7 +598,7 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 finally
                 {
                     // Ensure that the lock is released.
-                    Monitor.Exit(_inversionTableRecconectionSyncObject);
+                    Monitor.Exit(_inversionTableRecconectionMutex);
                 }
             }
             

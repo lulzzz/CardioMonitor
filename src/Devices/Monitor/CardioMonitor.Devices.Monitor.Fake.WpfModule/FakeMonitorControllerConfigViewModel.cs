@@ -28,6 +28,7 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
         private bool _needReconnect;
         private int _reconnectionTimeoutSec;
         private bool _isDataChanged;
+        private int _deviceReconectionsRetriesCount;
 
         private FakeMonitorControllerConfigBuilder _configBuilder;
 
@@ -107,6 +108,18 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
                 IsDataChanged = true;
             }
         }
+        
+        public int DeviceReconectionsRetriesCount
+        {
+            get => _deviceReconectionsRetriesCount;
+            set
+            {
+                _deviceReconectionsRetriesCount = value;
+                RisePropertyChanged(nameof(DeviceReconectionsRetriesCount));
+                RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = true;
+            }
+        }
 
         public bool CanGetConfig => String.IsNullOrEmpty(Error);
 
@@ -153,11 +166,15 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
             var reconnectionTimeout = NeedReconnect
                 ? TimeSpan.FromSeconds(ReconnectionTimeoutSec)
                 : default(TimeSpan?);
+            var reconnectionRetriesCount = NeedReconnect
+                ? DeviceReconectionsRetriesCount
+                : default(int?);
             var config = new FakeCardioMonitorConfig(
                 TimeSpan.FromMilliseconds(UpdateDataPeriodMs),
                 TimeSpan.FromMilliseconds(TimeoutMs),
                 TimeSpan.FromMilliseconds(DelayMs),
                 TimeSpan.FromMilliseconds(PumpingDelayMs),
+                reconnectionRetriesCount,
                 reconnectionTimeout);
             return _configBuilder.Build(config);
         }
@@ -182,6 +199,7 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
 
             DelayMs = Convert.ToInt32(config.DefaultDelay.TotalMilliseconds);
             PumpingDelayMs = Convert.ToInt32(config.PumpingDelay.TotalMilliseconds);
+            DeviceReconectionsRetriesCount = config.DeviceReconectionsRetriesCount ?? 0;
             IsDataChanged = false;
         }
 
@@ -224,6 +242,14 @@ namespace CardioMonitor.Devices.Monitor.Fake.WpfModule
                 if (String.IsNullOrWhiteSpace(columnName) || Equals(columnName, nameof(PumpingDelayMs)))
                 {
                     if (PumpingDelayMs < 0)
+                    {
+                        return "Необходимо задать целое положительное число";
+                    }
+                }
+                if ((String.IsNullOrWhiteSpace(columnName) || Equals(columnName, nameof(DeviceReconectionsRetriesCount))) &&
+                    _needReconnect)
+                {
+                    if (DeviceReconectionsRetriesCount < 0)
                     {
                         return "Необходимо задать целое положительное число";
                     }

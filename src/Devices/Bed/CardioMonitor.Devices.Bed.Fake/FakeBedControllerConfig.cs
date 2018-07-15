@@ -15,6 +15,7 @@ namespace CardioMonitor.Devices.Bed.Fake
             TimeSpan disconnectDelay,
             TimeSpan defaultdelay,
             TimeSpan cyclesWithMaxAngleDuration,
+            int? deviceReconectionsRetriesCount, 
             TimeSpan? deviceReconnectionTimeout = null)
         {
             MaxAngleX = maxAngleX;
@@ -26,6 +27,7 @@ namespace CardioMonitor.Devices.Bed.Fake
             DisconnectDelay = disconnectDelay;
             DefaultDelay = defaultdelay;
             CycleWithMaxAngleDuration = cyclesWithMaxAngleDuration;
+            DeviceReconectionsRetriesCount = deviceReconectionsRetriesCount;
             DeviceReconnectionTimeout = deviceReconnectionTimeout;
         }
 
@@ -40,6 +42,9 @@ namespace CardioMonitor.Devices.Bed.Fake
 
         /// <inheritdoc />
         public TimeSpan? DeviceReconnectionTimeout { get; }
+        
+        /// <inheritdoc />
+        public int? DeviceReconectionsRetriesCount { get; }
         
         public TimeSpan ConnectDelay { get; }
         

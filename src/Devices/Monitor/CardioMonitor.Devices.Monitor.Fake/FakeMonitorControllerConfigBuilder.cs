@@ -17,6 +17,7 @@ namespace CardioMonitor.Devices.Monitor.Fake
                 TimeSpan.FromMilliseconds(innerConfig.TimeoutMs),
                 TimeSpan.FromMilliseconds(innerConfig.DefaultDelayMs),
                 TimeSpan.FromMilliseconds(innerConfig.PumpingDelayMs),
+                innerConfig.DeviceReconectionsRetriesCount,
                 innerConfig.DeviceReconnectionTimeoutMs.HasValue
                     ? TimeSpan.FromMilliseconds(innerConfig.DeviceReconnectionTimeoutMs.Value)
                     : default(TimeSpan?));
@@ -32,7 +33,8 @@ namespace CardioMonitor.Devices.Monitor.Fake
                 TimeoutMs = typedConfig.Timeout.TotalMilliseconds,
                 DefaultDelayMs = typedConfig.DefaultDelay.TotalMilliseconds,
                 PumpingDelayMs = typedConfig.PumpingDelay.TotalMilliseconds,
-                DeviceReconnectionTimeoutMs = typedConfig.DeviceReconnectionTimeout?.TotalMilliseconds
+                DeviceReconnectionTimeoutMs = typedConfig.DeviceReconnectionTimeout?.TotalMilliseconds,
+                DeviceReconectionsRetriesCount = typedConfig.DeviceReconectionsRetriesCount
             };
 
             return JsonConvert.SerializeObject(innerConfig);
@@ -48,6 +50,10 @@ namespace CardioMonitor.Devices.Monitor.Fake
             
             [JsonProperty("DeviceReconnectionTimeout")]
             public double? DeviceReconnectionTimeoutMs { get; set; }
+            
+            // <inheritdoc />
+            [JsonProperty("DeviceReconectionsRetriesCount")]
+            public int? DeviceReconectionsRetriesCount { get; set; }
 
             [JsonProperty("DefaultDelay")]
             public double DefaultDelayMs { get; set; }

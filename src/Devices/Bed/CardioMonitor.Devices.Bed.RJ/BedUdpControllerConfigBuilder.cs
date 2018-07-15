@@ -10,7 +10,7 @@ namespace CardioMonitor.Devices.Bed.UDP
             string jsonConfig, 
             float maxAngleX = 0f, 
             short cyclesCount = 0, 
-            float movementFrequency = 0f )
+            float movementFrequency = 0f)
         {
             if (String.IsNullOrWhiteSpace(jsonConfig)) throw new ArgumentException(nameof(jsonConfig));
 
@@ -22,9 +22,10 @@ namespace CardioMonitor.Devices.Bed.UDP
                 maxAngleX, 
                 cyclesCount, 
                 movementFrequency,
+                config.DeviceReconectionsRetriesCount,
                 config.DeviceReconnectionTimeoutMs.HasValue
                 ? TimeSpan.FromMilliseconds(config.DeviceReconnectionTimeoutMs.Value) 
-                    :default(TimeSpan?) );
+                    :default(TimeSpan?));
         }
 
         public string Build(IBedControllerConfig config)
@@ -36,7 +37,8 @@ namespace CardioMonitor.Devices.Bed.UDP
                 BedIpEndpoint = typedConfig.BedIpEndpoint,
                 UpdateDataPeriodMs = typedConfig.UpdateDataPeriod.TotalMilliseconds,
                 TimeoutMs = typedConfig.Timeout.TotalMilliseconds,
-                DeviceReconnectionTimeoutMs = typedConfig.DeviceReconnectionTimeout?.TotalMilliseconds
+                DeviceReconnectionTimeoutMs = typedConfig.DeviceReconnectionTimeout?.TotalMilliseconds,
+                DeviceReconectionsRetriesCount = typedConfig.DeviceReconectionsRetriesCount
             };
 
             return JsonConvert.SerializeObject(innerConfig);
@@ -52,6 +54,9 @@ namespace CardioMonitor.Devices.Bed.UDP
 
             [JsonProperty("DeviceReconnectionTimeout")]
             public double? DeviceReconnectionTimeoutMs { get; set; }
+            
+            [JsonProperty("DeviceReconectionsRetriesCount")]
+            public int? DeviceReconectionsRetriesCount { get; set; }
 
             [JsonProperty("Timeout")]
             public double TimeoutMs { get; set; }

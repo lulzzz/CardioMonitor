@@ -26,6 +26,7 @@ namespace CardioMonitor.Devices.Bed.Fake
                 TimeSpan.FromMilliseconds(config.DisconnectDelayMs),
                 TimeSpan.FromMilliseconds(config.DefaultDelayMs),
                 TimeSpan.FromMilliseconds(config.CycleWithMaxAngleDurationMs),
+                config.DeviceReconectionsRetriesCount,
                 config.DeviceReconnectionTimeoutMs.HasValue
                     ? TimeSpan.FromMilliseconds(config.DeviceReconnectionTimeoutMs.Value)
                     : default(TimeSpan?));
@@ -42,6 +43,7 @@ namespace CardioMonitor.Devices.Bed.Fake
                 CycleWithMaxAngleDurationMs = fakeConfig.CycleWithMaxAngleDuration.TotalMilliseconds,
                 DefaultDelayMs = fakeConfig.DefaultDelay.TotalMilliseconds,
                 DeviceReconnectionTimeoutMs = fakeConfig.DeviceReconnectionTimeout?.TotalMilliseconds,
+                DeviceReconectionsRetriesCount = fakeConfig.DeviceReconectionsRetriesCount,
                 DisconnectDelayMs = fakeConfig.DisconnectDelay.TotalMilliseconds,
                 TimeoutMs = fakeConfig.Timeout.TotalMilliseconds
             };
@@ -68,6 +70,9 @@ namespace CardioMonitor.Devices.Bed.Fake
 
             [JsonProperty("DeviceReconnectionTimeoutMs")]
             public double? DeviceReconnectionTimeoutMs { get; set; }
+            
+            [JsonProperty("DeviceReconectionsRetriesCount")]
+            public int? DeviceReconectionsRetriesCount { get; set; }
         }
     }
 }

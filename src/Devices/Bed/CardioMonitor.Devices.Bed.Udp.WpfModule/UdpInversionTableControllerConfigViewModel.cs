@@ -15,10 +15,10 @@ namespace CardioMonitor.Devices.Bed.Udp.WpfModule
     {
         #region Constants
 
-        private const string DefaultEndpoint = "http://192.168.56.3:7777";
+        private const string DefaultEndpoint = "192.168.0.99:7777";
 
-        private const int DefaultTimeoutMs = 10000;
-        private const int DefaultUpdateDataPeriodMs = 500;
+        private const int DefaultTimeoutMs = 5000;
+        private const int DefaultUpdateDataPeriodMs = 900;
         
         #endregion
 
@@ -34,6 +34,8 @@ namespace CardioMonitor.Devices.Bed.Udp.WpfModule
         private readonly BedUdpControllerConfigBuilder _configBuilder;
 
         private string _endPoint;
+        
+        private int _deviceReconectionsRetriesCount;
 
         #endregion
 
@@ -98,7 +100,20 @@ namespace CardioMonitor.Devices.Bed.Udp.WpfModule
                 IsDataChanged = true;
             }
         }
-
+        
+        public int DeviceReconectionsRetriesCount
+        {
+            get => _deviceReconectionsRetriesCount;
+            set
+            {
+                _deviceReconectionsRetriesCount = value;
+                RisePropertyChanged(nameof(DeviceReconectionsRetriesCount));
+                RisePropertyChanged(nameof(CanGetConfig));
+                IsDataChanged = true;
+            }
+        }
+        
+        
         public bool CanGetConfig => String.IsNullOrEmpty(Error);
 
 
@@ -148,6 +163,9 @@ namespace CardioMonitor.Devices.Bed.Udp.WpfModule
             var reconnectionTimeout = NeedReconnect
                 ? TimeSpan.FromSeconds(ReconnectionTimeoutSec)
                 : default(TimeSpan?);
+            var reconnectionRetriesCount = NeedReconnect
+                ? DeviceReconectionsRetriesCount
+                : default(int?);
             var config = new BedUdpControllerConfig(
                 Endpoint,
                 TimeSpan.FromMilliseconds(UpdateDataPeriodMs),
@@ -155,6 +173,7 @@ namespace CardioMonitor.Devices.Bed.Udp.WpfModule
                 0,
                 0,
                 0,
+                reconnectionRetriesCount,
                 reconnectionTimeout);
             return _configBuilder.Build(config);
         }
@@ -176,6 +195,7 @@ namespace CardioMonitor.Devices.Bed.Udp.WpfModule
             }
 
             Endpoint = config.BedIpEndpoint;
+            DeviceReconectionsRetriesCount = config.DeviceReconectionsRetriesCount ?? 0;
 
 
             IsDataChanged = false;
@@ -199,14 +219,14 @@ namespace CardioMonitor.Devices.Bed.Udp.WpfModule
                 {
                     if (TimeoutMs < 100)
                     {
-                        return "Должен быть не меньше 100 мс";
+                        return "Должен быть больше 100 мс";
                     }
                 }
                 if (String.IsNullOrEmpty(columnName) || Equals(columnName, nameof(UpdateDataPeriodMs)))
                 {
                     if (UpdateDataPeriodMs <= 300)
                     {
-                        return "Должно быть не меньше 300 мс";
+                        return "Должно быть больше 300 мс";
                     }
                 }
 
@@ -214,6 +234,15 @@ namespace CardioMonitor.Devices.Bed.Udp.WpfModule
                     _needReconnect)
                 {
                     if (ReconnectionTimeoutSec < 0)
+                    {
+                        return "Необходимо задать целое положительное число";
+                    }
+                }
+                
+                if ((String.IsNullOrWhiteSpace(columnName) || Equals(columnName, nameof(DeviceReconectionsRetriesCount))) &&
+                    _needReconnect)
+                {
+                    if (DeviceReconectionsRetriesCount < 0)
                     {
                         return "Необходимо задать целое положительное число";
                     }
