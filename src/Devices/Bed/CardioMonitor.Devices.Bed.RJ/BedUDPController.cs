@@ -23,6 +23,15 @@ namespace CardioMonitor.Devices.Bed.UDP
         private const int DeviceIsInitialising = 1;
 
         private const int DeviceIsNotInitialising = 0;
+
+        /// <summary>
+        /// Дополнительно ожидание при подключении к устройству
+        /// </summary>
+        /// <remarks>
+        /// При подключении мы пробуем отключиться, если было раньше соединение.
+        /// Иногда Udp клиент не успевает освободить порт между подключениями
+        /// </remarks>
+        private readonly TimeSpan _connectionDelay = TimeSpan.FromMilliseconds(300);
         
         //todo оставил, чтобы пока помнить адресс
         //private IPEndPoint _bedIpEndPoint = new IPEndPoint(IPAddress.Parse("192.168.56.3"), 7777);
@@ -135,8 +144,12 @@ namespace CardioMonitor.Devices.Bed.UDP
                 {
                 }
 
-                await InternalDisconectAsync().ConfigureAwait(false);
-
+                await InternalDisconectAsync()
+                    .ConfigureAwait(false);
+                // чтобы порты точно освободились
+                await Task.Delay(_connectionDelay)
+                    .ConfigureAwait(false);
+                
                 _udpSendingClient = new UdpClient
                 {
                     Client =

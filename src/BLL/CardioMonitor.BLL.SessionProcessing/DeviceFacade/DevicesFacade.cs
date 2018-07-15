@@ -921,9 +921,19 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 _logger?.Trace($"{GetType().Name}: инициализация контроллера инверсионного стола");
                 _bedController.InitController(_startParams.BedControllerConfig);
                 _logger?.Trace($"{GetType().Name}: подключение к инверсионному столу");
-                await _bedController
-                    .ConnectAsync()
-                    .ConfigureAwait(false);
+                try
+                {
+                    await _bedController
+                        .ConnectAsync()
+                        .ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    await _bedController
+                        .DisconnectAsync()
+                        .ConfigureAwait(false);
+                    return false;
+                }
                
                 // запускаем кровать
                 var bedStatus = await _bedController
@@ -946,9 +956,19 @@ namespace CardioMonitor.BLL.SessionProcessing.DeviceFacade
                 _logger?.Trace($"{GetType().Name}: инициализация контроллера кардиомонитора");
                 _monitorController.Init(_startParams.MonitorControllerConfig);
                 _logger?.Trace($"{GetType().Name}: подключение к кардиомонитору");
-                await _monitorController
-                    .ConnectAsync()
-                    .ConfigureAwait(false);
+                try
+                {
+                    await _monitorController
+                        .ConnectAsync()
+                        .ConfigureAwait(false);
+                }
+                catch (Exception)
+                {
+                    await _monitorController
+                        .DisconnectAsync()
+                        .ConfigureAwait(false);
+                    return false;
+                }
 
                 // измерим перед стартом
                 _logger?.Trace($"{GetType().Name}: начальный запрос данных");
